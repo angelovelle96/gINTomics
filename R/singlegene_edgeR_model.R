@@ -1,4 +1,4 @@
-singlegene_edgeR_model <- function(response_var,covariates, design_mat_singlegene=NULL, y_all, threads=1){
+singlegene_edgeR_model <- function(response_var,covariates, design_mat_singlegene=NULL, offset_singlegene=NULL, y_all, threads=1){
 
 if(is.null(design_mat_singlegene)){
   cov <- colnames(covariates)
@@ -11,7 +11,14 @@ if(is.null(design_mat_singlegene)){
 }
 fit_list <- mclapply(1:nrow(response_var), function(x){
 y_gene <- DGEList(counts=t(response_var[x,]))
-y_gene$offset <- matrix(1, 1, ncol(y_gene))
+if(!is.null(offset_singlegene)){
+  if(is.list(offset_singlegene)){
+    y_gene$offset <- offset_singlegene[[x]]
+  }else{
+    y_gene$offset <- offset_singlegene
+  }
+}
+
 y_gene$common.dispersion <- y_all$common.dispersion
 y_gene$tagwise.dispersion <- y_all$tagwise.dispersion[x]
 if(is.list(design_mat_singlegene)){
