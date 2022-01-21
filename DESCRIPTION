@@ -14,6 +14,7 @@ Imports:
     edgeR,
     gdata,
     parallel,
+    plyr,
     readr
 Depends: 
     R (>= 2.10)

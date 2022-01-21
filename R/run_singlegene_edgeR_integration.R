@@ -34,9 +34,11 @@ run_singlegene_edgeR_integration <- function(response_var, covariates, design_ma
 
   y_all <- allgene_edgeR_model(response_var = response_var,  covariates = covariates, design_mat_allgene = design_mat_allgene, offset_allgene = offset_allgene)
   y_gene <- singlegene_edgeR_model(response_var = response_var, covariates = covariates, y_all = y_all, design_mat_singlegene =  design_mat_singlegene, offset_singlegene = offset_singlegene, threads = threads)
-  top_list <- extracting_edgeR_coef(y_gene, threads = threads)
+  model_results <- edger_coef_test(y_gene, threads = threads)
+  coef_pval_mat <- building_edger_result_matrices(model_results = model_results)
+  results <- list(model_results=model_results, coef_data=coef_pval_mat$coef, pval_data=coef_pval_mat$pval)
 
-  return(top_list)
+  return(results)
 }
 
 

@@ -1,4 +1,4 @@
-extracting_edgeR_coef <- function(fit, threads=1){
+edger_coef_test <- function(fit, threads=1){
 
 top_list <- mclapply(fit, function(x)  {
 coef <- colnames(x$coefficients)
