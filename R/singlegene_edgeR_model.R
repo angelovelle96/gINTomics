@@ -1,6 +1,9 @@
 singlegene_edgeR_model <- function(response_var,
-    covariates, design_mat = NULL, offset_singlegene = NULL,
-    y_all, threads = 1) {
+    covariates = NULL, design_mat = NULL,
+    offset_singlegene = NULL, y_all, threads = 1) {
+
+    if (is.null(covariates) & is.null(design_mat))
+        stop("Design matrix should be supplied if covariates are not specified")
 
     if (is.null(design_mat)) {
         cov <- colnames(covariates)

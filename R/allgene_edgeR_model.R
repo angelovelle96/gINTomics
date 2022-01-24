@@ -1,7 +1,9 @@
 allgene_edgeR_model <- function(response_var,
-    covariates, design_mat_allgene = NULL,
+    covariates = NULL, design_mat_allgene = NULL,
     offset_allgene = NULL) {
 
+    if (is.null(covariates) & is.null(design_mat_allgene))
+        stop("Design matrix should be supplied if covariates are not specified")
 
     if (is.null(design_mat_allgene)) {
         design_mat_allgene <- model.matrix(~1,

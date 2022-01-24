@@ -14,3 +14,7 @@ a <- lapply(1:ncol(mirna_exp_model), function(y) {
 b <- run_singlegene_edgeR_integration(response_var = mirna_exp_model,
     covariates = tf_expression_model, design_mat_singlegene = a,
     offset_singlegene = offset, threads = 16)
+
+design_all <- model.matrix(~1, data=tf_expression_model)
+c <- run_singlegene_edgeR_integration(response_var = mirna_exp_model, design_mat_allgene = design_all, design_mat_singlegene = a,
+                                      offset_singlegene = offset, threads = 16)

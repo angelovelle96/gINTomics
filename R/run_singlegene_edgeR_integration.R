@@ -1,7 +1,13 @@
 run_singlegene_edgeR_integration <- function(response_var,
-    covariates, design_mat_allgene = NULL,
+    covariates = NULL, design_mat_allgene = NULL,
     design_mat_singlegene = NULL, offset_allgene = NULL,
     offset_singlegene = NULL, threads = 1) {
+
+    if (is.null(covariates) & (is.null(design_mat_allgene) +
+        is.null(design_mat_singlegene) >=
+        1))
+        stop(paste("Design matrices should be supplied",
+            "if covariates are not specified"))
 
     if (is.atomic(response_var)) {
         message("response_var is an atomic vector, converting to matrix")
@@ -13,34 +19,36 @@ run_singlegene_edgeR_integration <- function(response_var,
         check_names <- rownames(response_var)
     }
 
-    if (is.atomic(covariates)) {
-        message("covariates is an atomic vector, converting to data.frame")
-        tmp <- as.data.frame(covariates)
-        rownames(tmp) <- names(covariates)
-        check_names2 <- names(covariates)
-        covariates <- tmp
-    } else {
-        check_names2 <- rownames(covariates)
-    }
-    if (!is.data.frame(covariates))
-        stop("covariates should be a data.frame or an atomic vector")
-
-
-    if (!identical(check_names, check_names2)) {
-        message("Sample names in response_var and covariates seems to differ,
-                assuming that response_var and covariates have
-                the same sample order")
-    }
-
     response_var <- as.matrix(t(response_var +
         1))  #######lasciare+1?
 
     if (!is.matrix(response_var))
-        stop("response_var should be a data.frame,
-                a matrix or an atomic vector")
-    if (ncol(response_var) != nrow(covariates))
-        stop("response_var and covariates have a different number of samples")
+        stop(paste("response_var should be a data.frame,",
+            "a matrix or an atomic vector"))
 
+    if (!is.null(covariates)) {
+        if (is.atomic(covariates)) {
+            message("covariates is an atomic vector, converting to data.frame")
+            tmp <- as.data.frame(covariates)
+            rownames(tmp) <- names(covariates)
+            check_names2 <- names(covariates)
+            covariates <- tmp
+        } else {
+            check_names2 <- rownames(covariates)
+        }
+        if (!is.data.frame(covariates))
+            stop("covariates should be a data.frame or an atomic vector")
+
+
+        if (!identical(check_names, check_names2))
+            message(paste("Sample names in response_var and covariates seems",
+                "to differ, assuming that response_var and covariates have",
+                "the same sample order"))
+
+        if (ncol(response_var) != nrow(covariates))
+            stop(paste("response_var and covariates have",
+                "a different number of samples"))
+    }
 
     y_all <- allgene_edgeR_model(response_var = response_var,
         covariates = covariates, design_mat_allgene = design_mat_allgene,
