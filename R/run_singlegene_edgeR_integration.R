@@ -1,7 +1,8 @@
 run_singlegene_edgeR_integration <- function(response_var,
     covariates = NULL, design_mat_allgene = NULL,
     design_mat_singlegene = NULL, offset_allgene = NULL,
-    offset_singlegene = NULL, threads = 1) {
+    offset_singlegene = NULL, norm_method_all = "TMM",
+    threads = 1) {
 
     if (is.null(covariates) & (is.null(design_mat_allgene) +
         is.null(design_mat_singlegene) >=
@@ -52,7 +53,8 @@ run_singlegene_edgeR_integration <- function(response_var,
 
     y_all <- allgene_edgeR_model(response_var = response_var,
         covariates = covariates, design_mat_allgene = design_mat_allgene,
-        offset_allgene = offset_allgene)
+        offset_allgene = offset_allgene,
+        norm_method_all = norm_method_all)
     y_gene <- singlegene_edgeR_model(response_var = response_var,
         covariates = covariates, y_all = y_all,
         design_mat = design_mat_singlegene,

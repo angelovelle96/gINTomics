@@ -25,6 +25,8 @@ singlegene_edgeR_model <- function(response_var,
                 } else {
                   y_gene$offset <- offset_singlegene
                 }
+            } else {
+                y_gene$samples$norm.factors <- y_all$samples$norm.factors
             }
             y_gene$common.dispersion <- y_all$common.dispersion
             y_gene$tagwise.dispersion <- y_all$tagwise.dispersion[x]
