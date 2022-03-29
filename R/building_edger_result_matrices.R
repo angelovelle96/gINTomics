@@ -1,6 +1,5 @@
 #' @import plyr
 building_edger_result_matrices <- function(model_results) {
-
     tmp <- lapply(model_results, function(x) as.data.frame(x["coef",
         ], check.names = F))
     coef_matrix <- rbind.fill(tmp)

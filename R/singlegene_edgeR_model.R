@@ -32,9 +32,9 @@
 singlegene_edgeR_model <- function(response_var,
     covariates = NULL, design_mat = NULL,
     offset_singlegene = NULL, y_all, threads = 1) {
-
-    if (is.null(covariates) & is.null(design_mat))
+    if (is.null(covariates) & is.null(design_mat)) {
         stop("Design matrix should be supplied if covariates are not specified")
+    }
 
     if (is.null(design_mat)) {
         cov <- colnames(covariates)
@@ -49,9 +49,10 @@ singlegene_edgeR_model <- function(response_var,
 
     fit_list <- mclapply(1:nrow(response_var),
         function(x) {
-            if(ncol(response_var)!=nrow(design_mat[[x]]))
+            if (ncol(response_var) != nrow(design_mat[[x]])) {
                 stop(paste("Number of samples differ between respone_var",
-                           "and design_mat"))
+                  "and design_mat"))
+            }
             y_gene <- DGEList(counts = t(response_var[x,
                 ]))
             if (!is.null(offset_singlegene)) {

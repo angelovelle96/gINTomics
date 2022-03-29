@@ -48,7 +48,7 @@ The number of vectors should be equal to the number of rows
 of \strong{response_var}.}
 
 \item{norm_method}{Normalization method to use for the all gene edgeR
-model (Default is "TMM"). The normalization factors will be passed to single
+model (Default is 'TMM'). The normalization factors will be passed to single
 gene models for normalization. Ignored if the offsets are provided.}
 
 \item{threads}{Number of threads to use for parallelization (Default is 1)}
@@ -63,8 +63,9 @@ integration models, in particular if for each gene the covariates change.
 For example if you need to integrate gene expression with copy number
 variations, for each gene you need to integrate its expression levels with
 CNV status, updating the covariate at each step. In this case you can
-provide the expression of all genes in \strong{response_var} and the relative CNV
-values (numeric) as a list of design matrices in \strong{design_mat_singlegene}.
+provide the expression of all genes in \strong{response_var} and the relative
+CNV values (numeric) as a list of design matrices in
+\strong{design_mat_singlegene}.
 The n gene contained in \strong{response_var} is fitted in the negative binomial
 model of the edgeR package using as design matrix the n element of the
 \strong{design_mat_singlegene} list. Alternatively, if the covariates are the

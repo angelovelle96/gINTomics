@@ -1,3 +1,5 @@
+formatR::tidy_dir("~/Documenti/Rpackages/integrazione",
+    width.cutoff = 20, indent = 4, recursive = T)
 
 load("~/Documenti/Rpackages/integrazione/data/mirna_exp_model.rda")
 load("~/Documenti/Rpackages/integrazione/data/tf_expression_model.rda")
@@ -7,10 +9,9 @@ load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_all_samples_ace2022
 
 
 
-# save(run_singlegene_edgeR_test1_input, run_singlegene_edgeR_test1_output,
-#      run_singlegene_edgeR_test2_input, run_singlegene_edgeR_test2_output,
-#      file = "~/Documenti/Rpackages/integrazione/R/sysdata.rda")
-
-
-
-
+# save(run_singlegene_edgeR_test1_input,
+# run_singlegene_edgeR_test1_output,
+# run_singlegene_edgeR_test2_input,
+# run_singlegene_edgeR_test2_output,
+# file =
+# '~/Documenti/Rpackages/integrazione/R/sysdata.rda')

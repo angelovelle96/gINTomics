@@ -4,8 +4,9 @@
 #' For example if you need to integrate gene expression with copy number
 #' variations, for each gene you need to integrate its expression levels with
 #' CNV status, updating the covariate at each step. In this case you can
-#' provide the expression of all genes in **response_var** and the relative CNV
-#' values (numeric) as a list of design matrices in **design_mat_singlegene**.
+#' provide the expression of all genes in **response_var** and the relative
+#' CNV values (numeric) as a list of design matrices in
+#' **design_mat_singlegene**.
 #' The n gene contained in **response_var** is fitted in the negative binomial
 #' model of the edgeR package using as design matrix the n element of the
 #' **design_mat_singlegene** list. Alternatively, if the covariates are the
@@ -41,7 +42,7 @@
 #' The number of vectors should be equal to the number of rows
 #' of **response_var**.
 #' @param norm_method Normalization method to use for the all gene edgeR
-#' model (Default is "TMM"). The normalization factors will be passed to single
+#' model (Default is 'TMM'). The normalization factors will be passed to single
 #' gene models for normalization. Ignored if the offsets are provided.
 #' @param threads Number of threads to use for parallelization (Default is 1)
 #'
@@ -55,14 +56,14 @@ run_singlegene_edgeR_integration <- function(response_var,
     design_mat_singlegene = NULL, offset_allgene = NULL,
     offset_singlegene = NULL, norm_method = "TMM",
     threads = 1) {
-
     if (is.null(covariates) & (is.null(design_mat_allgene) +
         is.null(design_mat_singlegene) >=
-        1))
+        1)) {
         stop(paste("Design matrices should be supplied",
             "if covariates are not specified"))
+    }
 
-    if (is.atomic(response_var)&is.vector(response_var)) {
+    if (is.atomic(response_var) & is.vector(response_var)) {
         message("response_var is an atomic vector, converting to matrix")
         tmp <- as.matrix(response_var)
         rownames(tmp) <- names(response_var)
@@ -73,11 +74,12 @@ run_singlegene_edgeR_integration <- function(response_var,
     }
 
     response_var <- as.matrix(t(response_var +
-        1))  #######lasciare+1?
+        1))  ####### lasciare+1?
 
-    if (!is.matrix(response_var))
+    if (!is.matrix(response_var)) {
         stop(paste("response_var should be a data.frame,",
             "a matrix or an atomic vector"))
+    }
 
     if (!is.null(covariates)) {
         if (is.atomic(covariates)) {
@@ -89,18 +91,21 @@ run_singlegene_edgeR_integration <- function(response_var,
         } else {
             check_names2 <- rownames(covariates)
         }
-        if (!is.data.frame(covariates))
+        if (!is.data.frame(covariates)) {
             stop("covariates should be a data.frame or an atomic vector")
+        }
 
 
-        if (!identical(check_names, check_names2))
+        if (!identical(check_names, check_names2)) {
             message(paste("Sample names in response_var and covariates seems",
                 "to differ, assuming that response_var and covariates have",
                 "the same sample order"))
+        }
 
-        if (ncol(response_var) != nrow(covariates))
+        if (ncol(response_var) != nrow(covariates)) {
             stop(paste("response_var and covariates have",
                 "a different number of samples"))
+        }
     }
 
     y_all <- allgene_edgeR_model(response_var = response_var,

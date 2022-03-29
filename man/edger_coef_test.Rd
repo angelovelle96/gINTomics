@@ -22,4 +22,5 @@ contained in the edgeR fitted model
 }
 \examples{
 edger_coef_test(fitted_model, threads = 2)
+
 }
