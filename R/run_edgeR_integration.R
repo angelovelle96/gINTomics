@@ -48,19 +48,22 @@
 #'
 #' @return A list containing the results of all the edger single gene models,
 #' the pvalues and the coefficients for each gene
-#' @import parallel edgeR
+#' @import parallel edgeR stringr
 
 
-run_singlegene_edgeR_integration <- function(response_var,
-    covariates = NULL, design_mat_allgene = NULL,
-    design_mat_singlegene = NULL, offset_allgene = NULL,
-    offset_singlegene = NULL, norm_method = "TMM",
-    threads = 1) {
+run_edgeR_integration <-  function( response_var,
+                                    covariates = NULL,
+                                    design_mat_allgene = NULL,
+                                    design_mat_singlegene = NULL,
+                                    offset_allgene = NULL,
+                                    offset_singlegene = NULL,
+                                    norm_method = "TMM",
+                                    threads = 1) {
+
     if (is.null(covariates) & (is.null(design_mat_allgene) +
-        is.null(design_mat_singlegene) >=
-        1)) {
-        stop(paste("Design matrices should be supplied",
-            "if covariates are not specified"))
+        is.null(design_mat_singlegene) >= 1)) {
+        stop(str_wrap("Design matrices should be supplied
+            if covariates are not specified"))
     }
 
     if (is.atomic(response_var) & is.vector(response_var)) {
@@ -73,12 +76,11 @@ run_singlegene_edgeR_integration <- function(response_var,
         check_names <- rownames(response_var)
     }
 
-    response_var <- as.matrix(t(response_var +
-        1))  ####### lasciare+1?
+    response_var <- as.matrix(t(response_var + 1)) ####### lasciare+1?
 
     if (!is.matrix(response_var)) {
-        stop(paste("response_var should be a data.frame,",
-            "a matrix or an atomic vector"))
+        stop(str_wrap("response_var should be a data.frame,
+            a matrix or an atomic vector"))
     }
 
     if (!is.null(covariates)) {
@@ -97,37 +99,41 @@ run_singlegene_edgeR_integration <- function(response_var,
 
 
         if (!identical(check_names, check_names2)) {
-            message(paste("Sample names in response_var and covariates seems",
-                "to differ, assuming that response_var and covariates have",
-                "the same sample order"))
+            message(str_wrap("Sample names in response_var and covariates seems
+                to differ, assuming that response_var and covariates have
+                the same sample order"))
         }
 
         if (ncol(response_var) != nrow(covariates)) {
-            stop(paste("response_var and covariates have",
-                "a different number of samples"))
+            stop(str_wrap("response_var and covariates have
+                a different number of samples"))
         }
     }
 
-    y_all <- allgene_edgeR_model(response_var = response_var,
-        covariates = covariates, design_mat_allgene = design_mat_allgene,
+    y_all <- allgene_edgeR_model(
+        response_var = response_var,
+        covariates = covariates,
+        design_mat_allgene = design_mat_allgene,
         offset_allgene = offset_allgene,
-        norm_method = norm_method)
-    y_gene <- singlegene_edgeR_model(response_var = response_var,
-        covariates = covariates, y_all = y_all,
+        norm_method = norm_method
+    )
+    y_gene <- singlegene_edgeR_model(
+        response_var = response_var,
+        covariates = covariates,
+        y_all = y_all,
         design_mat = design_mat_singlegene,
         offset_singlegene = offset_singlegene,
-        threads = threads)
+        threads = threads
+    )
     model_res <- edger_coef_test(y_gene,
-        threads = threads)
+        threads = threads
+    )
     coef_pval_mat <- building_edger_result_matrices(model_results = model_res)
-    results <- list(model_results = model_res,
-        coef_data = coef_pval_mat$coef, pval_data = coef_pval_mat$pval)
+    results <- list(
+        model_results = model_res,
+        coef_data = coef_pval_mat$coef,
+        pval_data = coef_pval_mat$pval
+    )
 
     return(results)
 }
-
-
-
-##### Offsets dei modelli all e single
-##### gene quando non abbiamo RUV
-##### calcnormfactors per allgene

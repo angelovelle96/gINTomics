@@ -3,3 +3,4 @@
 import(edgeR)
 import(parallel)
 import(plyr)
+import(stringr)

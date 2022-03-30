@@ -27,39 +27,40 @@
 #' @param y_all An all gene edgeR model needed to extract the common and
 #' tagwise dispersion
 #' @param threads Number of threads to use for parallelization (Default is 1)
-#' @import parallel edgeR
+#' @import parallel edgeR stringr
 
-singlegene_edgeR_model <- function(response_var,
-    covariates = NULL, design_mat = NULL,
-    offset_singlegene = NULL, y_all, threads = 1) {
-    if (is.null(covariates) & is.null(design_mat)) {
+singlegene_edgeR_model <- function( response_var,
+                                    covariates = NULL,
+                                    design_mat = NULL,
+                                    offset_singlegene = NULL,
+                                    y_all,
+                                    threads = 1) {
+
+    if(is.null(covariates)&is.null(design_mat)) {
         stop("Design matrix should be supplied if covariates are not specified")
     }
 
-    if (is.null(design_mat)) {
+    if(is.null(design_mat)) {
         cov <- colnames(covariates)
         cov <- gsub("-", "_", cov)
-        cov <- formula(paste0("~", paste0(cov,
-            collapse = "+")))
+        cov <- formula(paste0("~", paste0(cov, collapse = "+")))
         tmp <- covariates
         colnames(tmp) <- gsub("-", "_", colnames(tmp))
         design_mat <- model.matrix(cov, data = tmp)
         colnames(design_mat)[2:ncol(design_mat)] <- colnames(covariates)
     }
 
-    fit_list <- mclapply(1:nrow(response_var),
-        function(x) {
+    fit_list <- mclapply(1:nrow(response_var), function(x) {
             if (ncol(response_var) != nrow(design_mat[[x]])) {
-                stop(paste("Number of samples differ between respone_var",
-                  "and design_mat"))
+                stop(str_wrap("Number of samples differ between respone_var
+                                and design_mat"))
             }
-            y_gene <- DGEList(counts = t(response_var[x,
-                ]))
+            y_gene <- DGEList(counts = t(response_var[x,]))
             if (!is.null(offset_singlegene)) {
                 if (is.list(offset_singlegene)) {
-                  y_gene$offset <- offset_singlegene[[x]]
+                    y_gene$offset <- offset_singlegene[[x]]
                 } else {
-                  y_gene$offset <- offset_singlegene
+                    y_gene$offset <- offset_singlegene
                 }
             } else {
                 y_gene$samples$norm.factors <- y_all$samples$norm.factors
@@ -73,7 +74,7 @@ singlegene_edgeR_model <- function(response_var,
                 fit <- glmFit(y_gene, design_mat)
             }
             return(fit)
-        }, mc.cores = threads)
+    }, mc.cores = threads)
     names(fit_list) <- rownames(response_var)
     return(fit_list)
 }
