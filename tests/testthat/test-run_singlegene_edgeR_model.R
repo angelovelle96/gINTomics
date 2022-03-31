@@ -29,10 +29,11 @@ test_that("single gene complete integration gives correct results - Test1", {
 test_that("single gene complete TF integration gives correct results - Test2", {
     mirna_exp_model <- run_edgeR_test2_input$mirna_exp_model
     tf_expression_model <- run_edgeR_test2_input$tf_expression_model
-    expanded_tf_mirna_couples <- run_edgeR_test2_input$expanded_tf_mirna_couples
+    interactions <- run_edgeR_test2_input$expanded_tf_mirna_couples
+    interactions <- lapply(interactions, function(x) x[,1])
     expectedres <- run_edgeR_test2_output
     design_single <- lapply(1:ncol(mirna_exp_model), function(y) {
-        tf <- expanded_tf_mirna_couples[[y]][, "tf"]
+        tf <- interactions[[y]]
         tmp <- gsub("-", "_", tf)
         tmp <- formula(paste0("~", paste0(tmp, collapse = "+")))
         tmp2 <- tf_expression_model
@@ -52,10 +53,22 @@ test_that("single gene complete TF integration gives correct results - Test2", {
                                     design_mat_singlegene = design_single,
                                     threads = 16,
                                     norm_method = "TMM")
+    myres2 <- run_edgeR_integration(response_var = mirna_exp_model,
+                                    design_mat_allgene = design_all,
+                                    interactions = interactions,
+                                    covariates = tf_expression_model,
+                                    threads = 16,
+                                    norm_method = "TMM")
 
     colnames(myres$coef_data) <- paste0(colnames(myres$coef_data), "_coef")
     colnames(myres$pval_data) <- paste0(colnames(myres$pval_data), "_pvalue")
     tmp <- cbind(myres$coef_data, myres$pval_data)
     tmp <- tmp[rownames(expectedres), colnames(expectedres)]
+    colnames(myres2$coef_data) <- paste0(colnames(myres2$coef_data), "_coef")
+    colnames(myres2$pval_data) <- paste0(colnames(myres2$pval_data), "_pvalue")
+    tmp2 <- cbind(myres2$coef_data, myres2$pval_data)
+    tmp2 <- tmp2[rownames(expectedres), colnames(expectedres)]
     expect_identical(tmp, expectedres)
+    expect_identical(tmp2, expectedres)
+    expect_identical(myres, myres2)
 })

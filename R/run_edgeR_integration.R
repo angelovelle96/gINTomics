@@ -26,15 +26,19 @@
 #' be numeric values.
 #' @param covariates Matrix or data.frame containing the covariates of the
 #' models. Rows represent samples, while columns represent the different
-#' the covariates. All the covariates contained in columns will be used for
-#' each model, so use this argument only if all the models have the same
-#' covariates. In case you need a single covariate you can provide the
-#' covariate as an atomic vector. This argument is ignored if
-#' **design_mat_singlegene** is provided.
+#' covariates. This argument is ignored if **design_mat_singlegene**
+#' is provided.
+#' @param interactions A list of characters containing the covariates to use
+#' for each single gene model. Each element of the list should be a character
+#' vector corresponding to colnames in **covariates**, for each genes the
+#' specified columns will be used to create the design matrix.
+#' This argument is ignored if **design_mat_singlegene** is provided.
+#' @param design_mat_singlegene A design matrix (if the model to run is one or if the
+#' matrix doesn't change across models) or a list of design matrices for each
+#' edgeR single gene model.
+#' If provided as list, the number of design matrices should be equal to the
+#' number of rows of **response_var**.
 #' @param design_mat_allgene A design matrix for the all gene edgeR model
-#' @param design_mat_singlegene A design matrix (if the model to run is one) or
-#' a list of design matrices for each edgeR single gene model. The number of
-#' design matrices should be equal to the number of rows of **response_var**.
 #' @param offset_allgene A matrix containing the offsets of the all gene edgeR
 #' model
 #' @param offset_singlegene A vector (if the model to run is one) or
@@ -53,6 +57,7 @@
 
 run_edgeR_integration <-  function( response_var,
                                     covariates = NULL,
+                                    interactions = NULL,
                                     design_mat_allgene = NULL,
                                     design_mat_singlegene = NULL,
                                     offset_allgene = NULL,
@@ -60,53 +65,29 @@ run_edgeR_integration <-  function( response_var,
                                     norm_method = "TMM",
                                     threads = 1) {
 
-    if (is.null(covariates) & (is.null(design_mat_allgene) +
-        is.null(design_mat_singlegene) >= 1)) {
-        stop(str_wrap("Design matrices should be supplied
-            if covariates are not specified"))
-    }
-
     if (is.atomic(response_var) & is.vector(response_var)) {
         message("response_var is an atomic vector, converting to matrix")
         tmp <- as.matrix(response_var)
         rownames(tmp) <- names(response_var)
-        check_names <- names(response_var)
         response_var <- tmp
-    } else {
-        check_names <- rownames(response_var)
     }
 
-    response_var <- as.matrix(t(response_var + 1)) ####### lasciare+1?
+    response_var <- as.matrix(response_var)
 
     if (!is.matrix(response_var)) {
         stop(str_wrap("response_var should be a data.frame,
             a matrix or an atomic vector"))
     }
 
-    if (!is.null(covariates)) {
-        if (is.atomic(covariates)) {
+    if(!is.null(covariates)){
+        if (is.atomic(covariates)& is.vector(covariates)) {
             message("covariates is an atomic vector, converting to data.frame")
             tmp <- as.data.frame(covariates)
             rownames(tmp) <- names(covariates)
-            check_names2 <- names(covariates)
             covariates <- tmp
-        } else {
-            check_names2 <- rownames(covariates)
         }
         if (!is.data.frame(covariates)) {
             stop("covariates should be a data.frame or an atomic vector")
-        }
-
-
-        if (!identical(check_names, check_names2)) {
-            message(str_wrap("Sample names in response_var and covariates seems
-                to differ, assuming that response_var and covariates have
-                the same sample order"))
-        }
-
-        if (ncol(response_var) != nrow(covariates)) {
-            stop(str_wrap("response_var and covariates have
-                a different number of samples"))
         }
     }
 
@@ -120,6 +101,7 @@ run_edgeR_integration <-  function( response_var,
     y_gene <- singlegene_edgeR_model(
         response_var = response_var,
         covariates = covariates,
+        interactions=interactions,
         y_all = y_all,
         design_mat = design_mat_singlegene,
         offset_singlegene = offset_singlegene,

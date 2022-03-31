@@ -1,9 +1,10 @@
 
-lasso_model_results_can <- function(y, data){
+lasso_model_results_can <- function(data, covariates){
+
+  pbmclapply(1:length(covariates), function(y){
 
 
-
-  tf <- expanded_tf_mirna_couples_can[[y]][,"tf"]
+  covariates <- expanded_tf_mirna_couples_can[[y]][,"tf"]
   tmp <- gsub("-", "_", tf)
   tmp2 <- gsub("-", "_", names(expanded_tf_mirna_couples_can)[y])
   tmp2 <- gsub(";", "_", tmp2)
@@ -21,4 +22,9 @@ lasso_model_results_can <- function(y, data){
 
   return(lm_results)
 
+}, mc.cores = 22)
+
 }
+
+
+
