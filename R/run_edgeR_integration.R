@@ -33,9 +33,9 @@
 #' vector corresponding to colnames in **covariates**, for each genes the
 #' specified columns will be used to create the design matrix.
 #' This argument is ignored if **design_mat_singlegene** is provided.
-#' @param design_mat_singlegene A design matrix (if the model to run is one or if the
-#' matrix doesn't change across models) or a list of design matrices for each
-#' edgeR single gene model.
+#' @param design_mat_singlegene A design matrix (if the model to run is one or
+#' if the matrix doesn't change across models) or a list of design matrices for
+#' each edgeR single gene model.
 #' If provided as list, the number of design matrices should be equal to the
 #' number of rows of **response_var**.
 #' @param design_mat_allgene A design matrix for the all gene edgeR model
@@ -44,7 +44,7 @@
 #' @param offset_singlegene A vector (if the model to run is one) or
 #' a list of vector containing the offsets for each single gene edgeR model.
 #' The number of vectors should be equal to the number of rows
-#' of **response_var**.
+#' of **response_var**. As default, offsets are taken from the all gene fitting.
 #' @param norm_method Normalization method to use for the all gene edgeR
 #' model (Default is 'TMM'). The normalization factors will be passed to single
 #' gene models for normalization. Ignored if the offsets are provided.
@@ -63,6 +63,8 @@ run_edgeR_integration <-  function( response_var,
                                     offset_allgene = NULL,
                                     offset_singlegene = NULL,
                                     norm_method = "TMM",
+                                    steady_covariates = NULL,
+                                    cnv_mode = F,
                                     threads = 1) {
 
     if (is.atomic(response_var) & is.vector(response_var)) {
@@ -91,18 +93,26 @@ run_edgeR_integration <-  function( response_var,
         }
     }
 
-    y_all <- allgene_edgeR_model(
+    fit_all <- allgene_edgeR_model(
         response_var = response_var,
         covariates = covariates,
         design_mat_allgene = design_mat_allgene,
         offset_allgene = offset_allgene,
         norm_method = norm_method
     )
+    if(is.null(design_mat_singlegene)){
+        design_mat_singlegene <- generate_design(
+            response_var = response_var,
+            covariates = covariates,
+            interactions = interactions,
+            steady_covariates = steady_covariates,
+            cnv_mode = cnv_mode)
+    }
     y_gene <- singlegene_edgeR_model(
         response_var = response_var,
         covariates = covariates,
         interactions=interactions,
-        y_all = y_all,
+        fit_all = fit_all,
         design_mat = design_mat_singlegene,
         offset_singlegene = offset_singlegene,
         threads = threads

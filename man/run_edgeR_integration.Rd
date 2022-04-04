@@ -7,6 +7,7 @@
 run_edgeR_integration(
   response_var,
   covariates = NULL,
+  interactions = NULL,
   design_mat_allgene = NULL,
   design_mat_singlegene = NULL,
   offset_allgene = NULL,
@@ -27,17 +28,22 @@ be numeric values.}
 
 \item{covariates}{Matrix or data.frame containing the covariates of the
 models. Rows represent samples, while columns represent the different
-the covariates. All the covariates contained in columns will be used for
-each model, so use this argument only if all the models have the same
-covariates. In case you need a single covariate you can provide the
-covariate as an atomic vector. This argument is ignored if
-\strong{design_mat_singlegene} is provided.}
+covariates. This argument is ignored if \strong{design_mat_singlegene}
+is provided.}
+
+\item{interactions}{A list of characters containing the covariates to use
+for each single gene model. Each element of the list should be a character
+vector corresponding to colnames in \strong{covariates}, for each genes the
+specified columns will be used to create the design matrix.
+This argument is ignored if \strong{design_mat_singlegene} is provided.}
 
 \item{design_mat_allgene}{A design matrix for the all gene edgeR model}
 
-\item{design_mat_singlegene}{A design matrix (if the model to run is one) or
-a list of design matrices for each edgeR single gene model. The number of
-design matrices should be equal to the number of rows of \strong{response_var}.}
+\item{design_mat_singlegene}{A design matrix (if the model to run is one or
+if the matrix doesn't change across models) or a list of design matrices for
+each edgeR single gene model.
+If provided as list, the number of design matrices should be equal to the
+number of rows of \strong{response_var}.}
 
 \item{offset_allgene}{A matrix containing the offsets of the all gene edgeR
 model}

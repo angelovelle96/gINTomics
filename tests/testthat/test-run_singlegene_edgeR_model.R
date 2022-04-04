@@ -7,22 +7,39 @@ test_that("single gene complete integration gives correct results - Test1", {
     y_gene_offset <- lapply(1:nrow(counts), function(x) {
         matrix(1, 1, ncol(counts))
     })
+
+    myres <- run_edgeR_integration( response_var = t(counts),
+                                    covariates = data,
+                                    steady_covariates = c("W_1", "W_2", "W_3"),
+                                    design_mat_allgene = design_all,
+                                    offset_allgene = t(y_all_offset),
+                                    offset_singlegene = y_gene_offset,
+                                    threads = 16,
+                                    norm_method = "TMM",
+                                    cnv_mode = T)
+    expect_identical(myres$coef_data$cnv, expectedres$coef_ace)
+    expect_identical(myres$coef_data$`(Intercept)`, expectedres$coef_intercept)
+    expect_identical(myres$pval_data$cnv, expectedres$pval_ace)
+    expect_identical(myres$pval_data$`(Intercept)`, expectedres$pval_intercept)
+
     design_single <- list()
     for (i in rownames(counts)) {
         design_single[[i]] <- model.matrix(~data[, i]+W_1+W_2+W_3, data = data)
         colnames(design_single[[i]])[2] <- "cnv"
     }
-    myres <- run_edgeR_integration( response_var = t(counts),
-                                    design_mat_allgene = design_all,
+
+    myres2 <- run_edgeR_integration( response_var = t(counts),
                                     design_mat_singlegene = design_single,
+                                    design_mat_allgene = design_all,
                                     offset_allgene = t(y_all_offset),
                                     offset_singlegene = y_gene_offset,
                                     threads = 16,
-                                    norm_method = "TMM")
-    expect_identical(myres$coef_data$cnv, expectedres$coef_ace)
-    expect_identical(myres$coef_data$`(Intercept)`, expectedres$coef_intercept)
-    expect_identical(myres$pval_data$cnv, expectedres$pval_ace)
-    expect_identical(myres$pval_data$`(Intercept)`, expectedres$pval_intercept)
+                                    norm_method = "TMM",
+                                    cnv_mode = T)
+    expect_identical(myres2$coef_data$cnv, expectedres$coef_ace)
+    expect_identical(myres2$coef_data$`(Intercept)`, expectedres$coef_intercept)
+    expect_identical(myres2$pval_data$cnv, expectedres$pval_ace)
+    expect_identical(myres2$pval_data$`(Intercept)`, expectedres$pval_intercept)
 })
 ############
 
@@ -43,18 +60,13 @@ test_that("single gene complete TF integration gives correct results - Test2", {
         return(design)
     })
 
-    y_all_offset <- matrix(1, ncol(mirna_exp_model), nrow(mirna_exp_model))
-    y_gene_offset <- lapply(1:nrow(mirna_exp_model), function(x) {
-        matrix(1, 1, ncol(mirna_exp_model))
-    })
-    design_all <- model.matrix(~1, data = tf_expression_model)
+
     myres <- run_edgeR_integration( response_var = mirna_exp_model,
-                                    design_mat_allgene = design_all,
+                                    covariates = tf_expression_model,
                                     design_mat_singlegene = design_single,
                                     threads = 16,
                                     norm_method = "TMM")
     myres2 <- run_edgeR_integration(response_var = mirna_exp_model,
-                                    design_mat_allgene = design_all,
                                     interactions = interactions,
                                     covariates = tf_expression_model,
                                     threads = 16,

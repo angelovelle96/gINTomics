@@ -29,7 +29,7 @@
 #' offsets for each single gene edgeR model.
 #' If provided as list, the number of vectors should be equal to the number
 #' of rows of **response_var**.
-#' @param y_all An all gene edgeR model needed to extract the common and
+#' @param fit_all An all gene edgeR model needed to extract the common and
 #' tagwise dispersion
 #' @param threads Number of threads to use for parallelization (Default is 1)
 #' @import parallel edgeR stringr
@@ -38,8 +38,8 @@ singlegene_edgeR_model <- function( response_var,
                                     interactions = NULL,
                                     covariates = NULL,
                                     offset_singlegene = NULL,
-                                    design_mat = NULL,
-                                    y_all,
+                                    design_mat,
+                                    fit_all,
                                     threads = 1) {
 
     response_var <- t(response_var+1)
@@ -56,14 +56,7 @@ singlegene_edgeR_model <- function( response_var,
                     assuming that samples in response_var and covariates are
                     in the same order"))
     }
-    if(!is.null(interactions)){
-        if(nrow(response_var)!=length(interactions)) stop(str_wrap("response_var
-            and interactions should have the same number of genes"))
-        if(!identical(rownames(response_var), names(interactions))) warning(
-            str_wrap("response_var and interactions have different gene names,
-                    assuming that genes in response_var and interactions are
-                    in the same order"))
-    }
+
 
     fit_list <- mclapply(1:nrow(response_var), function(x) {
 
@@ -78,31 +71,12 @@ singlegene_edgeR_model <- function( response_var,
                 y_gene$offset <- offset_singlegene
             }
         } else {
-            y_gene$samples$norm.factors <- y_all$samples$norm.factors
+            y_gene$samples$norm.factors <- fit_all$samples$norm.factors
+            y_gene$offset <- fit_all$offset[1,]
         }
-        y_gene$common.dispersion <- y_all$common.dispersion
-        y_gene$tagwise.dispersion <- y_all$tagwise.dispersion[x]
-        if(is.null(design_mat)){
-            interactions <- lapply(interactions, function(x)
-                intersect(x, colnames(covariates)))
-            cov <- interactions[[x]]
-            cov <- gsub("-", "_", cov)
-            cov <- formula(paste0("~", paste0(cov, collapse = "+")))
-            tmp <- covariates
-            colnames(tmp) <- gsub("-", "_", colnames(tmp))
-            design_matrix <- model.matrix(cov, data = tmp)
-            colnames(design_matrix)[2:ncol(design_matrix)] <- interactions[[x]]
-        } else {
-            if(is.list(design_mat)) {
-                if(length(design_mat)!=nrow(response_var)) stop(str_wrap("
-                    If provided as list, the length of design_mat should be
-                    equal to the number of genes in response_var"))
-                design_matrix <- design_mat[[x]]
-            } else {
-                design_matrix <- design_mat
-            }
-        }
-        fit <- glmFit(y_gene, design_matrix)
+        y_gene$common.dispersion <- fit_all$common.dispersion
+        y_gene$tagwise.dispersion <- fit_all$tagwise.dispersion[x]
+        fit <- glmFit(y_gene, design_mat[[x]])
         return(fit)
         }, mc.cores = threads)
     names(fit_list) <- rownames(response_var)

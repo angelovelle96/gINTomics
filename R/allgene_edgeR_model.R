@@ -15,8 +15,8 @@ allgene_edgeR_model <- function(response_var,
             and covariates should have the same number of samples"))
         if(!identical(colnames(response_var), rownames(covariates))) warning(
             str_wrap("response_var and covariates have different sample names,
-                 assuming that samples in response_var and covariates are
-                 in the same order"))
+                    assuming that samples in response_var and covariates are
+                    in the same order"))
     }
     if(is.null(design_mat_allgene)) {
         design_mat_allgene <- model.matrix(~1, data = covariates)
@@ -29,5 +29,8 @@ allgene_edgeR_model <- function(response_var,
     if (!is.null(offset_allgene)) y_all$offset <- offset_allgene
     y_all <- estimateGLMCommonDisp(y_all, design_mat_allgene)
     y_all <- estimateGLMTagwiseDisp(y_all, design_mat_allgene)
-    return(y_all)
+    fit_all <- glmFit(y_all, design_mat_allgene)
+    fit_all$common.dispersion <- y_all$common.dispersion
+    fit_all$tagwise.dispersion <- y_all$tagwise.dispersion
+    return(fit_all)
 }
