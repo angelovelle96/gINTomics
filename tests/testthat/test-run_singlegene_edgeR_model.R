@@ -19,8 +19,9 @@ test_that("single gene complete integration gives correct results - Test1", {
                                     cnv_mode = T)
     expect_identical(myres$coef_data$cnv, expectedres$coef_ace)
     expect_identical(myres$coef_data$`(Intercept)`, expectedres$coef_intercept)
-    expect_identical(myres$pval_data$cnv, expectedres$pval_ace)
-    expect_identical(myres$pval_data$`(Intercept)`, expectedres$pval_intercept)
+    expect_equal(myres$pval_data$cnv, expectedres$pval_ace, tolerance = 10^-15)
+    expect_equal(myres$pval_data$`(Intercept)`, expectedres$pval_intercept,
+                 tolerance = 10^-15)
 
     design_single <- list()
     for (i in rownames(counts)) {
@@ -34,12 +35,20 @@ test_that("single gene complete integration gives correct results - Test1", {
                                     offset_allgene = t(y_all_offset),
                                     offset_singlegene = y_gene_offset,
                                     threads = 16,
+                                    norm_method = "TMM")
+    expect_identical(myres2, myres)
+
+    y_gene_offset <-  matrix(1, 1, ncol(counts))
+    myres3 <- run_edgeR_integration( response_var = t(counts),
+                                    covariates = data,
+                                    steady_covariates = c("W_1", "W_2", "W_3"),
+                                    design_mat_allgene = design_all,
+                                    offset_allgene = t(y_all_offset),
+                                    offset_singlegene = y_gene_offset,
+                                    threads = 16,
                                     norm_method = "TMM",
                                     cnv_mode = T)
-    expect_identical(myres2$coef_data$cnv, expectedres$coef_ace)
-    expect_identical(myres2$coef_data$`(Intercept)`, expectedres$coef_intercept)
-    expect_identical(myres2$pval_data$cnv, expectedres$pval_ace)
-    expect_identical(myres2$pval_data$`(Intercept)`, expectedres$pval_intercept)
+    expect_identical(myres3, myres)
 })
 ############
 
@@ -49,7 +58,7 @@ test_that("single gene complete TF integration gives correct results - Test2", {
     interactions <- run_edgeR_test2_input$expanded_tf_mirna_couples
     interactions <- lapply(interactions, function(x) x[,1])
     expectedres <- run_edgeR_test2_output
-    design_single <- lapply(1:ncol(mirna_exp_model), function(y) {
+    design_single <- lapply(colnames(mirna_exp_model), function(y) {
         tf <- interactions[[y]]
         tmp <- gsub("-", "_", tf)
         tmp <- formula(paste0("~", paste0(tmp, collapse = "+")))
@@ -59,10 +68,8 @@ test_that("single gene complete TF integration gives correct results - Test2", {
         colnames(design)[2:ncol(design)] <- tf
         return(design)
     })
-
-
+    names(design_single) <- colnames(mirna_exp_model)
     myres <- run_edgeR_integration( response_var = mirna_exp_model,
-                                    covariates = tf_expression_model,
                                     design_mat_singlegene = design_single,
                                     threads = 16,
                                     norm_method = "TMM")
@@ -80,7 +87,7 @@ test_that("single gene complete TF integration gives correct results - Test2", {
     colnames(myres2$pval_data) <- paste0(colnames(myres2$pval_data), "_pvalue")
     tmp2 <- cbind(myres2$coef_data, myres2$pval_data)
     tmp2 <- tmp2[rownames(expectedres), colnames(expectedres)]
-    expect_identical(tmp, expectedres)
-    expect_identical(tmp2, expectedres)
+    expect_equal(tmp, expectedres, tolerance = 10^-12)
+    expect_equal(tmp2, expectedres, tolerance = 10^-12)
     expect_identical(myres, myres2)
 })
