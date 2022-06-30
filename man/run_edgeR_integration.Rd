@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_edgeR_integration.R
 \name{run_edgeR_integration}
 \alias{run_edgeR_integration}
-\title{Integration of omics data running single gene edgeR models}
+\title{Integration of omics data running single gene negative binomial edgeR models}
 \usage{
 run_edgeR_integration(
   response_var,
@@ -13,6 +13,8 @@ run_edgeR_integration(
   offset_allgene = NULL,
   offset_singlegene = NULL,
   norm_method = "TMM",
+  steady_covariates = NULL,
+  cnv_mode = F,
   threads = 1
 )
 }
@@ -34,28 +36,39 @@ is provided.}
 \item{interactions}{A list of characters containing the covariates to use
 for each single gene model. Each element of the list should be a character
 vector corresponding to colnames in \strong{covariates}, for each genes the
-specified columns will be used to create the design matrix.
-This argument is ignored if \strong{design_mat_singlegene} is provided.}
+specified columns will be used to create the design matrix. The list should
+contain the covariates for each of the genes of \strong{response_var} and they
+should be in the same order of \strong{response_var} rownames.
+This argument is ignored if \strong{design_mat_singlegene} is provided or if
+\strong{cnv_mode} is set to TRUE.}
 
 \item{design_mat_allgene}{A design matrix for the all gene edgeR model}
 
-\item{design_mat_singlegene}{A design matrix (if the model to run is one or
-if the matrix doesn't change across models) or a list of design matrices for
-each edgeR single gene model.
-If provided as list, the number of design matrices should be equal to the
-number of rows of \strong{response_var}.}
+\item{design_mat_singlegene}{A list of design matrices for
+each edgeR single gene model, the number of design matrices should be equal
+to the number of rows of \strong{response_var}.}
 
 \item{offset_allgene}{A matrix containing the offsets of the all gene edgeR
 model}
 
-\item{offset_singlegene}{A vector (if the model to run is one) or
-a list of vector containing the offsets for each single gene edgeR model.
+\item{offset_singlegene}{A list of vector containing the offsets for each
+single gene edgeR model.
 The number of vectors should be equal to the number of rows
-of \strong{response_var}.}
+of \strong{response_var}. As default, offsets are taken from the all gene fitting.}
 
 \item{norm_method}{Normalization method to use for the all gene edgeR
 model (Default is 'TMM'). The normalization factors will be passed to single
-gene models for normalization. Ignored if the offsets are provided.}
+gene models for normalization.}
+
+\item{steady_covariates}{Character vector containing column names of
+\strong{covariates} corresponding to covariates that should be included in all
+single gene models (default=NULL).}
+
+\item{cnv_mode}{logical indicating if the model should perform copy number
+integration (default=FALSE). If set to TRUE the function will generate the
+design matrix of a given gene by searching that gene among the columns of
+\strong{covariates}, so each gene in \strong{response_var} should have a
+corresponding column in \strong{covariates} with the same name.}
 
 \item{threads}{Number of threads to use for parallelization (Default is 1)}
 }
@@ -68,17 +81,19 @@ This function is useful for users which need to run single gene
 integration models, in particular if for each gene the covariates change.
 For example if you need to integrate gene expression with copy number
 variations, for each gene you need to integrate its expression levels with
-CNV status, updating the covariate at each step. In this case you can
-provide the expression of all genes in \strong{response_var} and the relative
-CNV values (numeric) as a list of design matrices in
-\strong{design_mat_singlegene}.
-The n gene contained in \strong{response_var} is fitted in the negative binomial
-model of the edgeR package using as design matrix the n element of the
-\strong{design_mat_singlegene} list. Alternatively, if the covariates are the
-same for each gene, the user can provide them as a dataframe in
-\strong{covariates}, in this case all the columns will be included in the design
-matrix. Since the function runs a model for each of the genes contained in
+CNV status, updating the covariate at each step. In this case you can set
+\strong{cnv_mode} to TRUE, providing the expression of all genes in
+\strong{response_var} and the relative CNV values (numeric) in \strong{covariates}.
+The function will automatically use CNV values of each gene as covariates
+for the single gene models.
+If \strong{cnv_mode} is FALSE (default) the user should specify which covariates
+should be used for each gene in the \strong{interaction} argument.
+The use can manually provide a list of the design matrices for single gene
+models in \strong{design_mat_singlegene}, in this case the n gene contained in
+\strong{response_var} is fitted in the  model  using as design matrix the n
+element of the\strong{design_mat_singlegene} list.
+Since the function runs a model for each of the genes contained in
 \strong{response_var}, in order to compute the common and tagwise dispersion it
 starts running an all gene model without covariates, then the dispersion
-values are passed to the single gene model.
+values and the offsets are passed to the single gene model.
 }

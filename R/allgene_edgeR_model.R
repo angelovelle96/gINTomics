@@ -1,5 +1,4 @@
 allgene_edgeR_model <- function(response_var,
-                                covariates,
                                 design_mat_allgene = NULL,
                                 offset_allgene = NULL,
                                 norm_method = "TMM") {
@@ -10,19 +9,13 @@ allgene_edgeR_model <- function(response_var,
                         upperquartile, none"))
     }
 
-    if(!is.null(covariates)){
-        if(ncol(response_var)!=nrow(covariates)) stop(str_wrap("response_var
-            and covariates should have the same number of samples"))
-        if(!identical(colnames(response_var), rownames(covariates))) warning(
-            str_wrap("response_var and covariates have different sample names,
-                    assuming that samples in response_var and covariates are
-                    in the same order"))
-    }
     if(is.null(design_mat_allgene)) {
-        design_mat_allgene <- model.matrix(~1, data = covariates)
+        design_mat_allgene <- model.matrix(~1,
+                data = as.data.frame(t(response_var)))
     }
     if(ncol(response_var) != nrow(design_mat_allgene)) {
-        stop("Number of samples differ between respone_var and design_mat")
+        stop(str_wrap("Number of samples differ between respone_var and
+                        design_mat_allgene"))
     }
     y_all <- DGEList(counts = response_var)
     y_all <- calcNormFactors(y_all, method = norm_method)

@@ -1,21 +1,23 @@
-#' Integration of omics data running single gene edgeR models
+#' Integration of omics data running single gene negative binomial edgeR models
 #' @description This function is useful for users which need to run single gene
 #' integration models, in particular if for each gene the covariates change.
 #' For example if you need to integrate gene expression with copy number
 #' variations, for each gene you need to integrate its expression levels with
-#' CNV status, updating the covariate at each step. In this case you can
-#' provide the expression of all genes in **response_var** and the relative
-#' CNV values (numeric) as a list of design matrices in
-#' **design_mat_singlegene**.
-#' The n gene contained in **response_var** is fitted in the negative binomial
-#' model of the edgeR package using as design matrix the n element of the
-#' **design_mat_singlegene** list. Alternatively, if the covariates are the
-#' same for each gene, the user can provide them as a dataframe in
-#' **covariates**, in this case all the columns will be included in the design
-#' matrix. Since the function runs a model for each of the genes contained in
+#' CNV status, updating the covariate at each step. In this case you can set
+#' **cnv_mode** to TRUE, providing the expression of all genes in
+#' **response_var** and the relative CNV values (numeric) in **covariates**.
+#' The function will automatically use CNV values of each gene as covariates
+#' for the single gene models.
+#' If **cnv_mode** is FALSE (default) the user should specify which covariates
+#' should be used for each gene in the **interaction** argument.
+#' The use can manually provide a list of the design matrices for single gene
+#' models in **design_mat_singlegene**, in this case the n gene contained in
+#' **response_var** is fitted in the  model  using as design matrix the n
+#' element of the**design_mat_singlegene** list.
+#' Since the function runs a model for each of the genes contained in
 #' **response_var**, in order to compute the common and tagwise dispersion it
 #' starts running an all gene model without covariates, then the dispersion
-#' values are passed to the single gene model.
+#' values and the offsets are passed to the single gene model.
 #' @param response_var Matrix or data.frame containing the expression values
 #' for each model. Rows represent samples, while each column represents
 #' the different response variables of the models. The number of rows should
@@ -31,24 +33,33 @@
 #' @param interactions A list of characters containing the covariates to use
 #' for each single gene model. Each element of the list should be a character
 #' vector corresponding to colnames in **covariates**, for each genes the
-#' specified columns will be used to create the design matrix.
-#' This argument is ignored if **design_mat_singlegene** is provided.
-#' @param design_mat_singlegene A design matrix (if the model to run is one or
-#' if the matrix doesn't change across models) or a list of design matrices for
-#' each edgeR single gene model.
-#' If provided as list, the number of design matrices should be equal to the
-#' number of rows of **response_var**.
+#' specified columns will be used to create the design matrix. The list should
+#' contain the covariates for each of the genes of **response_var** and they
+#' should be in the same order of **response_var** rownames.
+#' This argument is ignored if **design_mat_singlegene** is provided or if
+#' **cnv_mode** is set to TRUE.
+#' @param design_mat_singlegene A list of design matrices for
+#' each edgeR single gene model, the number of design matrices should be equal
+#' to the number of rows of **response_var**.
 #' @param design_mat_allgene A design matrix for the all gene edgeR model
 #' @param offset_allgene A matrix containing the offsets of the all gene edgeR
 #' model
-#' @param offset_singlegene A vector (if the model to run is one) or
-#' a list of vector containing the offsets for each single gene edgeR model.
+#' @param offset_singlegene A list of vector containing the offsets for each
+#' single gene edgeR model.
 #' The number of vectors should be equal to the number of rows
 #' of **response_var**. As default, offsets are taken from the all gene fitting.
 #' @param norm_method Normalization method to use for the all gene edgeR
 #' model (Default is 'TMM'). The normalization factors will be passed to single
-#' gene models for normalization. Ignored if the offsets are provided.
+#' gene models for normalization.
 #' @param threads Number of threads to use for parallelization (Default is 1)
+#' @param cnv_mode logical indicating if the model should perform copy number
+#' integration (default=FALSE). If set to TRUE the function will generate the
+#' design matrix of a given gene by searching that gene among the columns of
+#' **covariates**, so each gene in **response_var** should have a
+#' corresponding column in **covariates** with the same name.
+#' @param steady_covariates Character vector containing column names of
+#' **covariates** corresponding to covariates that should be included in all
+#' single gene models (default=NULL).
 #'
 #' @return A list containing the results of all the edger single gene models,
 #' the pvalues and the coefficients for each gene
@@ -67,7 +78,7 @@ run_edgeR_integration <-  function( response_var,
                                     cnv_mode = F,
                                     threads = 1) {
 
-    if (is.atomic(response_var) & is.vector(response_var)) {
+    if(is.atomic(response_var) & is.vector(response_var)) {
         message("response_var is an atomic vector, converting to matrix")
         tmp <- as.matrix(response_var)
         rownames(tmp) <- names(response_var)
@@ -76,7 +87,7 @@ run_edgeR_integration <-  function( response_var,
 
     response_var <- as.matrix(response_var)
 
-    if (!is.matrix(response_var)) {
+    if(!is.matrix(response_var)) {
         stop(str_wrap("response_var should be a data.frame,
             a matrix or an atomic vector"))
     }
@@ -88,14 +99,13 @@ run_edgeR_integration <-  function( response_var,
             rownames(tmp) <- names(covariates)
             covariates <- tmp
         }
-        if (!is.data.frame(covariates)) {
+        if(!is.data.frame(covariates)) {
             stop("covariates should be a data.frame or an atomic vector")
         }
     }
 
     fit_all <- allgene_edgeR_model(
         response_var = response_var,
-        covariates = covariates,
         design_mat_allgene = design_mat_allgene,
         offset_allgene = offset_allgene,
         norm_method = norm_method
@@ -108,16 +118,14 @@ run_edgeR_integration <-  function( response_var,
             steady_covariates = steady_covariates,
             cnv_mode = cnv_mode)
     }
-    y_gene <- singlegene_edgeR_model(
+    fit_gene <- singlegene_edgeR_model(
         response_var = response_var,
-        covariates = covariates,
-        interactions=interactions,
         fit_all = fit_all,
         design_mat = design_mat_singlegene,
         offset_singlegene = offset_singlegene,
         threads = threads
     )
-    model_res <- edger_coef_test(y_gene,
+    model_res <- edger_coef_test(fit_gene,
         threads = threads
     )
     coef_pval_mat <- building_edger_result_matrices(model_results = model_res)
