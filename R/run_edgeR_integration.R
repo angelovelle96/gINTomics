@@ -76,7 +76,8 @@ run_edgeR_integration <-  function( response_var,
                                     norm_method = "TMM",
                                     steady_covariates = NULL,
                                     cnv_mode = F,
-                                    threads = 1) {
+                                    threads = 1,
+                                    reference=NULL) {
 
     if(is.atomic(response_var) & is.vector(response_var)) {
         message("response_var is an atomic vector, converting to matrix")
@@ -116,7 +117,8 @@ run_edgeR_integration <-  function( response_var,
             covariates = covariates,
             interactions = interactions,
             steady_covariates = steady_covariates,
-            cnv_mode = cnv_mode)
+            cnv_mode = cnv_mode,
+            reference = reference)
     }
     fit_gene <- singlegene_edgeR_model(
         response_var = response_var,

@@ -2,7 +2,8 @@ generate_design <- function(response_var,
                             covariates,
                             interactions = NULL,
                             steady_covariates = NULL,
-                            cnv_mode = F) {
+                            cnv_mode = F,
+                            reference=NULL) {
 
     response_var <- t(response_var+1)
     if(is.null(covariates)) stop(str_wrap("covariated should be provided if
@@ -13,6 +14,14 @@ generate_design <- function(response_var,
         str_wrap("response_var and covariates have different sample names,
                     assuming that samples in response_var and covariates are
                     in the same order"))
+    tmp <- as.data.frame(covariates)
+    tmp <- tmp[sapply(tmp, function(x) !is.numeric(x))]
+    if(ncol(tmp)>0){
+        tmp <- sapply(tmp, is.factor)
+        if(sum(tmp)!=length(tmp)) stop(str_wrap("covariates should be provided
+                                                  as numeric or factors"))
+    }
+
 
     if(cnv_mode==F){
 
@@ -28,19 +37,16 @@ generate_design <- function(response_var,
         interactions <- lapply(interactions, function(x)
             intersect(x, colnames(covariates)))
         design_matrix <- lapply(1:length(interactions), function(x) {
-
-            cov <- interactions[[x]]
-            if(!is.null(steady_covariates)) cov <- c(cov, steady_covariates)
-            tmp <- gsub("-", "_", cov)
-            tmp <- gsub(";", "_", tmp)
-            tmp <- gsub(":", "_", tmp)
-            tmp <- formula(paste0("~", paste0(tmp, collapse = "+")))
-            tmp2 <- covariates
-            colnames(tmp2) <- gsub("-", "_", colnames(tmp2))
-            colnames(tmp2) <- gsub(";", "_", colnames(tmp2))
-            colnames(tmp2) <- gsub(":", "_", colnames(tmp2))
-            design <- model.matrix(tmp, data = tmp2)
-            colnames(design)[2:ncol(design)] <- cov
+            des_cov <- covariates_check(x=x,
+                                       response_var=response_var,
+                                       covariates=covariates,
+                                       steady_covariates=steady_covariates,
+                                       reference=reference,
+                                       interactions = interactions,
+                                       cnv_mode = cnv_mode)
+            design <- des_cov$design
+            colnames(design)[2:(ncol(design)-length(steady_covariates))
+                             ] <- interactions[[x]]
             return(design)
         })
         names(design_matrix) <- rownames(response_var)
@@ -48,19 +54,24 @@ generate_design <- function(response_var,
         message("Using cnv_mode")
         design_matrix <- lapply(1:nrow(response_var), function(x) {
 
-            cov <- rownames(response_var)[x]
-            if(!is.null(steady_covariates)) cov <- c(cov, steady_covariates)
-            tmp <- gsub("-", "_", cov)
-            tmp <- gsub(";", "_", tmp)
-            tmp <- gsub(":", "_", tmp)
-            tmp <- formula(paste0("~", paste0(tmp, collapse = "+")))
-            tmp2 <- covariates
-            colnames(tmp2) <- gsub("-", "_", colnames(tmp2))
-            colnames(tmp2) <- gsub(";", "_", colnames(tmp2))
-            colnames(tmp2) <- gsub(":", "_", colnames(tmp2))
-            design <-  model.matrix(tmp, data = tmp2)
-            colnames(design)[2:ncol(design)] <- cov
-            colnames(design)[2] <- "cnv"
+            des_cov <- covariates_check(x=x,
+                             response_var=response_var,
+                             covariates=covariates,
+                             steady_covariates=steady_covariates,
+                             reference=reference,
+                             cnv_mode=cnv_mode,
+                             interactions=interactions)
+            design <- des_cov$design
+            cov <- des_cov$cov
+            tmp <- des_cov$formula
+
+            if(is.numeric(covariates[,rownames(response_var)[x]])){
+              colnames(design)[2:ncol(design)] <- cov
+              colnames(design)[2] <- "cnv"
+            }else{
+              tmp <- strsplit(split = " ", as.character(tmp))[[2]][1]
+              colnames(design) <- gsub(tmp, "cnv_", colnames(design))
+            }
             return(design)
         })
         names(design_matrix) <- rownames(response_var)

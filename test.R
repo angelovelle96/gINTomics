@@ -32,4 +32,33 @@ a <- run_lm_integration( response_var = response_var,
 
 
 
+counts <- run_edgeR_test1_input$counts
+data <- run_edgeR_test1_input$data
+tmp <- data[, 1:(ncol(data)-3)]
+tmp <- apply(tmp, 2, function(x) ifelse(x>2, "amp", ifelse(x==2, "norm", "del")))
+tmp <- as.data.frame(tmp)
+tmp[sapply(tmp, is.character)] <-  lapply(tmp[sapply(tmp, is.character)], as.factor)
+data[, 1:(ncol(data)-3)] <- tmp
+tmp <- sapply(data[,1:ncol(data)], function(x) length(levels(x)))
+data <- data[, tmp!=1]
+counts <- counts[intersect(rownames(counts), colnames(data)),]
+
+expectedres <- run_edgeR_test1_output
+design_all <- model.matrix(~W_1+W_2+W_3, data = data)
+y_all_offset <- matrix(1, ncol(counts), nrow(counts))
+y_gene_offset <- lapply(1:nrow(counts), function(x) {
+  matrix(1, 1, ncol(counts))
+})
+prova <- run_edgeR_integration( response_var = t(counts),
+                                covariates = data,
+                                steady_covariates = c("W_1", "W_2", "W_3"),
+                                design_mat_allgene = design_all,
+                                offset_allgene = t(y_all_offset),
+                                offset_singlegene = y_gene_offset,
+                                threads = 16,
+                                norm_method = "TMM",
+                                cnv_mode = T)
+
+a <- sapply(colnames(data), function(x) length(levels(data[,x])))
+b <- data[,names(a)[a==2]]
 

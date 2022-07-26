@@ -33,14 +33,23 @@ lm_singlegene <- function( response_var,
         tmp <- gsub("-", "_", tmp)
         tmp <- gsub(";", "_", tmp)
         tmp <- gsub(":", "_", tmp)
+        tmp <- gsub("\\*", "_", tmp)
+        tmp <- gsub("%in%", "_", tmp)
+        tmp <- gsub("\\^", "_", tmp)
         tmp2 <- gsub("-", "_", names(interactions)[y])
         tmp2 <- gsub(";", "_", tmp2)
         tmp2 <- gsub(":", "_", tmp2)
+        tmp2 <- gsub("\\*", "_", tmp2)
+        tmp2 <- gsub("%in%", "_", tmp2)
+        tmp2 <- gsub("\\^", "_", tmp2)
         tmp <- formula(paste0(tmp2,"~", paste0(tmp, collapse  = "+")))
         tmp2 <- data
         colnames(tmp2) <- gsub("-", "_", colnames(tmp2))
         colnames(tmp2) <- gsub(";", "_", colnames(tmp2))
         colnames(tmp2) <- gsub(":", "_", colnames(tmp2))
+        colnames(tmp2) <- gsub("\\*", "_", colnames(tmp2))
+        colnames(tmp2) <- gsub("%in%", "_", colnames(tmp2))
+        colnames(tmp2) <- gsub("\\^", "_", colnames(tmp2))
 
         if(step==T){
             lm_results <- summary(step(lm(tmp, data = tmp2)))
