@@ -2,8 +2,14 @@ run_lm_integration <- function(response_var,
                                covariates,
                                interactions,
                                threads=1,
-                               step=F){
+                               step=F,
+                               cnv_mode=F){
 
+    if(cnv_mode==T){
+      interactions <- as.list(intersect(colnames(covariates),
+                                        colnames(response_var)))
+      names(interactions) <- unlist(interactions)
+    }
     tmp <- data_check(response_var = response_var,
                       interactions = interactions)
     response_var <- tmp$response_var

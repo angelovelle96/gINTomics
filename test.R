@@ -7,14 +7,21 @@ load("~/Documenti/Rpackages/integrazione/data/mirna_exp_model.rda")
 load("~/Documenti/Rpackages/integrazione/data/tf_expression_model.rda")
 load("~/Documenti/Rpackages/integrazione/data/tf_mirna_couples.Rdata")
 load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_tf_singleseq_isoall_20220329.Rdata")
-load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_all_samples_ace20220311")
+load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_all_samples_ace20220311.Rdata")
+load("~/Documenti/Rpackages/integrazione/data/blca_tcga_omics.rda")
 
+
+tmp <- apply(blca_gistic, 2, as.numeric)
 
 
 # save(run_edgeR_test1_input,
 # run_edgeR_test1_output,
 # run_edgeR_test2_input,
 # run_edgeR_test2_output,
+# blca_gistic,
+# blca_metClust,
+# blca_miRNAseq,
+# blca_RNAseq,
 # file =
 # '~/Documenti/Rpackages/integrazione/R/sysdata.rda')
 

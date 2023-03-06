@@ -6,6 +6,7 @@ lm_singlegene <- function( response_var,
                             step=F){
 
 
+
     if(nrow(response_var)!=nrow(covariates)) stop(str_wrap("response_var
                 and covariates should have the same number of samples"))
     if(!identical(rownames(response_var), rownames(covariates))) warning(

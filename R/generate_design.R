@@ -6,7 +6,7 @@ generate_design <- function(response_var,
                             reference=NULL) {
 
     response_var <- t(response_var+1)
-    if(is.null(covariates)) stop(str_wrap("covariated should be provided if
+    if(is.null(covariates)) stop(str_wrap("covariates should be provided if
                                 design_mat_singlegene is not provided"))
     if(ncol(response_var)!=nrow(covariates)) stop(str_wrap("response_var
             and covariates should have the same number of samples"))

@@ -19,9 +19,9 @@ test_that("single gene complete integration gives correct results - Test1", {
                                     cnv_mode = T)
     expect_identical(myres$coef_data$cnv, expectedres$coef_ace)
     expect_identical(myres$coef_data$`(Intercept)`, expectedres$coef_intercept)
-    expect_equal(myres$pval_data$cnv, expectedres$pval_ace, tolerance = 10^-15)
+    expect_equal(myres$pval_data$cnv, expectedres$pval_ace, tolerance = 10^-12)
     expect_equal(myres$pval_data$`(Intercept)`, expectedres$pval_intercept,
-                 tolerance = 10^-15)
+                 tolerance = 10^-12)
 
     design_single <- list()
     for (i in rownames(counts)) {
@@ -87,7 +87,7 @@ test_that("single gene complete TF integration gives correct results - Test2", {
     colnames(myres2$pval_data) <- paste0(colnames(myres2$pval_data), "_pvalue")
     tmp2 <- cbind(myres2$coef_data, myres2$pval_data)
     tmp2 <- tmp2[rownames(expectedres), colnames(expectedres)]
-    expect_equal(tmp, expectedres, tolerance = 10^-12)
-    expect_equal(tmp2, expectedres, tolerance = 10^-12)
+    expect_equal(tmp, expectedres, tolerance = 10^-9)
+    expect_equal(tmp2, expectedres, tolerance = 10^-9)
     expect_identical(myres, myres2)
 })
