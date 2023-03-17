@@ -8,20 +8,15 @@ load("~/Documenti/Rpackages/integrazione/data/tf_expression_model.rda")
 load("~/Documenti/Rpackages/integrazione/data/tf_mirna_couples.Rdata")
 load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_tf_singleseq_isoall_20220329.Rdata")
 load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_all_samples_ace20220311.Rdata")
-load("~/Documenti/Rpackages/integrazione/data/blca_tcga_omics.rda")
+load("~/Documenti/Rpackages/integrazione/data/ov_test_tcga_omics.rda")
 
 
-tmp <- apply(blca_gistic, 2, as.numeric)
-
-
+#
 # save(run_edgeR_test1_input,
 # run_edgeR_test1_output,
 # run_edgeR_test2_input,
 # run_edgeR_test2_output,
-# blca_gistic,
-# blca_metClust,
-# blca_miRNAseq,
-# blca_RNAseq,
+# mmultiassay_ov,
 # file =
 # '~/Documenti/Rpackages/integrazione/R/sysdata.rda')
 
@@ -31,7 +26,7 @@ interactions <- lapply(interactions, function(x) x[,1])
 response_var <-  run_edgeR_test2_input$mirna_exp_model
 covariates <-  run_edgeR_test2_input$tf_expression_model
 
-a <- run_lm_integration( response_var = response_var,
+a4 <- run_lm_integration( response_var = response_var,
                     covariates = covariates,
                     interactions = interactions,
                     threads = 10,

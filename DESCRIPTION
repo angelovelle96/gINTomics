@@ -15,7 +15,9 @@ Imports:
     gdata,
     parallel,
     plyr,
-    readr
+    readr,
+    RUVSeq,
+    SummarizedExperiment
 Depends: 
     R (>= 2.10)
 LazyData: true

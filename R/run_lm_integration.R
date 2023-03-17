@@ -3,7 +3,10 @@ run_lm_integration <- function(response_var,
                                interactions,
                                threads=1,
                                step=F,
-                               cnv_mode=F){
+                               cnv_mode=F,
+                               steady_covariates=NULL,
+                               reference=NULL){
+
 
     if(cnv_mode==T){
       interactions <- as.list(intersect(colnames(covariates),
@@ -11,15 +14,23 @@ run_lm_integration <- function(response_var,
       names(interactions) <- unlist(interactions)
     }
     tmp <- data_check(response_var = response_var,
-                      interactions = interactions)
+                      interactions = interactions,
+                      covariates = covariates,
+                      cnv_mode = cnv_mode,
+                      linear=T,
+                      steady_covariates = steady_covariates)
     response_var <- tmp$response_var
     interactions <- tmp$interactions
+    covariates <- tmp$covariates
 
     lm_results <- lm_singlegene(response_var = response_var,
                                 covariates = covariates,
                                 interactions = interactions,
                                 threads = threads,
-                                step = step)
+                                step = step,
+                                steady_covariates = steady_covariates,
+                                reference = reference,
+                                cnv_mode = cnv_mode)
 
     return(lm_results)
 }

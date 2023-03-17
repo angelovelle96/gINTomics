@@ -64,7 +64,7 @@
 #' @return A list containing the results of all the edger single gene models,
 #' the pvalues and the coefficients for each gene
 #' @import parallel edgeR stringr
-
+#' @importMethodsFrom RUVSeq
 
 run_edgeR_integration <-  function( response_var,
                                     covariates = NULL,
@@ -79,30 +79,16 @@ run_edgeR_integration <-  function( response_var,
                                     threads = 1,
                                     reference=NULL) {
 
-    if(is.atomic(response_var) & is.vector(response_var)) {
-        message("response_var is an atomic vector, converting to matrix")
-        tmp <- as.matrix(response_var)
-        rownames(tmp) <- names(response_var)
-        response_var <- tmp
-    }
 
-    response_var <- as.matrix(response_var)
-
-    if(!is.matrix(response_var)) {
-        stop(str_wrap("response_var should be a data.frame,
-            a matrix or an atomic vector"))
-    }
-
-    if(!is.null(covariates)){
-        if (is.atomic(covariates)& is.vector(covariates)) {
-            message("covariates is an atomic vector, converting to data.frame")
-            tmp <- as.data.frame(covariates)
-            rownames(tmp) <- names(covariates)
-            covariates <- tmp
-        }
-        if(!is.data.frame(covariates)) {
-            stop("covariates should be a data.frame or an atomic vector")
-        }
+    if(is.null(design_mat_singlegene)){
+      tmp <- data_check(response_var = response_var,
+                        covariates = covariates,
+                        cnv_mode = cnv_mode,
+                        interactions = interactions,
+                        steady_covariates=steady_covariates)
+      response_var <- tmp$response_var
+      covariates <- tmp$covariates
+      interactions <- tmp$interactions
     }
 
     fit_all <- allgene_edgeR_model(
@@ -118,7 +104,8 @@ run_edgeR_integration <-  function( response_var,
             interactions = interactions,
             steady_covariates = steady_covariates,
             cnv_mode = cnv_mode,
-            reference = reference)
+            reference = reference,
+            threads=threads)
     }
     fit_gene <- singlegene_edgeR_model(
         response_var = response_var,
@@ -130,12 +117,26 @@ run_edgeR_integration <-  function( response_var,
     model_res <- edger_coef_test(fit_gene,
         threads = threads
     )
+
     coef_pval_mat <- building_edger_result_matrices(model_results = model_res)
-    results <- list(
+
+    if(cnv_mode==T){
+      tmp <- mclapply(fit_gene, function(x) as.data.frame(residuals(x)), mc.cores = threads)
+      rresiduals <- rbind.fill(tmp)
+      colnames(rresiduals) <- rownames(response_var)
+      rownames(rresiduals) <- names(tmp)
+      results <- list(
         model_results = model_res,
         coef_data = coef_pval_mat$coef,
-        pval_data = coef_pval_mat$pval
-    )
+        pval_data = coef_pval_mat$pval,
+        residuals = rresiduals)
+    }else{
+
+      results <- list(
+        model_results = model_res,
+        coef_data = coef_pval_mat$coef,
+        pval_data = coef_pval_mat$pval)
+    }
 
     return(results)
 }

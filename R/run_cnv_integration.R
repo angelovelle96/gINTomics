@@ -4,7 +4,6 @@ run_cnv_integration <- function(expression,
                                 ...){
 
 
-
     if(sequencing_data==T){
         cnv_res <- run_edgeR_integration(response_var = expression,
                                         covariates = cnv_data,

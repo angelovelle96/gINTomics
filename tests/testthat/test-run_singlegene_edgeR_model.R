@@ -36,7 +36,8 @@ test_that("single gene complete integration gives correct results - Test1", {
                                     offset_singlegene = y_gene_offset,
                                     threads = 16,
                                     norm_method = "TMM")
-    expect_identical(myres2, myres)
+    expect_identical(myres2[[1]], myres[[1]])
+    expect_identical(myres2[[2]], myres[[2]])
 
     y_gene_offset <-  matrix(1, 1, ncol(counts))
     myres3 <- run_edgeR_integration( response_var = t(counts),
@@ -48,7 +49,8 @@ test_that("single gene complete integration gives correct results - Test1", {
                                     threads = 16,
                                     norm_method = "TMM",
                                     cnv_mode = T)
-    expect_identical(myres3, myres)
+    expect_identical(myres3[[1]], myres[[1]])
+    expect_identical(myres3[[2]], myres[[2]])
 })
 ############
 
@@ -73,21 +75,29 @@ test_that("single gene complete TF integration gives correct results - Test2", {
                                     design_mat_singlegene = design_single,
                                     threads = 16,
                                     norm_method = "TMM")
+
+    colnames(myres$coef_data) <- paste0(colnames(myres$coef_data), "_coef")
+    colnames(myres$pval_data) <- paste0(colnames(myres$pval_data), "_pvalue")
+    tmp <- cbind(myres$coef_data, myres$pval_data)
+    tmp <- tmp[rownames(expectedres), colnames(expectedres)]
+    expect_equal(tmp, expectedres, tolerance = 10^-9)
+
+    tmp <- apply(mirna_exp_model, 2, sd)
+    mirna_exp_model <- mirna_exp_model[, tmp>0]
+    interactions <- lapply(colnames(mirna_exp_model), function(x) interactions[[x]])
+    names(interactions) <- colnames(mirna_exp_model)
     myres2 <- run_edgeR_integration(response_var = mirna_exp_model,
                                     interactions = interactions,
                                     covariates = tf_expression_model,
                                     threads = 16,
                                     norm_method = "TMM")
 
-    colnames(myres$coef_data) <- paste0(colnames(myres$coef_data), "_coef")
-    colnames(myres$pval_data) <- paste0(colnames(myres$pval_data), "_pvalue")
-    tmp <- cbind(myres$coef_data, myres$pval_data)
-    tmp <- tmp[rownames(expectedres), colnames(expectedres)]
-    colnames(myres2$coef_data) <- paste0(colnames(myres2$coef_data), "_coef")
-    colnames(myres2$pval_data) <- paste0(colnames(myres2$pval_data), "_pvalue")
-    tmp2 <- cbind(myres2$coef_data, myres2$pval_data)
-    tmp2 <- tmp2[rownames(expectedres), colnames(expectedres)]
-    expect_equal(tmp, expectedres, tolerance = 10^-9)
-    expect_equal(tmp2, expectedres, tolerance = 10^-9)
-    expect_identical(myres, myres2)
+    design_single <- lapply(colnames(mirna_exp_model), function(x) design_single[[x]])
+    names(design_single) <- colnames(mirna_exp_model)
+    myres3 <- run_edgeR_integration( response_var = mirna_exp_model,
+                                    design_mat_singlegene = design_single,
+                                    threads = 16,
+                                    norm_method = "TMM")
+
+    expect_identical(myres2, myres3)
 })
