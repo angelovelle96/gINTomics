@@ -13,6 +13,10 @@ covariates_check <- function(x,
       cov <- rownames(response_var)[x]
     }
     if(!is.null(steady_covariates)) cov <- c(cov, steady_covariates)
+    if(cnv_mode==T){
+      colnames(covariates)[colnames(covariates)==cov[1]] <- "cnv"
+      cov[1] <- "cnv"
+    }
     bad_str <- paste0(c("-",";",":","\\*","%in%","\\^"), collapse = "|")
     tmp <- gsub(bad_str, "_", cov)
     tmp2 <- formula(paste0("~", paste0(tmp, collapse = "+")))
@@ -29,12 +33,13 @@ covariates_check <- function(x,
     colnames(tmp3) <- tmp
 
     if(linear==T){
-      tmp2 <- formula(paste0(gsub(bad_str, "", rownames(response_var)[x]),
+      tmp2 <- formula(paste0(gsub(bad_str, "_", rownames(response_var)[x]),
                      "~", as.character(tmp2)[2]))
       tmp <- response_var[x,]
       tmp3 <- cbind(tmp, tmp3)
-      colnames(tmp3)[1] <- gsub(bad_str, "", rownames(response_var)[x])
+      colnames(tmp3)[1] <- gsub(bad_str, "_", rownames(response_var)[x])
     }
+
     return(list(des_data=tmp3, cov=cov, formula=tmp2))
 
 }

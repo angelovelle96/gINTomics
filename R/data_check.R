@@ -72,7 +72,8 @@ data_check <- function( response_var,
       if(length(tmp)==0) stop(str_wrap("No copy number values available
                                        for genes in response_var"))
       if(length(tmp)!=ncol(response_var)){
-        message(str_wrap("removing genes without copy number values"))
+        message(str_wrap("removing response variables
+                         without copy number values"))
       }
       response_var <- response_var[,tmp]
       covariates <- covariates[, c(tmp, steady_covariates)]

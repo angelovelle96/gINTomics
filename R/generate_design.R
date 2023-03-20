@@ -49,13 +49,6 @@ generate_design <- function(response_var,
             cov <- des_cov$cov
             tmp <- des_cov$formula
 
-            if(is.numeric(covariates[,rownames(response_var)[x]])){
-              colnames(design)[2:ncol(design)] <- cov
-              colnames(design)[2] <- "cnv"
-            }else{
-              tmp <- strsplit(split = " ", as.character(tmp))[[2]][1]
-              colnames(design) <- gsub(tmp, "cnv_", colnames(design))
-            }
             return(design)
         }, mc.cores = threads)
         names(design_matrix) <- rownames(response_var)
