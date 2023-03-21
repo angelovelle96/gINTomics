@@ -26,7 +26,7 @@ run_multiomics <- function(data=NULL,
           expression = t(assay(data, i = "gene_exp")),
           cnv_data = t(assay(data, i = "cnv_data")),
           threads=16,
-          sequencing_data = T)
+          sequencing_data = F)
 
     }
 

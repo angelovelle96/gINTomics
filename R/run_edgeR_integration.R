@@ -118,25 +118,18 @@ run_edgeR_integration <-  function( response_var,
         threads = threads
     )
 
-    coef_pval_mat <- building_edger_result_matrices(model_results = model_res)
+    coef_pval_mat <- building_result_matrices(model_results = model_res,
+                                              type = "edgeR")
 
-    if(cnv_mode==T){
-      tmp <- mclapply(fit_gene, function(x) as.data.frame(residuals(x)), mc.cores = threads)
-      rresiduals <- rbind.fill(tmp)
-      colnames(rresiduals) <- rownames(response_var)
-      rownames(rresiduals) <- names(tmp)
-      results <- list(
-        model_results = model_res,
-        coef_data = coef_pval_mat$coef,
-        pval_data = coef_pval_mat$pval,
-        residuals = rresiduals)
-    }else{
-
-      results <- list(
-        model_results = model_res,
-        coef_data = coef_pval_mat$coef,
-        pval_data = coef_pval_mat$pval)
-    }
-
+    tmp <- mclapply(fit_gene, function(x) as.data.frame(residuals(x)),
+                    mc.cores = threads)
+    rresiduals <- rbind.fill(tmp)
+    colnames(rresiduals) <- rownames(response_var)
+    rownames(rresiduals) <- names(tmp)
+    results <- list(
+      model_results = model_res,
+      coef_data = coef_pval_mat$coef,
+      pval_data = coef_pval_mat$pval,
+      residuals = rresiduals)
     return(results)
 }

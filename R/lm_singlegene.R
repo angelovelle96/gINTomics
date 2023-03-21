@@ -11,7 +11,7 @@ lm_singlegene <- function(  response_var,
 
 
     if(length(intersect(colnames(response_var), colnames(covariates)))>0){
-        warning(str_wrap("response_var and covariates have common colnames,
+        message(str_wrap("response_var and covariates have common colnames,
                          adding '_cov' to covariates colnames"))
         colnames(covariates) <- paste0(colnames(covariates), "_cov")
         interactions <- lapply(interactions, function(x)

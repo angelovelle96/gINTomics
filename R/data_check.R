@@ -64,9 +64,9 @@ data_check <- function( response_var,
                                                 and interactions"))
         response_var <- response_var[,tmp]
         interactions <- lapply(tmp, function(x) interactions[[x]])
-        names(interactions) <- tmp
         interactions <- lapply(interactions, function(x)
           intersect(x, colnames(covariates)))
+        names(interactions) <- tmp
     }else{
       tmp <- intersect(colnames(response_var), colnames(covariates))
       if(length(tmp)==0) stop(str_wrap("No copy number values available
@@ -77,7 +77,10 @@ data_check <- function( response_var,
       }
       response_var <- response_var[,tmp]
       covariates <- covariates[, c(tmp, steady_covariates)]
-      if(linear==T) interactions <- lapply(tmp, function(x) interactions[[x]])
+      if(linear==T){
+        interactions <- lapply(tmp, function(x) interactions[[x]])
+        names(interactions) <- tmp
+        }
 
     }
 

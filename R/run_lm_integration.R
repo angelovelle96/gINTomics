@@ -33,5 +33,17 @@ run_lm_integration <- function(response_var,
                                 reference = reference,
                                 cnv_mode = cnv_mode)
 
-    return(lm_results)
+    coef_pval_mat <- building_result_matrices(model_results = lm_results,
+                                              type = "lm")
+    tmp <- mclapply(lm_results, function(x) as.data.frame(t(residuals(x))),
+                    mc.cores = threads)
+    rresiduals <- rbind.fill(tmp)
+    colnames(rresiduals) <- rownames(response_var)
+    rownames(rresiduals) <- names(tmp)
+    results <- list(
+      model_results = lm_results,
+      coef_data = coef_pval_mat$coef,
+      pval_data = coef_pval_mat$pval,
+      residuals = rresiduals)
+    return(results)
 }

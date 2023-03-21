@@ -1,7 +1,17 @@
 #' @import plyr
-building_edger_result_matrices <- function(model_results) {
-    tmp <- lapply(model_results, function(x) as.data.frame( x["coef",],
-        check.names = F))
+building_result_matrices <- function(model_results,
+                                           type){
+
+    if(type=="edgeR"){
+      tmp <- lapply(model_results, function(x) as.data.frame( x["coef",],
+          check.names = F))
+    }
+    if(type=="lm"){
+      tmp <- lapply(model_results, function(x){
+        data.frame(t(x[["coefficients"]][, "Estimate"]),check.names = F)
+      })
+    }
+
     coef_matrix <- rbind.fill(tmp)
     rownames(coef_matrix) <- names(model_results)
     for(i in 1:ncol(coef_matrix)) {
@@ -12,8 +22,17 @@ building_edger_result_matrices <- function(model_results) {
     }
 
 
-    tmp <- lapply(model_results, function(x) as.data.frame( x["PValue",],
+
+    if(type=="edgeR"){
+      tmp <- lapply(model_results, function(x) as.data.frame( x["PValue",],
         check.names = F))
+    }
+    if(type=="lm"){
+      tmp <- lapply(model_results, function(x){
+        data.frame(t(x[["coefficients"]][, "Pr(>|t|)"]),check.names = F)
+      })
+    }
+
     pval_matrix <- rbind.fill(tmp)
     rownames(pval_matrix) <- names(model_results)
     for(i in 1:ncol(pval_matrix)) {
