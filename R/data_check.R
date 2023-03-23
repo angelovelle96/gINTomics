@@ -11,6 +11,13 @@ data_check <- function( response_var,
                        not using cnv_mode"))
     }
 
+    if(cnv_mode==T & is.null(interactions)){
+      message("Using cnv_mode")
+      interactions <- as.list(intersect(colnames(covariates),
+                                        colnames(response_var)))
+      names(interactions) <- unlist(interactions)
+    }
+
     if(is.atomic(response_var) & is.vector(response_var)) {
       message("response_var is an atomic vector, converting to matrix")
       tmp <- as.matrix(response_var)
@@ -58,31 +65,14 @@ data_check <- function( response_var,
     }
 
 
-    if(cnv_mode==F){
-        tmp <- intersect(names(interactions), colnames(response_var))
-        if(length(tmp)==0) stop(str_wrap("No genes in common between response_var
+    tmp <- intersect(names(interactions), colnames(response_var))
+    if(length(tmp)==0) stop(str_wrap("No genes in common between response_var
                                                 and interactions"))
-        response_var <- response_var[,tmp]
-        interactions <- lapply(tmp, function(x) interactions[[x]])
-        interactions <- lapply(interactions, function(x)
-          intersect(x, colnames(covariates)))
-        names(interactions) <- tmp
-    }else{
-      tmp <- intersect(colnames(response_var), colnames(covariates))
-      if(length(tmp)==0) stop(str_wrap("No copy number values available
-                                       for genes in response_var"))
-      if(length(tmp)!=ncol(response_var)){
-        message(str_wrap("removing response variables
-                         without copy number values"))
-      }
-      response_var <- response_var[,tmp]
-      covariates <- covariates[, c(tmp, steady_covariates)]
-      if(linear==T){
-        interactions <- lapply(tmp, function(x) interactions[[x]])
-        names(interactions) <- tmp
-        }
-
-    }
+    response_var <- response_var[,tmp]
+    interactions <- lapply(tmp, function(x) interactions[[x]])
+    interactions <- lapply(interactions, function(x)
+      intersect(x, colnames(covariates)))
+    names(interactions) <- tmp
 
     rresult <- list(response_var=response_var,
                     covariates=covariates,

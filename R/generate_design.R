@@ -1,6 +1,6 @@
 generate_design <- function(response_var,
                             covariates,
-                            interactions = NULL,
+                            interactions,
                             steady_covariates = NULL,
                             cnv_mode = F,
                             reference=NULL,
@@ -16,45 +16,28 @@ generate_design <- function(response_var,
     }
 
 
-    if(cnv_mode==F){
+    design_matrix <- mclapply(1:length(interactions), function(x) {
+      des_cov <- covariates_check(x=x,
+                                  response_var=response_var,
+                                  covariates=covariates,
+                                  steady_covariates=steady_covariates,
+                                  reference=reference,
+                                  interactions = interactions,
+                                  cnv_mode = cnv_mode)
 
+      design <- model.matrix(des_cov$formula, data=des_cov$des_data)
+      if(cnv_mode==F){
+        colnames(design)[2:(ncol(design)-length(steady_covariates))
+                         ] <- interactions[[x]]
+      }
+      return(design)
+    }, mc.cores = threads)
+    names(design_matrix) <- names(interactions)
 
-        design_matrix <- mclapply(1:length(interactions), function(x) {
-            des_cov <- covariates_check(x=x,
-                                       response_var=response_var,
-                                       covariates=covariates,
-                                       steady_covariates=steady_covariates,
-                                       reference=reference,
-                                       interactions = interactions,
-                                       cnv_mode = cnv_mode)
-
-            design <- model.matrix(des_cov$formula, data=des_cov$des_data)
-            colnames(design)[2:(ncol(design)-length(steady_covariates))
-                             ] <- interactions[[x]]
-            return(design)
-        }, mc.cores = threads)
-        names(design_matrix) <- rownames(response_var)
-    } else {
-        message("Using cnv_mode")
-        design_matrix <- mclapply(1:nrow(response_var), function(x) {
-
-            des_cov <- covariates_check(x=x,
-                             response_var=response_var,
-                             covariates=covariates,
-                             steady_covariates=steady_covariates,
-                             reference=reference,
-                             cnv_mode=cnv_mode,
-                             interactions=interactions)
-            design <- model.matrix(des_cov$formula, data=des_cov$des_data)
-            cov <- des_cov$cov
-            tmp <- des_cov$formula
-
-            return(design)
-        }, mc.cores = threads)
-        names(design_matrix) <- rownames(response_var)
-    }
     return(design_matrix)
-}
+
+    }
+
 
 
 

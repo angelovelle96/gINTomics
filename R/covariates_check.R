@@ -1,17 +1,13 @@
 covariates_check <- function(x,
                              response_var,
                              covariates,
-                             interactions=NULL,
+                             interactions,
                              steady_covariates=NULL,
                              reference=NULL,
                              cnv_mode=F,
                              linear=F){
 
-    if(cnv_mode==F | linear==T){
-      cov <- interactions[[x]]
-    }else{
-      cov <- rownames(response_var)[x]
-    }
+    cov <- interactions[[x]]
     if(!is.null(steady_covariates)) cov <- c(cov, steady_covariates)
     if(cnv_mode==T){
       colnames(covariates)[colnames(covariates)==cov[1]] <- "cnv"

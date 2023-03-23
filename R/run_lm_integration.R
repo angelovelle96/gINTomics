@@ -8,12 +8,6 @@ run_lm_integration <- function(response_var,
                                reference=NULL){
 
 
-    if(cnv_mode==T){
-      message("Using cnv_mode")
-      interactions <- as.list(intersect(colnames(covariates),
-                                        colnames(response_var)))
-      names(interactions) <- unlist(interactions)
-    }
     tmp <- data_check(response_var = response_var,
                       interactions = interactions,
                       covariates = covariates,

@@ -40,6 +40,16 @@ run_multiomics <- function(data=NULL,
 
     }
 
+  if(!is.null(data@ExperimentList$methylation) &
+     !is.null(data@ExperimentList$miRNA_exp)){
+    met_res <- run_met_integration(
+      expression = t(assay(data, i = "gene_exp")),
+      methylation = t(assay(data, i = "methylation")),
+      threads=16,
+      sequencing_data = T)
+
+  }
+
 
 
 
