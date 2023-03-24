@@ -4,14 +4,14 @@ covariates_check <- function(x,
                              interactions,
                              steady_covariates=NULL,
                              reference=NULL,
-                             cnv_mode=F,
-                             linear=F){
+                             linear=F,
+                             single_cov=F){
 
     cov <- interactions[[x]]
     if(!is.null(steady_covariates)) cov <- c(cov, steady_covariates)
-    if(cnv_mode==T){
-      colnames(covariates)[colnames(covariates)==cov[1]] <- "cnv"
-      cov[1] <- "cnv"
+    if(single_cov==T){
+      colnames(covariates)[colnames(covariates)==cov[1]] <- "cov"
+      cov[1] <- "cov"
     }
     bad_str <- paste0(c("-",";",":","\\*","%in%","\\^"), collapse = "|")
     tmp <- gsub(bad_str, "_", cov)

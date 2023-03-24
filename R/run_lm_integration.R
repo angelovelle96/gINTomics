@@ -1,17 +1,19 @@
 run_lm_integration <- function(response_var,
                                covariates,
-                               interactions=NULL,
+                               interactions="auto",
                                threads=1,
                                step=F,
-                               cnv_mode=F,
                                steady_covariates=NULL,
-                               reference=NULL){
+                               reference=NULL,
+                               BPPARAM=NULL){
 
-
-    tmp <- data_check(response_var = response_var,
+  if(is.null(BPPARAM)) BPPARAM <- MulticoreParam(workers = threads,
+                                                 exportglobals = F,
+                                                 force.GC = T,
+                                                 exportvariables=F)
+  tmp <- data_check(response_var = response_var,
                       interactions = interactions,
                       covariates = covariates,
-                      cnv_mode = cnv_mode,
                       linear=T,
                       steady_covariates = steady_covariates)
     response_var <- tmp$response_var
@@ -25,12 +27,11 @@ run_lm_integration <- function(response_var,
                                 step = step,
                                 steady_covariates = steady_covariates,
                                 reference = reference,
-                                cnv_mode = cnv_mode)
+                                BPPARAM = BPPARAM)
 
     coef_pval_mat <- building_result_matrices(model_results = lm_results,
                                               type = "lm")
-    tmp <- mclapply(lm_results, function(x) as.data.frame(t(residuals(x))),
-                    mc.cores = threads)
+    tmp <- lapply(lm_results, function(x) as.data.frame(t(residuals(x))))
     rresiduals <- rbind.fill(tmp)
     colnames(rresiduals) <- rownames(response_var)
     rownames(rresiduals) <- names(tmp)
@@ -39,5 +40,7 @@ run_lm_integration <- function(response_var,
       coef_data = coef_pval_mat$coef,
       pval_data = coef_pval_mat$pval,
       residuals = rresiduals)
+    #rm(list=ls()[ls()!="results"])
+    #gc(full = T)
     return(results)
 }

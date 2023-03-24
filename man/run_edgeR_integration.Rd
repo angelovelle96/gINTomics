@@ -7,15 +7,15 @@
 run_edgeR_integration(
   response_var,
   covariates = NULL,
-  interactions = NULL,
+  interactions = "auto",
   design_mat_allgene = NULL,
   design_mat_singlegene = NULL,
   offset_allgene = NULL,
   offset_singlegene = NULL,
   norm_method = "TMM",
   steady_covariates = NULL,
-  cnv_mode = F,
-  threads = 1
+  threads = 1,
+  reference = NULL
 )
 }
 \arguments{
@@ -39,8 +39,7 @@ vector corresponding to colnames in \strong{covariates}, for each genes the
 specified columns will be used to create the design matrix. The list should
 contain the covariates for each of the genes of \strong{response_var} and they
 should be in the same order of \strong{response_var} rownames.
-This argument is ignored if \strong{design_mat_singlegene} is provided or if
-\strong{cnv_mode} is set to TRUE.}
+This argument is ignored if \strong{design_mat_singlegene} is provided.}
 
 \item{design_mat_allgene}{A design matrix for the all gene edgeR model}
 
@@ -64,12 +63,6 @@ gene models for normalization.}
 \strong{covariates} corresponding to covariates that should be included in all
 single gene models (default=NULL).}
 
-\item{cnv_mode}{logical indicating if the model should perform copy number
-integration (default=FALSE). If set to TRUE the function will generate the
-design matrix of a given gene by searching that gene among the columns of
-\strong{covariates}, so each gene in \strong{response_var} should have a
-corresponding column in \strong{covariates} with the same name.}
-
 \item{threads}{Number of threads to use for parallelization (Default is 1)}
 }
 \value{
@@ -82,13 +75,13 @@ integration models, in particular if for each gene the covariates change.
 For example if you need to integrate gene expression with copy number
 variations, for each gene you need to integrate its expression levels with
 CNV status, updating the covariate at each step. In this case you can set
-\strong{cnv_mode} to TRUE, providing the expression of all genes in
+\strong{interactions} to auto (default), providing the expression of all genes in
 \strong{response_var} and the relative CNV values (numeric) in \strong{covariates}.
 The function will automatically use CNV values of each gene as covariates
 for the single gene models.
-If \strong{cnv_mode} is FALSE (default) the user should specify which covariates
-should be used for each gene in the \strong{interaction} argument.
-The use can manually provide a list of the design matrices for single gene
+The user can specify which covariates should be used for each gene in the
+\strong{interaction} argument.
+The user can manually provide a list of the design matrices for single gene
 models in \strong{design_mat_singlegene}, in this case the n gene contained in
 \strong{response_var} is fitted in the  model  using as design matrix the n
 element of the\strong{design_mat_singlegene} list.

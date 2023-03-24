@@ -1,18 +1,13 @@
 data_check <- function( response_var,
                         covariates,
-                        interactions=NULL,
-                        cnv_mode=F,
+                        interactions,
                         steady_covariates=NULL,
                         linear=F){
 
 
-    if(cnv_mode==F & is.null(interactions)){
-      stop(str_wrap("You should provide interactions if you are
-                       not using cnv_mode"))
-    }
 
-    if(cnv_mode==T & is.null(interactions)){
-      message("Using cnv_mode")
+    if(identical(interactions,"auto")){
+      message("Generating interactions")
       interactions <- as.list(intersect(colnames(covariates),
                                         colnames(response_var)))
       names(interactions) <- unlist(interactions)

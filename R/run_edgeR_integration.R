@@ -4,13 +4,13 @@
 #' For example if you need to integrate gene expression with copy number
 #' variations, for each gene you need to integrate its expression levels with
 #' CNV status, updating the covariate at each step. In this case you can set
-#' **cnv_mode** to TRUE, providing the expression of all genes in
+#' **interactions** to auto (default), providing the expression of all genes in
 #' **response_var** and the relative CNV values (numeric) in **covariates**.
 #' The function will automatically use CNV values of each gene as covariates
 #' for the single gene models.
-#' If **cnv_mode** is FALSE (default) the user should specify which covariates
-#' should be used for each gene in the **interaction** argument.
-#' The use can manually provide a list of the design matrices for single gene
+#' The user can specify which covariates should be used for each gene in the
+#' **interaction** argument.
+#' The user can manually provide a list of the design matrices for single gene
 #' models in **design_mat_singlegene**, in this case the n gene contained in
 #' **response_var** is fitted in the  model  using as design matrix the n
 #' element of the**design_mat_singlegene** list.
@@ -36,8 +36,7 @@
 #' specified columns will be used to create the design matrix. The list should
 #' contain the covariates for each of the genes of **response_var** and they
 #' should be in the same order of **response_var** rownames.
-#' This argument is ignored if **design_mat_singlegene** is provided or if
-#' **cnv_mode** is set to TRUE.
+#' This argument is ignored if **design_mat_singlegene** is provided.
 #' @param design_mat_singlegene A list of design matrices for
 #' each edgeR single gene model, the number of design matrices should be equal
 #' to the number of rows of **response_var**.
@@ -52,38 +51,36 @@
 #' model (Default is 'TMM'). The normalization factors will be passed to single
 #' gene models for normalization.
 #' @param threads Number of threads to use for parallelization (Default is 1)
-#' @param cnv_mode logical indicating if the model should perform copy number
-#' integration (default=FALSE). If set to TRUE the function will generate the
-#' design matrix of a given gene by searching that gene among the columns of
-#' **covariates**, so each gene in **response_var** should have a
-#' corresponding column in **covariates** with the same name.
 #' @param steady_covariates Character vector containing column names of
 #' **covariates** corresponding to covariates that should be included in all
 #' single gene models (default=NULL).
 #'
 #' @return A list containing the results of all the edger single gene models,
 #' the pvalues and the coefficients for each gene
-#' @import parallel edgeR stringr
-#' @importMethodsFrom RUVSeq
+#' @import parallel edgeR stringr BiocParallel
+
 
 run_edgeR_integration <-  function( response_var,
                                     covariates = NULL,
-                                    interactions = NULL,
+                                    interactions = "auto",
                                     design_mat_allgene = NULL,
                                     design_mat_singlegene = NULL,
                                     offset_allgene = NULL,
                                     offset_singlegene = NULL,
                                     norm_method = "TMM",
                                     steady_covariates = NULL,
-                                    cnv_mode = F,
                                     threads = 1,
-                                    reference=NULL) {
+                                    reference = NULL,
+                                    BPPARAM = NULL) {
 
 
+    if(is.null(BPPARAM)) BPPARAM <- MulticoreParam(workers = threads,
+                                                   exportglobals = F,
+                                                   force.GC = T,
+                                                   exportvariables=F)
     if(is.null(design_mat_singlegene)){
       tmp <- data_check(response_var = response_var,
                         covariates = covariates,
-                        cnv_mode = cnv_mode,
                         interactions = interactions,
                         steady_covariates=steady_covariates)
       response_var <- tmp$response_var
@@ -103,26 +100,21 @@ run_edgeR_integration <-  function( response_var,
             covariates = covariates,
             interactions = interactions,
             steady_covariates = steady_covariates,
-            cnv_mode = cnv_mode,
             reference = reference,
-            threads=threads)
+            BPPARAM = BPPARAM)
     }
     fit_gene <- singlegene_edgeR_model(
         response_var = response_var,
         fit_all = fit_all,
         design_mat = design_mat_singlegene,
         offset_singlegene = offset_singlegene,
-        threads = threads
+        BPPARAM = BPPARAM
     )
-    model_res <- edger_coef_test(fit_gene,
-        threads = threads
-    )
-
+    model_res <- edger_coef_test(fit_gene)
     coef_pval_mat <- building_result_matrices(model_results = model_res,
                                               type = "edgeR")
 
-    tmp <- mclapply(fit_gene, function(x) as.data.frame(residuals(x)),
-                    mc.cores = threads)
+    tmp <- lapply(fit_gene, function(x) as.data.frame(residuals(x)))
     rresiduals <- rbind.fill(tmp)
     colnames(rresiduals) <- rownames(response_var)
     rownames(rresiduals) <- names(tmp)

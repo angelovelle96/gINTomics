@@ -25,7 +25,7 @@ run_multiomics <- function(data=NULL,
         gene_cnv_res <- run_cnv_integration(
           expression = t(assay(data, i = "gene_exp")),
           cnv_data = t(assay(data, i = "cnv_data")),
-          threads=16,
+          threads=2,
           sequencing_data = F)
 
     }
@@ -35,8 +35,8 @@ run_multiomics <- function(data=NULL,
       mirna_cnv_res <- run_cnv_integration(
         expression = t(assay(data, i = "miRNA_exp")),
         cnv_data = t(assay(data, i = "miRNA_cnv_data")),
-        threads=16,
-        sequencing_data = F)
+        threads=8,
+        sequencing_data = T)
 
     }
 

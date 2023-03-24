@@ -26,14 +26,14 @@ singlegene_edgeR_model <- function( response_var,
                                     offset_singlegene = NULL,
                                     design_mat,
                                     fit_all,
-                                    threads = 1) {
+                                    BPPARAM = BPPARAM) {
 
     response_var <- t(response_var+1)
     if(!identical(rownames(response_var), names(design_mat))) warning(
         str_wrap("response_var and design_mat have different gene names,
                     assuming that genes in response_var and design_mat are
                     in the same order"))
-    fit_list <- mclapply(1:nrow(response_var), function(x) {
+    fit_list <- bplapply(1:nrow(response_var), function(x) {
         if(nrow(design_mat[[x]])!=ncol(response_var)) stop(str_wrap("Number
                 of samples in response_var and design_mat_singlegene
                 should not differ"))
@@ -55,7 +55,7 @@ singlegene_edgeR_model <- function( response_var,
         y_gene$tagwise.dispersion <- fit_all$tagwise.dispersion[x]
         fit <- glmFit(y_gene, design_mat[[x]])
         return(fit)
-        }, mc.cores = threads)
+        }, BPPARAM = BPPARAM)
     names(fit_list) <- rownames(response_var)
     return(fit_list)
 }

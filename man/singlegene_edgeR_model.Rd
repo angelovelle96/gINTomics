@@ -8,8 +8,7 @@ singlegene_edgeR_model(
   response_var,
   offset_singlegene = NULL,
   design_mat,
-  fit_all,
-  threads = 1
+  fit_all
 )
 }
 \arguments{

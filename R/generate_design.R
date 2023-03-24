@@ -2,9 +2,8 @@ generate_design <- function(response_var,
                             covariates,
                             interactions,
                             steady_covariates = NULL,
-                            cnv_mode = F,
                             reference=NULL,
-                            threads=1) {
+                            BPPARAM=BPPARAM) {
 
     response_var <- t(response_var+1)
     tmp <- as.data.frame(covariates)
@@ -15,23 +14,29 @@ generate_design <- function(response_var,
                                                   as numeric or factors"))
     }
 
+    tmp <- unlist(lapply(interactions, length))
+    single_cov=F
+    if(sum(tmp==1)==length(tmp)){
+      single_cov=T
+    }
 
-    design_matrix <- mclapply(1:length(interactions), function(x) {
+    design_matrix <- bplapply(1:length(interactions), function(x) {
       des_cov <- covariates_check(x=x,
                                   response_var=response_var,
                                   covariates=covariates,
                                   steady_covariates=steady_covariates,
                                   reference=reference,
                                   interactions = interactions,
-                                  cnv_mode = cnv_mode)
+                                  single_cov=single_cov)
 
       design <- model.matrix(des_cov$formula, data=des_cov$des_data)
-      if(cnv_mode==F){
+      tmp <- unlist(lapply(interactions, length))
+      if(!"cov"%in%colnames(design)){
         colnames(design)[2:(ncol(design)-length(steady_covariates))
                          ] <- interactions[[x]]
       }
       return(design)
-    }, mc.cores = threads)
+    }, BPPARAM = BPPARAM)
     names(design_matrix) <- names(interactions)
 
     return(design_matrix)

@@ -16,8 +16,7 @@ test_that("run_cnv_integration check", {
                                   offset_allgene = t(y_all_offset),
                                   offset_singlegene = y_gene_offset,
                                   threads = 16,
-                                  norm_method = "TMM",
-                                  cnv_mode = T)
+                                  norm_method = "TMM")
 
   myres2 <- run_cnv_integration(expression = t(counts),
                                 cnv_data = data,
