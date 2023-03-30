@@ -7,6 +7,7 @@ test_that("single gene complete integration gives correct results - Test1", {
     y_gene_offset <- lapply(1:nrow(counts), function(x) {
         matrix(1, 1, ncol(counts))
     })
+    names(y_gene_offset) <- rownames(counts)
 
     myres <- run_edgeR_integration( response_var = t(counts),
                                     covariates = data,
@@ -14,8 +15,7 @@ test_that("single gene complete integration gives correct results - Test1", {
                                     design_mat_allgene = design_all,
                                     offset_allgene = t(y_all_offset),
                                     offset_singlegene = y_gene_offset,
-                                    threads = 16,
-                                    norm_method = "TMM")
+                                    norm_method = "TMM", single_cov = T)
     expect_identical(myres$coef_data$cov, expectedres$coef_ace)
     expect_identical(myres$coef_data$`(Intercept)`, expectedres$coef_intercept)
     expect_equal(myres$pval_data$cov, expectedres$pval_ace, tolerance = 10^-12)

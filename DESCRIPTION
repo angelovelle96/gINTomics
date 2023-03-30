@@ -14,10 +14,12 @@ Imports:
     BiocParallel,
     edgeR,
     gdata,
+    MultiAssayExperiment,
     parallel,
     plyr,
     readr,
     RUVSeq,
+    stringr,
     SummarizedExperiment
 Depends: 
     R (>= 2.10)
