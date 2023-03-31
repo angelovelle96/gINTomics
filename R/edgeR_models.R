@@ -66,6 +66,7 @@ run_edgeR_integration <-  function( response_var,
                                     design_mat_allgene = NULL,
                                     offset_allgene = NULL,
                                     offset_singlegene = NULL,
+                                    normalize=T,
                                     norm_method = "TMM",
                                     steady_covariates = NULL,
                                     reference = NULL,
@@ -81,6 +82,8 @@ run_edgeR_integration <-  function( response_var,
     covariates <- tmp$covariates
     interactions <- tmp$interactions
 
+    if(normalize==F) offset_allgene <- matrix(1, ncol(response_var),
+                                              nrow(response_var))
     fit_all <- allgene_edgeR_model(
         response_var = response_var,
         design_mat_allgene = design_mat_allgene,

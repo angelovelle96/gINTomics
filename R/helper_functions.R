@@ -223,3 +223,22 @@ create_multiassay <- function(methylation=NULL,
   return(mmultiassay)
 }
 
+
+######################################################
+#' Data normalization for linear models
+
+
+    data_norm <- function(data,
+                          method="TMM"){
+
+      data <- edgeR::DGEList(t(data))
+      data <- edgeR::calcNormFactors(data, method=method)
+      data <- t(edgeR::cpm(data, log = F))
+      return(data)
+    }
+
+
+
+
+
+

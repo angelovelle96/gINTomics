@@ -28,9 +28,10 @@ run_multiomics <- function(data=NULL,
         system.time(gene_cnv_res <- run_cnv_integration(
           expression = t(assay(data, i = "gene_exp")),
           cnv_data = t(assay(data, i = "cnv_data")),
-          sequencing_data = F))
+          sequencing_data = T, normalize=T,norm_method="RLE"))
 
     }
+
 
   if(!is.null(data@ExperimentList$cnv_data) &
      !is.null(data@ExperimentList$gene_exp)){
@@ -99,14 +100,9 @@ run_cnv_integration <- function(expression,
 run_met_integration <- function( expression,
                                  methylation,
                                  sequencing_data=T,
-                                 interactions=NULL,
+                                 interactions="auto",
                                  ...){
 
-  if(is.null(interactions)){
-    interactions <- as.list(intersect(colnames(methylation),
-                                      colnames(expression)))
-    names(interactions) <- unlist(interactions)
-  }
 
   if(sequencing_data==T){
     met_res <- run_edgeR_integration(response_var = expression,

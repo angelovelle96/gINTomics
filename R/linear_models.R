@@ -7,6 +7,8 @@ run_lm_integration <- function(response_var,
                                steady_covariates=NULL,
                                reference=NULL,
                                single_cov=F,
+                               normalize=T,
+                               norm_method="TMM",
                                BPPARAM=BiocParallel::bpparam()){
 
   tmp <- data_check(response_var = response_var,
@@ -15,6 +17,9 @@ run_lm_integration <- function(response_var,
     response_var <- tmp$response_var
     interactions <- tmp$interactions
     covariates <- tmp$covariates
+
+    if(normalize==T) response_var <- data_norm(response_var,
+                                               method = norm_method)
 
     lm_results <- lm_singlegene(response_var = response_var,
                                 covariates = covariates,
