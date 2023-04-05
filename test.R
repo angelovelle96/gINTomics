@@ -10,15 +10,32 @@ load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_tf_singleseq_isoall
 load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_all_samples_ace20220311.Rdata")
 load("~/Documenti/Rpackages/integrazione/data/ov_test_tcga_omics.rda")
 
+tf_mirna <- list()
+tf_mirna[["hsa"]] <- read.table("~/Documenti/Rpackages/integrazione/data/hsa.tsv", sep = "\t")
+tf_mirna[["hsa"]] <- tf_mirna[["hsa"]][,c(1,2,5,7)]
+colnames(tf_mirna[["hsa"]]) <- c("TF", "miRNA", "function", "level")
+tf_mirna[["mmu"]] <- read.table("~/Documenti/Rpackages/integrazione/data/mmu.tsv", sep = "\t")
+tf_mirna[["mmu"]] <- tf_mirna[["mmu"]][,c(1,2,5,7)]
+colnames(tf_mirna[["mmu"]]) <- c("TF", "miRNA", "function", "level")
+tf_mirna[["rno"]] <- read.table("~/Documenti/Rpackages/integrazione/data/rno.tsv", sep = "\t")
+tf_mirna[["rno"]] <- tf_mirna[["rno"]][,c(1,2,5,7)]
+colnames(tf_mirna[["rno"]]) <- c("TF", "miRNA", "function", "level")
+tf_mirna[["dme"]] <- read.table("~/Documenti/Rpackages/integrazione/data/dme.tsv", sep = "\t")
+tf_mirna[["dme"]] <- tf_mirna[["dme"]][,c(1,2,5,7)]
+colnames(tf_mirna[["dme"]]) <- c("TF", "miRNA", "function", "level")
+tf_mirna[["cel"]] <- read.table("~/Documenti/Rpackages/integrazione/data/cel.tsv", sep = "\t")
+tf_mirna[["cel"]] <- tf_mirna[["cel"]][,c(1,2,5,7)]
+colnames(tf_mirna[["cel"]]) <- c("TF", "miRNA", "function", "level")
+tf_mirna <- lapply(tf_mirna, function(x) x[!duplicated(paste0(x$TF,x$miRNA,x$level)),])
+#save(tf_mirna, file = "~/Documenti/Rpackages/integrazione/data/miRNA_TF.Rdata")
 
-#
-# save(run_edgeR_test1_input,
-# run_edgeR_test1_output,
-# run_edgeR_test2_input,
-# run_edgeR_test2_output,
-# mmultiassay_ov,
-# file =
-# '~/Documenti/Rpackages/integrazione/R/sysdata.rda')
+
+save(run_edgeR_test1_input,
+run_edgeR_test1_output,
+run_edgeR_test2_input,
+run_edgeR_test2_output,
+mmultiassay_ov,
+file = '~/Documenti/Rpackages/integrazione/R/sysdata.rda')
 
 
 interactions <- expanded_tf_mirna_couples
