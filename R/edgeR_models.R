@@ -70,10 +70,7 @@ run_edgeR_integration <-  function( response_var,
                                     norm_method = "TMM",
                                     steady_covariates = NULL,
                                     reference = NULL,
-                                    single_cov = F,
-                                    BPPARAM = BiocParallel::bpparam()) {
-
-
+                                    BPPARAM = BiocParallel::SerialParam()) {
 
     tmp <- data_check(response_var = response_var,
                       covariates = covariates,
@@ -99,6 +96,7 @@ run_edgeR_integration <-  function( response_var,
     covariates <- tmp$covariates
     response_var <- tmp$response_var
     interactions <- tmp$interactions
+    original_id <- tmp$original_id
     fformula <- generate_formula(interactions = interactions)
 
     fit_gene <- singlegene_edgeR_model(
@@ -112,6 +110,11 @@ run_edgeR_integration <-  function( response_var,
 
     model_res <- edger_coef_test(fit_gene,
                                  BPPARAM = BPPARAM)
+    tmp <- unlist(lapply(interactions, length))
+    single_cov=F
+    if(sum(tmp==1)==length(tmp)){
+      single_cov=T
+    }
     coef_pval_mat <- building_result_matrices(model_results = model_res,
                                               type = "edgeR",
                                               single_cov = single_cov)
@@ -124,6 +127,10 @@ run_edgeR_integration <-  function( response_var,
       coef_data = coef_pval_mat$coef,
       pval_data = coef_pval_mat$pval,
       residuals = rresiduals)
+    if(nrow(original_id)>0){
+      results <- id_conversion(dictionary = original_id,
+                               results = results)
+    }
     return(results)
 }
 

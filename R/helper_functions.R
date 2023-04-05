@@ -49,13 +49,18 @@ data_check <- function( response_var,
                                 zero standard deviation"))
       response_var <- response_var[, check_sd>0]
     }
-    tmp <- intersect(names(interactions), colnames(response_var))
-    if(length(tmp)==0) stop(str_wrap("No genes in common between response_var
-                                                and interactions"))
-    response_var <- response_var[,tmp]
-    interactions <- lapply(tmp, function(x) interactions[[x]])
+
+
     interactions <- lapply(interactions, function(x)
       intersect(x, colnames(covariates)))
+    tmp <- lapply(interactions, length)
+    tmp <- which(tmp!=0)
+    interactions <- lapply(tmp, function(x) interactions[[x]])
+    tmp <- intersect(names(interactions), colnames(response_var))
+    if(length(tmp)==0) stop(str_wrap("No genes left in common between
+                                      response_var and interactions"))
+    response_var <- response_var[,tmp]
+    interactions <- lapply(tmp, function(x) interactions[[x]])
     names(interactions) <- tmp
 
     rresult <- list(response_var=response_var,
@@ -88,9 +93,11 @@ covariates_check <- function(response_var,
       unique(c(x,steady_covariates)))
   }
   bad_str <- paste0(c("-",";",":","\\*","%in%","\\^"), collapse = "|")
-  original_id <- unique(c(unlist(interactions)), names(interactions))
+  original_id <- unique(c(unlist(interactions), names(interactions)))
   original_id <- data.frame(original=original_id,
                             tranformed=gsub(bad_str, "_", original_id))
+  tmp <- apply(original_id, 1, function(x) x[1]!=x[2])
+  original_id <- original_id[tmp,]
   interactions <- lapply(interactions, function(x) gsub(bad_str, "_", x))
   colnames(covariates) <- gsub(bad_str, "_", colnames(covariates))
   covariates <- covariates[, colnames(covariates)%in%unlist(interactions)]
@@ -144,7 +151,9 @@ building_result_matrices <- function(model_results,
   }
   if(type=="lm"){
     tmp <- lapply(model_results, function(x){
-      data.frame(t(x[["coefficients"]][, "Estimate"]),check.names = F)
+      tmp <- data.frame(t(x[["coefficients"]][, "Estimate"]),check.names = F)
+      colnames(tmp) <- rownames(x[["coefficients"]])
+      return(tmp)
     })
   }
   if(single_cov==T){
@@ -171,7 +180,9 @@ building_result_matrices <- function(model_results,
   }
   if(type=="lm"){
     tmp <- lapply(model_results, function(x){
-      data.frame(t(x[["coefficients"]][, "Pr(>|t|)"]),check.names = F)
+      tmp <- data.frame(t(x[["coefficients"]][, "Pr(>|t|)"]),check.names = F)
+      colnames(tmp) <- rownames(x[["coefficients"]])
+      return(tmp)
     })
   }
   if(single_cov==T){
@@ -237,7 +248,53 @@ create_multiassay <- function(methylation=NULL,
       return(data)
     }
 
+#########################################################
+#' conversion back to the orginal IDs
+#' @importFrom stringi stri_replace_all_regex
 
+    id_conversion <- function(dictionary,
+                              results){
+
+      dictionary$tranformed <- paste0("^", dictionary$tranformed, "$")
+
+      names(results$model_results) <- stri_replace_all_regex(
+        names(results$model_results),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+      rownames(results$residuals) <- stri_replace_all_regex(
+        rownames(results$residuals),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+      colnames(results$coef_data) <- stri_replace_all_regex(
+        colnames(results$coef_data),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+      rownames(results$coef_data) <- stri_replace_all_regex(
+        rownames(results$coef_data),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+      colnames(results$pval_data) <- stri_replace_all_regex(
+        colnames(results$pval_data),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+      rownames(results$pval_data) <- stri_replace_all_regex(
+        rownames(results$pval_data),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+       return(results)
+    }
 
 
 

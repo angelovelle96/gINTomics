@@ -11,11 +11,11 @@ run_edgeR_integration(
   design_mat_allgene = NULL,
   offset_allgene = NULL,
   offset_singlegene = NULL,
+  normalize = T,
   norm_method = "TMM",
   steady_covariates = NULL,
   reference = NULL,
-  single_cov = F,
-  BPPARAM = BiocParallel::bpparam()
+  BPPARAM = BiocParallel::SerialParam()
 )
 }
 \arguments{
