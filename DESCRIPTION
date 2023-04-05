@@ -14,11 +14,15 @@ Imports:
     BiocParallel,
     edgeR,
     gdata,
+    ggplot2,
+    ggridges,
     MultiAssayExperiment,
     parallel,
     plyr,
     readr,
+    reshape2,
     RUVSeq,
+    stringi,
     stringr,
     SummarizedExperiment
 Depends: 
