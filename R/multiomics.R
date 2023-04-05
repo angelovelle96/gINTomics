@@ -29,25 +29,28 @@ run_multiomics <- function(data=NULL,
           expression = t(assay(data, i = "gene_exp")),
           cnv_data = t(assay(data, i = "cnv_data")),
           sequencing_data = T, normalize=T,norm_method="RLE"))
-
+      data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
+        rownames(gene_cnv_res$residuals),
+        colnames(gene_cnv_res$residuals)]
+      assay(data@ExperimentList$gene_exp) <- gene_cnv_res$residuals[
+        rownames(assay(data, i = "gene_exp")),
+        colnames(assay(data, i = "gene_exp"))]
     }
 
-
-  if(!is.null(data@ExperimentList$cnv_data) &
-     !is.null(data@ExperimentList$gene_exp)){
-    system.time(gene_cnv_res2 <- run_cnv_integration(
-      expression = t(assay(data, i = "gene_exp")),
-      cnv_data = t(assay(data, i = "cnv_data")),
-      sequencing_data = T))
-
-  }
 
     if(!is.null(data@ExperimentList$miRNA_cnv_data) &
        !is.null(data@ExperimentList$miRNA_exp)){
       mirna_cnv_res <- run_cnv_integration(
         expression = t(assay(data, i = "miRNA_exp")),
         cnv_data = t(assay(data, i = "miRNA_cnv_data")),
-        sequencing_data = F, BPPARAM=SerialParam())
+        sequencing_data = F, BPPARAM=SerialParam(), step=T)
+      data@ExperimentList$miRNA_exp <- data@ExperimentList$miRNA_exp[
+        rownames(mirna_cnv_res$residuals),
+        colnames(mirna_cnv_res$residuals)]
+      assay(data@ExperimentList$miRNA_exp) <- mirna_cnv_res$residuals[
+        rownames(assay(data, i = "miRNA_exp")),
+        colnames(assay(data, i = "miRNA_exp"))]
+
 
     }
 
@@ -56,13 +59,22 @@ run_multiomics <- function(data=NULL,
     met_res <- run_met_integration(
       expression = t(assay(data, i = "gene_exp")),
       methylation = t(assay(data, i = "methylation")),
-      threads=16,
       sequencing_data = F)
 
   }
 
 
 
+
+  if(!is.null(data@ExperimentList$miRNA_exp) &
+     !is.null(data@ExperimentList$gene_exp)){
+    tf_mirna_res <- run_tf_integration(
+      expression = t(assay(data, i = "miRNA_exp")),
+      tf_expression = t(assay(data, i = "gene_exp")),
+      interactions = interactions_tf,
+      sequencing_data = F, step=T)
+
+  }
 
 
 
@@ -82,12 +94,10 @@ run_cnv_integration <- function(expression,
   if(sequencing_data==T){
     cnv_res <- run_edgeR_integration(response_var = expression,
                                      covariates = cnv_data,
-                                     single_cov=T,
                                      ...)
   }else{
     cnv_res <- run_lm_integration(response_var = expression,
                                   covariates = cnv_data,
-                                  single_cov=T,
                                   ...)
   }
   return(cnv_res)
@@ -99,8 +109,9 @@ run_cnv_integration <- function(expression,
 
 run_met_integration <- function( expression,
                                  methylation,
-                                 sequencing_data=T,
+                                 sequencing_data=F,
                                  interactions="auto",
+                                 normalize=F,
                                  ...){
 
 
@@ -108,11 +119,13 @@ run_met_integration <- function( expression,
     met_res <- run_edgeR_integration(response_var = expression,
                                      covariates = methylation,
                                      interactions = interactions,
+                                     normalize = normalize,
                                      ...)
   }else{
     met_res <- run_lm_integration(response_var = expression,
                                   covariates = methylation,
                                   interactions = interactions,
+                                  normalize = normalize,
                                   ...)
   }
   return(met_res)
@@ -123,10 +136,23 @@ run_met_integration <- function( expression,
 #' @export
 
 run_tf_integration <- function( expression,
-                                tf_expression,
-                                interactions,
+                                tf_expression=expression,
+                                interactions=NULL,
                                 sequencing_data=T,
+                                species="hsa",
                                 ...){
+
+    if(is.null(interactions)){
+      interactions <- integrazione::tf_mirna[[species]]
+      interactions <- interactions[interactions$level=="literature",]
+      tmp <- unique(interactions$miRNA)
+      interactions <- lapply(tmp, function(x){
+        interactions$TF[grep(x,interactions$miRNA)]
+      })
+      names(interactions) <- tmp
+
+    }
+
 
   if(sequencing_data==T){
     tf_res <- run_edgeR_integration(response_var = expression,
