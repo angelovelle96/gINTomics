@@ -6,6 +6,7 @@ run_multiomics <- function(data=NULL,
                            interactions_met=NULL,
                            interactions_miRNA=NULL,
                            interactions_tf=NULL,
+                           interactions_regulators=NULL,
                            ...){
 
 

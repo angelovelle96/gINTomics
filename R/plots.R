@@ -1,8 +1,8 @@
 
-extract_model_res <-  function(object, ...) UseMethod("extract_model_res")
+extract_model_res <-  function(model_results, ...) UseMethod("extract_model_res")
 
 
-extract_model_res.default <- function(object,
+extract_model_res.default <- function(model_results,
                                       outliers=F){
 
   data <- cbind(response=rownames(model_results$coef_data),
@@ -38,11 +38,11 @@ extract_model_res.default <- function(object,
 #' @import ggplot2 ggridges
 #' @importFrom reshape melt
 
-ridgeline_plot <- function(model_results,
+ridgeline_plot <- function(data,
                            outliers=F){
 
 
-    ggplot(data, aes(x = value, y = "pval", fill="pval"))+
+    ggplot(data, aes(x = value, y = pval, fill=pval))+
       geom_density_ridges() +
       theme_ridges()
 

@@ -10,6 +10,11 @@ run_lm_integration <- function(response_var,
                                norm_method="TMM",
                                BPPARAM=BiocParallel::SerialParam()){
 
+    tmp <- unlist(lapply(interactions, length))
+    single_cov=F
+    if(sum(tmp==1)==length(tmp)){
+      single_cov=T
+    }
   tmp <- data_check(response_var = response_var,
                       interactions = interactions,
                       covariates = covariates)
@@ -38,11 +43,6 @@ run_lm_integration <- function(response_var,
                             BPPARAM = BPPARAM)
     names(lm_results) <- names(interactions)
 
-    tmp <- unlist(lapply(interactions, length))
-    single_cov=F
-    if(sum(tmp==1)==length(tmp)){
-      single_cov=T
-    }
     coef_pval_mat <- building_result_matrices(model_results = lm_results,
                                               type = "lm",
                                               single_cov = single_cov)

@@ -160,7 +160,9 @@ building_result_matrices <- function(model_results,
     tmp <- lapply(tmp, function(x){
       ans=x
       pos <- length(grep("Intercept", names(ans)))+1
-      names(ans)[pos] <- "cov"
+      if(length(ans)>=pos){
+        names(ans)[pos] <- "cov"
+      }
       return(ans)
     })
   }
@@ -189,7 +191,9 @@ building_result_matrices <- function(model_results,
     tmp <- lapply(tmp, function(x){
       ans=x
       pos <- length(grep("Intercept", names(ans)))+1
-      names(ans)[pos] <- "cov"
+      if(length(ans)>=pos){
+        names(ans)[pos] <- "cov"
+      }
       return(ans)
     })
   }
@@ -216,6 +220,7 @@ create_multiassay <- function(methylation=NULL,
                               gene_exp=NULL,
                               miRNA_exp=NULL,
                               miRNA_cnv_data=NULL,
+                              regulators=NULL,
                               ...){
 
   if((is.null(methylation)+is.null(cnv_data)+
@@ -228,9 +233,9 @@ create_multiassay <- function(methylation=NULL,
                               methylation=methylation,
                               cnv_data=cnv_data,
                               miRNA_exp=miRNA_exp,
-                              miRNA_cnv_data=miRNA_cnv_data))
+                              miRNA_cnv_data=miRNA_cnv_data,
+                              regulators=regulators))
   mmultiassay <- MultiAssayExperiment(experiments = eexperiments)
-  mmultiassay <- intersectColumns(mmultiassay)
   return(mmultiassay)
 }
 

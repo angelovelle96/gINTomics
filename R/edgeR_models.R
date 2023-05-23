@@ -78,6 +78,11 @@ run_edgeR_integration <-  function( response_var,
     response_var <- tmp$response_var
     covariates <- tmp$covariates
     interactions <- tmp$interactions
+    tmp <- unlist(lapply(interactions, length))
+    single_cov=F
+    if(sum(tmp==1)==length(tmp)){
+      single_cov=T
+    }
 
     if(normalize==F) offset_allgene <- matrix(1, ncol(response_var),
                                               nrow(response_var))
@@ -110,11 +115,6 @@ run_edgeR_integration <-  function( response_var,
 
     model_res <- edger_coef_test(fit_gene,
                                  BPPARAM = BPPARAM)
-    tmp <- unlist(lapply(interactions, length))
-    single_cov=F
-    if(sum(tmp==1)==length(tmp)){
-      single_cov=T
-    }
     coef_pval_mat <- building_result_matrices(model_results = model_res,
                                               type = "edgeR",
                                               single_cov = single_cov)
