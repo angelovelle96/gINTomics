@@ -1,0 +1,36 @@
+---
+title: "Gene_info_table"
+author: "Angelo Velle"
+date: "2023-05-10"
+output: html_document
+---
+
+```{r}
+
+library(biomaRt)
+mart_hsa <- useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
+gene_position_table_hsa <- getBM(attributes = c('hgnc_symbol', "ensembl_gene_id", "chromosome_name", "start_position", "end_position", "band", "description" ),  mart = mart_hsa)
+
+mart_mmu <- useMart(biomart = "ensembl", dataset = "mmusculus_gene_ensembl")
+gene_position_table_mmu <- getBM(attributes = c( 'ensembl_gene_id',"chromosome_name", "start_position", "end_position", "band", "description" ),  mart = mart_mmu)
+
+mart_cel <- useMart(biomart = "ensembl", dataset = "celegans_gene_ensembl")
+gene_position_table_cel <- getBM(attributes = c( 'ensembl_gene_id',"chromosome_name", "start_position", "end_position", "band", "description" ),  mart = mart_cel)
+
+mart_dme <- useMart(biomart = "ensembl", dataset = "dmelanogaster_gene_ensembl")
+gene_position_table_dme <- getBM(attributes = c( 'ensembl_gene_id',"chromosome_name", "start_position", "end_position", "band", "description" ),  mart = mart_dme)
+
+mart_rno <- useMart(biomart = "ensembl", dataset = "rnorvegicus_gene_ensembl")
+gene_position_table_rno <- getBM(attributes = c( 'ensembl_gene_id',"chromosome_name", "start_position", "end_position", "band", "description" ),  mart = mart_rno)
+
+
+genes_annotation <- list(hsa=gene_position_table_hsa,
+                         mmu=gene_position_table_mmu,
+                         dme=gene_position_table_dme,
+                         cel=gene_position_table_cel,
+                         rno=gene_position_table_rno)
+
+#save(genes_annotation, file = "/home/angelo/Documenti/Rpackages/integrazione/data/genes_annotation.Rdata")
+
+```
+
