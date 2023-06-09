@@ -1,3 +1,7 @@
+setClass("MultiOmics",
+         representation("list")
+)
+
 #' @import MultiAssayExperiment
 #' @import SummarizedExperiment
 #' @export
@@ -7,6 +11,12 @@ run_multiomics <- function(data=NULL,
                            interactions_miRNA=NULL,
                            interactions_tf=NULL,
                            interactions_regulators=NULL,
+                           RNAseq=T,
+                           miRNAseq=T,
+                           normalize_miRNA_expr=T,
+                           normalize_gene_expr=T,
+                           norm_method_gene_expr="TMM",
+                           norm_method_miRNA_expr="TMM",
                            ...){
 
 
@@ -24,18 +34,27 @@ run_multiomics <- function(data=NULL,
                     to create proper input data"))
     }
 
-    if(!is.null(data@ExperimentList$cnv_data) &
+
+  normalize_gene_expr2 <- normalize_gene_expr
+  normalize_miRNA_expr2 <- normalize_miRNA_expr
+  if(!is.null(data@ExperimentList$cnv_data) &
        !is.null(data@ExperimentList$gene_exp)){
-        system.time(gene_cnv_res <- run_cnv_integration(
+        gene_cnv_res <- run_cnv_integration(
           expression = t(assay(data, i = "gene_exp")),
           cnv_data = t(assay(data, i = "cnv_data")),
-          sequencing_data = T, normalize=T,norm_method="RLE"))
+          sequencing_data = RNAseq,
+          normalize=normalize_gene_expr,
+          norm_method=norm_method_gene_expr,
+          BPPARAM=SerialParam())
+      data <- c(data, gene_exp_original=data@ExperimentList$gene_exp)
       data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
         rownames(gene_cnv_res$residuals),
         colnames(gene_cnv_res$residuals)]
       assay(data@ExperimentList$gene_exp) <- gene_cnv_res$residuals[
         rownames(assay(data, i = "gene_exp")),
         colnames(assay(data, i = "gene_exp"))]
+      RNAseq <- F
+      normalize_gene_expr2 <- F
     }
 
 
@@ -44,14 +63,19 @@ run_multiomics <- function(data=NULL,
       mirna_cnv_res <- run_cnv_integration(
         expression = t(assay(data, i = "miRNA_exp")),
         cnv_data = t(assay(data, i = "miRNA_cnv_data")),
-        sequencing_data = F, BPPARAM=SerialParam(), step=T)
+        sequencing_data = miRNAseq,
+        normalize=normalize_miRNA_expr,
+        norm_method=norm_method_miRNA_expr,
+        BPPARAM=SerialParam())
+      data <- c(data, miRNA_exp_original=data@ExperimentList$miRNA_exp)
       data@ExperimentList$miRNA_exp <- data@ExperimentList$miRNA_exp[
         rownames(mirna_cnv_res$residuals),
         colnames(mirna_cnv_res$residuals)]
       assay(data@ExperimentList$miRNA_exp) <- mirna_cnv_res$residuals[
         rownames(assay(data, i = "miRNA_exp")),
         colnames(assay(data, i = "miRNA_exp"))]
-
+      miRNAseq <- F
+      normalize_miRNA_expr2 <- F
 
     }
 
@@ -60,29 +84,42 @@ run_multiomics <- function(data=NULL,
     met_res <- run_met_integration(
       expression = t(assay(data, i = "gene_exp")),
       methylation = t(assay(data, i = "methylation")),
-      sequencing_data = F)
+      sequencing_data = RNAseq,
+      normalize = normalize_gene_expr2)
 
   }
-
 
 
 
   if(!is.null(data@ExperimentList$miRNA_exp) &
      !is.null(data@ExperimentList$gene_exp)){
-    tf_mirna_res <- run_tf_integration(
-      expression = t(assay(data, i = "miRNA_exp")),
-      tf_expression = t(assay(data, i = "gene_exp")),
-      interactions = interactions_tf,
-      sequencing_data = F, step=T)
+
+    tmp <- t(assay(data,i = "gene_exp_original"))
+    if(normalize_gene_expr==T) tmp <- data_norm(tmp)
+
+    if(!is.null(data@ExperimentList$gene_exp_original)){
+      tf_mirna_res <- run_tf_integration(
+        expression = t(assay(data, i = "miRNA_exp")),
+        tf_expression = tmp,
+        interactions = interactions_tf,
+        sequencing_data = RNAseq, normalize=normalize_miRNA_expr2)
+    }else{
+      tf_mirna_res <- run_tf_integration(
+        expression = t(assay(data, i = "miRNA_exp")),
+        tf_expression = tmp,
+        interactions = interactions_tf,
+        sequencing_data = RNAseq, normalize=normalize_miRNA_expr2)
+      }
 
   }
 
-
-
-
 #proseguo con le altre integrazioni
 
-
+  ans <- new("MultiOmics",  list(gene_cnv_res=gene_cnv_res,
+              mirna_cnv_res=mirna_cnv_res,
+              met_res=met_res,
+              tf_mirna_res=tf_mirna_res))
+  return(ans)
 }
 
 ####################################################################
