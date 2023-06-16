@@ -60,6 +60,22 @@ setMethod("extract_model_res", "list",
 )
 
 
+setMethod("extract_model_res", "MultiOmics",
+          function(model_results,
+                   outliers=F,
+                   species="hsa"){
+
+        tmp <- lapply(model_results, function(x) extract_model_res(x,
+                                                            outliers=outliers,
+                                                            species=species))
+        data <- lapply(names(tmp), function(x) cbind(tmp[[x]], omics=x))
+        names(data) <- names(tmp)
+        data <- plyr::rbind.fill(data)
+        return(data)
+          }
+)
+
+
 #' @import ggplot2 ggridges
 
 ridgeline_plot <- function(data,
@@ -102,9 +118,19 @@ heatmap_sign <- function(data,
                          outliers=T,
                          number=50){
 
-  data <- extract_model_res(tf_mirna_res, outliers=outliers)
+
+  data <- extract_model_res(mmultiomics, outliers=outliers)
   data <- data[data$cov!="(Intercept)",]
-  data <- data[data$significativity=="significant",]
+  data <- data[data$pval<=0.1,]
+  if(!"omics"%in%colnames(data)) data$omics <-rep("omic", nrow(data))
+  tmp <- unique(data$omics)
+  data <- lapply(tmp, function(x) data[data$omics==x,])
+  names(data) <- tmp
+  tmp <- lapply(data, function(x) sort(table(x$response), decreasing = T))
+
+  ####una volta selezionati i geni fare le heatmap per ciascuna omica per quei geni
+
+
   tmp <- sort(table(data$response), decreasing = T)
   if(length(tmp)>number) tmp <- tmp[1:number]
   pval <- lapply(names(tmp), function(x) data[data$response%in%x, "pval"])
