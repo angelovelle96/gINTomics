@@ -56,7 +56,10 @@ run_lm_integration <- function(response_var,
       model_results = lm_results,
       coef_data = coef_pval_mat$coef,
       pval_data = coef_pval_mat$pval,
-      residuals = rresiduals)
+      residuals = rresiduals,
+      data = list(response_var = response_var,
+                  covariates = covariates,
+                  formula = fformula))
     if(nrow(original_id)>0){
       results <- id_conversion(dictionary = original_id,
                                results = results)
