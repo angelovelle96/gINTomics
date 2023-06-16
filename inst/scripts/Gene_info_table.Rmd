@@ -50,10 +50,15 @@ tmp2 <- tmp2[-grep("CHR", tmp2$chromosome_name),]
 rownames(tmp2) <- tmp2$hgnc_symbol
 tmp2 <- tmp2[names(tmp),]
 rownames(tmp2) <- tmp
+tmp2$miRBase_id <- rownames(tmp2)
+rownames(tmp2) <- NULL
 
+genes_annotation$hsa$miRBase_id <- NA
 genes_annotation$hsa <- genes_annotation$hsa[!genes_annotation$hsa$hgnc_symbol%in%tmp2$hgnc_symbol,]
 genes_annotation$hsa <- rbind(genes_annotation$hsa, tmp2)
-
+genes_annotation$hsa$original_hgnc_symbol <- genes_annotation$hsa$hgnc_symbol
+genes_annotation$hsa$hgnc_symbol[!is.na(genes_annotation$hsa$miRBase_id)] <- 
+  genes_annotation$hsa$miRBase_id[!is.na(genes_annotation$hsa$miRBase_id)]
 
 
 #save(genes_annotation, file = "/home/angelo/Documenti/Rpackages/integrazione/data/genes_annotation.Rdata")
