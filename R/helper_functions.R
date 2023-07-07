@@ -298,9 +298,166 @@ create_multiassay <- function(methylation=NULL,
         replacement = dictionary$original,
         vectorize_all = F)
 
+      colnames(results$data$response_var) <- stri_replace_all_regex(
+        colnames(results$data$response_var),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+      colnames(results$data$covariates) <- stri_replace_all_regex(
+        colnames(results$data$covariates),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
        return(results)
     }
 
+####################################################
 
+setMethod("extract_model_res", "list",
+          function(model_results,
+                   outliers=F,
+                   species="hsa",
+                   filters="hgnc_symbol"){
+
+            data <- cbind(response=rownames(model_results$coef_data),
+                          model_results$coef_data)
+            data <- reshape2::melt(data,
+                                   id.vars="response",
+                                   variable.name = "cov")
+            rownames(data) <- paste0(data$response, "_", data$cov)
+            data <- data[!is.na(data$value),]
+            pval <- cbind(response=rownames(model_results$pval_data),
+                          model_results$pval_data)
+            pval <- reshape2::melt(pval,
+                                   id.vars="response",
+                                   variable.name = "cov")
+            rownames(pval) <- paste0(pval$response, "_", pval$cov)
+            pval <- pval[rownames(data),]
+            tmp <- rep("not_significant", nrow(pval))
+            tmp[pval$value<=0.05] <- "significant"
+            names(tmp) <- rownames(pval)
+            data$pval <- pval[rownames(data), "value"]
+            data$significativity <- tmp[rownames(data)]
+            data$sign <- rep("negative", nrow(data))
+            data$sign[data$value>0]="positive"
+            data$cov <- as.character(data$cov)
+            for(i in 1:nrow(data)){
+              data$cov[i] <- gsub("cov",
+                                  data$response[i],
+                                  as.character(data$cov[i]))
+            }
+            genes_info <- download_gene_info(data$cov,
+                                             filters=filters,
+                                             species = species)
+            tmp <- intersect(data$cov, rownames(genes_info))
+            tmp <- genes_info[tmp,]
+            tmp2 <- intersect(data$cov, genes_info$ensembl_gene_id)
+            tmp2 <- genes_info[genes_info$ensembl_gene_id%in%tmp2,]
+            tmp2 <- tmp2[!duplicated(tmp2$ensembl_gene_id),]
+            rownames(tmp2) <- tmp2$ensembl_gene_id
+            genes_info <- rbind(tmp, tmp2)
+            data$chr_cov <- genes_info[as.character(data$cov),
+                                       "chromosome_name"]
+            data$cytoband_cov <- genes_info[as.character(data$cov), "band"]
+
+            mmin <- quantile(data$value, 0.25) - 1.5*IQR(data$value)
+            mmax <- quantile(data$value, 0.75) + 1.5*IQR(data$value)
+
+            if(outliers==F){
+              data <- data[data$value>mmin,]
+              data <- data[data$value<mmax,]
+            }
+
+            return(data)
+
+          }
+)
+
+
+setMethod("extract_model_res", "MultiOmics",
+          function(model_results,
+                   outliers=F,
+                   species="hsa"){
+
+            tmp <- lapply(model_results, function(x)
+              extract_model_res(x,
+                                outliers=outliers,
+                                species=species))
+            data <- lapply(names(tmp), function(x) cbind(tmp[[x]], omics=x))
+            names(data) <- names(tmp)
+            data <- plyr::rbind.fill(data)
+            return(data)
+          }
+)
+
+
+setMethod("extract_data", "list",
+          function(model_results,
+                   species="hsa",
+                   filters="hgnc_symbol"){
+
+    res_layer <- model_results$data$response_var
+    res_layer <- apply(res_layer, 2, mean)
+    cov_layer <- model_results$data$covariates[
+                    rownames(model_results$data$response_var),]
+    colnames(cov_layer) <- gsub("_cov", "", colnames(cov_layer))
+    cov_layer <- apply(cov_layer, 2, mean)
+    coef_layer <- NULL
+    tmp <- as.data.frame(model_results$coef_data)
+    tmp <- tmp[, colnames(tmp)!="(Intercept)", drop=F]
+    if(identical(colnames(tmp),"cov")){
+      coef_layer <- tmp
+      coef_layer <- as.data.frame(cbind(coef_layer,
+                                        pval=model_results$pval_data$cov))
+    }
+    genes_info <- download_gene_info(unique(c(names(res_layer),
+                                              names(cov_layer))),
+                                     filters=filters,
+                                     species = species)
+    tmp <- genes_info$ensembl_gene_id%in%c(names(res_layer), names(cov_layer))
+    tmp <- genes_info[tmp,]
+    tmp <- tmp[!duplicated(tmp$ensembl_gene_id),]
+    rownames(tmp) <- tmp$ensembl_gene_id
+    genes_info <- rbind(genes_info, tmp)
+    res_layer <- data.frame(mean=res_layer, genes_info[names(res_layer),])
+    tmp <- is.na(res_layer$chromosome_name)+
+      is.na(res_layer$start_position)+
+      is.na(res_layer$end_position)
+    res_layer <- res_layer[tmp==0,]
+    cov_layer <- data.frame(mean=cov_layer, genes_info[names(cov_layer),])
+    tmp <- is.na(cov_layer$chromosome_name)+
+      is.na(cov_layer$start_position)+
+      is.na(cov_layer$end_position)
+    cov_layer <- cov_layer[tmp==0,]
+    if(!is.null(coef_layer)){
+      coef_layer <- as.data.frame(cbind(coef_layer,
+                                        genes_info[rownames(coef_layer),]))
+      tmp <- is.na(coef_layer$chromosome_name)+
+        is.na(coef_layer$start_position)+
+        is.na(coef_layer$end_position)
+      coef_layer <- coef_layer[tmp==0,]
+    }
+
+    ans <- Filter(Negate(is.null),
+                  list(res_layer=res_layer,
+                       cov_layer=cov_layer,
+                       coef_layer=coef_layer))
+
+    return(ans)
+})
+
+
+
+
+setMethod("extract_data", "MultiOmics",
+          function(model_results,
+                   species="hsa"){
+
+    ans <- lapply(model_results, function(x)
+      extract_data(x,species=species))
+    return(ans)
+
+})
 
 
