@@ -1,81 +1,4 @@
 
-setGeneric("extract_model_res", function(model_results, ...) standardGeneric("extract_model_res"))
-
-setMethod("extract_model_res", "list",
-          function(model_results,
-                   outliers=F,
-                   species="hsa"){
-
-  data <- cbind(response=rownames(model_results$coef_data),
-                model_results$coef_data)
-  data <- reshape2::melt(data, id.vars="response", variable.name = "cov")
-  rownames(data) <- paste0(data$response, "_", data$cov)
-  data <- data[!is.na(data$value),]
-  pval <- cbind(response=rownames(model_results$pval_data),
-                model_results$pval_data)
-  pval <- reshape2::melt(pval, id.vars="response", variable.name = "cov")
-  rownames(pval) <- paste0(pval$response, "_", pval$cov)
-  pval <- pval[rownames(data),]
-  tmp <- rep("not_significant", nrow(pval))
-  tmp[pval$value<=0.05] <- "significant"
-  names(tmp) <- rownames(pval)
-  data$pval <- pval[rownames(data), "value"]
-  data$significativity <- tmp[rownames(data)]
-  data$sign <- rep("negative", nrow(data))
-  data$sign[data$value>0]="positive"
-  genes_info <- integrazione::genes_annotation[[species]]
-  tmp <- grep("^CHR_", genes_info$chromosome_name)
-  genes_info <- genes_info[-tmp,]
-  tmp <- grep("^K", genes_info$chromosome_name)
-  genes_info <- genes_info[-tmp,]
-  tmp <- grep("^G", genes_info$chromosome_name)
-  genes_info <- genes_info[-tmp,]
-  data$cov <- as.character(data$cov)
-  for(i in 1:nrow(data)){
-    data$cov[i] <- gsub("cov", data$response[i], as.character(data$cov[i]))
-  }
-  tmp <- c(intersect(data$cov, genes_info$hgnc_symbol))
-  tmp <- rbind(genes_info[genes_info$hgnc_symbol%in%tmp,])
-  tmp <- tmp[!duplicated(tmp$hgnc_symbol),]
-  rownames(tmp) <- tmp$hgnc_symbol
-  tmp2 <- intersect(data$cov, genes_info$ensembl_gene_id)
-  tmp2 <- genes_info[genes_info$ensembl_gene_id%in%tmp2,]
-  tmp2 <- tmp2[!duplicated(tmp2$ensembl_gene_id),]
-  rownames(tmp2) <- tmp2$hgnc_symbol
-  genes_info <- rbind(tmp, tmp2)
-  data$chr_cov <- genes_info[as.character(data$cov), "chromosome_name"]
-  data$cytoband_cov <- genes_info[as.character(data$cov), "band"]
-
-  mmin <- quantile(data$value, 0.25) - 1.5*IQR(data$value)
-  mmax <- quantile(data$value, 0.75) + 1.5*IQR(data$value)
-
-  if(outliers==F){
-    data <- data[data$value>mmin,]
-    data <- data[data$value<mmax,]
-  }
-
-  return(data)
-
-      }
-)
-
-
-setMethod("extract_model_res", "MultiOmics",
-          function(model_results,
-                   outliers=F,
-                   species="hsa"){
-
-        tmp <- lapply(model_results, function(x) extract_model_res(x,
-                                                            outliers=outliers,
-                                                            species=species))
-        data <- lapply(names(tmp), function(x) cbind(tmp[[x]], omics=x))
-        names(data) <- names(tmp)
-        data <- plyr::rbind.fill(data)
-        return(data)
-          }
-)
-
-
 #' @import ggplot2 ggridges
 
 ridgeline_plot <- function(data,
@@ -99,6 +22,7 @@ chr_distribution_plot <- function(data,
   data <- extract_model_res(data)
   data <- data[!is.na(data$chr_cov),]
   if(show_sign){
+    data <- data[data$significativity=="significant",]
     ggplot(data, aes(x = factor(chr_cov, level=mixedsort(unique(data$chr_cov))),
                      fill=sign))+
       geom_bar(position="dodge", stat="count")+
@@ -118,7 +42,6 @@ heatmap_sign <- function(data,
                          outliers=T,
                          number=50){
 
-
   data <- extract_model_res(mmultiomics, outliers=outliers)
   data <- data[data$cov!="(Intercept)",]
   data <- data[data$pval<=0.1,]
@@ -127,17 +50,165 @@ heatmap_sign <- function(data,
   data <- lapply(tmp, function(x) data[data$omics==x,])
   names(data) <- tmp
   tmp <- lapply(data, function(x) sort(table(x$response), decreasing = T))
+  tmp2 <- lapply(data, function(x) sort(setNames(x$pval, x$response)))
+  tmp2 <- lapply(tmp2, function(x) x[!duplicated(names(x))])
+  tmp2 <- lapply(tmp2, function(x) 1-x)
+  tmp3 <- lapply(names(tmp), function(x) tmp[[x]]+tmp2[[x]][names(tmp[[x]])])
+  names(tmp3) <- names(tmp)
+  tmp <- lapply(tmp3, function(x) sort(x, decreasing = T))
+  tmp <- lapply(tmp, function(x){
+    if(length(x)>number) x <- x[1:number]
+    return(x)
+  })
+  tmp2 <- lapply(tmp2, function(x) 1-x)
+  tmp2 <- lapply(names(tmp), function(x) tmp2[[x]][names(tmp[[x]])])
+  names(tmp2) <- names(tmp)
+  tmp <- lapply(names(tmp2), function(x)
+    as.data.frame(t(data.frame(row.names = names(tmp[[x]]),
+                               freq = as.numeric(tmp[[x]]-(1-tmp2[[x]]))))))
+  names(tmp) <- names(tmp2)
+  tmp2 <- lapply(tmp2, function(x)
+    as.data.frame(t(data.frame(row.names = names(x), pval=x))))
 
-  ####una volta selezionati i geni fare le heatmap per ciascuna omica per quei geni
 
+  hheatmap <- plyr::rbind.fill(tmp)
+  hheatmap <- t(hheatmap)
+  colnames(hheatmap) <- names(tmp)
+  pval <- plyr::rbind.fill(tmp2)
+  pval <- t(pval)
+  colnames(pval) <- names(tmp2)
 
-  tmp <- sort(table(data$response), decreasing = T)
-  if(length(tmp)>number) tmp <- tmp[1:number]
-  pval <- lapply(names(tmp), function(x) data[data$response%in%x, "pval"])
-  names(pval) <- names(tmp)
-  pval <- sapply(pval, min)
+  ComplexHeatmap::pheatmap(hheatmap, cluster_rows = F, cluster_cols = F)
+
 
 }
+
+
+#' @import circlize
+
+ccircos_genLines_chr <- function(chr=c(1:22, "X", "Y", "MT"),
+                                    rregion,
+                                    vvalue,
+                                    ttrack,
+                                    ttype,
+                                    aarea,
+                                    ccol,
+                                    bbaseline,
+                                    ...){
+  for (i in chr) {
+
+    circos.genomicLines(region = rregion[which(rregion[,1] ==i) ,2:3],
+                        value = vvalue[which(rregion[,1] ==i)],
+                        sector.index = i,
+                        track.index = ttrack,
+                        type = ttype,
+                        area = aarea,
+                        col = ccol[which(rregion[,1] ==i)],
+                        baseline = bbaseline)
+
+
+  }
+
+}
+
+
+#' @import circlize
+
+ccircos_genPoints_chr <- function(chr=c(1:22, "X", "Y", "MT"),
+                                  rregion,
+                                  vvalue,
+                                  ppch,
+                                  ccex,
+                                  ttrack,
+                                  ccol,
+                                  bbaseline){
+  for (i in chr) {
+
+    circos.genomicPoints(region = rregion[which(rregion[,1] ==i) ,2:3],
+                         value = vvalue[which(rregion[,1] ==i)],
+                         sector.index = i,
+                         track.index = ttrack,
+                         pch = ppch ,
+                         col = ccol,
+                         baseline = bbaseline,
+                         cex = ccex)
+
+
+  }
+
+}
+
+#' @import circlize
+#' @importFrom gtools mixedsort
+#'
+
+circos_plot <- function(model_results,
+                        species="hg38"){
+
+    data <- extract_data(model_results)
+    coef <- "coef_layer"%in%names(data)
+    if(coef) {
+      colnames(data$coef_layer) <- gsub("cov", "mean",
+                                        colnames(data$coef_layer))
+      data$coef_layer <- data$coef_layer[data$coef_layer$pval<=0.05,]
+    }
+
+    tmp <- lapply(names(data), function(x) {
+      ans <- data[[x]]
+      ans$chromosome_name <- paste0("chr", ans$chromosome_name)
+      ans <- ans[ans$chromosome_name!="chrMT",]
+      ans$ccol <- rep("red3", nrow(ans))
+      ans$ccol[ans$mean<0] <- "royalblue4"
+      return(ans)
+    })
+    names(tmp) <- names(data)
+    data <- tmp
+    wwhich <- data$res_layer$mean>quantile(data$res_layer$mean,0.99)
+    data$res_layer$mean[wwhich] <- quantile(data$res_layer$mean, 0.99)
+    wwhich <- data$cov_layer$mean>quantile(data$cov_layer$mean,0.99)
+    data$cov_layer$mean[wwhich] <- quantile(data$cov_layer$mean, 0.99)
+    tmp <- unique(gtools::mixedsort(data$res_layer$chromosome_name))
+    circos.initializeWithIdeogram(species = "hg38", chromosome.index = tmp)+
+    circos.genomicTrack(data, ylim=c(min(data$cov_layer$mean),
+                                     max(data$cov_layer$mean)))+
+    circos.genomicTrack(data, ylim=c(min(data$res_layer$mean),
+                                     max(data$res_layer$mean)))+
+    ccircos_genLines_chr(chr = tmp,
+                         rregion = data$cov_layer[,4:6],
+                         vvalue = data$cov_layer$mean,
+                         ttrack = 3,
+                         ttype = "h",
+                         aarea = TRUE,
+                         ccol = data$cov_layer$ccol,
+                         bbaseline = 0,
+                         lwd = 1)+
+    ccircos_genLines_chr(chr = tmp,
+                         rregion = data$res_layer[,4:6],
+                         vvalue = data$res_layer$mean,
+                         ttrack = 4,
+                         ttype = "h",
+                         aarea = TRUE,
+                         ccol = data$res_layer$ccol,
+                         bbaseline = 0,
+                         lwd = 1)+
+    if(coef) circos.genomicTrack(data, ylim=c(min(data$coef_layer$mean),
+                                              max(data$coef_layer$mean)))+
+      ccircos_genLines_chr(chr = tmp,
+                           rregion = data$coef_layer[,5:7],
+                           vvalue = data$coef_layer$mean,
+                           ttrack = 5,
+                           ttype = "h",
+                           aarea = TRUE,
+                           ccol = data$coef_layer$ccol,
+                           bbaseline = 0,
+                           lwd = 1)
+
+}
+
+
+
+
+
 
 
 
