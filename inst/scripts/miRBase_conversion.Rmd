@@ -1,0 +1,16 @@
+---
+title: "miRBase_conversion"
+author: "Angelo Velle"
+date: "2023-07-07"
+output: html_document
+---
+
+# The table was downloaded from HGNC website (https://www.genenames.org/cgi-bin/genegroup/download?id=476&type=branch)
+```{r}
+
+mirna_hsa <- read.table("data/miRBase_conversion.tsv", sep = "\t", header = T)
+#save(mirna_hsa, file = "data/miRBase_conversion.rda")
+
+
+```
+
