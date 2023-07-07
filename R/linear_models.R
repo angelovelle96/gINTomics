@@ -70,6 +70,7 @@ run_lm_integration <- function(response_var,
 
 ##################################
 #' Linear model definition
+#' @export
 
 def_lm <- function(formula,
                    data,

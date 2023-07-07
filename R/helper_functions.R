@@ -120,6 +120,7 @@ covariates_check <- function(response_var,
 
 ######################################################
 #' Function for formula generation
+#' @export
 
 generate_formula <- function(interactions,
                              linear=F){
@@ -138,7 +139,7 @@ generate_formula <- function(interactions,
 }
 
 #####################################################
-#' @import plyr
+#' @importFrom plyr rbind.fill
 #' @export
 
 building_result_matrices <- function(model_results,
@@ -242,6 +243,7 @@ create_multiassay <- function(methylation=NULL,
 
 ######################################################
 #' Data normalization for linear models
+#' @export
 
 
     data_norm <- function(data,
@@ -256,6 +258,7 @@ create_multiassay <- function(methylation=NULL,
 #########################################################
 #' conversion back to the orginal IDs
 #' @importFrom stringi stri_replace_all_regex
+#' @export
 
     id_conversion <- function(dictionary,
                               results){
@@ -314,6 +317,7 @@ create_multiassay <- function(methylation=NULL,
 
 ####################################################
 
+#'
 setMethod("extract_model_res", "list",
           function(model_results,
                    outliers=F,
@@ -375,6 +379,7 @@ setMethod("extract_model_res", "list",
 )
 
 
+#'
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
                    outliers=F,
@@ -392,6 +397,7 @@ setMethod("extract_model_res", "MultiOmics",
 )
 
 
+#'
 setMethod("extract_data", "list",
           function(model_results,
                    species="hsa",
@@ -449,7 +455,7 @@ setMethod("extract_data", "list",
 
 
 
-
+#'
 setMethod("extract_data", "MultiOmics",
           function(model_results,
                    species="hsa"){

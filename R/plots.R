@@ -1,5 +1,7 @@
 
 #' @import ggplot2 ggridges
+#' @export
+#'
 
 ridgeline_plot <- function(data,
                            outliers=F){
@@ -14,6 +16,7 @@ ridgeline_plot <- function(data,
 
 #' @import ggplot2 ggridges
 #' @importFrom gtools mixedsort
+#' @export
 
 chr_distribution_plot <- function(data,
                            outliers=F,
@@ -37,6 +40,7 @@ chr_distribution_plot <- function(data,
 }
 
 #' @import ComplexHeatmap
+#' @export
 
 heatmap_sign <- function(data,
                          outliers=T,
@@ -85,6 +89,7 @@ heatmap_sign <- function(data,
 
 
 #' @import circlize
+#' @export
 
 ccircos_genLines_chr <- function(chr=c(1:22, "X", "Y", "MT"),
                                     rregion,
@@ -113,6 +118,7 @@ ccircos_genLines_chr <- function(chr=c(1:22, "X", "Y", "MT"),
 
 
 #' @import circlize
+#' @export
 
 ccircos_genPoints_chr <- function(chr=c(1:22, "X", "Y", "MT"),
                                   rregion,
@@ -140,7 +146,7 @@ ccircos_genPoints_chr <- function(chr=c(1:22, "X", "Y", "MT"),
 
 #' @import circlize
 #' @importFrom gtools mixedsort
-#'
+#' @export
 
 circos_plot <- function(model_results,
                         species="hg38"){

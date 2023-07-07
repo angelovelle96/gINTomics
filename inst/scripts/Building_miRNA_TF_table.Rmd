@@ -24,7 +24,7 @@ tf_mirna[["cel"]] <- read.table("data/cel.tsv", sep = "\t")
 tf_mirna[["cel"]] <- tf_mirna[["cel"]][,c(1,2,5,7)]
 colnames(tf_mirna[["cel"]]) <- c("TF", "miRNA", "function", "level")
 tf_mirna <- lapply(tf_mirna, function(x) x[!duplicated(paste0(x$TF,x$miRNA,x$level)),])
-#save(tf_mirna, file = "data/miRNA_TF.Rdata")
+#save(tf_mirna, file = "data/miRNA_TF.rda")
 
 
 

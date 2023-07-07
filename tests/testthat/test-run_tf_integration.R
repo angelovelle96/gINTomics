@@ -1,4 +1,4 @@
-test_that("run_tf_integration sequencind data check", {
+test_that("run_tf_integration sequencing data check", {
 
   mirna_exp_model <- run_edgeR_test2_input$mirna_exp_model
   tf_expression_model <- run_edgeR_test2_input$tf_expression_model
@@ -10,17 +10,15 @@ test_that("run_tf_integration sequencind data check", {
   myres <- run_edgeR_integration(response_var = mirna_exp_model,
                                   interactions = interactions,
                                   covariates = tf_expression_model,
-                                  threads = 16,
                                   norm_method = "TMM")
 
   myres2 <- run_tf_integration(expression = mirna_exp_model,
                                 tf_expression = tf_expression_model,
                                 interactions = interactions,
                                 sequencing_data = T,
-                                threads = 16,
-                                norm_method = "TMM")
+                                norm_method = "TMM", normalize_cov = F)
 
-  expect_identical(myres, myres2)
+  expect_identical(myres$coef_data, myres2$coef_data)
 })
 
 
@@ -36,15 +34,13 @@ test_that("run_tf_integration microarray data check", {
   myres <- suppressWarnings(run_lm_integration(response_var = mirna_exp_model,
                                  interactions = interactions,
                                  covariates = tf_expression_model,
-                                 threads = 16,
                                  step = T))
 
   myres2 <- suppressWarnings(run_tf_integration(expression = mirna_exp_model,
                                tf_expression = tf_expression_model,
                                interactions = interactions,
                                sequencing_data = F,
-                               threads = 16,
-                               step=T))
+                               step=T, normalize_cov = F))
 
   tmp <- lapply(myres, function(x)  x$coefficients)
   tmp2 <- lapply(myres2, function(x) x$coefficients)

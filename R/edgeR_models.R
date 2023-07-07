@@ -57,7 +57,8 @@
 #'
 #' @return A list containing the results of all the edger single gene models,
 #' the pvalues and the coefficients for each gene
-#' @import parallel edgeR BiocParallel stringr
+#' @import parallel edgeR BiocParallel stringr RUVSeq
+#' @importFrom plyr rbind.fill
 #' @export
 
 run_edgeR_integration <-  function( response_var,
@@ -194,6 +195,7 @@ allgene_edgeR_model <- function(response_var,
 #' and tagwise dispersion and the offsets
 #' @param threads Number of threads to use for parallelization (Default is 1)
 #' @import parallel edgeR
+#' @export
 
 singlegene_edgeR_model <- function( response_var,
                                     covariates,
@@ -227,6 +229,7 @@ singlegene_edgeR_model <- function( response_var,
 
 ##########################################################
 #' Define edgeR model
+#' @export
 
 def_edger <- function(formula,
                       response_var,
@@ -262,9 +265,7 @@ def_edger <- function(formula,
 #' @return A data frame containing the results of the likelihood ratio test
 #' for all the coefficients present in the model
 #' @import parallel edgeR
-#'
-#' @examples
-#' edger_coef_test(fitted_model, threads = 2)
+#' @export
 #'
 edger_coef_test <- function(fit_list,
                             BPPARAM) {
@@ -275,6 +276,7 @@ edger_coef_test <- function(fit_list,
 
 #########################################################
 #' Define coef test function
+#' @export
 
 def_coef_test <- function(fit){
 

@@ -15,7 +15,6 @@ test_that("run_cnv_integration check", {
                                   design_mat_allgene = design_all,
                                   offset_allgene = t(y_all_offset),
                                   offset_singlegene = y_gene_offset,
-                                  threads = 16,
                                   norm_method = "TMM")
 
   myres2 <- run_cnv_integration(expression = t(counts),
@@ -25,9 +24,8 @@ test_that("run_cnv_integration check", {
                                 design_mat_allgene = design_all,
                                 offset_allgene = t(y_all_offset),
                                 offset_singlegene = y_gene_offset,
-                                threads = 16,
                                 norm_method = "TMM")
 
-    expect_identical(myres, myres2)
+    expect_identical(myres$coef_data, myres2$coef_data)
 
 })

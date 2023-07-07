@@ -1,5 +1,6 @@
 #'
 #' @import multiMiR
+#' @export
 
 
    download_mirna_target <- function(miRNAs,
@@ -27,6 +28,7 @@
 
 #'
 #' @import  dorothea
+#' @export
 
    download_tf <- function(genes,
                            species="hsa",
@@ -64,6 +66,7 @@
 
 #' @import biomaRt
 #' @importFrom stringr str_wrap
+#' @export
 
    download_gene_info <- function(genes,
                                   species = "hsa",
@@ -106,9 +109,7 @@
        rownames(ans) <- ans$hgnc_symbol
 
 
-       mirna_hsa <- read.table("data/miRBase_conversion.tsv",
-                               sep = "\t",
-                               header = T)
+       data("miRBase_conversion")
        genes <- cbind(genes, nop = gsub("-3p", "", genes))
        genes[,"nop"] <- gsub("-5p", "", genes[, "nop"])
 

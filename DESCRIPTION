@@ -12,11 +12,17 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: 
     BiocParallel,
+    biomaRt,
+    circlize,
+    ComplexHeatmap,
+    dorothea,
     edgeR,
     gdata,
     ggplot2,
     ggridges,
+    gtools,
     MultiAssayExperiment,
+    multiMiR,
     parallel,
     plyr,
     readr,

@@ -1,6 +1,5 @@
 
-#' @import MultiAssayExperiment
-#' @import SummarizedExperiment
+#' @import MultiAssayExperiment SummarizedExperiment
 #' @export
 run_multiomics <- function(data,
                            use_cnv_res=T,
@@ -254,7 +253,8 @@ run_tf_integration <- function( expression,
 
     if(is.null(interactions)){
       if(type=="tf_miRNA"){
-        interactions <- integrazione::tf_mirna[[species]]
+        data("miRNA_TF")
+        interactions <- tf_mirna[[species]]
         interactions <- interactions[interactions$level=="literature",]
         tmp <- unique(interactions$miRNA)
         interactions <- lapply(tmp, function(x){

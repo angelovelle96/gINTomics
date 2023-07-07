@@ -20,7 +20,3 @@ for all the coefficients present in the model
 Perform likelihood ratio test for all the coefficients
 contained in the edgeR fitted model
 }
-\examples{
-edger_coef_test(fitted_model, threads = 2)
-
-}
