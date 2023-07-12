@@ -1,5 +1,6 @@
 test_that("run_cnv_integration check", {
 
+  data("test_results")
   counts <- run_edgeR_test1_input$counts
   data <- run_edgeR_test1_input$data
   expectedres <- run_edgeR_test1_output

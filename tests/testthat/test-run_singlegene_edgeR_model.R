@@ -1,4 +1,5 @@
 test_that("single gene complete integration gives correct results - Test1", {
+    data("test_results")
     counts <- run_edgeR_test1_input$counts
     data <- run_edgeR_test1_input$data
     expectedres <- run_edgeR_test1_output

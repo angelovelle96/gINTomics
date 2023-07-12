@@ -5,6 +5,7 @@ test_that("multiassay generation works", {
                                        miRNA_exp = mmultiassay_ov@ExperimentList$miRNA_exp,
                                        miRNA_cnv_data = mmultiassay_ov@ExperimentList$miRNA_cnv_data)
 
+  data("ov_test_tcga_omics")
   expect_identical(mmultiassay_ov, mmultiassay_ov2)
 
 

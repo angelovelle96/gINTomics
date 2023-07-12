@@ -1,10 +1,10 @@
 test_that("run_tf_integration sequencing data check", {
 
+  data("test_results")
   mirna_exp_model <- run_edgeR_test2_input$mirna_exp_model
   tf_expression_model <- run_edgeR_test2_input$tf_expression_model
   interactions <- run_edgeR_test2_input$expanded_tf_mirna_couples
   interactions <- lapply(interactions, function(x) x[,1])
-  expectedres <- run_edgeR_test2_output
 
 
   myres <- run_edgeR_integration(response_var = mirna_exp_model,
@@ -24,11 +24,11 @@ test_that("run_tf_integration sequencing data check", {
 
 test_that("run_tf_integration microarray data check", {
 
+  data("test_results")
   mirna_exp_model <- run_edgeR_test2_input$mirna_exp_model
   tf_expression_model <- run_edgeR_test2_input$tf_expression_model
   interactions <- run_edgeR_test2_input$expanded_tf_mirna_couples
   interactions <- lapply(interactions, function(x) x[,1])
-  expectedres <- run_edgeR_test2_output
 
 
   myres <- suppressWarnings(run_lm_integration(response_var = mirna_exp_model,

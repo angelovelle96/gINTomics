@@ -109,7 +109,6 @@
        rownames(ans) <- ans$hgnc_symbol
 
 
-       data("miRBase_conversion")
        genes <- cbind(genes, nop = gsub("-3p", "", genes))
        genes[,"nop"] <- gsub("-5p", "", genes[, "nop"])
 
