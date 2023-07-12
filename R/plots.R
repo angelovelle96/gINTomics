@@ -7,9 +7,13 @@ ridgeline_plot <- function(data,
                            outliers=F){
 
     data <- extract_model_res(data)
-    ggplot(data, aes(x = value, y = significativity, fill=significativity))+
+    data <- data[data$cov!="(Intercept)",]
+    ggplot(data, aes(x = data$value, y = data$significativity, fill=data$significativity))+
       geom_density_ridges() +
-      theme_ridges()
+      theme_ridges()+
+      guides(fill=guide_legend(title="Significativity"))+
+      xlab("Value")+
+      ylab("Significativity")
 
 }
 
@@ -23,19 +27,28 @@ chr_distribution_plot <- function(data,
                            show_sign=F){
 
   data <- extract_model_res(data)
+  data <- data[data$cov!="(Intercept)",]
   data <- data[!is.na(data$chr_cov),]
   if(show_sign){
     data <- data[data$significativity=="significant",]
-    ggplot(data, aes(x = factor(chr_cov, level=mixedsort(unique(data$chr_cov))),
-                     fill=sign))+
+    ggplot(data, aes(x = factor(data$chr_cov,
+                                level=mixedsort(unique(data$chr_cov))),
+                     fill=data$sign))+
       geom_bar(position="dodge", stat="count")+
-      xlab("Chromosome")
+      xlab("Chromosome")+
+      guides(fill=guide_legend(title="Sign"))+
+      xlab("Chromosome")+
+      ylab("Count")
 
   }else{
-  ggplot(data, aes(x = factor(chr_cov, level=mixedsort(unique(data$chr_cov))),
-                   fill=significativity))+
+  ggplot(data, aes(x = factor(data$chr_cov,
+                              level=mixedsort(unique(data$chr_cov))),
+                   fill=data$significativity))+
     geom_bar(position="dodge", stat="count")+
-      xlab("Chromosome")
+      xlab("Chromosome")+
+      guides(fill=guide_legend(title="Significativity"))+
+      xlab("Chromosome")+
+      ylab("Count")
         }
 }
 
