@@ -3,22 +3,18 @@ formatR::tidy_dir("~/Documenti/Rpackages/integrazione/R/allgene_edgeR_model.R",
 styler::style_file("~/Documenti/Rpackages/integrazione/R/run_edgeR_integration.R",
                    transformers = tidyverse_style(indent_by = 4))
 
-load("~/Documenti/Rpackages/integrazione/data/mirna_exp_model.rda")
-load("~/Documenti/Rpackages/integrazione/data/tf_expression_model.rda")
-load("~/Documenti/Rpackages/integrazione/data/tf_mirna_couples.Rdata")
+
+
+load("~/Documenti/Rpackages/integrazione/data/miRBase_conversion.rda")
+load("~/Documenti/Rpackages/integrazione/data/miRNA_TF.rda")
+
+save(mirna_hsa, tf_mirna,
+     file = "~/Documenti/Rpackages/integrazione/R/sysdata.rda")
+
+
+
 load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_tf_singleseq_isoall_20220329.Rdata")
 load("~/Documenti/Ovarian/rdata/parametri_integrazione_mirna_all_samples_ace20220311.Rdata")
-load("~/Documenti/Rpackages/integrazione/data/ov_test_tcga_omics.rda")
-
-
-
-
-save(run_edgeR_test1_input,
-run_edgeR_test1_output,
-run_edgeR_test2_input,
-run_edgeR_test2_output,
-mmultiassay_ov,
-file = '~/Documenti/Rpackages/integrazione/R/sysdata.rda')
 
 
 interactions <- expanded_tf_mirna_couples
