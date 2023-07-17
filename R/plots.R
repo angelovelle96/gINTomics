@@ -53,9 +53,8 @@ chr_distribution_plot <- function(data,
 }
 
 #' @import ComplexHeatmap
-#' @export
 
-heatmap_sign <- function(data,
+.heatmap_sign <- function(data,
                          outliers=T,
                          number=50){
 

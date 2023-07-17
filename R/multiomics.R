@@ -34,7 +34,6 @@ run_multiomics <- function(data,
                            interactions_miRNA_target=NULL,
                            interactions_tf=NULL,
                            interactions_tf_miRNA=NULL,
-                           interactions_regulators=NULL,
                            RNAseq=T,
                            miRNAseq=T,
                            normalize_miRNA_expr=T,
@@ -112,7 +111,7 @@ run_multiomics <- function(data,
       tmp <- t(assay(data, i = "gene_exp_original"))
       tmp <- tmp[rownames(met_res$data$response_var),
                  colnames(met_res$data$response_var)]
-      if(normalize_gene_expr) tmp <-  data_norm(tmp,
+      if(normalize_gene_expr) tmp <-  .data_norm(tmp,
                                                 method = norm_method_gene_expr)
       met_res$data$response_var <- tmp
 
@@ -135,7 +134,7 @@ run_multiomics <- function(data,
       tmp <- t(assay(data, i = "gene_exp_original"))
       tmp <- tmp[rownames(tf_res$data$response_var),
                  colnames(tf_res$data$response_var)]
-      if(normalize_gene_expr) tmp <-  data_norm(tmp,
+      if(normalize_gene_expr) tmp <-  .data_norm(tmp,
                                                 method = norm_method_gene_expr)
       tf_res$data$response_var <- tmp
     }
@@ -158,7 +157,7 @@ run_multiomics <- function(data,
         tmp <- t(assay(data, i = "miRNA_exp_original"))
         tmp <- tmp[rownames(tf_mirna_res$data$response_var),
                    colnames(tf_mirna_res$data$response_var)]
-        if(normalize_miRNA_expr) tmp <-  data_norm(tmp,
+        if(normalize_miRNA_expr) tmp <-  .data_norm(tmp,
                                                   method = norm_method_miRNA_expr)
         tf_mirna_res$data$response_var <- tmp
     }
@@ -181,7 +180,7 @@ run_multiomics <- function(data,
       tmp <- t(assay(data, i = "gene_exp_original"))
       tmp <- tmp[rownames(mirna_target_res$data$response_var),
                  colnames(mirna_target_res$data$response_var)]
-      if(normalize_gene_expr) tmp <-  data_norm(tmp,
+      if(normalize_gene_expr) tmp <-  .data_norm(tmp,
                                                  method = norm_method_gene_expr)
       mirna_target_res$data$response_var <- tmp
     }
@@ -230,7 +229,7 @@ run_cnv_integration <- function(expression,
                                      norm_method = norm_method,
                                      ...)
     if(normalize){
-      cnv_res$data$response_var <- data_norm(cnv_res$data$response_var,
+      cnv_res$data$response_var <- .data_norm(cnv_res$data$response_var,
                                              method = norm_method)
       }
   }else{
@@ -279,7 +278,7 @@ run_met_integration <- function( expression,
                                      norm_method = norm_method,
                                      ...)
     if(normalize){
-      met_res$data$response_var <- data_norm(met_res$data$response_var,
+      met_res$data$response_var <- .data_norm(met_res$data$response_var,
                                              method = norm_method)
     }
   }else{
@@ -353,12 +352,12 @@ run_tf_integration <- function( expression,
       }
 
       if(type=="tf"){
-        interactions <- download_tf(genes = colnames(expression),
+        interactions <- .download_tf(genes = colnames(expression),
                                     species = species)
       }
 
       if(type=="miRNA_target"){
-        interactions <- download_mirna_target(miRNAs = colnames(tf_expression),
+        interactions <- .download_mirna_target(miRNAs = colnames(tf_expression),
                                               targets = colnames(expression),
                                               species = species)
         interactions <- lapply(interactions, function(x)
@@ -368,7 +367,7 @@ run_tf_integration <- function( expression,
 
     }
 
-    if(normalize_cov) tf_expression <- data_norm(tf_expression,
+    if(normalize_cov) tf_expression <- .data_norm(tf_expression,
                                                  method = norm_method_cov)
 
     tmp <- unlist(lapply(interactions, length))
@@ -382,7 +381,7 @@ run_tf_integration <- function( expression,
                                       norm_method = norm_method,
                                       ...)
       if(normalize){
-        tf_res$data$response_var <- data_norm(tf_res$data$response_var,
+        tf_res$data$response_var <- .data_norm(tf_res$data$response_var,
                                                method = norm_method)
       }
     }else{

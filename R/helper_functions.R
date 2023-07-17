@@ -1,5 +1,5 @@
-#' @export
-data_check <- function( response_var,
+
+.data_check <- function( response_var,
                         covariates,
                         interactions){
 
@@ -70,8 +70,7 @@ data_check <- function( response_var,
 }
 
 ##################################################################
-#' @export
-covariates_check <- function(response_var,
+.covariates_check <- function(response_var,
                              covariates,
                              interactions,
                              steady_covariates=NULL,
@@ -119,10 +118,8 @@ covariates_check <- function(response_var,
 
 
 ######################################################
-#' Function for formula generation
-#' @export
 
-generate_formula <- function(interactions,
+.generate_formula <- function(interactions,
                              linear=F){
 
   fformula <- lapply(seq_along(interactions), function(x){
@@ -140,9 +137,8 @@ generate_formula <- function(interactions,
 
 #####################################################
 #' @importFrom plyr rbind.fill
-#' @export
 
-building_result_matrices <- function(model_results,
+.building_result_matrices <- function(model_results,
                                      type,
                                      single_cov=F){
   ####coef extraction
@@ -214,6 +210,17 @@ building_result_matrices <- function(model_results,
 
 
 ################################################
+#' MultiAssayExperiment generation
+#' @description
+#' This function will generate a proper MultiAssayExperiment suitable for the
+#' **run_multiomics** function.
+#' @param methylation Matrix or SummarizedExperiment for Methylation data
+#' @param cnv_data Matrix or SummarizedExperiment for genes' Copy Number
+#' Variation data
+#' @param gene_exp Matrix or SummarizedExperiment for Gene expression data
+#' @param miRNA_exp Matrix or SummarizedExperiment for miRNA expression data
+#' @param miRNA_cnv_data Matrix or SummarizedExperiment for miRNA's Copy
+#' Number Variations data
 #' @export
 
 create_multiassay <- function(methylation=NULL,
@@ -221,7 +228,6 @@ create_multiassay <- function(methylation=NULL,
                               gene_exp=NULL,
                               miRNA_exp=NULL,
                               miRNA_cnv_data=NULL,
-                              regulators=NULL,
                               ...){
 
   if((is.null(methylation)+is.null(cnv_data)+
@@ -234,19 +240,15 @@ create_multiassay <- function(methylation=NULL,
                               methylation=methylation,
                               cnv_data=cnv_data,
                               miRNA_exp=miRNA_exp,
-                              miRNA_cnv_data=miRNA_cnv_data,
-                              regulators=regulators))
+                              miRNA_cnv_data=miRNA_cnv_data))
   mmultiassay <- MultiAssayExperiment(experiments = eexperiments)
   return(mmultiassay)
 }
 
 
 ######################################################
-#' Data normalization for linear models
-#' @export
 
-
-    data_norm <- function(data,
+    .data_norm <- function(data,
                           method="TMM"){
 
       data <- edgeR::DGEList(t(data))
@@ -256,11 +258,9 @@ create_multiassay <- function(methylation=NULL,
     }
 
 #########################################################
-#' conversion back to the orginal IDs
 #' @importFrom stringi stri_replace_all_regex
-#' @export
 
-    id_conversion <- function(dictionary,
+    .id_conversion <- function(dictionary,
                               results){
 
       dictionary$tranformed <- paste0("^", dictionary$tranformed, "$")
@@ -317,7 +317,7 @@ create_multiassay <- function(methylation=NULL,
 
 ####################################################
 
-#'
+
 setMethod("extract_model_res", "list",
           function(model_results,
                    outliers=F,
@@ -351,7 +351,7 @@ setMethod("extract_model_res", "list",
                                   data$response[i],
                                   as.character(data$cov[i]))
             }
-            genes_info <- download_gene_info(data$cov,
+            genes_info <- .download_gene_info(data$cov,
                                              filters=filters,
                                              species = species)
             tmp <- intersect(data$cov, rownames(genes_info))
@@ -379,7 +379,7 @@ setMethod("extract_model_res", "list",
 )
 
 
-#'
+####################################################
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
                    outliers=F,
@@ -397,7 +397,7 @@ setMethod("extract_model_res", "MultiOmics",
 )
 
 
-#'
+#######################################################
 setMethod("extract_data", "list",
           function(model_results,
                    species="hsa",
@@ -417,7 +417,7 @@ setMethod("extract_data", "list",
       coef_layer <- as.data.frame(cbind(coef_layer,
                                         pval=model_results$pval_data$cov))
     }
-    genes_info <- download_gene_info(unique(c(names(res_layer),
+    genes_info <- .download_gene_info(unique(c(names(res_layer),
                                               names(cov_layer))),
                                      filters=filters,
                                      species = species)
@@ -455,7 +455,7 @@ setMethod("extract_data", "list",
 
 
 
-#'
+###############################################
 setMethod("extract_data", "MultiOmics",
           function(model_results,
                    species="hsa"){

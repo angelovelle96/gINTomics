@@ -1,9 +1,8 @@
 #'
 #' @import multiMiR
-#' @export
 
 
-   download_mirna_target <- function(miRNAs,
+   .download_mirna_target <- function(miRNAs,
                                      targets = NULL,
                                      species = 'hsa',
                                      table   = 'mirtarbase',
@@ -28,9 +27,8 @@
 
 #'
 #' @import  dorothea
-#' @export
 
-   download_tf <- function(genes,
+   .download_tf <- function(genes,
                            species="hsa",
                            include_predicted=F){
 
@@ -66,9 +64,8 @@
 
 #' @import biomaRt
 #' @importFrom stringr str_wrap
-#' @export
 
-   download_gene_info <- function(genes,
+   .download_gene_info <- function(genes,
                                   species = "hsa",
                                   filters = "hgnc_symbol"){
 

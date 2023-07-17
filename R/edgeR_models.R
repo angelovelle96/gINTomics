@@ -73,7 +73,7 @@ run_edgeR_integration <-  function( response_var,
                                     reference = NULL,
                                     BPPARAM = BiocParallel::SerialParam()) {
 
-    tmp <- data_check(response_var = response_var,
+    tmp <- .data_check(response_var = response_var,
                       covariates = covariates,
                       interactions = interactions)
     response_var <- tmp$response_var
@@ -94,7 +94,7 @@ run_edgeR_integration <-  function( response_var,
         norm_method = norm_method
     )
 
-    tmp <- covariates_check(response_var=response_var,
+    tmp <- .covariates_check(response_var=response_var,
                             covariates=covariates,
                             interactions = interactions,
                             steady_covariates=steady_covariates,
@@ -103,7 +103,7 @@ run_edgeR_integration <-  function( response_var,
     response_var <- tmp$response_var
     interactions <- tmp$interactions
     original_id <- tmp$original_id
-    fformula <- generate_formula(interactions = interactions)
+    fformula <- .generate_formula(interactions = interactions)
 
     fit_gene <- singlegene_edgeR_model(
         response_var = response_var,
@@ -116,7 +116,7 @@ run_edgeR_integration <-  function( response_var,
 
     model_res <- edger_coef_test(fit_gene,
                                  BPPARAM = BPPARAM)
-    coef_pval_mat <- building_result_matrices(model_results = model_res,
+    coef_pval_mat <- .building_result_matrices(model_results = model_res,
                                               type = "edgeR",
                                               single_cov = single_cov)
     tmp <- lapply(fit_gene, function(x) as.data.frame(residuals(x)))
@@ -132,7 +132,7 @@ run_edgeR_integration <-  function( response_var,
                   covariates = covariates,
                   formula = fformula))
     if(nrow(original_id)>0){
-      results <- id_conversion(dictionary = original_id,
+      results <- .id_conversion(dictionary = original_id,
                                results = results)
     }
     return(results)
