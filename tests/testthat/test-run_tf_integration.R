@@ -7,7 +7,7 @@ test_that("run_tf_integration sequencing data check", {
   interactions <- lapply(interactions, function(x) x[,1])
 
 
-  myres <- run_edgeR_integration(response_var = mirna_exp_model,
+  myres <- .run_edgeR_integration(response_var = mirna_exp_model,
                                   interactions = interactions,
                                   covariates = tf_expression_model,
                                   norm_method = "TMM")
@@ -31,7 +31,7 @@ test_that("run_tf_integration microarray data check", {
   interactions <- lapply(interactions, function(x) x[,1])
 
 
-  myres <- suppressWarnings(run_lm_integration(response_var = mirna_exp_model,
+  myres <- suppressWarnings(.run_lm_integration(response_var = mirna_exp_model,
                                  interactions = interactions,
                                  covariates = tf_expression_model,
                                  step = T))

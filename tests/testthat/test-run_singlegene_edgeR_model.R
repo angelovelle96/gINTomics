@@ -10,7 +10,7 @@ test_that("single gene complete integration gives correct results - Test1", {
     })
     names(y_gene_offset) <- rownames(counts)
 
-    myres <- run_edgeR_integration( response_var = t(counts),
+    myres <- .run_edgeR_integration( response_var = t(counts),
                                     covariates = data,
                                     steady_covariates = c("W_1", "W_2", "W_3"),
                                     design_mat_allgene = design_all,

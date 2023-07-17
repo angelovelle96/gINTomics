@@ -10,7 +10,7 @@ test_that("run_cnv_integration check", {
     matrix(1, 1, ncol(counts))
   })
 
-  myres <- run_edgeR_integration( response_var = t(counts),
+  myres <- .run_edgeR_integration( response_var = t(counts),
                                   covariates = data,
                                   steady_covariates = c("W_1", "W_2", "W_3"),
                                   design_mat_allgene = design_all,
