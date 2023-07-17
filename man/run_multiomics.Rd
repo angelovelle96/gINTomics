@@ -10,7 +10,6 @@ run_multiomics(
   interactions_miRNA_target = NULL,
   interactions_tf = NULL,
   interactions_tf_miRNA = NULL,
-  interactions_regulators = NULL,
   RNAseq = T,
   miRNAseq = T,
   normalize_miRNA_expr = T,
