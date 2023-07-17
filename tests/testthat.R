@@ -1,4 +1,4 @@
 library(testthat)
-library(integrazione)
+library(gINTomics)
 
-test_check("integrazione")
+test_check("gINTomics")
