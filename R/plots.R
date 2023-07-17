@@ -1,4 +1,12 @@
 
+#' Ridgeline plot
+#' @description
+#' The ridgeline plot allow to compare the distribution of significant and
+#' non significant coefficients.
+#' @param data Output of one of the integration functions or output of
+#' **run_multiomics**
+#' @param outliers logical. Should outliers be showed in the plot. Default is
+#' set to FALSE
 #' @import ggplot2 ggridges
 #' @export
 #'
@@ -6,7 +14,8 @@
 ridgeline_plot <- function(data,
                            outliers=F){
 
-    data <- extract_model_res(data)
+    data <- extract_model_res(data,
+                              outliers=outliers)
     data <- data[data$cov!="(Intercept)",]
     ggplot(data, aes(x = data$value, y = data$significativity, fill=data$significativity))+
       geom_density_ridges() +
@@ -17,22 +26,34 @@ ridgeline_plot <- function(data,
 
 }
 
-
+#' Chromosome distribution plot
+#' @description
+#' The chromosome distribution plot is a barplot showing the number of
+#' significant/non significant or positive/negative coefficients
+#' for each chromosome.
+#' @param data Output of one of the integration functions or output of
+#' **run_multiomics**
+#' @param outliers logical. Should outliers be showed in the plot. Default is
+#' set to TRUE
+#' @param show_sign logical. Should barplot colors be defined according to the
+#' sign of the coefficients ? In this case only significant coefficients will
+#' be included in the plot. Default set to FALSE.
 #' @import ggplot2 ggridges
 #' @importFrom gtools mixedsort
 #' @export
 
 chr_distribution_plot <- function(data,
-                           outliers=F,
+                           outliers=T,
                            show_sign=F){
 
-  data <- extract_model_res(data)
+  data <- extract_model_res(data,
+                            outliers=outliers)
   data <- data[data$cov!="(Intercept)",]
   data <- data[!is.na(data$chr_cov),]
   if(show_sign){
     data <- data[data$significativity=="significant",]
     ggplot(data, aes(x = factor(data$chr_cov,
-                                level=mixedsort(unique(data$chr_cov))),
+                                levels=mixedsort(unique(data$chr_cov))),
                      fill=data$sign))+
       geom_bar(position="dodge", stat="count")+
       xlab("Chromosome")+
@@ -42,7 +63,7 @@ chr_distribution_plot <- function(data,
 
   }else{
   ggplot(data, aes(x = factor(data$chr_cov,
-                              level=mixedsort(unique(data$chr_cov))),
+                              levels=mixedsort(unique(data$chr_cov))),
                    fill=data$significativity))+
     geom_bar(position="dodge", stat="count")+
       xlab("Chromosome")+
@@ -101,9 +122,8 @@ chr_distribution_plot <- function(data,
 
 
 #' @import circlize
-#' @export
 
-ccircos_genLines_chr <- function(chr=c(1:22, "X", "Y", "MT"),
+.ccircos_genLines_chr <- function(chr=c(1:22, "X", "Y", "MT"),
                                     rregion,
                                     vvalue,
                                     ttrack,
@@ -130,9 +150,8 @@ ccircos_genLines_chr <- function(chr=c(1:22, "X", "Y", "MT"),
 
 
 #' @import circlize
-#' @export
 
-ccircos_genPoints_chr <- function(chr=c(1:22, "X", "Y", "MT"),
+.ccircos_genPoints_chr <- function(chr=c(1:22, "X", "Y", "MT"),
                                   rregion,
                                   vvalue,
                                   ppch,
@@ -156,8 +175,22 @@ ccircos_genPoints_chr <- function(chr=c(1:22, "X", "Y", "MT"),
 
 }
 
+#' Circos plot
+#' @description
+#' This function will generate a Circos plot for an integration model. It will
+#' display in the first two layer the data of the covariates and of the
+#' response variable and when possible in the third layer the values of the
+#' significant coefficients
+#' @param model_results Output of an integration model. Not available for
+#' the entire **run_multiomics** output. You can provide one of the results
+#' of the MultiOmics object (e.g. muliomics$gene_cnv_res) or provide the
+#' results of one of the other integration functions.
+#' @param species Species information, default is "hg38". See
+#' **circos.initializeWithIdeogram** function from **circlize** package for
+#' further information
 #' @import circlize
 #' @importFrom gtools mixedsort
+#' @importFrom stats quantile
 #' @export
 
 circos_plot <- function(model_results,
@@ -186,12 +219,12 @@ circos_plot <- function(model_results,
     wwhich <- data$cov_layer$mean>quantile(data$cov_layer$mean,0.99)
     data$cov_layer$mean[wwhich] <- quantile(data$cov_layer$mean, 0.99)
     tmp <- unique(gtools::mixedsort(data$res_layer$chromosome_name))
-    circos.initializeWithIdeogram(species = "hg38", chromosome.index = tmp)+
+    circos.initializeWithIdeogram(species = species, chromosome.index = tmp)+
     circos.genomicTrack(data, ylim=c(min(data$cov_layer$mean),
                                      max(data$cov_layer$mean)))+
     circos.genomicTrack(data, ylim=c(min(data$res_layer$mean),
                                      max(data$res_layer$mean)))+
-    ccircos_genLines_chr(chr = tmp,
+    .ccircos_genLines_chr(chr = tmp,
                          rregion = data$cov_layer[,4:6],
                          vvalue = data$cov_layer$mean,
                          ttrack = 3,
@@ -200,7 +233,7 @@ circos_plot <- function(model_results,
                          ccol = data$cov_layer$ccol,
                          bbaseline = 0,
                          lwd = 1)+
-    ccircos_genLines_chr(chr = tmp,
+    .ccircos_genLines_chr(chr = tmp,
                          rregion = data$res_layer[,4:6],
                          vvalue = data$res_layer$mean,
                          ttrack = 4,
@@ -211,7 +244,7 @@ circos_plot <- function(model_results,
                          lwd = 1)+
     if(coef) circos.genomicTrack(data, ylim=c(min(data$coef_layer$mean),
                                               max(data$coef_layer$mean)))+
-      ccircos_genLines_chr(chr = tmp,
+      .ccircos_genLines_chr(chr = tmp,
                            rregion = data$coef_layer[,5:7],
                            vvalue = data$coef_layer$mean,
                            ttrack = 5,

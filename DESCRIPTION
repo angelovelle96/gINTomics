@@ -17,7 +17,6 @@ Imports:
     ComplexHeatmap,
     dorothea,
     edgeR,
-    gdata,
     ggplot2,
     ggridges,
     gtools,
@@ -25,12 +24,13 @@ Imports:
     multiMiR,
     parallel,
     plyr,
-    readr,
-    reshape2,
     RUVSeq,
     stringi,
     stringr,
-    SummarizedExperiment
+    SummarizedExperiment,
+    methods,
+    stats,
+    reshape2
 Depends: 
     R (>= 3.5.0)
 LazyData: true

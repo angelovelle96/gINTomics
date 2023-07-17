@@ -3,8 +3,6 @@
 #' @description
 #' This function will perform a complete Multi-Omics integration on a
 #' MultiAssayExperiment
-#' @import MultiAssayExperiment SummarizedExperiment
-#'
 #' @param data A MultiAssayExperiment. It can be generated exploiting the
 #' **generate_multiassay** function.
 #' @param interactions_met **interactions** as for **run_met_integration**
@@ -28,6 +26,8 @@
 #' @param norm_method_miRNA_expr Normalization method to be used for miRNA
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
+#' @import MultiAssayExperiment SummarizedExperiment
+#' @importFrom methods new
 #' @export
 run_multiomics <- function(data,
                            interactions_met=NULL,
@@ -223,7 +223,7 @@ run_cnv_integration <- function(expression,
                                 ...){
 
   if(sequencing_data==T){
-    cnv_res <- run_edgeR_integration(response_var = expression,
+    cnv_res <- .run_edgeR_integration(response_var = expression,
                                      covariates = cnv_data,
                                      normalize = normalize,
                                      norm_method = norm_method,
@@ -233,7 +233,7 @@ run_cnv_integration <- function(expression,
                                              method = norm_method)
       }
   }else{
-    cnv_res <- run_lm_integration(response_var = expression,
+    cnv_res <- .run_lm_integration(response_var = expression,
                                   covariates = cnv_data,
                                   normalize = normalize,
                                   norm_method = norm_method,
@@ -272,7 +272,7 @@ run_met_integration <- function( expression,
                                  ...){
 
   if(sequencing_data==T){
-    met_res <- run_edgeR_integration(response_var = expression,
+    met_res <- .run_edgeR_integration(response_var = expression,
                                      covariates = methylation,
                                      normalize = normalize,
                                      norm_method = norm_method,
@@ -282,7 +282,7 @@ run_met_integration <- function( expression,
                                              method = norm_method)
     }
   }else{
-    met_res <- run_lm_integration(response_var = expression,
+    met_res <- .run_lm_integration(response_var = expression,
                                   covariates = methylation,
                                   normalize = normalize,
                                   norm_method = norm_method,
@@ -326,6 +326,7 @@ run_met_integration <- function( expression,
 #' "none".
 #' @param normalize_cov Same as **normalize** but for covariates.
 #' @param norm_method_cov Same as **norm_method** but for covariates.
+#' @importFrom stats quantile
 #' @export
 
 run_tf_integration <- function( expression,
@@ -377,7 +378,7 @@ run_tf_integration <- function( expression,
     if(quantile(tmp, 0.75)>=10) sequencing_data <- F
 
     if(sequencing_data==T){
-      tf_res <- run_edgeR_integration(response_var = expression,
+      tf_res <- .run_edgeR_integration(response_var = expression,
                                       covariates = tf_expression,
                                       interactions = interactions,
                                       normalize = normalize,
@@ -388,7 +389,7 @@ run_tf_integration <- function( expression,
                                                method = norm_method)
       }
     }else{
-      tf_res <- run_lm_integration(response_var = expression,
+      tf_res <- .run_lm_integration(response_var = expression,
                                    covariates = tf_expression,
                                    interactions = interactions,
                                    normalize = normalize,

@@ -1,4 +1,6 @@
 
+#' @importFrom stats sd
+
 .data_check <- function( response_var,
                         covariates,
                         interactions){
@@ -69,7 +71,9 @@
     return(rresult)
 }
 
-##################################################################
+
+#' @importFrom stats relevel
+
 .covariates_check <- function(response_var,
                              covariates,
                              interactions,
@@ -117,7 +121,7 @@
 }
 
 
-######################################################
+#' @importFrom stats formula
 
 .generate_formula <- function(interactions,
                              linear=F){
@@ -316,7 +320,8 @@ create_multiassay <- function(methylation=NULL,
     }
 
 ####################################################
-
+#' @importFrom reshape2 melt
+#' @importFrom stats IQR quantile
 
 setMethod("extract_model_res", "list",
           function(model_results,
@@ -326,9 +331,9 @@ setMethod("extract_model_res", "list",
 
             data <- cbind(response=rownames(model_results$coef_data),
                           model_results$coef_data)
-            data <- reshape2::melt(data,
-                                   id.vars="response",
-                                   variable.name = "cov")
+            data <- melt(data,
+                         id.vars="response",
+                         variable.name = "cov")
             rownames(data) <- paste0(data$response, "_", data$cov)
             data <- data[!is.na(data$value),]
             pval <- cbind(response=rownames(model_results$pval_data),

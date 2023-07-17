@@ -1,6 +1,6 @@
 #' @import stringr
-#' @export
-run_lm_integration <- function(response_var,
+#' @importFrom stats residuals
+.run_lm_integration <- function(response_var,
                                covariates,
                                interactions="auto",
                                step=F,
@@ -37,7 +37,7 @@ run_lm_integration <- function(response_var,
     fformula <- .generate_formula(interactions = interactions,
                                  linear=T)
     data <- cbind(response_var, covariates)
-    lm_results <-  bplapply(fformula, def_lm,
+    lm_results <-  bplapply(fformula, .def_lm,
                             data=data,
                             step=step,
                             BPPARAM = BPPARAM)
@@ -69,10 +69,9 @@ run_lm_integration <- function(response_var,
 
 
 ##################################
-#' Linear model definition
-#' @export
+#' @importFrom stats lm
 
-def_lm <- function(formula,
+.def_lm <- function(formula,
                    data,
                    step=F){
 

@@ -64,6 +64,7 @@
 
 #' @import biomaRt
 #' @importFrom stringr str_wrap
+#' @importFrom stats setNames
 
    .download_gene_info <- function(genes,
                                   species = "hsa",
