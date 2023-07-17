@@ -341,6 +341,9 @@ run_tf_integration <- function( expression,
                                 ...){
 
     if(is.null(interactions)){
+      if(!type%in%c("tf_miRNA", "tf", "miRNA_target"))
+        stop(str_wrap("If interactions are not provided, type should be one
+                      of tf_miRNA, tf, miRNA_target"))
       if(type=="tf_miRNA"){
         interactions <- tf_mirna[[species]]
         interactions <- interactions[interactions$level=="literature",]
