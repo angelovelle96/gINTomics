@@ -1,28 +1,6 @@
----
-title: "gINTomics vignette"
-author:
-- name: Angelo Velle
-  affiliation: 
-  - &id Biology Department, University of Padova, Italy
-  email: angelo.velle@phd.unipd.it
-- name: Chiara Romualdi
-  affiliation: 
-  - &id Biology Department, University of Padova, Italy
-  email: chiara.romualdi@unipd.it
-abstract: >
-  gINTomics is an R package for Multi-Omics data integration and visualization. gINTomics is designed to detect the association between the expression of a target and of its regulators, taking into account also their genomics modifications such as Copy Number Variations (CNV) and methylation. For RNA sequencing data, the counts will be fitted using a negative binomial model, while in the case of microarray or other types of data, a linear model will be applied. In some cases the number of regulators for a given target could be very high, in order to handle this eventuality, we provide a penalized linear model that will automatically keep only the most important regulators. All the models are gene-specific, so each gene/miRNA will have its own model with its covariates. The package will automatically download information about TF-target couples (dorothea), miRNA-target couples (multiMiR) and TF-miRNA couples (TransmiR). The couples will be used to define the covariates used in the integration models.
-output: 
-  BiocStyle::html_document:
-      toc: true
-      toc_float:
-          collapsed: true
-vignette: >
-  %\VignetteIndexEntry{gINTomics vignette}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-date: 18 luglio 2023
-link-citations: true
----
+
+ gINTomics is an R package for Multi-Omics data integration and visualization. gINTomics is designed to detect the association between the expression of a target and of its regulators, taking into account also their genomics modifications such as Copy Number Variations (CNV) and methylation. For RNA sequencing data, the counts will be fitted using a negative binomial model, while in the case of microarray or other types of data, a linear model will be applied. In some cases the number of regulators for a given target could be very high, in order to handle this eventuality, we provide a penalized linear model that will automatically keep only the most important regulators. All the models are gene-specific, so each gene/miRNA will have its own model with its covariates. The package will automatically download information about TF-target couples (dorothea), miRNA-target couples (multiMiR) and TF-miRNA couples (TransmiR). The couples will be used to define the covariates used in the integration models.
+
 
 # Installation
 To install this package:
