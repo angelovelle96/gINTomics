@@ -52,6 +52,25 @@
       response_var <- response_var[, check_sd>0]
     }
 
+    if(is.numeric(covariates[,1])){
+      check_sd <- apply(covariates, 2, sd)
+      if(sum(check_sd==0)>0) {
+        message(str_wrap("removing covariates with
+                                  zero standard deviation"))
+        covariates <- covariates[, check_sd>0]
+      }
+    }else{
+      check_sd <- apply(covariates, 2, function(x){
+        ans <- length(unique(x))
+        return(ans)
+      })
+      if(sum(check_sd==1)>0) {
+        message(str_wrap("removing covariates with
+                                  zero standard deviation"))
+        covariates <- covariates[, check_sd>1]
+      }
+    }
+
 
     interactions <- lapply(interactions, function(x)
       intersect(x, colnames(covariates)))
@@ -351,8 +370,9 @@ setMethod("extract_model_res", "list",
             data$sign <- rep("negative", nrow(data))
             data$sign[data$value>0]="positive"
             data$cov <- as.character(data$cov)
+            data$cov <- gsub("_cov", "", data$cov)
             for(i in 1:nrow(data)){
-              data$cov[i] <- gsub("cov",
+              data$cov[i] <- gsub("^cov",
                                   data$response[i],
                                   as.character(data$cov[i]))
             }
