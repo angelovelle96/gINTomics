@@ -119,7 +119,7 @@ run_multiomics <- function(data,
 
 
     tf_res <- NULL
-    if(!is.null(data@ExperimentList$miRNA_exp)){
+    if(!is.null(data@ExperimentList$gene_exp)){
 
       tf_res <- run_tf_integration(
         expression = t(assay(data,i = "gene_exp")),
@@ -332,7 +332,7 @@ run_met_integration <- function( expression,
 run_tf_integration <- function( expression,
                                 tf_expression=expression,
                                 interactions=NULL,
-                                type=NULL,
+                                type="none",
                                 sequencing_data=T,
                                 species="hsa",
                                 normalize=T,
