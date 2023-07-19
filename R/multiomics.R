@@ -69,9 +69,9 @@ run_multiomics <- function(data,
         data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
           rownames(gene_cnv_res$residuals),
           colnames(gene_cnv_res$residuals)]
-        assay(data@ExperimentList$gene_exp) <- gene_cnv_res$residuals[
+        assay(data@ExperimentList$gene_exp) <- as.matrix(gene_cnv_res$residuals[
           rownames(assay(data, i = "gene_exp")),
-          colnames(assay(data, i = "gene_exp"))]
+          colnames(assay(data, i = "gene_exp"))])
         RNAseq <- F
         normalize_gene_expr2 <- F
       }
@@ -91,9 +91,9 @@ run_multiomics <- function(data,
       data@ExperimentList$miRNA_exp <- data@ExperimentList$miRNA_exp[
         rownames(mirna_cnv_res$residuals),
         colnames(mirna_cnv_res$residuals)]
-      assay(data@ExperimentList$miRNA_exp) <- mirna_cnv_res$residuals[
+      assay(data@ExperimentList$miRNA_exp) <- as.matrix(mirna_cnv_res$residuals[
         rownames(assay(data, i = "miRNA_exp")),
-        colnames(assay(data, i = "miRNA_exp"))]
+        colnames(assay(data, i = "miRNA_exp"))])
       miRNAseq <- F
       normalize_miRNA_expr2 <- F
 
