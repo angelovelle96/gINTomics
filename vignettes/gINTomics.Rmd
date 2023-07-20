@@ -32,6 +32,7 @@ To install this package:
 
 ```{r, eval=FALSE}
 
+##installation
 devtools::install_github("angelovelle96/gINTomics")
 
 ```
