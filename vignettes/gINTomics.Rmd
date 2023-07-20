@@ -31,7 +31,9 @@ knitr::include_graphics("figures/logo_gINTomics.png")
 To install this package:
 
 ```{r eval=FALSE}
+
 devtools::install_github("angelovelle96/gINTomics")
+
 ```
 
 # How to use gINTomics
