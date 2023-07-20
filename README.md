@@ -7,7 +7,7 @@
 To install this package:
 
 ``` r
-devtools::install_github("angelovelle96/gINTomics")`
+devtools::install_github("angelovelle96/gINTomics")
 ```
 
 # How to use gINTomics
