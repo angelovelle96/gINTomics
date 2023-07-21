@@ -121,6 +121,9 @@ This barplot highlights the distribution of significant and non significant cova
 chr_distribution_plot(multiomics_integration)
 
 ```
+<p align="center">
+<img width="500" height="300" src="vignettes/figures/chr_distr.png" class="center" />
+</p>
 
 ### Ridgeline plot
 
@@ -130,6 +133,9 @@ The ridgeline plot is designed to compare different distributions, it has been i
 ridgeline_plot(multiomics_integration)
 
 ```
+<p align="center">
+<img width="500" height="300" src="vignettes/figures/ridgeline.png" class="center" />
+</p>
 
 ### Circos plot
 
@@ -139,6 +145,7 @@ Circos plots are an incredible resource in terms of data visualization and summa
 circos_plot(multiomics_integration$gene_cnv_res)
 
 ```
-
-
+<p align="center">
+<img align="center" width="500" height="500" src="vignettes/figures/circos.png" class="center" />
+</p>
 
