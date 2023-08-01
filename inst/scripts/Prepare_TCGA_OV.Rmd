@@ -1,0 +1,200 @@
+---
+title: "Prepare_OV_data"
+author: "Angelo Velle"
+date: "2023-03-08"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(curatedTCGAData)
+library(TCGAutils)
+library(SummarizedExperiment)
+```
+
+#Download TCGA biolinks
+```{r}
+library(TCGAbiolinks)
+
+query.met <- GDCquery(
+  project = "TCGA-OV", 
+  data.category = "DNA Methylation", 
+  data.type = "Methylation Beta Value",
+  platform = "Illumina Human Methylation 27"
+)
+
+GDCdownload(
+  query = query.met, 
+  files.per.chunk = 20,
+  directory = "/mnt/st1_eoc/TCGA/"
+)
+
+ov.met <- GDCprepare(
+  query = query.met,
+  save = T,
+  directory = "/mnt/st1_eoc/TCGA/", 
+  save.filename = "/mnt/st1_eoc/TCGA/TCGA-OV/TCGA-OVmeth450K_20230307.RData"
+)
+
+##########
+
+query.rnaseq <- GDCquery(
+  project = "TCGA-OV", 
+  data.category = "Transcriptome Profiling", 
+  data.type = "Gene Expression Quantification",
+  workflow.type = "STAR - Counts"
+)
+
+GDCdownload(
+  query = query.rnaseq, 
+  files.per.chunk = 20,
+  directory = "/mnt/st1_eoc/TCGA/"
+)
+
+ov.rnaseq <- GDCprepare(
+  query = query.rnaseq,
+  save = T,
+  directory = "/mnt/st1_eoc/TCGA/", 
+  save.filename = "/mnt/st1_eoc/TCGA/TCGA-OV/TCGA-OVtranscriptome_Profiling20230307.RData"
+)
+
+#########
+
+query.mirna <- GDCquery(
+  project = "TCGA-OV",
+  data.type = "miRNA Expression Quantification",
+  data.category = "Transcriptome Profiling"
+)
+
+GDCdownload(
+  query = query.mirna,
+  files.per.chunk = 10,
+  directory = "/mnt/st1_eoc/TCGA/"
+)
+
+ov.mirna <- GDCprepare(
+  query = query.mirna,
+  save = T,
+  directory = "/mnt/st1_eoc/TCGA/", 
+  save.filename = "/mnt/st1_eoc/TCGA/TCGA-OV/TCGA-OVmirnaseq20230307.RData"
+)
+```
+
+#curatedTCGA Downloading and saving gistic
+```{r, eval=FALSE}
+
+gistic_data <- curatedTCGAData(diseaseCode = "OV", assays = "gistic_allbygene", version = "2.0.1", dry.run = F)
+#save(gistic_data, file = "/mnt/st1_eoc/TCGA/TCGA-OV/OV_GISTIC_AllByGene_20160128.RData")
+
+
+```
+
+#Loading SummarizedExperiment
+```{r}
+load("/mnt/st1_eoc/TCGA/TCGA-OV/OV_GISTIC_AllByGene_20160128.RData")
+tmp <- gistic_data[[1]]
+assay(tmp) <- apply(assay(tmp), 2, as.numeric)
+colData(tmp) <- colData(gistic_data)
+rownames(tmp) <- gistic_data@ExperimentList@listData$`OV_GISTIC_AllByGene-20160128`@elementMetadata@listData$Gene.Symbol
+gistic_data <- tmp
+load("/mnt/st1_eoc/TCGA/TCGA-OV/TCGA-OVmirnaseq20230307.RData")
+mirna_data <- data
+mirna_data <- mirna_data[, c(1, grep("^read_count", colnames(mirna_data)))]
+colnames(mirna_data) <- gsub("^read_count_", "", colnames(mirna_data))
+rownames(mirna_data) <- mirna_data$miRNA_ID
+mirna_data <- mirna_data[, colnames(mirna_data)!="miRNA_ID"]
+mirna_data <- SummarizedExperiment(assays = mirna_data)
+mirna_data$barcode <- colnames(mirna_data)
+colnames(mirna_data) <- substr(colnames(mirna_data), start = 1, stop = 12)
+load("/mnt/st1_eoc/TCGA/TCGA-OV/TCGA-OVmeth450K_20230307.RData")
+colnames(data) <- data$patient
+meth_data <- data
+load("/mnt/st1_eoc/TCGA/TCGA-OV/TCGA-OVtranscriptome_Profiling20230307.RData")
+colnames(data) <- data$patient
+rownames(data) <- data@rowRanges@elementMetadata$gene_name
+rnaseq_data <- data
+rm(data)
+```
+
+#Filtering
+```{r}
+dim(mirna_data)#[1] 1881  499
+tmp <- sapply(strsplit(mirna_data$barcode, split = "-"), function(x) x[4])
+dim(mirna_data <- mirna_data[, tmp=="01A"])#[1] 1881  470
+dim(mirna_data <- mirna_data[, !duplicated(colnames(mirna_data))])#[1] 1881  469
+dim(rnaseq_data)#[1] 60660   429
+dim(rnaseq_data <- rnaseq_data[, rnaseq_data$sample_type_id=="01"])#[1] 60660   421
+dim(meth_data)#[1] 27578   613
+dim(meth_data <- meth_data[, meth_data$sample_type_id=="01"])#[1] 27578   582
+
+
+```
+
+
+
+# Clustering met data
+```{r, eval=FALSE}
+library(TCGAutils)
+library(impute)
+library(doParallel)
+library(MethylMix)
+library(pbmcapply)
+library(curatedTCGAData)
+
+metData <- as.matrix(assay(meth_data))
+  
+# Remove all rows with low values and impute missing values
+thr <- ncol(metData)*0.4
+remove <- apply(is.na(metData),1,sum) > thr
+metAssay <- metData[!remove, ]
+metAssay <- impute.knn(metAssay,k=5)$data
+  
+cl <- makeCluster(20)
+registerDoParallel(cl)
+metClustValues <- ClusterProbes(metAssay, MET_Normal = NULL)
+stopCluster(cl)
+
+
+metClustValues$methData <- meth_data
+
+#save(metClustValues, file = "/mnt/st1_eoc/TCGA/TCGA-OV/OV_TCGA_metclust_res.Rdata")
+```
+
+#Generating mirna cnv data
+```{r}
+library(biomaRt)
+mart <- useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
+hugo_to_mirbase <- getBM(attributes = c( 'hgnc_symbol',"mirbase_id"), filters = "hgnc_symbol", values = rownames(gistic_data), mart = mart)
+hugo_to_mirbase <- hugo_to_mirbase[hugo_to_mirbase$mirbase_id!="",]
+hugo_to_mirbase <- hugo_to_mirbase[!duplicated(hugo_to_mirbase$hgnc_symbol),]
+hugo_to_mirbase <- hugo_to_mirbase[!duplicated(hugo_to_mirbase$mirbase_id),]
+dim(mirna_cnv_data <- gistic_data[rownames(gistic_data)%in%hugo_to_mirbase$hgnc_symbol,])#[1] 1202  573
+rownames(mirna_cnv_data) <- hugo_to_mirbase$mirbase_id
+
+
+```
+
+
+#preparing multiassay for integration package
+```{r}
+load("/mnt/st1_eoc/TCGA/TCGA-OV/OV_TCGA_metclust_res.Rdata")
+meth_data_clustered <- SummarizedExperiment(assays = metClustValues$MET_Cancer_Clustered, colData = colData(meth_data)[ colnames(metClustValues$MET_Cancer_Clustered),])
+
+
+eexperiments <- ExperimentList(gene_exp=rnaseq_data,
+                               methylation=meth_data_clustered,
+                               cnv_data=gistic_data)
+
+
+mmultiassay_ov <- MultiAssayExperiment(experiments = eexperiments)
+mmultiassay_ov <- intersectRows(mmultiassay_ov)
+mmultiassay_ov <- c(mmultiassay_ov, miRNA_exp=mirna_data, miRNA_cnv_data=mirna_cnv_data)
+mmultiassay_ov <- intersectColumns(mmultiassay_ov)
+mmultiassay_ov <- mmultiassay_ov[, 1:20]
+
+
+#save(mmultiassay_ov, file = "~/Documenti/Rpackages/integrazione/data/ov_test_tcga_omics.rda")
+
+
+```
