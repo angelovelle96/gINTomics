@@ -346,13 +346,8 @@ run_tf_integration <- function( expression,
         stop(str_wrap("If interactions are not provided, type should be one
                       of tf_miRNA, tf, miRNA_target"))
       if(type=="tf_miRNA"){
-        interactions <- tf_mirna[[species]]
-        interactions <- interactions[interactions$level=="literature",]
-        tmp <- unique(interactions$miRNA)
-        interactions <- lapply(tmp, function(x){
-          interactions$TF[grep(x,interactions$miRNA)]
-        })
-        names(interactions) <- tmp
+       interactions <- .download_tf_mirna(miRNAs = colnames(expression),
+                                          species = species)
       }
 
       if(type=="tf"){
@@ -362,10 +357,7 @@ run_tf_integration <- function( expression,
 
       if(type=="miRNA_target"){
         interactions <- .download_mirna_target(miRNAs = colnames(tf_expression),
-                                              targets = colnames(expression),
                                               species = species)
-        interactions <- lapply(interactions, function(x)
-          gsub("-miR-", "-mir-", x))
       }
 
 

@@ -1,62 +1,95 @@
 #'
-#' @import multiMiR
-
+#' @import OmnipathR miRBaseConverter
 
    .download_mirna_target <- function(miRNAs,
-                                     targets = NULL,
                                      species = 'hsa',
-                                     table   = 'mirtarbase',
                                      ...){
-
-
-     tmp <- get_multimir(org = species,
-                         target = targets,
-                         mirna   = miRNAs,
-                         table   = table,
-                         summary = F,
-                         ...)
-     tmp2 <- tmp@data[grep("Luciferase", tmp@data$experiment),]
-     ans <- lapply(unique(tmp2$target_symbol), function(x)
-       tmp2$mature_mirna_id[tmp2$target_symbol==x])
-
-     names(ans) <- unique(tmp2$target_symbol)
+     if(!species%in%c("hsa", "mmu", "rno")) stop(str_wrap("Available species
+                                                          are hsa, mmu and rno
+                                                          for miRNA target
+                                                          download"))
+     org <- setNames(c(9606, 10090, 10116), c("hsa", "mmu", "rno"))
+     mirna_target <-  import_mirnatarget_interactions(organism = org[species])
+     tmp <- getAllMiRNAs(species = species)
+     rownames(tmp) <- tmp$Accession
+     mirna_target$mirbase <- tmp[mirna_target$source, "Name"]
+     mirna_target$mirbase[is.na(mirna_target$mirbase)] <-
+       mirna_target$source_genesymbol[is.na(mirna_target$mirbase)]
+     names(miRNAs) <- tolower(miRNAs)
+     mirna_target <- mirna_target[
+       tolower(mirna_target$mirbase)%in%names(miRNAs),]
+     mirna_target$miRNAs <- miRNAs[tolower(mirna_target$mirbase)]
+     ans <- lapply(unique(mirna_target$target_genesymbol), function(x)
+       mirna_target$miRNAs[mirna_target$target_genesymbol==x])
+     names(ans) <- unique(mirna_target$target_genesymbol)
      ans <- lapply(ans, unique)
      return(ans)
    }
 
 
 #'
-#' @import  dorothea
+#' @import OmnipathR miRBaseConverter
+
+    .download_tf_mirna <- function(miRNAs,
+                                      species = 'hsa',
+                                      ...){
+
+      if(!species%in%c("hsa", "mmu", "rno")) stop(str_wrap("Available species
+                                                          are hsa, mmu and rno
+                                                          for miRNA target
+                                                          download"))
+      org <- setNames(c(9606, 10090, 10116), c("hsa", "mmu", "rno"))
+      tf_mirna <-  import_tf_mirna_interactions(organism = org[species], resources = "TransmiR")
+      tmp <- getAllMiRNAs(species = species)
+      rownames(tmp) <- tmp$Accession
+      tf_mirna$mirbase <- tmp[tf_mirna$target, "Name"]
+      tf_mirna$mirbase[is.na(tf_mirna$mirbase)] <-
+        tf_mirna$target_genesymbol[is.na(tf_mirna$mirbase)]
+      tmp <- tf_mirna
+      tmp$mirbase <- gsub("-3p", "", tmp$mirbase)
+      tmp$mirbase <- gsub("-5p", "", tmp$mirbase)
+      tmp$mirbase <- gsub("\\*", "", tmp$mirbase)
+      tf_mirna <- rbind(tf_mirna, tmp)
+      tf_mirna$check <- paste(tf_mirna$source_genesymbol,
+                              tf_mirna$mirbase,
+                              sep = "_")
+      tf_mirna <- tf_mirna[!duplicated(tf_mirna$check),]
+      names(miRNAs) <- tolower(miRNAs)
+      tf_mirna <- tf_mirna[
+        tolower(tf_mirna$mirbase)%in%names(miRNAs),]
+      tf_mirna$miRNAs <- miRNAs[tolower(tf_mirna$mirbase)]
+      ans <- lapply(unique(tf_mirna$miRNAs), function(x)
+        tf_mirna$source_genesymbol[tf_mirna$miRNAs==x])
+      names(ans) <- unique(tf_mirna$miRNAs)
+      ans <- lapply(ans, unique)
+      return(ans)
+
+
+    }
+
+
+
+
+#'
+#' @import  OmnipathR
 
    .download_tf <- function(genes,
                            species="hsa",
-                           include_predicted=F){
+                           ...){
 
-     if(!species%in%c("hsa", "mmu")) stop(str_wrap("Available species are hsa
-                                                   and mmu for TF download"))
-
-     if(species=="hsa"){
-       data("dorothea_hs", package = "dorothea")
-       data <- dorothea_hs
-       if(!include_predicted) data <- data[data$confidence!="E",]
-       data <- data[data$tf%in%genes,]
-       data <- data[data$target%in%genes,]
-
-      }
-
-     if(species=="mmu"){
-       data("dorothea_mm", package = "dorothea")
-       data <- dorothea_mm
-       if(!include_predicted) data <- data[data$confidence!="E",]
-       data <- data[data$tf%in%genes,]
-       data <- data[data$target%in%genes,]
-     }
-
-   ans <- lapply(unique(data$target), function(x)
-     data$tf[data$target==x])
-
-   names(ans) <- unique(data$target)
-   return(ans)
+     if(!species%in%c("hsa", "mmu", "rno")) stop(str_wrap("Available species
+                                                          are hsa, mmu and rno
+                                                          for TF target
+                                                          download"))
+     org <- setNames(c(9606, 10090, 10116), c("hsa", "mmu", "rno"))
+     tf_target <-  import_tf_target_interactions(organism = org[species])
+     tf_target <- tf_target[tf_target$source_genesymbol%in%genes,]
+     tf_target <- tf_target[tf_target$target_genesymbol%in%genes,]
+     ans <- lapply(unique(tf_target$target_genesymbol), function(x)
+       tf_target$source_genesymbol[tf_target$target_genesymbol==x])
+     names(ans) <- unique(tf_target$target_genesymbol)
+     ans <- lapply(ans, unique)
+     return(ans)
 
 
 }

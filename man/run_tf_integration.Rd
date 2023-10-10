@@ -8,7 +8,7 @@ run_tf_integration(
   expression,
   tf_expression = expression,
   interactions = NULL,
-  type = NULL,
+  type = "none",
   sequencing_data = T,
   species = "hsa",
   normalize = T,
