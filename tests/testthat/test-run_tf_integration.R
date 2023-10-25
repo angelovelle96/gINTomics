@@ -7,18 +7,21 @@ test_that("run_tf_integration sequencing data check", {
   interactions <- lapply(interactions, function(x) x[,1])
 
 
-  myres <- .run_edgeR_integration(response_var = mirna_exp_model,
+  myres <- suppressWarnings(.run_edgeR_integration(
+                                  response_var = mirna_exp_model,
                                   interactions = interactions,
                                   covariates = tf_expression_model,
-                                  norm_method = "TMM")
+                                  norm_method = "TMM"))
 
-  myres2 <- run_tf_integration(expression = mirna_exp_model,
+  myres2 <- suppressWarnings(run_tf_integration(expression = mirna_exp_model,
                                 tf_expression = tf_expression_model,
                                 interactions = interactions,
                                 sequencing_data = T,
-                                norm_method = "TMM", normalize_cov = F)
+                                norm_method = "TMM", normalize_cov = F))
 
-  expect_identical(myres$coef_data, myres2$coef_data)
+  expect_identical(myres$model_results$`hsa-miR-29c-3p;iso_3p:a`,
+                   myres2$model_results$`hsa-miR-29c-3p;iso_3p:a`)
+  expect_identical(names(myres$model_results), names(myres2$model_results))
 })
 
 
