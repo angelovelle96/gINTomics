@@ -3,7 +3,6 @@
 .run_lm_integration <- function(response_var,
                                covariates,
                                interactions="auto",
-                               step=F,
                                steady_covariates=NULL,
                                reference=NULL,
                                normalize=T,
@@ -39,7 +38,6 @@
     data <- cbind(response_var, covariates)
     lm_results <-  bplapply(fformula, .def_lm,
                             data=data,
-                            step=step,
                             BPPARAM = BPPARAM)
     names(lm_results) <- names(interactions)
 
@@ -72,9 +70,13 @@
 #' @importFrom stats lm
 
 .def_lm <- function(formula,
-                   data,
-                   step=F){
+                   data){
 
+  step=F
+  if(length(attr(terms(formula), "term.labels"))>
+     as.integer(nrow(data)*0.4)){
+    step=T
+  }
   if(step==T){
     lm_results <- summary(step(lm(formula, data = data),
                                trace = 0))
