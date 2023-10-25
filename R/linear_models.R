@@ -70,19 +70,18 @@
 #' @importFrom stats lm
 
 .def_lm <- function(formula,
-                   data){
+                    data){
 
-  step=F
   if(length(attr(terms(formula), "term.labels"))>
      as.integer(nrow(data)*0.4)){
-    step=T
+
+    tmp <- as.character(formula[2])
+    tmp2 <- .rf_selection(formula = formula,
+                          data = data)
+    formula <- as.formula(paste(tmp, "~", as.character(tmp2[2])))
   }
-  if(step==T){
-    lm_results <- summary(step(lm(formula, data = data),
-                               trace = 0))
-  } else {
-    lm_results <- summary(lm(formula, data = data))
-  }
+
+  lm_results <- summary(lm(formula, data = data))
   return(lm_results)
 }
 
