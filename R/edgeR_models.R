@@ -46,23 +46,6 @@
     interactions <- tmp$interactions
     original_id <- tmp$original_id
     fformula <- .generate_formula(interactions = interactions)
-    bad_str <- paste0(c("-",";",":","\\*","%in%","\\^"), collapse = "|")
-    tmp <- response_var
-    colnames(tmp) <- gsub(bad_str, "_", colnames(tmp))
-    tmp <- cbind(tmp, covariates)
-    tmp2 <- fformula
-    names(tmp2) <- gsub(bad_str, "_", names(tmp2))
-    tmp3 <- lapply(seq_along(tmp2), function(x){
-      ans <- paste0(names(tmp2)[x], "~", as.character(tmp2[[x]][2]))
-      ans <- as.formula(ans)
-      return(ans)
-      })
-    names(tmp3) <- names(tmp2)
-    tmp4 <- bplapply(tmp3, .rf_selection,
-                         data=tmp,
-                         BPPARAM = BPPARAM)
-    names(tmp4) <- names(fformula)
-    fformula <- tmp4
 
     fit_gene <- .singlegene_edgeR_model(
         response_var = response_var,
@@ -171,6 +154,22 @@
                       covariates,
                       offset_singlegene = NULL,
                       fit_all){
+
+  if(length(attr(terms(formula$formula), "term.labels"))>
+     as.integer(ncol(response_var)*0.4)){
+
+    bad_str <- paste0(c("-",";",":","\\*","%in%","\\^"), collapse = "|")
+    tmp <- t(response_var)
+    colnames(tmp) <- gsub(bad_str, "_", colnames(tmp))
+    tmp <- cbind(tmp, covariates)
+    tmp2 <- gsub(bad_str, "_", formula$var_name)
+    tmp2 <- as.formula(paste(as.character(tmp2), "~",
+                       as.character(formula$formula[2])))
+    tmp <- .rf_selection(formula = tmp2,
+                          data = tmp)
+    formula$formula <- tmp
+  }
+
   design <- model.matrix(formula$formula, data=covariates)
   dge <- DGEList(counts = t(response_var[formula$var_name,]))
   if(!is.null(offset_singlegene)) {
