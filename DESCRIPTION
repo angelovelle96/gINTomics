@@ -1,6 +1,6 @@
 Package: gINTomics
 Title: Multi-Omics data integration
-Version: 1.1.0
+Version: 1.0.0
 Authors@R: c(person("Angelo", "Velle", role = c("cre", "aut"),
                     email = "angelo.velle@phd.unipd.it",
                     comment = c(ORCID = "0000-0002-4010-6390")),
@@ -36,7 +36,8 @@ Imports:
     SummarizedExperiment,
     methods,
     stats,
-    reshape2
+    reshape2,
+    randomForest
 Depends: 
     R (>= 3.5.0)
 LazyData: false

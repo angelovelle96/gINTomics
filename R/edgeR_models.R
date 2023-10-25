@@ -46,6 +46,23 @@
     interactions <- tmp$interactions
     original_id <- tmp$original_id
     fformula <- .generate_formula(interactions = interactions)
+    bad_str <- paste0(c("-",";",":","\\*","%in%","\\^"), collapse = "|")
+    tmp <- response_var
+    colnames(tmp) <- gsub(bad_str, "_", colnames(tmp))
+    tmp <- cbind(tmp, covariates)
+    tmp2 <- fformula
+    names(tmp2) <- gsub(bad_str, "_", names(tmp2))
+    tmp3 <- lapply(seq_along(tmp2), function(x){
+      ans <- paste0(names(tmp2)[x], "~", as.character(tmp2[[x]][2]))
+      ans <- as.formula(ans)
+      return(ans)
+      })
+    names(tmp3) <- names(tmp2)
+    tmp4 <- bplapply(tmp3, .rf_selection,
+                         data=tmp,
+                         BPPARAM = BPPARAM)
+    names(tmp4) <- names(fformula)
+    fformula <- tmp4
 
     fit_gene <- .singlegene_edgeR_model(
         response_var = response_var,

@@ -338,6 +338,34 @@ create_multiassay <- function(methylation=NULL,
        return(results)
     }
 
+
+
+#########################################################
+#' @importFrom randomForest randomForest importance
+
+.rf_selection <- function(data,
+                          formula){
+
+  if(length(attr(terms(formula), "term.labels"))>
+     as.integer(nrow(data)*0.4)){
+    ans <- randomForest(formula, data)
+    ans <- importance(ans)
+    ans <- ans[order(ans[,1], decreasing = T),]
+    tmp <- as.integer(nrow(data)*0.4)
+    ans <- ans[1:tmp]
+    tmp <- paste(names(ans), collapse = "+")
+    tmp <- paste(as.character(formula[2]), "~", tmp)
+    ans <- as.formula(tmp)
+  }else{
+      ans <- formula
+  }
+
+  ans <- as.formula(paste(as.character(ans[1]), as.character(ans[3])))
+  return(ans)
+}
+
+
+
 ####################################################
 #' @importFrom reshape2 melt
 #' @importFrom stats IQR quantile
@@ -346,7 +374,8 @@ setMethod("extract_model_res", "list",
           function(model_results,
                    outliers=F,
                    species="hsa",
-                   filters="hgnc_symbol"){
+                   filters="hgnc_symbol",
+                   genes_info=NULL){
 
             data <- cbind(response=rownames(model_results$coef_data),
                           model_results$coef_data)
@@ -376,9 +405,11 @@ setMethod("extract_model_res", "list",
                                   data$response[i],
                                   as.character(data$cov[i]))
             }
-            genes_info <- .download_gene_info(data$cov,
-                                             filters=filters,
-                                             species = species)
+            if(is.null(genes_info)){
+              genes_info <- .download_gene_info(data$cov,
+                                               filters=filters,
+                                               species = species)
+              }
             tmp <- intersect(data$cov, rownames(genes_info))
             tmp <- genes_info[tmp,]
             tmp2 <- intersect(data$cov, genes_info$ensembl_gene_id)
@@ -405,15 +436,46 @@ setMethod("extract_model_res", "list",
 
 
 ####################################################
+#' @importFrom plyr rbind.fill
+
+
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
                    outliers=F,
-                   species="hsa"){
+                   species="hsa",
+                   filters="hgnc_symbol",
+                   genes_info=NULL){
+
+            if(is.null(genes_info)){
+              tmp <- lapply(model_results, function(x){
+                  ans <- cbind(response=rownames(x$coef_data),
+                                x$coef_data)
+                  ans <- melt(ans,
+                              id.vars="response",
+                              variable.name = "cov")
+                  ans <- ans[!is.na(ans$value),]
+                  return(ans)
+              })
+
+              tmp <- rbind.fill(tmp)
+              tmp$cov <- as.character(tmp$cov)
+              tmp$cov <- gsub("_cov", "", tmp$cov)
+              for(i in 1:nrow(tmp)){
+                tmp$cov[i] <- gsub("^cov",
+                                   tmp$response[i],
+                                   as.character(tmp$cov[i]))
+              }
+
+              genes_info <- .download_gene_info(tmp$cov,
+                                                filters=filters,
+                                                species = species)
+            }
 
             tmp <- lapply(model_results, function(x)
               extract_model_res(x,
                                 outliers=outliers,
-                                species=species))
+                                species=species,
+                                genes_info=genes_info))
             data <- lapply(names(tmp), function(x) cbind(tmp[[x]], omics=x))
             names(data) <- names(tmp)
             data <- plyr::rbind.fill(data)
@@ -490,5 +552,7 @@ setMethod("extract_data", "MultiOmics",
     return(ans)
 
 })
+
+
 
 

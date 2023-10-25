@@ -366,8 +366,6 @@ run_tf_integration <- function( expression,
     if(normalize_cov) tf_expression <- .data_norm(tf_expression,
                                                  method = norm_method_cov)
 
-    tmp <- unlist(lapply(interactions, length))
-    if(quantile(tmp, 0.75)>=10) sequencing_data <- F
 
     if(sequencing_data==T){
       tf_res <- .run_edgeR_integration(response_var = expression,
