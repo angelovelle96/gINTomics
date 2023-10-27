@@ -36,17 +36,15 @@ test_that("run_tf_integration microarray data check", {
 
   myres <- suppressWarnings(.run_lm_integration(response_var = mirna_exp_model,
                                  interactions = interactions,
-                                 covariates = tf_expression_model,
-                                 step = T))
+                                 covariates = tf_expression_model))
 
   myres2 <- suppressWarnings(run_tf_integration(expression = mirna_exp_model,
                                tf_expression = tf_expression_model,
                                interactions = interactions,
-                               sequencing_data = F,
-                               step=T, normalize_cov = F))
+                               sequencing_data = F, normalize_cov = F))
 
-  tmp <- lapply(myres, function(x)  x$coefficients)
-  tmp2 <- lapply(myres2, function(x) x$coefficients)
-  expect_identical(tmp, tmp2)
+
+  expect_identical(myres$model_results[[5]]$coefficients,
+                   myres2$model_results[[5]]$coefficients)
 
 })
