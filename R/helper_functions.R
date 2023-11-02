@@ -400,11 +400,10 @@ setMethod("extract_model_res", "list",
             data$sign[data$value>0]="positive"
             data$cov <- as.character(data$cov)
             data$cov <- gsub("_cov", "", data$cov)
-            for(i in 1:nrow(data)){
-              data$cov[i] <- gsub("^cov",
-                                  data$response[i],
-                                  as.character(data$cov[i]))
-            }
+            tmp <- data.frame(pos=grep("^cov$", data$cov),
+                              sub=data$response[grep("^cov$", data$cov)])
+            data$cov[tmp$pos] <- tmp$sub
+
             if(is.null(genes_info)){
               genes_info <- .download_gene_info(data$cov,
                                                filters=filters,
@@ -460,11 +459,9 @@ setMethod("extract_model_res", "MultiOmics",
               tmp <- rbind.fill(tmp)
               tmp$cov <- as.character(tmp$cov)
               tmp$cov <- gsub("_cov", "", tmp$cov)
-              for(i in 1:nrow(tmp)){
-                tmp$cov[i] <- gsub("^cov",
-                                   tmp$response[i],
-                                   as.character(tmp$cov[i]))
-              }
+              tmp2 <- data.frame(pos=grep("^cov$", tmp$cov),
+                                 sub=tmp$response[grep("^cov$", tmp$cov)])
+              tmp$cov[tmp2$pos] <- tmp2$sub
 
               genes_info <- .download_gene_info(tmp$cov,
                                                 filters=filters,
