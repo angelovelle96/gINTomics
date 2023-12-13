@@ -39,7 +39,8 @@ run_multiomics <- function(data,
                            normalize_miRNA_expr=T,
                            normalize_gene_expr=T,
                            norm_method_gene_expr="TMM",
-                           norm_method_miRNA_expr="TMM"){
+                           norm_method_miRNA_expr="TMM",
+                           BBPARAM=SerialParam()){
 
 
 
@@ -55,9 +56,38 @@ run_multiomics <- function(data,
     normalize_gene_expr2 <- normalize_gene_expr
     normalize_miRNA_expr2 <- normalize_miRNA_expr
     data <- c(data, gene_exp_original=data@ExperimentList$gene_exp)
+
+
+    gene_genomic_res <- NULL
+    geno <- F
+    if(!is.null(data@ExperimentList$cnv_data) &
+       !is.null(data@ExperimentList$gene_exp)&
+       !is.null(data@ExperimentList$methylation)){
+      gene_genomic_res <- run_genomic_integration(
+        expression = t(assay(data, i = "gene_exp")),
+        cnv_data = t(assay(data, i = "cnv_data")),
+        methylation = t(assay(data, i = "methylation")),
+        sequencing_data = RNAseq,
+        normalize=normalize_gene_expr,
+        norm_method=norm_method_gene_expr,
+        BPPARAM=BBPARAM)
+      #######
+      data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
+        rownames(gene_genomic_res$residuals),
+        colnames(gene_genomic_res$residuals)]
+      assay(data@ExperimentList$gene_exp) <- as.matrix(
+        gene_genomic_res$residuals[rownames(assay(data, i = "gene_exp")),
+                                   colnames(assay(data, i = "gene_exp"))])
+      RNAseq <- F
+      normalize_gene_expr2 <- F
+      geno <- T
+    }
+
+
     gene_cnv_res <- NULL
     if(!is.null(data@ExperimentList$cnv_data) &
-         !is.null(data@ExperimentList$gene_exp)){
+       !is.null(data@ExperimentList$gene_exp) &
+       geno==F){
           gene_cnv_res <- run_cnv_integration(
             expression = t(assay(data, i = "gene_exp")),
             cnv_data = t(assay(data, i = "cnv_data")),
@@ -75,6 +105,24 @@ run_multiomics <- function(data,
         normalize_gene_expr2 <- F
       }
 
+    gene_met_res <- NULL
+    if(!is.null(data@ExperimentList$methylation) &
+       !is.null(data@ExperimentList$gene_exp) &
+       geno==F){
+      gene_met_res <- run_met_integration(
+        expression = t(assay(data, i = "gene_exp")),
+        methylation = t(assay(data, i = "methylation")),
+        sequencing_data = RNAseq,
+        normalize = normalize_gene_expr2,
+        norm_method=norm_method_gene_expr)
+      tmp <- t(assay(data, i = "gene_exp_original"))
+      tmp <- tmp[rownames(met_res$data$response_var),
+                 colnames(met_res$data$response_var)]
+      if(normalize_gene_expr) tmp <-  .data_norm(tmp,
+                                                method = norm_method_gene_expr)
+      met_res$data$response_var <- tmp
+
+    }
 
     data <- c(data, miRNA_exp_original=data@ExperimentList$miRNA_exp)
     mirna_cnv_res <- NULL
@@ -98,23 +146,6 @@ run_multiomics <- function(data,
 
     }
 
-    met_res <- NULL
-    if(!is.null(data@ExperimentList$methylation) &
-       !is.null(data@ExperimentList$gene_exp)){
-      met_res <- run_met_integration(
-        expression = t(assay(data, i = "gene_exp")),
-        methylation = t(assay(data, i = "methylation")),
-        sequencing_data = RNAseq,
-        normalize = normalize_gene_expr2,
-        norm_method=norm_method_gene_expr)
-      tmp <- t(assay(data, i = "gene_exp_original"))
-      tmp <- tmp[rownames(met_res$data$response_var),
-                 colnames(met_res$data$response_var)]
-      if(normalize_gene_expr) tmp <-  .data_norm(tmp,
-                                                method = norm_method_gene_expr)
-      met_res$data$response_var <- tmp
-
-    }
 
 
     tf_res <- NULL
@@ -186,8 +217,9 @@ run_multiomics <- function(data,
 
   ans <- new("MultiOmics", Filter(Negate(is.null),
                                   list(gene_cnv_res=gene_cnv_res,
+                                       gene_genomic_res=gene_genomic_res,
                                        mirna_cnv_res=mirna_cnv_res,
-                                       met_res=met_res,
+                                       gene_met_res=gene_met_res,
                                        tf_res=tf_res,
                                        tf_mirna_res=tf_mirna_res,
                                        mirna_target_res=mirna_target_res)))
@@ -289,6 +321,121 @@ run_met_integration <- function( expression,
   }
   return(met_res)
 }
+
+
+#' Integration of expression, Copy Number Variations and methylation data
+#' @description
+#' This function will perform an integration of expression data and Copy Number
+#' Variations data
+#' @param expression Matrix or data.frame containing the expression values
+#' for each model. Rows represent samples, while each column represents
+#' the different response variables of the models.
+#' @param cnv_data Matrix or data.frame containing the Copy Number variation
+#' status for the models. Rows represent samples, while columns represent
+#' the different covariates. If **interactions** are not provided, they will be
+#' automatically generated and for each gene contained in **expression**
+#' the model will look for the same gene in **cnv_data**
+#' @param methylation Matrix or data.frame containing the methylation
+#' values for the models. Rows represent samples, while columns represent
+#' the different covariates. If **interactions** are not provided, they will be
+#' automatically generated and for each gene contained in **expression**
+#' the model will look for the same gene in **methylation**
+#' #' @param sequencing_data logical. Are expression data obtained from RNA
+#' sequencing ? Default is set to TRUE
+#' @param normalize logical.Should expression data be
+#' normalized ? Default is set to TRUE
+#' @param norm_method Normalization method to be used for
+#' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
+#' "none".
+#' @param interactions A list of character vectors containing the interactions
+#' between response variable and covariates. The names of the list should
+#' match the response variables while the character contained in each element
+#' of the list should match the covariates. If NULL (default), the interactions
+#' will be automatically defined according to response variable's colnames.
+#' @importFrom plyr rbind.fill
+#' @export
+run_genomic_integration <- function(expression,
+                                cnv_data,
+                                methylation,
+                                sequencing_data=T,
+                                normalize=T,
+                                norm_method="TMM",
+                                interactions=NULL,
+                                ...){
+
+
+  adj_out <- F
+  if(is.null(interactions)){
+
+    tmp <- Reduce(intersect,
+                  list(colnames(expression),
+                       colnames(cnv_data),
+                       colnames(methylation)))
+    expression <- expression[, tmp]
+    cnv_data <- expression[, tmp]
+    methylation <- methylation[, tmp]
+    colnames(cnv_data) <- paste0(colnames(cnv_data), "_cnv")
+    colnames(methylation) <- paste0(colnames(methylation), "_met")
+    message("Generating interactions")
+    interactions <- lapply(seq_along(colnames(expression)), function(x)
+      c(colnames(cnv_data)[x], colnames(methylation)[x]))
+    names(interactions) <- colnames(expression)
+    adj_out <- T
+  }
+
+
+
+  if(sequencing_data==T){
+
+
+    gen_res <- .run_edgeR_integration(response_var = expression,
+                                      covariates = cbind(cnv_data, methylation),
+                                      normalize = normalize,
+                                      norm_method = norm_method,
+                                      interactions = interactions,
+                                      ...)
+    if(normalize){
+      gen_res$data$response_var <- .data_norm(gen_res$data$response_var,
+                                              method = norm_method)
+    }
+  }else{
+    gen_res <- .run_lm_integration(response_var = expression,
+                                   covariates = cbind(cnv_data, methylation),
+                                   normalize = normalize,
+                                   norm_method = norm_method,
+                                   interactions = interactions,
+                                   ...)
+  }
+
+  if(adj_out){
+    tmp <- gen_res$coef_data
+    tmp2 <- lapply(rownames(tmp), function(x){
+              ans <- tmp[x, c(paste0(x, "_cnv"), paste0(x, "_met"))]
+              colnames(ans) <- c("cnv", "met")
+              return(ans)
+           })
+    tmp2 <- rbind.fill(tmp2)
+    rownames(tmp2) <- rownames(tmp)
+    gen_res$coef_data <- cbind('(Intercept)'=gen_res$coef_data[,"(Intercept)"],
+                               tmp2[rownames(gen_res$coef_data),])
+
+    tmp <- gen_res$pval_data
+    tmp2 <- lapply(rownames(tmp), function(x){
+      ans <- tmp[x, c(paste0(x, "_cnv"), paste0(x, "_met"))]
+      colnames(ans) <- c("cnv", "met")
+      return(ans)
+    })
+    tmp2 <- rbind.fill(tmp2)
+    rownames(tmp2) <- rownames(tmp)
+    gen_res$pval_data <- cbind('(Intercept)'=gen_res$pval_data[,"(Intercept)"],
+                               tmp2[rownames(gen_res$pval_data),])
+
+  }
+
+  return(gen_res)
+}
+
+
 
 
 #' Integration of expression and Transcription Factors / Generic Regulators
