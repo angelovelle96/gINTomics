@@ -75,37 +75,45 @@ chr_distribution_plot <- function(data,
 
 #' @import ComplexHeatmap
 
-.heatmap_sign <- function(data,
+.heatmap_sign <- function(model_results,
                          outliers=T,
                          number=50){
 
-  data <- extract_model_res(mmultiomics, outliers=outliers)
+  data <- extract_model_res(model_results, outliers=outliers)
   data <- data[data$cov!="(Intercept)",]
   data <- data[data$pval<=0.1,]
-  if(!"omics"%in%colnames(data)) data$omics <-rep("omic", nrow(data))
-  tmp <- unique(data$omics)
-  data <- lapply(tmp, function(x) data[data$omics==x,])
-  names(data) <- tmp
-  tmp <- lapply(data, function(x) sort(table(x$response), decreasing = T))
-  tmp2 <- lapply(data, function(x) sort(setNames(x$pval, x$response)))
-  tmp2 <- lapply(tmp2, function(x) x[!duplicated(names(x))])
-  tmp2 <- lapply(tmp2, function(x) 1-x)
-  tmp3 <- lapply(names(tmp), function(x) tmp[[x]]+tmp2[[x]][names(tmp[[x]])])
-  names(tmp3) <- names(tmp)
-  tmp <- lapply(tmp3, function(x) sort(x, decreasing = T))
-  tmp <- lapply(tmp, function(x){
-    if(length(x)>number) x <- x[1:number]
-    return(x)
-  })
-  tmp2 <- lapply(tmp2, function(x) 1-x)
-  tmp2 <- lapply(names(tmp), function(x) tmp2[[x]][names(tmp[[x]])])
-  names(tmp2) <- names(tmp)
-  tmp <- lapply(names(tmp2), function(x)
-    as.data.frame(t(data.frame(row.names = names(tmp[[x]]),
-                               freq = as.numeric(tmp[[x]]-(1-tmp2[[x]]))))))
-  names(tmp) <- names(tmp2)
-  tmp2 <- lapply(tmp2, function(x)
-    as.data.frame(t(data.frame(row.names = names(x), pval=x))))
+  if(!"omics"%in%colnames(data)){
+    data$omics <- rep("omic", nrow(data))
+    tmp <- unique(data$omics)
+    data <- lapply(tmp, function(x) data[data$omics==x,])
+    names(data) <- tmp
+    input <- list()
+    input[["omic"]] <- model_results$data$response_var
+  }else{
+      tmp <- unique(data$omics)
+      data <- lapply(tmp, function(x) data[data$omics==x,])
+      names(data) <- tmp
+      input <- lapply(model_results, function(x) x$data$response_var)
+      }
+
+  input <- lapply(names(data), function(x)
+    input[[x]][, colnames(input[[x]])%in%data[[x]]$response])
+  names(input) <- names(data)
+  input <- lapply(input, function(x) sort(apply(x, 2, sd), decreasing = T))
+  input <- lapply(input, function(x) names(x)[seq(number)])
+  data <- lapply(data, function(x) x[order(x$pval, decreasing = F),])
+  data <- lapply(data, function(x) x[!duplicated(x$response),])
+  data <- lapply(names(input), function(x)
+    data[[x]][data[[x]]$response%in%input[[x]],])
+  names(data) <- names(input)
+
+  hheatmap <- lapply(data, function(x) data.frame(row.names = x$response,
+                                                  pvalue = x$pval))
+
+  hheatmap_gene <- cbind(TF=hheatmap$tf_res$pvalue,
+                         CNV=hheatmap$gene_cnv_res[rownames(hheatmap$tf_res),],
+                         MET=hheatmap$met_res[rownames(hheatmap$tf_res),],
+                         miRNA=hheatmap$mirna_target_res[rownames(hheatmap$tf_res),])
 
 
   hheatmap <- plyr::rbind.fill(tmp)
@@ -258,8 +266,29 @@ circos_plot <- function(model_results,
 
 
 
+#' PCA
+#' @description
+#' PCA plot
+#' @param model_results Output of one of the integration functions
+#' @import ggplot2
+#' @export
+#'
 
+plot_pca <- function(model_results){
 
+  data <- model_results$data$response_var
+  res <- prcomp(t(data))
+  tmp <- as.matrix(model_results$pval_data[, 2:ncol(model_results$pval_data)])
+  rownames(tmp) <- rownames(model_results$pval_data)
+  tmp <- apply(tmp, 1, function(x) sum(x<=0.05, na.rm = T))
+  ssel <- names(tmp)[tmp!=0]
+  ccol <- setNames(rep("not_significant", ncol(data)), colnames(data))
+  ccol[ssel] <- "significant"
+  ccol <- data.frame(row.names = names(ccol),
+                     Significativity= ccol)
+  ggplot2::autoplot(res, data=ccol, colour = "Significativity", label=F)
+
+}
 
 
 

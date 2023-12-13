@@ -3,6 +3,7 @@
 export(chr_distribution_plot)
 export(circos_plot)
 export(create_multiassay)
+export(plot_pca)
 export(ridgeline_plot)
 export(run_cnv_integration)
 export(run_met_integration)
