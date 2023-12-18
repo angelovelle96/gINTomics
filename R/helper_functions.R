@@ -45,7 +45,8 @@
       response_var <- response_var[check_sample,]
       covariates <- covariates[check_sample,]
     }
-    check_sd <- apply(response_var, 2, sd)
+    check_sd <- apply(response_var, 2, function(x) sd(x, na.rm = T))
+    check_sd[is.na(check_sd)] <- 0
     if(sum(check_sd==0)>0) {
       message(str_wrap("removing response variables with
                                 zero standard deviation"))
@@ -53,7 +54,8 @@
     }
 
     if(is.numeric(covariates[,1])){
-      check_sd <- apply(covariates, 2, sd)
+      check_sd <- apply(covariates, 2, function(x) sd(x, na.rm = T))
+      check_sd[is.na(check_sd)] <- 0
       if(sum(check_sd==0)>0) {
         message(str_wrap("removing covariates with
                                   zero standard deviation"))
