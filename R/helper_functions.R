@@ -379,6 +379,22 @@ setMethod("extract_model_res", "list",
                    filters="hgnc_symbol",
                    genes_info=NULL){
 
+            if(names(model_results)[length(model_results)]!="data"){
+              tmp <- names(model_results)
+              data <- lapply(tmp, function(x){
+               ans <- extract_model_res(model_results = model_results[[x]],
+                                        outliers=outliers,
+                                        species=species,
+                                        filters=filters,
+                                        genes_info=genes_info)
+               ans <- cbind(ans, class=x)
+               return(ans)
+              })
+              names(data) <- tmp
+              data <- rbind.fill(data)
+              return(data)
+            }
+
             data <- cbind(response=rownames(model_results$coef_data),
                           model_results$coef_data)
             data <- melt(data,
@@ -402,12 +418,15 @@ setMethod("extract_model_res", "list",
             data$sign[data$value>0]="positive"
             data$cov <- as.character(data$cov)
             data$cov <- gsub("_cov", "", data$cov)
-            tmp <- data.frame(pos=grep("^cov$", data$cov),
-                              sub=data$response[grep("^cov$", data$cov)])
-            data$cov[tmp$pos] <- tmp$sub
+            data$significativity[data$significativity=="significant" &
+                                   data$cov=="cnv"] <- "significant_cnv"
+            data$significativity[data$significativity=="significant" &
+                                   data$cov=="met"] <- "significant_met"
+            data$cov[data$cov%in%c("cov", "cnv", "met")] <-
+              data$response[data$cov%in%c("cov", "cnv", "met")]
 
             if(is.null(genes_info)){
-              genes_info <- .download_gene_info(data$cov,
+              genes_info <- .download_gene_info(c(data$cov, data$response),
                                                filters=filters,
                                                species = species)
               }
@@ -417,17 +436,42 @@ setMethod("extract_model_res", "list",
             tmp2 <- genes_info[genes_info$ensembl_gene_id%in%tmp2,]
             tmp2 <- tmp2[!duplicated(tmp2$ensembl_gene_id),]
             rownames(tmp2) <- tmp2$ensembl_gene_id
-            genes_info <- rbind(tmp, tmp2)
-            data$chr_cov <- genes_info[as.character(data$cov),
+            tmp <- rbind(tmp, tmp2)
+            data$chr_cov <- tmp[as.character(data$cov),
                                        "chromosome_name"]
-            data$cytoband_cov <- genes_info[as.character(data$cov), "band"]
+            data$cytoband_cov <- tmp[as.character(data$cov), "band"]
+            data$start_cov <- tmp[as.character(data$cov), "start_position"]
+            data$end_cov <- tmp[as.character(data$cov), "end_position"]
 
-            mmin <- quantile(data$value, 0.25) - 1.5*IQR(data$value)
-            mmax <- quantile(data$value, 0.75) + 1.5*IQR(data$value)
+            tmp <- intersect(data$response, rownames(genes_info))
+            tmp <- genes_info[tmp,]
+            tmp2 <- intersect(data$response, genes_info$ensembl_gene_id)
+            tmp2 <- genes_info[genes_info$ensembl_gene_id%in%tmp2,]
+            tmp2 <- tmp2[!duplicated(tmp2$ensembl_gene_id),]
+            rownames(tmp2) <- tmp2$ensembl_gene_id
+            tmp <- rbind(tmp, tmp2)
+            data$chr_response <- tmp[as.character(data$response),
+                                     "chromosome_name"]
+            data$cytoband_response <- tmp[as.character(data$response),
+                                          "band"]
+            data$start_response <- tmp[as.character(data$response),
+                                       "start_position"]
+            data$end_response <- tmp[as.character(data$response),
+                                     "end_position"]
+            colnames(data)[colnames(data)=="value"] <- "coef"
+            tmp <-  apply(model_results$data$response_var, 2, mean)
+            data$response_value <- tmp[data$response]
+            tmp <-  apply(model_results$data$covariates, 2, mean)
+            names(tmp) <- gsub("_cov", "", names(tmp))
+            names(tmp) <- gsub("_cnv", "", names(tmp))
+            names(tmp) <- gsub("_met", "", names(tmp))
+            data$cov_value <- tmp[data$cov]
+            mmin <- quantile(data$coef, 0.25) - 1.5*IQR(data$coef)
+            mmax <- quantile(data$coef, 0.75) + 1.5*IQR(data$coef)
 
             if(outliers==F){
-              data <- data[data$value>mmin,]
-              data <- data[data$value<mmax,]
+              data <- data[data$coef>mmin,]
+              data <- data[data$coef<mmax,]
             }
 
             return(data)
@@ -439,7 +483,6 @@ setMethod("extract_model_res", "list",
 ####################################################
 #' @importFrom plyr rbind.fill
 
-
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
                    outliers=F,
@@ -447,25 +490,29 @@ setMethod("extract_model_res", "MultiOmics",
                    filters="hgnc_symbol",
                    genes_info=NULL){
 
+            tmp <- model_results
             if(is.null(genes_info)){
-              tmp <- lapply(model_results, function(x){
-                  ans <- cbind(response=rownames(x$coef_data),
-                                x$coef_data)
-                  ans <- melt(ans,
-                              id.vars="response",
-                              variable.name = "cov")
-                  ans <- ans[!is.na(ans$value),]
-                  return(ans)
-              })
+                  if(names(model_results[[1]])[
+                    length(model_results[[1]])]!="data"){
+                    tmp <- unlist(tmp, recursive = F)
+                  }
+                  tmp <- lapply(tmp, function(x){
+                      ans <- cbind(response=rownames(x$coef_data),
+                                    x$coef_data)
+                      ans <- melt(ans,
+                                  id.vars="response",
+                                  variable.name = "cov")
+                      ans <- ans[!is.na(ans$value),]
+                      return(ans)
+                  })
 
               tmp <- rbind.fill(tmp)
               tmp$cov <- as.character(tmp$cov)
               tmp$cov <- gsub("_cov", "", tmp$cov)
-              tmp2 <- data.frame(pos=grep("^cov$", tmp$cov),
-                                 sub=tmp$response[grep("^cov$", tmp$cov)])
-              tmp$cov[tmp2$pos] <- tmp2$sub
+              tmp$cov[tmp$cov%in%c("cov", "cnv", "met")] <-
+                tmp$response[tmp$cov%in%c("cov", "cnv", "met")]
 
-              genes_info <- .download_gene_info(tmp$cov,
+              genes_info <- .download_gene_info(c(tmp$cov, tmp$response),
                                                 filters=filters,
                                                 species = species)
             }
@@ -477,13 +524,14 @@ setMethod("extract_model_res", "MultiOmics",
                                 genes_info=genes_info))
             data <- lapply(names(tmp), function(x) cbind(tmp[[x]], omics=x))
             names(data) <- names(tmp)
-            data <- plyr::rbind.fill(data)
+            data <- rbind.fill(data)
             return(data)
           }
 )
 
 
 #######################################################
+#DA ELIMINARE
 setMethod("extract_data", "list",
           function(model_results,
                    species="hsa",
@@ -542,6 +590,7 @@ setMethod("extract_data", "list",
 
 
 ###############################################
+#DA ELIMINARE
 setMethod("extract_data", "MultiOmics",
           function(model_results,
                    species="hsa"){
