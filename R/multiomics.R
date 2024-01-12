@@ -425,10 +425,16 @@ run_met_integration <- function( expression,
                                     normalize,
                                     norm_method,
                                     interactions,
+                                    scale,
                                     ...){
 
 
   adj_out <- F
+  if(scale){
+    cnv_data <- scale(cnv_data)
+    methylation <- scale(methylation)
+  }
+
   if(is.null(interactions)){
 
     tmp <- Reduce(intersect,
@@ -436,7 +442,7 @@ run_met_integration <- function( expression,
                        colnames(cnv_data),
                        colnames(methylation)))
     expression <- expression[, tmp]
-    cnv_data <- expression[, tmp]
+    cnv_data <- cnv_data[, tmp]
     methylation <- methylation[, tmp]
     colnames(cnv_data) <- paste0(colnames(cnv_data), "_cnv")
     colnames(methylation) <- paste0(colnames(methylation), "_met")
@@ -540,6 +546,7 @@ run_genomic_integration <- function(expression,
                                 norm_method="TMM",
                                 interactions=NULL,
                                 class=NULL,
+                                scale=T,
                                 ...){
 
 
@@ -551,6 +558,7 @@ run_genomic_integration <- function(expression,
                                         normalize = normalize,
                                         norm_method = norm_method,
                                         interactions = interactions,
+                                        scale = scale,
                                         ...)
   }else{
     if(!is.character(class) |
@@ -571,6 +579,7 @@ run_genomic_integration <- function(expression,
                                       normalize = normalize,
                                       norm_method = norm_method,
                                       interactions = interactions,
+                                      scale = scale,
                                       ...)
       return(ans)
     })
