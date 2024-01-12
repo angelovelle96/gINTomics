@@ -17,11 +17,13 @@ ridgeline_plot <- function(data,
     data <- extract_model_res(data,
                               outliers=outliers)
     data <- data[data$cov!="(Intercept)",]
-    ggplot(data, aes(x = data$value, y = data$significativity, fill=data$significativity))+
+    ggplot(data, aes(x = data$coef,
+                     y = data$significativity,
+                     fill=data$significativity))+
       geom_density_ridges() +
       theme_ridges()+
       guides(fill=guide_legend(title="Significativity"))+
-      xlab("Value")+
+      xlab("coef")+
       ylab("Significativity")
 
 }
