@@ -422,6 +422,9 @@ setMethod("extract_model_res", "list",
                                    data$cov=="cnv"] <- "significant_cnv"
             data$significativity[data$significativity=="significant" &
                                    data$cov=="met"] <- "significant_met"
+            data$cnv_met <- rep(NA, nrow(data))
+            data$cnv_met[data$cov=="cnv"] <- "cnv"
+            data$cnv_met[data$cov=="met"] <- "met"
             data$cov[data$cov%in%c("cov", "cnv", "met")] <-
               data$response[data$cov%in%c("cov", "cnv", "met")]
 
