@@ -431,6 +431,10 @@ run_met_integration <- function( expression,
 
   adj_out <- F
   if(scale){
+    original_cnv <- cnv_data
+    original_met <- methylation
+    colnames(original_cnv) <- paste0(colnames(original_cnv), "_cnv")
+    colnames(original_met) <- paste0(colnames(original_met), "_met")
     cnv_data <- scale(cnv_data)
     methylation <- scale(methylation)
   }
@@ -501,7 +505,10 @@ run_met_integration <- function( expression,
                                tmp2[rownames(gen_res$pval_data),])
 
   }
-
+  if(scale){
+    tmp <- cbind(original_cnv, original_met[rownames(original_cnv),])
+    gen_res$data$covariates <- tmp[, colnames(gen_res$data$covariates)]
+  }
   return(gen_res)
 }
 
