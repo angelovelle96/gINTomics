@@ -374,9 +374,11 @@ create_multiassay <- function(methylation=NULL,
 
 setMethod("extract_model_res", "list",
           function(model_results,
-                   outliers=F,
+                   outliers=T,
                    species="hsa",
-                   filters="hgnc_symbol",
+                   filters=c("hgnc_symbol",
+                             "ensembl_gene_id",
+                             "entrezgene_id"),
                    genes_info=NULL){
 
             if(names(model_results)[length(model_results)]!="data"){
@@ -433,34 +435,28 @@ setMethod("extract_model_res", "list",
                                                filters=filters,
                                                species = species)
               }
-            tmp <- intersect(data$cov, rownames(genes_info))
+            tmp2 <- data$cov
+            tmp <- intersect(tmp2, rownames(genes_info))
             tmp <- genes_info[tmp,]
-            tmp2 <- intersect(data$cov, genes_info$ensembl_gene_id)
-            tmp2 <- genes_info[genes_info$ensembl_gene_id%in%tmp2,]
-            tmp2 <- tmp2[!duplicated(tmp2$ensembl_gene_id),]
-            rownames(tmp2) <- tmp2$ensembl_gene_id
-            tmp <- rbind(tmp, tmp2)
-            data$chr_cov <- tmp[as.character(data$cov),
-                                       "chromosome_name"]
-            data$cytoband_cov <- tmp[as.character(data$cov), "band"]
-            data$start_cov <- tmp[as.character(data$cov), "start_position"]
-            data$end_cov <- tmp[as.character(data$cov), "end_position"]
+            data$chr_cov <- tmp[as.character(tmp2),"chromosome_name"]
+            data$cytoband_cov <- tmp[as.character(tmp2), "band"]
+            data$start_cov <- tmp[as.character(tmp2), "start_position"]
+            data$end_cov <- tmp[as.character(tmp2), "end_position"]
+            data$ensg_cov <- tmp[as.character(tmp2), "ensembl_gene_id"]
+            data$entrez_cov <- tmp[as.character(tmp2), "entrezgene_id"]
+            data$hgnc_cov <- tmp[as.character(tmp2), "hgnc_symbol"]
 
-            tmp <- intersect(data$response, rownames(genes_info))
+            tmp2 <- data$response
+            tmp <- intersect(tmp2, rownames(genes_info))
             tmp <- genes_info[tmp,]
-            tmp2 <- intersect(data$response, genes_info$ensembl_gene_id)
-            tmp2 <- genes_info[genes_info$ensembl_gene_id%in%tmp2,]
-            tmp2 <- tmp2[!duplicated(tmp2$ensembl_gene_id),]
-            rownames(tmp2) <- tmp2$ensembl_gene_id
-            tmp <- rbind(tmp, tmp2)
-            data$chr_response <- tmp[as.character(data$response),
-                                     "chromosome_name"]
-            data$cytoband_response <- tmp[as.character(data$response),
-                                          "band"]
-            data$start_response <- tmp[as.character(data$response),
-                                       "start_position"]
-            data$end_response <- tmp[as.character(data$response),
-                                     "end_position"]
+            data$chr_response <- tmp[as.character(tmp2),"chromosome_name"]
+            data$cytoband_response <- tmp[as.character(tmp2),"band"]
+            data$start_response <- tmp[as.character(tmp2),"start_position"]
+            data$end_response <- tmp[as.character(tmp2),"end_position"]
+            data$ensg_response <- tmp[as.character(tmp2),"ensembl_gene_id"]
+            data$entrez_response <- tmp[as.character(tmp2),"entrezgene_id"]
+            data$hgnc_response <- tmp[as.character(tmp2), "hgnc_symbol"]
+
             colnames(data)[colnames(data)=="value"] <- "coef"
             tmp <-  apply(model_results$data$response_var, 2, mean)
             data$response_value <- tmp[data$response]
@@ -488,9 +484,11 @@ setMethod("extract_model_res", "list",
 
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
-                   outliers=F,
+                   outliers=T,
                    species="hsa",
-                   filters="hgnc_symbol",
+                   filters=c("hgnc_symbol",
+                             "ensembl_gene_id",
+                             "entrezgene_id"),
                    genes_info=NULL){
 
             tmp <- model_results
@@ -524,7 +522,8 @@ setMethod("extract_model_res", "MultiOmics",
               extract_model_res(x,
                                 outliers=outliers,
                                 species=species,
-                                genes_info=genes_info))
+                                genes_info=genes_info,
+                                filters=filters))
             data <- lapply(names(tmp), function(x) cbind(tmp[[x]], omics=x))
             names(data) <- names(tmp)
             data <- rbind.fill(data)
@@ -538,7 +537,9 @@ setMethod("extract_model_res", "MultiOmics",
 setMethod("extract_data", "list",
           function(model_results,
                    species="hsa",
-                   filters="hgnc_symbol"){
+                   filters=c("hgnc_symbol",
+                             "ensembl_gene_id",
+                             "entrezgene_id")){
 
     res_layer <- model_results$data$response_var
     res_layer <- apply(res_layer, 2, mean)
