@@ -507,7 +507,8 @@ run_met_integration <- function( expression,
   }
   if(scale){
     tmp <- cbind(original_cnv, original_met[rownames(original_cnv),])
-    gen_res$data$covariates <- tmp[, colnames(gen_res$data$covariates)]
+    gen_res$data$covariates <- tmp[rownames(gen_res$data$covariates),
+                                   colnames(gen_res$data$covariates)]
   }
   return(gen_res)
 }
