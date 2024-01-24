@@ -379,7 +379,8 @@ setMethod("extract_model_res", "list",
                    filters=c("hgnc_symbol",
                              "ensembl_gene_id",
                              "entrezgene_id"),
-                   genes_info=NULL){
+                   genes_info=NULL,
+                   ...){
 
             if(names(model_results)[length(model_results)]!="data"){
               tmp <- names(model_results)
@@ -433,7 +434,8 @@ setMethod("extract_model_res", "list",
             if(is.null(genes_info)){
               genes_info <- .download_gene_info(c(data$cov, data$response),
                                                filters=filters,
-                                               species = species)
+                                               species = species,
+                                               ...)
               }
             tmp2 <- data$cov
             tmp <- intersect(tmp2, rownames(genes_info))
@@ -489,7 +491,8 @@ setMethod("extract_model_res", "MultiOmics",
                    filters=c("hgnc_symbol",
                              "ensembl_gene_id",
                              "entrezgene_id"),
-                   genes_info=NULL){
+                   genes_info=NULL,
+                   ...){
 
             tmp <- model_results
             if(is.null(genes_info)){
@@ -515,7 +518,8 @@ setMethod("extract_model_res", "MultiOmics",
 
               genes_info <- .download_gene_info(c(tmp$cov, tmp$response),
                                                 filters=filters,
-                                                species = species)
+                                                species = species,
+                                                ...)
             }
 
             tmp <- lapply(model_results, function(x)
@@ -532,78 +536,27 @@ setMethod("extract_model_res", "MultiOmics",
 )
 
 
-#######################################################
-#DA ELIMINARE
-setMethod("extract_data", "list",
-          function(model_results,
-                   species="hsa",
-                   filters=c("hgnc_symbol",
-                             "ensembl_gene_id",
-                             "entrezgene_id")){
 
-    res_layer <- model_results$data$response_var
-    res_layer <- apply(res_layer, 2, mean)
-    cov_layer <- model_results$data$covariates[
-                    rownames(model_results$data$response_var),]
-    colnames(cov_layer) <- gsub("_cov", "", colnames(cov_layer))
-    cov_layer <- apply(cov_layer, 2, mean)
-    coef_layer <- NULL
-    tmp <- as.data.frame(model_results$coef_data)
-    tmp <- tmp[, colnames(tmp)!="(Intercept)", drop=F]
-    if(identical(colnames(tmp),"cov")){
-      coef_layer <- tmp
-      coef_layer <- as.data.frame(cbind(coef_layer,
-                                        pval=model_results$pval_data$cov))
-    }
-    genes_info <- .download_gene_info(unique(c(names(res_layer),
-                                              names(cov_layer))),
-                                     filters=filters,
-                                     species = species)
-    tmp <- genes_info$ensembl_gene_id%in%c(names(res_layer), names(cov_layer))
-    tmp <- genes_info[tmp,]
-    tmp <- tmp[!duplicated(tmp$ensembl_gene_id),]
-    rownames(tmp) <- tmp$ensembl_gene_id
-    genes_info <- rbind(genes_info, tmp)
-    res_layer <- data.frame(mean=res_layer, genes_info[names(res_layer),])
-    tmp <- is.na(res_layer$chromosome_name)+
-      is.na(res_layer$start_position)+
-      is.na(res_layer$end_position)
-    res_layer <- res_layer[tmp==0,]
-    cov_layer <- data.frame(mean=cov_layer, genes_info[names(cov_layer),])
-    tmp <- is.na(cov_layer$chromosome_name)+
-      is.na(cov_layer$start_position)+
-      is.na(cov_layer$end_position)
-    cov_layer <- cov_layer[tmp==0,]
-    if(!is.null(coef_layer)){
-      coef_layer <- as.data.frame(cbind(coef_layer,
-                                        genes_info[rownames(coef_layer),]))
-      tmp <- is.na(coef_layer$chromosome_name)+
-        is.na(coef_layer$start_position)+
-        is.na(coef_layer$end_position)
-      coef_layer <- coef_layer[tmp==0,]
-    }
+##################################
+search_gene <- function(genes,
+                        model_res=NULL,
+                        data_frame=NULL){
+  if(sum(is.null(model_res), is.null(data_frame))>1){
+    stop(str_wrap("One of model_res amd data_frame should be provided"))
+  }
+  genes <- genes[!is.na(genes)]
+  genes <- as.character(genes)
+  genes <- unique(genes)
+  if(is.null(data_frame)) data_frame <- extract_model_res(model_res)
+  ans <- rbind(data_frame[data_frame$ensg_cov%in%genes,],
+               data_frame[data_frame$entrez_cov%in%genes,],
+               data_frame[data_frame$hgnc_cov%in%genes,],
+               data_frame[data_frame$ensg_response%in%genes,],
+               data_frame[data_frame$entrez_response%in%genes,],
+               data_frame[data_frame$hgnc_response%in%genes,])
+  return(ans)
 
-    ans <- Filter(Negate(is.null),
-                  list(res_layer=res_layer,
-                       cov_layer=cov_layer,
-                       coef_layer=coef_layer))
-
-    return(ans)
-})
-
-
-
-###############################################
-#DA ELIMINARE
-setMethod("extract_data", "MultiOmics",
-          function(model_results,
-                   species="hsa"){
-
-    ans <- lapply(model_results, function(x)
-      extract_data(x,species=species))
-    return(ans)
-
-})
+}
 
 
 
