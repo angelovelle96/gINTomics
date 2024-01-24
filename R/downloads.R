@@ -104,7 +104,8 @@
                                   species = "hsa",
                                   filters = c("hgnc_symbol",
                                               "ensembl_gene_id",
-                                              "entrezgene_id")){
+                                              "entrezgene_id"),
+                                  ...){
 
      tmp <- setNames(c("hsapiens_gene_ensembl",
                        "mmusculus_gene_ensembl",
@@ -133,7 +134,8 @@
                                    "band"),
                     mart = mart,
                     filters = x,
-                    values = genes)
+                    values = genes,
+                    ...)
        tmp <- c(1:100, "X", "Y", "MT")
        ans <- ans[ans$chromosome_name%in%tmp,]
        ans <- ans[!duplicated(ans[,x]),]
@@ -168,7 +170,8 @@
                                     "band"),
                     mart = mart,
                     filters = "hgnc_symbol",
-                    values = names(tmp))
+                    values = names(tmp),
+                    ...)
        tmp3 <- c(1:100, "X", "Y", "MT")
        tmp2 <- tmp2[tmp2$chromosome_name%in%tmp3,]
        tmp2 <- tmp2[!duplicated(tmp2$hgnc_symbol),]
