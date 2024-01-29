@@ -100,12 +100,12 @@
 #' @importFrom stats setNames
 #' @importFrom plyr rbind.fill
 
-   .download_gene_info <- function(genes,
-                                  species = "hsa",
-                                  filters = c("hgnc_symbol",
-                                              "ensembl_gene_id",
-                                              "entrezgene_id"),
-                                  ...){
+   .download_gene_info_biomart <- function(genes,
+                                          species = "hsa",
+                                          filters = c("hgnc_symbol",
+                                                      "ensembl_gene_id",
+                                                      "entrezgene_id"),
+                                          ...){
 
      tmp <- setNames(c("hsapiens_gene_ensembl",
                        "mmusculus_gene_ensembl",
@@ -197,6 +197,112 @@
  }
 
 
+   #' @import biomaRt
+   #' @importFrom stringr str_wrap
+   #' @importFrom stats setNames
+   #' @importFrom plyr rbind.fill
+   #' @importFrom GenomicFeatures genes
+   #' @importFrom dplyr mutate_all
+   #' @importFrom BiocGenerics which.max
+
+   .download_gene_info_org <- function(genes,
+                                   species = "hsa",
+                                   ...){
+
+     tmp <- c("hsa", "mmu")
+     if(!species%in%tmp) stop(str_wrap(paste("Supported species for gene
+                                                    annotation are:",
+                                                    paste(tmp,
+                                                          sep = " ",
+                                                          collapse = ", "))))
+     if(species=="hsa") dataset <- Homo.sapiens
+     if(species=="mmu") dataset <- Mus.musculus
+     genes <- unique(genes)
+     all_genes <- suppressMessages(genes(dataset,
+                                         columns=c("SYMBOL",
+                                                   "MAP",
+                                                   "ENSEMBL")))
+     all_genes <- as.data.frame(all_genes)
+     all_genes <- mutate_all(all_genes, function(x)
+       unlist(lapply(x, function(y) y[1])))
+     all_genes$ENTREZ <- rownames(all_genes)
+     pos <- apply(all_genes, 2, function(x) length(intersect(genes,x)))
+     ans <- data.frame()
+     if(sum(pos)>0){
+       pos <- which(pos!=0)
+       ans <- lapply(pos, function(x){
+                 ans <- all_genes[!is.na(all_genes[,pos]),]
+                 ans <- ans[!duplicated(ans[,pos]),]
+                 rownames(ans) <- ans[,pos]
+                 return(ans)
+                 })
+       ans <- rbind.fill(ans)
+       }
+
+     genes <- cbind(genes, nop = gsub("-3p", "", genes))
+     genes[,"nop"] <- gsub("-5p", "", genes[, "nop"])
+
+     if(sum(mirna_hsa$Alias.symbols%in%genes[, "nop"])>0){
+
+       mirna_hsa <- mirna_hsa[mirna_hsa$Alias.symbols%in%genes[, "nop"],]
+       mirna_hsa <- mirna_hsa[!duplicated(mirna_hsa$Approved.symbol),]
+       rownames(mirna_hsa) <- mirna_hsa$Approved.symbol
+       tmp <- setNames(mirna_hsa$Alias.symbols, mirna_hsa$Approved.symbol)
+       tmp <- strsplit(tmp, split = ",")
+       tmp <- sapply(tmp, function(x) x[1])
+       tmp <- tmp[!duplicated(tmp)]
+       tmp <- tmp[!is.na(tmp)]
+
+       tmp2 <- all_genes
+       tmp2 <- tmp2[!duplicated(tmp2$SYMBOL),]
+       tmp2 <- tmp2[!is.na(tmp2$SYMBOL),]
+       rownames(tmp2) <- tmp2$SYMBOL
+       tmp <- tmp[intersect(rownames(tmp2), names(tmp))]
+       tmp2 <- tmp2[names(tmp),]
+       tmp2$miRBase_id <- tmp
+       tmp2 <- tmp2[!duplicated(tmp2$miRBase_id),]
+       rownames(tmp2) <- tmp2$miRBase_id
+       tmp2 <- tmp2[, colnames(tmp2)!="miRBase_id"]
+       tmp2 <- tmp2[genes[,"nop"],]
+       rownames(tmp2) <- genes[, "genes"]
+       tmp2 <- tmp2[!is.na(tmp2$SYMBOL),]
+       ans <- rbind(ans, tmp2)
+     }
+
+     tmp <- intersect(rownames(ans), genes[, "genes"])
+     ans <- ans[tmp,]
+     colnames(ans) <- gsub("seqnames", "chromosome_name", colnames(ans))
+     colnames(ans) <- gsub("start", "start_position", colnames(ans))
+     colnames(ans) <- gsub("end", "end_position", colnames(ans))
+     colnames(ans) <- gsub("ENSEMBL", "ensembl_gene_id", colnames(ans))
+     colnames(ans) <- gsub("MAP", "band", colnames(ans))
+     colnames(ans) <- gsub("SYMBOL", "hgnc_symbol", colnames(ans))
+     colnames(ans) <- gsub("ENTREZ", "entrezgene_id", colnames(ans))
+     ans <- ans[, c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id",
+                    "chromosome_name", "start_position",
+                    "end_position", "band")]
+     ans$chromosome_name <- gsub("chr", "", ans$chromosome_name)
+     ans$band <- gsub(".*q", "q", ans$band)
+     ans$band <- gsub(".*p", "p", ans$band)
+     return(ans)
+   }
 
 
+
+   .download_gene_info <- function(genes,
+                                   species = "hsa",
+                                   biomaRt = F,
+                                   ...){
+
+     if(biomaRt){
+       ans <- .download_gene_info_biomart(genes = genes,
+                                         species = species,
+                                         ...)
+     }else{
+       ans <- .download_gene_info_org(genes = genes,
+                                     species = species,
+                                     ...)
+     }
+     return(ans)
+   }
 
