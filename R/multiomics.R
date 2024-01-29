@@ -57,8 +57,10 @@ run_multiomics <- function(data,
 
     normalize_gene_expr2 <- normalize_gene_expr
     normalize_miRNA_expr2 <- normalize_miRNA_expr
-    data <- c(data, gene_exp_original=data@ExperimentList$gene_exp)
-
+    if(!is.null(data@ExperimentList$gene_exp))
+      data <- c(data, gene_exp_original=data@ExperimentList$gene_exp)
+    if(!is.null(data@ExperimentList$miRNA_exp))
+      data <- c(data, miRNA_exp_original=data@ExperimentList$miRNA_exp)
 
     gene_genomic_res <- NULL
     geno <- F
@@ -139,7 +141,6 @@ run_multiomics <- function(data,
         norm_method=norm_method_gene_expr)
     }
 
-    data <- c(data, miRNA_exp_original=data@ExperimentList$miRNA_exp)
     mirna_cnv_res <- NULL
     if(!is.null(data@ExperimentList$miRNA_cnv_data) &
        !is.null(data@ExperimentList$miRNA_exp)){

@@ -10,6 +10,7 @@ run_cnv_integration(
   sequencing_data = T,
   normalize = T,
   norm_method = "TMM",
+  class = NULL,
   ...
 )
 }
