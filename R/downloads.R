@@ -197,7 +197,7 @@
  }
 
 
-   #' @import Homo.sapiens org.Mm.eg.db
+   #' @import Homo.sapiens Mus.musculus
    #' @importFrom stringr str_wrap
    #' @importFrom stats setNames
    #' @importFrom plyr rbind.fill
@@ -215,8 +215,8 @@
                                                     paste(tmp,
                                                           sep = " ",
                                                           collapse = ", "))))
-     if(species=="hsa") dataset <- org.Hs.eg.db::Homo.sapiens
-     if(species=="mmu") dataset <- org.Mm.eg.db::Mus.musculus
+     if(species=="hsa") dataset <- Homo.sapiens
+     if(species=="mmu") dataset <- Mus.musculus
      genes <- unique(genes)
      all_genes <- suppressMessages(genes(dataset,
                                          columns=c("SYMBOL",
