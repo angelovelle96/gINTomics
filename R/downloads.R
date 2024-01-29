@@ -197,7 +197,7 @@
  }
 
 
-   #' @import org.Hs.eg.db org.Mm.eg.db
+   #' @import Homo.sapiens org.Mm.eg.db
    #' @importFrom stringr str_wrap
    #' @importFrom stats setNames
    #' @importFrom plyr rbind.fill
