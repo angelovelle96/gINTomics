@@ -215,8 +215,8 @@
                                                     paste(tmp,
                                                           sep = " ",
                                                           collapse = ", "))))
-     if(species=="hsa") dataset <- Homo.sapiens
-     if(species=="mmu") dataset <- Mus.musculus
+     if(species=="hsa") dataset <- org.Hs.eg.db::Homo.sapiens
+     if(species=="mmu") dataset <- org.Mm.eg.db::Mus.musculus
      genes <- unique(genes)
      all_genes <- suppressMessages(genes(dataset,
                                          columns=c("SYMBOL",
