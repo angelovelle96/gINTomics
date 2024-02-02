@@ -480,6 +480,30 @@ setMethod("extract_model_res", "list",
           }
 )
 
+###################################################
+setMethod("extract_model_res", "MultiClass",
+          function(model_results,
+                   outliers=T,
+                   species="hsa",
+                   filters=c("hgnc_symbol",
+                             "ensembl_gene_id",
+                             "entrezgene_id"),
+                   genes_info=NULL,
+                   ...){
+
+      deg <- model_results$deg
+      model_results <- lapply(model_results, function(x) x)
+      data <- extract_model_res(model_results,
+                                outliers=outliers,
+                                species=species,
+                                genes_info=genes_info,
+                                filters=filters,
+                                ...)
+      data$deg <- rep(F, nrow(data))
+      data$deg[data$response%in%deg] <- T
+      return(data)
+          })
+
 
 ####################################################
 #' @importFrom plyr rbind.fill
@@ -499,6 +523,9 @@ setMethod("extract_model_res", "MultiOmics",
                   if(names(model_results[[1]])[
                     length(model_results[[1]])]!="data"){
                     tmp <- unlist(tmp, recursive = F)
+                    tmp2 <- names(tmp)[-grep("\\.deg$", names(tmp))]
+                    tmp <- lapply(tmp2, function(x) tmp[[x]])
+                    names(tmp) <- tmp2
                   }
                   tmp <- lapply(tmp, function(x){
                       ans <- cbind(response=rownames(x$coef_data),
@@ -531,6 +558,10 @@ setMethod("extract_model_res", "MultiOmics",
             data <- lapply(names(tmp), function(x) cbind(tmp[[x]], omics=x))
             names(data) <- names(tmp)
             data <- rbind.fill(data)
+            if("deg"%in%colnames(data)){
+              deg <- unique(data$response[data$deg])
+              data$deg[data$response%in%deg] <- T
+            }
             return(data)
           }
 )
@@ -558,6 +589,50 @@ search_gene <- function(genes,
 
 }
 
+#########################################
+#' @import edgeR limma
 
+.find_deg <- function(eexpression,
+                      class,
+                      RNAseq=T,
+                      norm_method="TMM",
+                      normalize=T){
+
+  tmp <- apply(eexpression, 1, function(x) sum(is.na(x)))
+  eexpression <- eexpression[tmp==0,]
+  design_mat <- model.matrix(~class, data = as.data.frame(t(eexpression)))
+  if(RNAseq){
+    y <- DGEList(counts = eexpression)
+    y <- calcNormFactors(y, method = norm_method)
+    if(!normalize) y$offset <- matrix(1, ncol(eexpression),
+                                      nrow(eexpression))
+    y <- estimateGLMCommonDisp(y, design_mat)
+    y <- estimateGLMTagwiseDisp(y, design_mat)
+    fit <- glmFit(y, design_mat)
+    lrt <- glmLRT(fit)
+    top <- topTags(lrt, n = nrow(eexpression))$table
+  }else{
+    if(normalize) eexpression <- t(.data_norm(t(eexpression), norm_method))
+    fit <- lmFit(eexpression, design_mat)
+    fit <- eBayes(fit)
+    top <- topTable(fit, number = nrow(eexpression))
+    colnames(top) <- gsub("adj.P.Val", "FDR", colnames(top))
+  }
+    return(top)
+
+}
+
+############################################
+
+
+setMethod("lapply", "MultiClass",
+          function(X, FUN){
+            ans <- X
+            attributes(ans)$class <- "list"
+            tmp <- names(ans)[names(ans)!="deg"]
+            ans <- lapply(tmp, function(y) ans[[y]])
+            names(ans) <- tmp
+            return(lapply(ans, FUN))
+          })
 
 

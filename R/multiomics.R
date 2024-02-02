@@ -62,6 +62,8 @@ run_multiomics <- function(data,
     if(!is.null(data@ExperimentList$miRNA_exp))
       data <- c(data, miRNA_exp_original=data@ExperimentList$miRNA_exp)
 
+    deg_gene <- T
+    deg_mirna <- T
     gene_genomic_res <- NULL
     geno <- F
     if(!is.null(data@ExperimentList$cnv_data) &
@@ -75,6 +77,7 @@ run_multiomics <- function(data,
         normalize=normalize_gene_expr,
         norm_method=norm_method_gene_expr,
         class=class,
+        run_deg=deg_gene,
         BPPARAM=BBPARAM)
       if(!is.null(class)){
         tmp <- lapply(gene_genomic_res, function(x)
@@ -94,6 +97,7 @@ run_multiomics <- function(data,
       RNAseq <- F
       normalize_gene_expr2 <- F
       geno <- T
+      deg_gene <- F
     }
 
 
@@ -108,6 +112,7 @@ run_multiomics <- function(data,
             normalize=normalize_gene_expr,
             norm_method=norm_method_gene_expr,
             class=class,
+            run_deg=deg_gene,
             BPPARAM=SerialParam())
         if(!is.null(class)){
           tmp <- lapply(gene_cnv_res, function(x)
@@ -126,6 +131,7 @@ run_multiomics <- function(data,
                      colnames(assay(data, i = "gene_exp"))])
         RNAseq <- F
         normalize_gene_expr2 <- F
+        deg_gene <- F
       }
 
     gene_met_res <- NULL
@@ -137,8 +143,10 @@ run_multiomics <- function(data,
         methylation = t(assay(data, i = "methylation")),
         sequencing_data = RNAseq,
         class=class,
+        run_deg=deg_gene,
         normalize = normalize_gene_expr2,
         norm_method=norm_method_gene_expr)
+      deg_gene <- F
     }
 
     mirna_cnv_res <- NULL
@@ -151,6 +159,7 @@ run_multiomics <- function(data,
         normalize=normalize_miRNA_expr,
         norm_method=norm_method_miRNA_expr,
         class=class,
+        run_deg=deg_mirna,
         BPPARAM=SerialParam())
       if(!is.null(class)){
         tmp <- lapply(mirna_cnv_res, function(x)
@@ -169,7 +178,7 @@ run_multiomics <- function(data,
         colnames(assay(data, i = "miRNA_exp"))])
       miRNAseq <- F
       normalize_miRNA_expr2 <- F
-
+      deg_mirna <- F
     }
 
 
@@ -187,7 +196,9 @@ run_multiomics <- function(data,
         normalize_cov = normalize_gene_expr,
         norm_method_cov = norm_method_gene_expr,
         class=class,
+        run_deg=deg_gene,
         type="tf")
+      deg_gene <- F
     }
 
 
@@ -205,7 +216,9 @@ run_multiomics <- function(data,
           normalize_cov = normalize_gene_expr,
           norm_method_cov = norm_method_gene_expr,
           class=class,
+          run_deg=deg_mirna,
           type="tf_miRNA")
+        deg_mirna <- F
     }
 
 
@@ -223,7 +236,9 @@ run_multiomics <- function(data,
         normalize_cov = normalize_miRNA_expr,
         norm_method_cov = norm_method_miRNA_expr,
         class=class,
+        run_deg=deg_gene,
         type="miRNA_target")
+      deg_gene <- F
     }
 
   ans <- new("MultiOmics", Filter(Negate(is.null),
@@ -293,6 +308,7 @@ run_cnv_integration <- function(expression,
                                 normalize=T,
                                 norm_method="TMM",
                                 class=NULL,
+                                run_deg=T,
                                 ...){
 
   if(is.null(class)){
@@ -322,6 +338,15 @@ run_cnv_integration <- function(expression,
                                  ...)
       return(ans)
     })
+    deg <- NULL
+    if(run_deg){
+      deg <- .find_deg(eexpression = t(expression),
+                       class = class,
+                       normalize = normalize,
+                       norm_method = norm_method)
+      deg <- list(rownames(deg)[deg$FDR<=0.1])
+      }
+    cnv_res <- new("MultiClass", c(cnv_res, deg=deg))
   }
   return(cnv_res)
 }
@@ -385,6 +410,7 @@ run_met_integration <- function( expression,
                                  normalize=T,
                                  norm_method="TMM",
                                  class=NULL,
+                                 run_deg=T,
                                  ...){
 
   if(is.null(class)){
@@ -414,6 +440,15 @@ run_met_integration <- function( expression,
                                   ...)
       return(ans)
     })
+    deg <- NULL
+    if(run_deg){
+      deg <- .find_deg(eexpression = t(expression),
+                       class = class,
+                       normalize = normalize,
+                       norm_method = norm_method)
+      deg <- list(rownames(deg)[deg$FDR<=0.1])
+    }
+    met_res <- new("MultiClass", c(met_res, deg=deg))
   }
   return(met_res)
 }
@@ -556,6 +591,7 @@ run_genomic_integration <- function(expression,
                                 interactions=NULL,
                                 class=NULL,
                                 scale=T,
+                                run_deg=T,
                                 ...){
 
 
@@ -592,6 +628,15 @@ run_genomic_integration <- function(expression,
                                       ...)
       return(ans)
     })
+    deg <- NULL
+    if(run_deg){
+      deg <- .find_deg(eexpression = t(expression),
+                       class = class,
+                       normalize = normalize,
+                       norm_method = norm_method)
+      deg <- list(rownames(deg)[deg$FDR<=0.1])
+    }
+    gen_res <- new("MultiClass", c(gen_res, deg=deg))
   }
   return(gen_res)
 }
@@ -708,6 +753,7 @@ run_tf_integration <- function( expression,
                                 normalize_cov=T,
                                 norm_method_cov="TMM",
                                 class=NULL,
+                                run_deg=T,
                                 ...){
 
 
@@ -748,6 +794,15 @@ run_tf_integration <- function( expression,
                                  ...)
       return(ans)
     })
+    deg <- NULL
+    if(run_deg){
+      deg <- .find_deg(eexpression = t(expression),
+                       class = class,
+                       normalize = normalize,
+                       norm_method = norm_method)
+      deg <- list(rownames(deg)[deg$FDR<=0.1])
+    }
+    tf_res <- new("MultiClass", c(tf_res, deg=deg))
   }
   return(tf_res)
 }
