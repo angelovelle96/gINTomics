@@ -5,3 +5,7 @@ require(methods)
 setClass("MultiOmics",
          representation("list")
 )
+
+setClass("MultiClass",
+         representation("list")
+)
