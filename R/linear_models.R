@@ -22,7 +22,8 @@
     covariates <- tmp$covariates
 
     if(normalize==T) response_var <- .data_norm(response_var,
-                                               method = norm_method)
+                                               method = norm_method,
+                                               RNAseq = F)
     tmp <- .covariates_check(response_var = response_var,
                             covariates = covariates,
                             interactions = interactions,
