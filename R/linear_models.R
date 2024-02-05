@@ -49,11 +49,10 @@
     colnames(rresiduals) <- rownames(response_var)
     rownames(rresiduals) <- names(tmp)
 
-
     results <- list(
-      model_results = lm_results,
       coef_data = coef_pval_mat$coef,
       pval_data = coef_pval_mat$pval,
+      fdr_data = fdr(coef_pval_mat$pval),
       residuals = rresiduals,
       data = list(response_var = response_var,
                   covariates = covariates,

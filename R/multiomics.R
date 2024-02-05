@@ -518,28 +518,24 @@ run_met_integration <- function( expression,
   }
 
   if(adj_out){
-    tmp <- gen_res$coef_data
-    tmp2 <- lapply(rownames(tmp), function(x){
-      ans <- tmp[x, c(paste0(x, "_cnv"), paste0(x, "_met"))]
-      colnames(ans) <- c("cnv", "met")
-      return(ans)
-    })
-    tmp2 <- rbind.fill(tmp2)
-    rownames(tmp2) <- rownames(tmp)
-    gen_res$coef_data <- cbind('(Intercept)'=gen_res$coef_data[,"(Intercept)"],
-                               tmp2[rownames(gen_res$coef_data),])
 
-    tmp <- gen_res$pval_data
-    tmp2 <- lapply(rownames(tmp), function(x){
-      ans <- tmp[x, c(paste0(x, "_cnv"), paste0(x, "_met"))]
-      colnames(ans) <- c("cnv", "met")
-      return(ans)
-    })
-    tmp2 <- rbind.fill(tmp2)
-    rownames(tmp2) <- rownames(tmp)
-    gen_res$pval_data <- cbind('(Intercept)'=gen_res$pval_data[,"(Intercept)"],
-                               tmp2[rownames(gen_res$pval_data),])
-
+    tmp <- list(coef=gen_res$coef_data,
+                pval=gen_res$pval_data)
+    ans <- lapply(tmp, function(y){
+        tmp2 <- lapply(rownames(y), function(x){
+          ans2 <- y[x, c(paste0(x, "_cnv"), paste0(x, "_met"))]
+          colnames(ans2) <- c("cnv", "met")
+          return(ans2)
+        })
+        tmp2 <- rbind.fill(tmp2)
+        rownames(tmp2) <- rownames(y)
+        ans <- cbind('(Intercept)'=y[,"(Intercept)"],
+                                   tmp2[rownames(y),])
+        return(ans)
+        })
+    gen_res$coef_data <- ans$coef
+    gen_res$pval_data <- ans$pval
+    gen_res$fdr_data <- fdr(ans$pval)
   }
   if(scale){
     tmp <- cbind(original_cnv, original_met[rownames(original_cnv),])

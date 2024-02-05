@@ -290,12 +290,6 @@ create_multiassay <- function(methylation=NULL,
 
       dictionary$tranformed <- paste0("^", dictionary$tranformed, "$")
 
-      names(results$model_results) <- stri_replace_all_regex(
-        names(results$model_results),
-        pattern = dictionary$tranformed,
-        replacement = dictionary$original,
-        vectorize_all = F)
-
       rownames(results$residuals) <- stri_replace_all_regex(
         rownames(results$residuals),
         pattern = dictionary$tranformed,
@@ -322,6 +316,18 @@ create_multiassay <- function(methylation=NULL,
 
       rownames(results$pval_data) <- stri_replace_all_regex(
         rownames(results$pval_data),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+      colnames(results$fdr_data) <- stri_replace_all_regex(
+        colnames(results$fdr_data),
+        pattern = dictionary$tranformed,
+        replacement = dictionary$original,
+        vectorize_all = F)
+
+      rownames(results$fdr_data) <- stri_replace_all_regex(
+        rownames(results$fdr_data),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
         vectorize_all = F)
@@ -407,15 +413,23 @@ setMethod("extract_model_res", "list",
             data <- data[!is.na(data$value),]
             pval <- cbind(response=rownames(model_results$pval_data),
                           model_results$pval_data)
-            pval <- reshape2::melt(pval,
-                                   id.vars="response",
-                                   variable.name = "cov")
+            pval <- melt(pval,
+                         id.vars="response",
+                         variable.name = "cov")
             rownames(pval) <- paste0(pval$response, "_", pval$cov)
             pval <- pval[rownames(data),]
+            fdr <- cbind(response=rownames(model_results$fdr_data),
+                          model_results$fdr_data)
+            fdr <- melt(fdr,
+                        id.vars="response",
+                        variable.name = "cov")
+            rownames(fdr) <- paste0(fdr$response, "_", fdr$cov)
+            fdr <- fdr[rownames(data),]
             tmp <- rep("not_significant", nrow(pval))
             tmp[pval$value<=0.05] <- "significant"
             names(tmp) <- rownames(pval)
             data$pval <- pval[rownames(data), "value"]
+            data$fdr <- fdr[rownames(data), "value"]
             data$significativity <- tmp[rownames(data)]
             data$sign <- rep("negative", nrow(data))
             data$sign[data$value>0]="positive"
@@ -634,5 +648,24 @@ setMethod("lapply", "MultiClass",
             names(ans) <- tmp
             return(lapply(ans, FUN))
           })
+
+
+#'
+#' @importFrom stats p.adjust
+
+fdr <- function(pval_mat){
+
+  fdr_data <- apply(pval_mat, 2, function(x){
+    ans <- p.adjust(x[!is.na(x)], method = "fdr", )
+    x[!is.na(x)] <- ans
+    return(x)
+  })
+  fdr_data <- as.data.frame(fdr_data)
+  return(fdr_data)
+}
+
+
+
+
 
 
