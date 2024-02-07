@@ -14,6 +14,7 @@ run_genomic_integration(
   interactions = NULL,
   class = NULL,
   scale = T,
+  run_deg = T,
   ...
 )
 }

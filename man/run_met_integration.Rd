@@ -11,6 +11,7 @@ run_met_integration(
   normalize = T,
   norm_method = "TMM",
   class = NULL,
+  run_deg = T,
   ...
 )
 }

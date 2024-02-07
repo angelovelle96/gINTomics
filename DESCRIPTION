@@ -37,7 +37,19 @@ Imports:
     methods,
     stats,
     reshape2,
-    randomForest
+    randomForest,
+    Homo.sapiens,
+    Mus.musculus,
+    VennDetail,
+    cowplot,
+    limma,
+    org.Hs.eg.db,
+    org.Mm.eg.db,
+    BiocGenerics,
+    GenomicFeatures,
+    ReactomePA,
+    clusterProfiler,
+    dplyr
 Depends: 
     R (>= 3.5.0)
 LazyData: false

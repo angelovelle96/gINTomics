@@ -16,6 +16,7 @@ run_tf_integration(
   normalize_cov = T,
   norm_method_cov = "TMM",
   class = NULL,
+  run_deg = T,
   ...
 )
 }
