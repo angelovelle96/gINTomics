@@ -180,12 +180,17 @@
   }
   if(single_cov==T){
     tmp <- lapply(tmp, function(x){
-      ans=x
-      pos <- length(grep("Intercept", names(ans)))+1
-      if(length(ans)>=pos){
-        names(ans)[pos] <- "cov"
+      pos <- length(grep("Intercept", names(x)))+1
+      if(length(x)>=pos){
+        names(x)[pos] <- "cov"
       }
-      return(ans)
+      return(x)
+    })
+  }else{
+    tmp <- lapply(tmp, function(x){
+      names(x) <- gsub("^.*_cnv", "cnv", names(x))
+      names(x) <- gsub("^.*_met", "met", names(x))
+      return(x)
     })
   }
   coef_matrix <- rbind.fill(tmp)
@@ -211,12 +216,17 @@
   }
   if(single_cov==T){
     tmp <- lapply(tmp, function(x){
-      ans=x
-      pos <- length(grep("Intercept", names(ans)))+1
-      if(length(ans)>=pos){
-        names(ans)[pos] <- "cov"
+      pos <- length(grep("Intercept", names(x)))+1
+      if(length(x)>=pos){
+        names(x)[pos] <- "cov"
       }
-      return(ans)
+      return(x)
+    })
+  }else{
+    tmp <- lapply(tmp, function(x){
+      names(x) <- gsub("^.*_cnv", "cnv", names(x))
+      names(x) <- gsub("^.*_met", "met", names(x))
+      return(x)
     })
   }
   pval_matrix <- rbind.fill(tmp)

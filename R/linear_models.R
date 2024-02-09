@@ -7,7 +7,7 @@
                                reference=NULL,
                                normalize=T,
                                norm_method="TMM",
-                               BPPARAM=BiocParallel::SerialParam()){
+                               BPPARAM=SerialParam()){
 
     tmp <- unlist(lapply(interactions, length))
     single_cov=F
@@ -45,7 +45,8 @@
     coef_pval_mat <- .building_result_matrices(model_results = lm_results,
                                               type = "lm",
                                               single_cov = single_cov)
-    tmp <- lapply(lm_results, function(x) as.data.frame(t(residuals(x))))
+    tmp <- bplapply(lm_results, function(x) as.data.frame(t(residuals(x))),
+                    BPPARAM = BPPARAM)
     rresiduals <- rbind.fill(tmp)
     colnames(rresiduals) <- rownames(response_var)
     rownames(rresiduals) <- names(tmp)
