@@ -334,7 +334,7 @@
 ############################################################################
 #############################################################################
 
-.server <- function(input, output, session) {
+server <- function(input, output, session) {
 
   # ---------------------- NETWORK SERVER -----------------------------
   tmp <- gINTomics:::.prepare_network(data_table)
@@ -383,7 +383,7 @@ run_shiny <- function(multiomics_integration){
   data <- .shiny_preprocess(data)
   data_table <- data$data_table
   ui <- .create_ui(data_table)
-  shiny::shinyApp(ui, .server)
+  shiny::shinyApp(ui, server)
 }
 
 
