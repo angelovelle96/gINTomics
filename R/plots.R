@@ -7,24 +7,74 @@
 #' **run_multiomics**
 #' @param outliers logical. Should outliers be showed in the plot. Default is
 #' set to FALSE
-#' @import ggplot2 ggridges
+#' @import ggplot2 ggridges VennDetail cowplot
 #' @export
 #'
 
 ridgeline_plot <- function(data,
                            outliers=F){
 
+    g1 <- g2 <- g <- NULL
     data <- extract_model_res(data,
                               outliers=outliers)
     data <- data[data$cov!="(Intercept)",]
-    ggplot(data, aes(x = data$coef,
-                     y = data$significativity,
-                     fill=data$significativity))+
-      geom_density_ridges() +
-      theme_ridges()+
-      guides(fill=guide_legend(title="Significativity"))+
-      xlab("coef")+
-      ylab("Significativity")
+    if(sum(c("significant_cnv", "significant_met")%in%data$significativity)!=0){
+
+      tmp <- data[data$significativity%in%c("significant_cnv",
+                                            "significant_met"),]
+
+      ven <- venndetail(list(CNV = tmp$response[tmp$cnv_met=="cnv"],
+                             Methylation = tmp$response[tmp$cnv_met=="met"]))
+
+      data_ns <- tmp[tmp$response%in%ven@result$Detail[
+        ven@result$Subset!="Shared"],]
+      if(nrow(data_ns)>0){
+          g1 <- ggplot(tmp2, aes(x = data_ns$coef,
+                                 y = data_ns$significativity,
+                                 fill=data_ns$significativity))+
+            geom_density_ridges() +
+            theme_ridges()+
+            guides(fill=guide_legend(title="Significativity"))+
+            xlab("coef")+
+            ylab("Significativity")
+          }
+
+      data_s <- tmp[tmp$response%in%ven@result$Detail[
+        ven@result$Subset=="Shared"],]
+      if(nrow(data_s)>0){
+          g2 <- ggplot(tmp2, aes(x = data_s$coef,
+                                 y = data_s$significativity,
+                                 fill=data_s$significativity))+
+            geom_density_ridges() +
+            theme_ridges()+
+            guides(fill=guide_legend(title="Significativity"))+
+            xlab("coef")+
+            ylab("Significativity")
+          }
+
+    }
+
+    data_r <- data[!data$cnv_met%in%c("cnv", "met"),]
+    #data_r <- data_r[data_r$omics=="tf_res",]
+    #data_r <- data_r[data_r$significativity!="not_significant",]
+
+    ############cambiare e fare un grafico per ogni omica (da selezionare nella shiny)
+    if("omics"%in%colnames(data_r)){
+      data_r$significativity[
+        data_r$significativity=="significant"] <- paste(data_r$significativity[
+          data_r$significativity=="significant"], data_r$omics[
+            data_r$significativity=="significant"],sep = "_")
+    }
+    if(nrow(data_r)>0){
+        g <- ggplot(data_r, aes(x = data_r$coef,
+                         y = data_r$significativity,
+                         fill=data_r$significativity))+
+          geom_density_ridges(panel_scaling=T) +
+          theme_ridges()+
+          guides(fill=guide_legend(title="Significativity"))+
+          xlab("coef")+
+          ylab("Significativity")
+        }
 
 }
 
