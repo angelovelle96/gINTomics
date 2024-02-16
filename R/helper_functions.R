@@ -680,6 +680,63 @@ fdr <- function(pval_mat){
 }
 
 
+##############################################
+
+
+.shiny_preprocess <- function(data){
+
+  data_table <- data
+  data_table <- filter(data_table, cov != '(Intercept)')   # elimino intercetta
+  rownames(data_table) <- 1:nrow(data_table)
+  data_table <- data_table[, !(names(data_table) %in% c('significativity', 'sign'))]
+  colnames(data)[colnames(data) == "response"] <- "gene"
+  colnames(data)[colnames(data) == "start_response"] <- "start"
+  colnames(data)[colnames(data) == "end_response"] <-"end"
+  colnames(data)[colnames(data) == "chr_response"] <-"chr"
+  data$direction_cov <- ifelse(data$cov_value < 0, 'negative', 'positive')
+  data$direction_coef <- ifelse(data$coef < 0, 'negative', 'positive')
+  data$cov_value <- abs(data$cov_value)
+  data$coef <- abs(data$coef)
+  ans <- list(data=data, data_table=data_table)
+  return(ans)
+}
+
+#############################################################################
+
+.circos_preprocess <- function(data){
+
+  library(GenomicRanges)
+  dataframes <- lapply(unique(data$omics), function(x) {
+    single_omic_df <- data[data$omics==x,]
+    return(single_omic_df)
+  })
+  names(dataframes) <- paste0("df_", unique(data$omics))
+  if("df_gene_genomic_res"%in%names(dataframes)){
+    dataframes$df_cnv <- filter(dataframes$df_gene_genomic_res,
+                                cnv_met == 'cnv')
+    dataframes$df_met <- filter(dataframes$df_gene_genomic_res,
+                                cnv_met == 'met')
+    tmp <- lapply(which(names(dataframes)!="df_gene_genomic_res"), function(x){
+      ans <- dataframes[[x]]
+      ans <- ans[ans$cov!="(Intercept)",]
+      return(ans)
+    })
+    names(tmp) <- names(dataframes)[
+      which(names(dataframes)!="df_gene_genomic_res")]
+    dataframes <- tmp
+  }
+
+  gr <- lapply(dataframes, function(x){
+    ans <- makeGRangesFromDataFrame(x,
+                                    seqnames.field = 'chr',
+                                    start.field = 'start',
+                                    end.field = 'end',
+                                    keep.extra.columns = TRUE,
+                                    na.rm = TRUE)
+    return(ans)
+  })
+  return(gr)
+}
 
 
 
