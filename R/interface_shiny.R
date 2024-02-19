@@ -215,7 +215,7 @@
                               choices = unique(data_table$omics)),
                   selectInput("classSelectRidge",
                               "Select Class:",
-                              choices = unique(data$class)),
+                              choices = unique(data_table$class)),
                   selectInput(inputId = 'degSelectRidge',
                               label = 'DEGs:',
                               choices = c('All','Only DEGs')),

@@ -77,7 +77,7 @@
                 met_sign_genes = met_sign_genes,
                 common_genes = common_genes)
     return(data_venn)
-    }, env = parent.frame())%>%bindEvent(input$classSelectVenn,
+    })%>%bindEvent(input$classSelectVenn,
                                          input$FDRRangeVenn,
                                          input$pvalRangeVenn,
                                          input$integrationSelectVenn,
@@ -140,7 +140,7 @@
                              session){
   observe({
     if('class' %in% colnames(data_table)){
-      df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$classSelectHeatmap]]$data$response_var
+      df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
     } else {
       df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]]$data$response_var
     }
@@ -148,7 +148,7 @@
     df_heatmap_t <- t(df_heatmap)
     if(input$integrationSelectHeatmap == 'gene_genomic_res'){
       if('class' %in% colnames(data_table)){
-        data_table <- data_table[data_table$class == input$classSelectHeatmap,]
+        data_table <- data_table[data_table$class == input$selectClassHeatmap,]
         if (input$degSelectHeatmap == 'Only DEGs'){
           data_table <- data_table[data_table$deg == TRUE, ]
         }
@@ -201,7 +201,7 @@
                  input$FDRRangeHeatmap,
                  input$pvalRangeHeatmap,
                  input$significativityCriteriaHeatmap,
-                 input$classSelectHeatmap)
+                 input$selectClassHeatmap)
 }
 
 ######################################################################
