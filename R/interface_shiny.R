@@ -66,7 +66,7 @@
                               choices = unique(data_table$chr_cov)),
                   selectInput(inputId = 'degSelectTable',
                               label = 'DEGs:',
-                              choices = c('Only DEGs', 'All')),
+                              choices = c('All', 'Only DEGs')),
                   selectInput(inputId = 'significativityCriteriaTable',
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
@@ -77,7 +77,7 @@
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.05)),
+                                step = 0.005)),
                   conditionalPanel(
                     condition = "input.significativityCriteriaTable == 'FDR'",
                     sliderInput("FDRRangeTable",
@@ -85,7 +85,7 @@
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.05))
+                                step = 0.005))
                 ),
                 fluidRow(
                   column(
@@ -131,7 +131,7 @@
                              choices = c('All', unique(data_table$chr_cov))),
                  selectInput(inputId = 'degSelectHisto',
                              label = 'DEGs:',
-                             choices = c('Only DEGs', 'All')),
+                             choices = c('All', 'Only DEGs')),
                  selectInput(inputId = 'significativityCriteriaHisto',
                              label = 'Significativity criteria:',
                              choices = c('pval', 'FDR')),
@@ -142,7 +142,7 @@
                                min = 0,
                                max = 1,
                                value = c(0, 0.05),
-                               step = 0.05)),
+                               step = 0.005)),
                  conditionalPanel(
                    condition = "input.significativityCriteriaHisto == 'FDR'",
                    sliderInput("FDRRangeHisto",
@@ -150,7 +150,7 @@
                                min = 0,
                                max = 1,
                                value = c(0, 0.05),
-                               step = 0.05))
+                               step = 0.005))
                ),
                mainPanel(
                  plotlyOutput('histogramPlot')
@@ -178,7 +178,7 @@
                                min = 0,
                                max = 1,
                                value = c(0, 0.10),
-                               step = 0.05)),
+                               step = 0.005)),
                  conditionalPanel(
                    condition = "input.significativityCriteriaHistoTFs == 'FDR'",
                    sliderInput("FDRRangeHistoTFs",
@@ -186,7 +186,7 @@
                                min = 0,
                                max = 1,
                                value = c(0, 0.10),
-                               step = 0.05))
+                               step = 0.005))
                ),
                mainPanel(
                  plotlyOutput('histogramPlotTFs'),
@@ -229,7 +229,7 @@
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.05)),
+                                step = 0.005)),
                   conditionalPanel(
                     condition = "input.significativityCriteriaRidge == 'FDR'",
                     sliderInput("FDRRangeRidge",
@@ -237,7 +237,7 @@
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.05))
+                                step = 0.005))
                 ),
                 mainPanel(
                   # OUTPUT
@@ -269,7 +269,7 @@
                               choices = unique(data_table$class)),
                   selectInput(inputId = 'degSelectVenn',
                               label = 'DEGs:',
-                              choices = c('Only DEGs', 'All')),
+                              choices = c('All', 'Only DEGs')),
                   selectInput(inputId = 'significativityCriteriaVenn',
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
@@ -385,14 +385,14 @@
                               label = 'Integration Type:',
                               choices = unique(data_table$cnv_met)),
                   numericInput("num_top_genes",
-                               "Numero di geni top:",
+                               "Number of top genes to visualize:",
                                value = 50),
                   sliderInput("pvalRangeVolcano",
                               "P-Value Range:",
                               min = 0,
                               max = 1,
                               value = c(0, 0.05),
-                              step = 0.05)
+                              step = 0.005)
                 ),
                 mainPanel(
                   # OUTPUT
