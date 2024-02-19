@@ -310,6 +310,9 @@
 ###################################################################
 
 .gint_tabitem_page_heatmap <- function(data_table){
+  int <- intersect(c("gene_genomic_res", "gene_met_res",
+                     "gene_cnv_res", "mirna_cnv_res"),
+                   unique(data_table$omics))
   tabItem(tabName = "page_heatmap",
           fluidRow(
             box(title = "Subsection 1",
@@ -321,7 +324,7 @@
                   #input
                   selectInput(inputId = 'integrationSelectHeatmap',
                               label = 'Integration Type:',
-                              choices = unique(data_table$omics)),
+                              choices = int),
                   sliderInput("numTopGenesHeatmap",
                               "Number of top genes:",
                               value = 50,
