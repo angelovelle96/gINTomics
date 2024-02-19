@@ -10,7 +10,7 @@
                            'omics'))
 
   all <- all[order(all$pval), ] # modificare
-  all <- head(all, 300)
+  all <- head(all, 600)
   # ottengo tutti i geni(mirna/tf/targets) in modo da avere un nodo per ogni elemento unico
   nodes <- data.frame(gene = c(all$cov, all$response))  #controllare doppioni
   #ottengo gli edges ovvero le coppie di interazioni (from-to)
@@ -124,9 +124,9 @@
                                            hover = TRUE),
                    nodesIdSelection = TRUE,
                    manipulation = TRUE) %>%
-        visPhysics(stabilization = FALSE) %>%
+       # visPhysics() %>%
         visIgraphLayout() %>%
-        visLayout(randomSeed = 20, improvedLayout = T)
+        visLayout(randomSeed = 20, improvedLayout = TRUE)
 }
 
 
@@ -182,14 +182,14 @@
 .build_volcano <- function(volcano_data){
     plot_ly(volcano_data,
             x = ~coef,
-            y = ~pval,
+            y = ~pval_fdr,
             mode = 'markers',
             color =  ~group,
             symbol = ~class,
             text =  ~paste("Group:", group, "<br>",
                            "Class:", class,"<br>",
                            "Name:", cov, "<br>",
-                           "Pval:", pval, "<br>",
+                           "Pval/FDR:", pval, "<br>",
                            "coef", coef),
             textposition = 'top right') %>%
       layout(title = "Volcano Plot") %>%
