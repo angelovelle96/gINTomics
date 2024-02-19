@@ -334,55 +334,52 @@
 ############################################################################
 #############################################################################
 
-server <- function(input, output, session) {
-
-  # ---------------------- NETWORK SERVER -----------------------------
-  tmp <- gINTomics:::.prepare_network(data_table)
-  reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
-                                                      input = input,
-                                                      output = output,
-                                                      network_data = tmp)
-  gINTomics:::.render_reactive_network(reactive_network = reactive_network,
-                                       input = input,
-                                       output = output)
-
-  ### ------------------------ VENN SERVER ----------------------
-  reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table, input = input, output = output)
-  output$venn_plot <- gINTomics:::.render_venn(reactive_venn)
-  output$common_genes_table <- gINTomics:::.render_venn_table(reactive_venn)
-
-  ## -------------------------- VOLCANO SERVER ------------------------
-  reactive_volcano <- gINTomics:::.prepare_reactive_volcano(data_table, input = input, output = output)
-  output$volcanoPlot <- gINTomics:::.render_volcano(reactive_volcano)
-
-  ## -------------------------- HEATMAP SERVER ------------------------
-  gINTomics:::.prepare_reactive_heatmap(data_table=data_table, multiomics_integration = multiomics_integration, input=input, output=output, session = session)
-
-  ## ---------------------- RIDGE SERVER ------------------------
-  reactive_ridge <- gINTomics:::.prepare_reactive_ridge(data_table, input = input, output = output)
-  output$ridgelinePlot <- gINTomics:::.render_ridge(reactive_ridge)
-  ## ----------------------- HISTO SERVER --------------------------
-  reactive_histo <- gINTomics:::.prepare_reactive_histo(data_table, input = input, output = output)
-  output$histogramPlot <- gINTomics:::.render_histo(reactive_histo)
-
-  ## ----------------------- HISTO SERVER TF --------------------------
-  reactive_histo_tf <- gINTomics:::.prepare_reactive_histo_tf(data_table, input = input, output = output)
-  output$histogramPlotTFs <- gINTomics:::.render_histo_TF(reactive_histo_tf, by_chr = F)
-  output$histogramPlotTFsByChromosome <- gINTomics:::.render_histo_TF(reactive_histo_tf, by_chr = T)
-  #### ------------------- TABLE SERVER ----------------------------
-  reactive_table <- gINTomics:::.prepare_reactive_table(data_table, input = input, output = output)
-  output$res_table <- gINTomics:::.render_table(reactive_table)
-}
-
-
-############################################################################
-#############################################################################
-
 run_shiny <- function(multiomics_integration){
   data <- extract_model_res(multiomics_integration)
   data <- .shiny_preprocess(data)
   data_table <- data$data_table
   ui <- .create_ui(data_table)
+  server <- function(input, output, session) {
+
+    # ---------------------- NETWORK SERVER -----------------------------
+    tmp <- gINTomics:::.prepare_network(data_table)
+    reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
+                                                        input = input,
+                                                        output = output,
+                                                        network_data = tmp)
+    gINTomics:::.render_reactive_network(reactive_network = reactive_network,
+                                         input = input,
+                                         output = output)
+
+    ### ------------------------ VENN SERVER ----------------------
+    reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table, input = input, output = output)
+    output$venn_plot <- gINTomics:::.render_venn(reactive_venn)
+    output$common_genes_table <- gINTomics:::.render_venn_table(reactive_venn)
+
+    ## -------------------------- VOLCANO SERVER ------------------------
+    reactive_volcano <- gINTomics:::.prepare_reactive_volcano(data_table, input = input, output = output)
+    output$volcanoPlot <- gINTomics:::.render_volcano(reactive_volcano)
+
+    ## -------------------------- HEATMAP SERVER ------------------------
+    gINTomics:::.prepare_reactive_heatmap(data_table=data_table, multiomics_integration = multiomics_integration, input=input, output=output, session = session)
+
+    ## ---------------------- RIDGE SERVER ------------------------
+    reactive_ridge <- gINTomics:::.prepare_reactive_ridge(data_table, input = input, output = output)
+    output$ridgelinePlot <- gINTomics:::.render_ridge(reactive_ridge)
+    ## ----------------------- HISTO SERVER --------------------------
+    reactive_histo <- gINTomics:::.prepare_reactive_histo(data_table, input = input, output = output)
+    output$histogramPlot <- gINTomics:::.render_histo(reactive_histo)
+
+    ## ----------------------- HISTO SERVER TF --------------------------
+    reactive_histo_tf <- gINTomics:::.prepare_reactive_histo_tf(data_table, input = input, output = output)
+    output$histogramPlotTFs <- gINTomics:::.render_histo_TF(reactive_histo_tf, by_chr = F)
+    output$histogramPlotTFsByChromosome <- gINTomics:::.render_histo_TF(reactive_histo_tf, by_chr = T)
+    #### ------------------- TABLE SERVER ----------------------------
+    reactive_table <- gINTomics:::.prepare_reactive_table(data_table, input = input, output = output)
+    output$res_table <- gINTomics:::.render_table(reactive_table)
+  }
+
+
   shiny::shinyApp(ui, server)
 }
 
