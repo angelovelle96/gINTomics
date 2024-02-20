@@ -191,13 +191,13 @@ observe({
     }
     top_met <- df_heatmap_t %>%
       arrange(desc(abs(met))) %>%
-      head(input$numTopGenesHeatmap)
+      head(input$numTopGenesHeatmap/2)
     top_cnv <- df_heatmap_t %>%
       arrange(desc(abs(cnv))) %>%
-      head(input$numTopGenesHeatmap)
+      head(input$numTopGenesHeatmap/2)
     expr_top <- rbind(top_cnv, top_met)
 
-    row_ha <- rowAnnotation(coef=runif(nrow(expr_top)))
+    row_ha <- rowAnnotation(coef_cnv=expr_top$cnv, coef_met=expr_top$met)
     ht <- ComplexHeatmap:::Heatmap(expr_top, right_annotation=row_ha)
     ht = draw(ht)
     ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')
@@ -288,14 +288,14 @@ observe({
                                      df_heatmap_t$fdr_mirna_cnv <= input$FDRRangeHeatmap, ]
     }
 
+    df_heatmap_t <- as.data.frame(df_heatmap_t)
     top_mirna_cnv <- df_heatmap_t %>%
-    arrange(desc(abs(mirna_cnv))) %>%
+    arrange(desc(abs(mirna_cnv)))  %>%
     head(input$numTopGenesHeatmap)
     expr_top <- top_mirna_cnv
 
-    row_ha <- rowAnnotation(coef=runif(input$numTopGenesHeatmap))
-    ht <- ComplexHeatmap::Heatmap(as.matrix(expr_top, right_annotation=row_ha),
-                                  cluster_columns = FALSE)
+    row_ha <- rowAnnotation(coef=expr_top$mirna_cnv)
+    ht <- ComplexHeatmap:::Heatmap(expr_top, right_annotation=row_ha)
     ht = draw(ht)
     ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')
 
