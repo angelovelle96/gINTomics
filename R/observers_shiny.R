@@ -456,43 +456,26 @@ observe({
 
 .prepare_reactive_circos <- function(data, input, output) {
   reactive({
-    common_tracks <- list(
-      track_cyto,
-      track_expr
-    )
 
-    if (input$integrationSelectCircos == "gene_genomic_res") {
-      additional_tracks <- list(
-        track_cnv,
-        track_coefs_cnv,
-        track_met,
-        track_coefs_met
-      )
-    } else if (input$integrationSelectCircos == "gene_cnv_res") {
-      additional_tracks <- list(
-        track_cnv,
-        track_coefs_cnv
-      )
-    } else if (input$integrationSelectCircos == "gene_met_res"){
-      additional_tracks <- list(
-        track_met,
-        track_coefs_met
-      )
-    } else if (input$integrationSelectCircos == "mirna_cnv_res"){
-      additional_tracks <- list(
-        track_mirna,
-        track_cnv,
-        track_coefs_cnv
-      )
-    }
+  tracks <- .create_tracks(data_table, data)
 
-    composed_view_circos <- .create_composed_view(common_tracks, additional_tracks, input$layout_single)
+if(c("cnv_track","met_track") %in% tracks){composed_view_genomic <- .create_composed_view(cnv_track,
+                                                                                           met_track,
+                                                                                           cyto_track,
+                                                                                           expr_track)}
+if(!(cnv_track %in% tracks)){composed_view_met <- .create_composed_view(met_track,
+                                                                         cyto_track,
+                                                                         expr_track)}
+if(!(met_track %in% tracks)){composed_view_cnv <- .create_composed_view(cnv_track,
+                                                                        cyto_track,
+                                                                        expr_track)}
 
-    arranged_view_circos <- arrange_views(
+
+    arranged_view_circos_genomic <- arrange_views(
       title = 'Interactive Circos',
       subtitle = 'subtitle',
-      views = composed_view_circos,
-      xDomain = list(chromosome = 'chr1')
+      views = composed_view_genomic,
+      # xDomain = list(chromosome = 'chr1')
     )
 
     return(arranged_view_circos)
@@ -500,8 +483,8 @@ observe({
 }
 
 
-.create_composed_view <- function(common_tracks, additional_tracks, layout) {
-  tracks <- c(common_tracks, additional_tracks)
+.create_composed_view <- function(tracks, layout) {
+
 
   composed_view_circos <- compose_view(
     multi = TRUE,
