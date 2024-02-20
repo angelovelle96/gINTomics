@@ -471,7 +471,7 @@
                 "This is the content of Subsection 1."),
             mainPanel(
                 do.call("tabsetPanel", lapply(as.list(unique(data_table$omics)), function(x) tabPanel(x)))
-        )
+        )          ## USARE uiOutput("gosling_plot_circos_ui")
       )
   )
 }

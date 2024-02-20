@@ -679,9 +679,7 @@ fdr <- function(pval_mat){
   return(fdr_data)
 }
 
-
 ##############################################
-
 
 .shiny_preprocess <- function(data){
 
@@ -725,7 +723,6 @@ fdr <- function(pval_mat){
       which(names(dataframes)!="df_gene_genomic_res")]
     dataframes <- tmp
   }
-
   gr <- lapply(dataframes, function(x){
     ans <- makeGRangesFromDataFrame(x,
                                     seqnames.field = 'chr',
@@ -738,6 +735,72 @@ fdr <- function(pval_mat){
   return(gr)
 }
 
+# Funzione per creare una singola traccia
+.create_single_track <- function(data, genomicFields, value, tooltipTitle, mark = 'bar', axis = 'none', legend = FALSE) {
+  return(
+    add_single_track(
+      data = track_data_gr(data, chromosomeField = 'seqnames', genomicFields = genomicFields, value = value),
+      mark = mark,
+      x = visual_channel_x(field = 'start', type = 'genomic', axis = axis),
+      xe = visual_channel_x(field = 'end', type = 'genomic', axis = axis),
+      y = visual_channel_y(field = value, type = 'quantitative', axis = axis),
+      color = visual_channel_color(field = 'direction_cov', type = 'nominal', domain = c('positive', 'negative'), range = c('red', 'blue')),
+      tooltip = visual_channel_tooltips(
+        visual_channel_tooltip(field = "start", type = "genomic", alt = 'Start Position:'),
+        visual_channel_tooltip(field = "end", type = "genomic", alt = "End Position:"),
+        visual_channel_tooltip(field = value, title = tooltipTitle, type = "quantitative", alt = paste(tooltipTitle, "Value:"), format = "0.2"),
+        visual_channel_tooltip(field = 'gene', type = 'nominal', alt = 'Gene Name:'),
+        visual_channel_tooltip(field = 'class', type = 'nominal', alt = 'Class:'),
+        visual_channel_tooltip(field = 'cnv_met', type = 'nominal', alt = 'Integration Type:')
+      ),
+      size = list(value = 1),
+      legend = legend
+    )
+  )
+}
 
-
-
+# # Tracce comuni
+# track_cyto <- create_single_track(
+#   data = cnv_gr,
+#   genomicFields = c('start', 'end'),
+#   value = 'cov_value',
+#   tooltipTitle = 'cytoband'
+# )
+#
+# track_expr <- create_single_track(
+#   data = cnv_gr,
+#   genomicFields = c('start', 'end'),
+#   value = 'response_value',
+#   tooltipTitle = 'expression',
+#   legend = TRUE
+# )
+#
+# track_cnv <- create_single_track(
+#   data = cnv_gr,
+#   genomicFields = c('start', 'end'),
+#   value = 'cov_value',
+#   tooltipTitle = 'CNV'
+# )
+#
+# # Tracce specifiche ai casi
+# track_met <- create_single_track(
+#   data = met_gr,
+#   genomicFields = c('start', 'end'),
+#   value = 'cov_value',
+#   tooltipTitle = 'met'
+# )
+#
+# track_coefs_cnv <- create_single_track(
+#   data = cnv_gr,
+#   genomicFields = c('start', 'end'),
+#   value = 'coef',
+#   tooltipTitle = 'Coefficient',
+#   legend = TRUE
+# )
+#
+# track_coefs_met <- create_single_track(
+#   data = met_gr,
+#   genomicFields = c('start', 'end'),
+#   value = 'coef',
+#   tooltipTitle = 'Coefficient'
+# )

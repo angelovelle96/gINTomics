@@ -294,7 +294,7 @@ observe({
     head(input$numTopGenesHeatmap)
     expr_top <- top_mirna_cnv
 
-    row_ha <- rowAnnotation(coef=expr_top$mirna_cnv)
+    row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv)
     ht <- ComplexHeatmap:::Heatmap(expr_top, right_annotation=row_ha)
     ht = draw(ht)
     ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')
@@ -432,7 +432,6 @@ observe({
       filtered_df <- data_table[data_table$omics == input$integrationSelectTable, ]
       if('class' %in% names(filtered_df)){
         filtered_df <- filtered_df[filtered_df$class == input$classSelectTable,]}
-      #filtered_df <- filtered_df[filtered_df$chr_cov == input$chrSelectTable, ]
       if(input$significativityCriteriaTable == 'pval'){
         filtered_df <- filtered_df[filtered_df$pval >= input$pvalRangeTable[1] &
                                      filtered_df$pval <= input$pvalRangeTable[2], ]
@@ -450,6 +449,70 @@ observe({
                  input$FDRRangeTable,
                  input$degSelectTable,
                  input$significativityCriteriaTable)
+}
+
+#######################################################################
+#######################################################################
+
+.prepare_reactive_circos <- function(data, input, output) {
+  reactive({
+    common_tracks <- list(
+      track_cyto,
+      track_expr
+    )
+
+    if (input$integrationSelectCircos == "gene_genomic_res") {
+      additional_tracks <- list(
+        track_cnv,
+        track_coefs_cnv,
+        track_met,
+        track_coefs_met
+      )
+    } else if (input$integrationSelectCircos == "gene_cnv_res") {
+      additional_tracks <- list(
+        track_cnv,
+        track_coefs_cnv
+      )
+    } else if (input$integrationSelectCircos == "gene_met_res"){
+      additional_tracks <- list(
+        track_met,
+        track_coefs_met
+      )
+    } else if (input$integrationSelectCircos == "mirna_cnv_res"){
+      additional_tracks <- list(
+        track_mirna,
+        track_cnv,
+        track_coefs_cnv
+      )
+    }
+
+    composed_view_circos <- .create_composed_view(common_tracks, additional_tracks, input$layout_single)
+
+    arranged_view_circos <- arrange_views(
+      title = 'Interactive Circos',
+      subtitle = 'subtitle',
+      views = composed_view_circos,
+      xDomain = list(chromosome = 'chr1')
+    )
+
+    return(arranged_view_circos)
+  })
+}
+
+
+.create_composed_view <- function(common_tracks, additional_tracks, layout) {
+  tracks <- c(common_tracks, additional_tracks)
+
+  composed_view_circos <- compose_view(
+    multi = TRUE,
+    layout = layout,
+    tracks = add_multi_tracks(tracks),
+    alignment = 'stack',
+    spacing = 0.01,
+    linkingId = "detail"
+  )
+
+  return(composed_view)
 }
 
 
