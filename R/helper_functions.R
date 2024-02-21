@@ -776,7 +776,9 @@ fdr <- function(pval_mat){
   )
 }
 
-# funzione per creare tutte le tracks possibili in base ai dati gr di input (generati in base a unique(data_table$omics))
+#######################################################################
+########################################################################
+
 .create_tracks <- function(data_table, gr){
 
 tracks <- list()
