@@ -1,7 +1,7 @@
 
 #' @importFrom stats sd
 
-.data_check <- function( response_var,
+.data_check <- function(response_var,
                         covariates,
                         interactions){
 
@@ -679,9 +679,7 @@ fdr <- function(pval_mat){
   return(fdr_data)
 }
 
-
 ##############################################
-
 
 .shiny_preprocess <- function(data){
 
@@ -725,7 +723,6 @@ fdr <- function(pval_mat){
       which(names(dataframes)!="df_gene_genomic_res")]
     dataframes <- tmp
   }
-
   gr <- lapply(dataframes, function(x){
     ans <- makeGRangesFromDataFrame(x,
                                     seqnames.field = 'chr',
@@ -738,6 +735,240 @@ fdr <- function(pval_mat){
   return(gr)
 }
 
+# funzione per creare una singola track. questa viene usata nella funzione .create_tracks che in base ai dati disponibili crea tutte le track possibili che poi andranno unite (composed_view) e usate in arrange_views
+.create_single_track <- function(data,
+                                 dataValue,
+                                 x_axis,
+                                 xe_axis,
+                                 y_axis,
+                                 colorField,
+                                 colorDomain,
+                                 colorRange,
+                                 tooltipField1,
+                                 tooltipTitle,
+                                 tooltipAlt1,
+                                 tooltipField2,
+                                 tooltipAlt2,
+                                 tooltipField3,
+                                 tooltipAlt3,
+                                 tooltipField4,
+                                 tooltipAlt4,
+                                 legend) {
+  return(
+    add_single_track(
+      data = track_data_gr(data, chromosomeField = 'seqnames', genomicFields = c('start','end'), value = dataValue),
+      mark = 'bar',
+      x = visual_channel_x(field = 'start', type = 'genomic', axis = x_axis),
+      xe = visual_channel_x(field = 'end', type = 'genomic', axis = xe_axis),
+      y = visual_channel_y(field = yValue, type = 'quantitative', axis = y_axis),
+      color = visual_channel_color(field = colorField, type = 'nominal', domain = colorDomain, range = colorRange),
+      tooltip = visual_channel_tooltips(
+        visual_channel_tooltip(field = "start", type = "genomic", alt = 'Start Position:'),
+        visual_channel_tooltip(field = "end", type = "genomic", alt = "End Position:"),
+        visual_channel_tooltip(field = tooltipField1, title = tooltipTitle, type = "quantitative", alt = paste(tooltipTitle, "Value:"), format = "0.2"),
+        visual_channel_tooltip(field = tooltipField2, type = 'nominal', alt = tooltipAlt2),
+        visual_channel_tooltip(field = tooltipField3, type = 'nominal', alt = tooltipAlt3),
+        visual_channel_tooltip(field = tooltipField4, type = 'nominal', alt = tooltipAlt4)
+      ),
+      size = list(value = 1),
+      legend = legend
+    )
+  )
+}
+
+# funzione per creare tutte le tracks possibili in base ai dati gr di input (generati in base a unique(data_table$omics))
+.create_tracks <- function(data_table, gr){
+
+tracks <- list()
+
+track_cyto <- add_single_track(
+  id = "track2",
+  data = track_data(
+    url = "https://raw.githubusercontent.com/sehilyi/gemini-datasets/master/data/UCSC.HG38.Human.CytoBandIdeogram.csv",
+    type = "csv",
+    chromosomeField = "Chromosome",
+    genomicFields = c("chromStart",
+                      "chromEnd")
+  ),
+  mark = "rect",
+  x = visual_channel_x(field = "chromStart",
+                       type = "genomic"),
+  xe = visual_channel_x(field = "chromEnd",
+                        type = "genomic"),
+  color = visual_channel_color(
+    field = "Stain",
+    type = "nominal",
+    domain = c(
+      "gneg",
+      "gpos25",
+      "gpos50",
+      "gpos75",
+      "gpos100",
+      "gvar",
+      "acen"           # acen: centromeric region (UCSC band files)
+    ),
+    range = c(
+      "white",
+      "#D9D9D9",
+      "#979797",
+      "#636363",
+      "black",
+      "#F0F0F0",
+      "red"
+    )
+  ),
+  stroke = visual_channel_stroke(
+    value = "lightgray"
+  ),
+  strokeWidth = visual_channel_stroke_width(
+    value = 0.5
+  ),
+)
+  if ("gene_genomic_res" %in% unique(data_table$omics)){
+    track_cnv <- create_single_track(data=cnv_gr,
+                                     dataValue='cov_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="cov_value",
+                                     tooltipTitle="cnv",
+                                     tooltipAlt1="CNV Value:",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
+
+    track_met <- create_single_track(data=met_gr,
+                                     dataValue='cov_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="cov_value",
+                                     tooltipTitle="met",
+                                     tooltipAlt1="MET Value:",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
+
+    track_expr <- create_single_track(data=cnv_gr,
+                                     dataValue='response_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="response_value",
+                                     tooltipTitle="expr",
+                                     tooltipAlt1="Expression Value (log2):",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
+    }
+   tracks <- append(tracks, c(track_cnv, track_met, track_expr, track_cyto))
 
 
+  if ("cnv_gene_res" %in% unique(data_table$omics)){
+    track_cnv <- create_single_track(data=cnv_gr,
+                                     dataValue='cov_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="cov_value",
+                                     tooltipTitle="cnv",
+                                     tooltipAlt1="CNV Value:",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
 
+    track_expr <- create_single_track(data=cnv_gr,
+                                      dataValue='response_value',
+                                      x_axis="none",
+                                      xe_axis="none",
+                                      y_axis="none",
+                                      colorField="direction_cov",
+                                      colorDomain=c("positive","negative"),
+                                      colorRange=c("red","blue"),
+                                      tooltipField1="response_value",
+                                      tooltipTitle="expr",
+                                      tooltipAlt1="Expression Value (log2):",
+                                      tooltipField2="gene",
+                                      tooltipAlt2="Gene Name:",
+                                      tooltipField3="class",
+                                      tooltipAlt3="Class:",
+                                      tooltipField4="cnv_met",
+                                      tooltipAlt4="Integration Type:",
+                                      legend=FALSE)
+
+    tracks <- append(tracks, c(track_cnv, track_expr, track_cyto))
+    }
+
+  if("met_gene_res"%in%unique(data_table$omics)){
+
+    track_met <- create_single_track(data=met_gr,
+                                     dataValue='cov_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="cov_value",
+                                     tooltipTitle="met",
+                                     tooltipAlt1="MET Value:",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
+
+    track_expr <- create_single_track(data=cnv_gr,
+                                      dataValue='response_value',
+                                      x_axis="none",
+                                      xe_axis="none",
+                                      y_axis="none",
+                                      colorField="direction_cov",
+                                      colorDomain=c("positive","negative"),
+                                      colorRange=c("red","blue"),
+                                      tooltipField1="response_value",
+                                      tooltipTitle="expr",
+                                      tooltipAlt1="Expression Value (log2):",
+                                      tooltipField2="gene",
+                                      tooltipAlt2="Gene Name:",
+                                      tooltipField3="class",
+                                      tooltipAlt3="Class:",
+                                      tooltipField4="cnv_met",
+                                      tooltipAlt4="Integration Type:",
+                                      legend=FALSE)
+
+    tracks <- append(tracks, c(track_met, track_expr, track_cyto))
+    }
+
+return(tracks)
+}

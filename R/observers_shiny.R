@@ -9,10 +9,16 @@
                               edges=network_data$edges,
                               legend_nodes=network_data$legend_nodes,
                               legend_edges=network_data$legend_edges)
-    network <- network%>%visHierarchicalLayout(enabled = input$layoutNetwork)
+    network <- network%>%
+      visHierarchicalLayout(enabled = input$layoutNetwork)%>%
+      visIgraphLayout(physics = input$physics,
+                      layout = "layout.fruchterman.reingold",
+                      randomSeed = 20)
+
     return(network)
     })
-  })%>%bindEvent(input$layoutNetwork)
+  })%>%bindEvent(input$layoutNetwork,
+                 input$physics)
 }
 
 ################################################################
@@ -23,16 +29,20 @@
                                 input,
                                 output){
   reactive({
-    if(input$deg==T){
+    if(input$deg==TRUE){
       ans <- network_data
-      ssel <- unique(data_table$response[data_table$deg==T])
+      ssel <- unique(data_table$response[data_table$deg==TRUE])
       ans$nodes <- ans$nodes[ans$nodes$id%in%ssel,]
       ans$edges <- ans$edges[ans$edges$from%in%ssel,]
       ans$edges <- ans$edges[ans$edges$to%in%ssel,]
     }else{ans <- network_data}
+
+
+
     return(ans)
   })%>%bindEvent(input$layoutNetwork,
-                 input$deg)
+                 input$deg,
+                 input$physics)
 }
 
 
@@ -90,109 +100,207 @@
   reactive({
     if(!"class"%in%colnames(data_table)) data_table$class <- data_table$omics
     if (input$integrationSelectVolcano == 'gene_genomic_res'){
-      data_volcano <- data_table[data_table$omics == 'gene_genomic_res',
-                                 c('cov',
-                                   'coef',
-                                   'pval',
-                                   'omics',
-                                   'class',
-                                   'cnv_met')]
+      data_volcano <- data_table[data_table$omics == 'gene_genomic_res',]
       data_volcano <- data_volcano[
-        data_volcano$cnv_met == input$genomicTypeSelectVolcano,
-                                   c('cov',
-                                     'coef',
-                                     'class',
-                                     'pval')]
+        data_volcano$cnv_met == input$genomicTypeSelectVolcano,]
     } else {
       data_volcano <- data_table[
-        data_table$omics == input$integrationSelectVolcano,
-                                 c('cov',
-                                   'coef',
-                                   'class',
-                                   'pval')]
+        data_table$omics == input$integrationSelectVolcano,]
     }
-    data_volcano <- data_volcano[, c('cov',
-                                     'coef',
-                                     'class',
-                                     'pval')]
-    data_volcano$group <- rep("NotSignificant", nrow(data_volcano))
-    data_volcano[which(data_volcano$pval <= 0.05),
-                 'group'] <- "Significant"
-    top_peaks <- data_volcano[with(data_volcano,
-                                   order(coef, pval)),][1:10,]
-    top_peaks <- rbind(top_peaks,
-                       data_volcano[with(data_volcano,
-                                         order(-coef, pval)),][1:10,])
-    data_volcano$pval <- -log10(data_volcano$pval)
+    if(input$degSelectVolcano == 'Only DEGs' & 'class' %in% names(data_table)){
+
+      data_volcano <- data_volcano[data_volcano$deg == TRUE, ]
+
+    }
+
+    if(input$significativityCriteriaVolcano == 'pval'){
+
+      data_volcano["group"] <- "NotSignificant"
+
+      data_volcano[data_volcano$pval <= input$pvalRangeVolcano, 'group'] <- "Significant"
+
+      top_peaks <- data_volcano[with(data_volcano,
+                                     order(pval, coef)),][1:input$numTopGenesVolcano,]
+      data_volcano <- rbind(top_peaks, data_volcano[with(data_volcano,
+                                                         order(-coef, pval)), ][1:10,])
+
+
+      data_volcano$pval_fdr <- -log10(data_volcano$pval)
+    }else{
+
+      data_volcano[data_volcano$fdr <= input$FDRRangeVolcano, 'group'] <- "Significant"
+
+      top_peaks <- data_volcano[with(data_volcano,
+                                     order(fdr, coef)),][1:input$numTopGenesVolcano,]
+      data_volcano <- rbind(top_peaks, data_volcano[with(data_volcano,
+                                                         order(-coef, fdr)),][1:10,])
+
+
+      data_volcano$pval_fdr <- -log10(data_volcano$fdr)
+    }
+
     return(data_volcano)
-  })%>%bindEvent(input$genomicTypeSelectVolcano, input$integrationSelectVolcano)
+  })%>%bindEvent(input$genomicTypeSelectVolcano,
+                 input$integrationSelectVolcano,
+                 input$FDRRangeVolcano,
+                 input$numTopGenesVolcano,
+                 input$pvalRangeVolcano,
+                 input$degSelectVolcano,
+                 input$significativityCriteriaVolcano)
 }
 #######################################################################
-########################################################################
+#######################################################################
 
 .prepare_reactive_heatmap <- function(data_table,
                              multiomics_integration,
                              input,
                              output,
                              session){
-  observe({
-    if('class' %in% colnames(data_table)){
-      df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
+observe({
+
+  if(!is.null(input$classSelectHeatmap)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
+                                          data_table <- data_table[data_table$class == input$selectClassHeatmap,]}
+  if(input$degSelectHeatmap == "Only DEGs"){data_table <- data_table[data_table$deg == TRUE,]}
+  if(is.null(input$classSelectHeatmap)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]]$data$response_var}
+  data_table <- data_table[data_table$cov != '(Intercept)',]
+  df_heatmap_t <- t(df_heatmap)
+
+  if(input$integrationSelectHeatmap == "gene_genomic_res"){
+    data_table <- data_table[data_table$omics == 'gene_genomic_res',]
+    tmp <-  data.frame(cnv=data_table$coef[data_table$cnv_met == 'cnv'],
+                       pval_cnv=data_table$pval[data_table$cnv_met == 'cnv'],
+                       fdr_cnv=data_table$fdr[data_table$cnv_met == 'cnv'],
+                       row.names = data_table$response[data_table$cnv_met == 'cnv'])
+
+    tmp2 <- data.frame(met=data_table$coef[data_table$cnv_met == 'met'],
+                       pval_met=data_table$pval[data_table$cnv_met == 'met'],
+                       fdr_met=data_table$fdr[data_table$cnv_met == 'met'],
+                       row.names = data_table$response[data_table$cnv_met == 'met'])
+
+    tmp3 <- unique(c(rownames(tmp), rownames(tmp2)))
+
+    data_table <- cbind(cnv=tmp[tmp3,], met=tmp2[tmp3,])
+    colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
+    rownames(data_table) <- tmp3
+    df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
+    if (input$significativityCriteriaHeatmap == 'pval'){
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap &
+                                     df_heatmap_t$pval_met <= input$pvalRangeHeatmap, ]
     } else {
-      df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]]$data$response_var
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap &
+                                     df_heatmap_t$fdr_met <= input$FDRRangeHeatmap, ]
+    }
+    top_met <- df_heatmap_t %>%
+      arrange(desc(abs(met))) %>%
+      head(input$numTopGenesHeatmap/2)
+    top_cnv <- df_heatmap_t %>%
+      arrange(desc(abs(cnv))) %>%
+      head(input$numTopGenesHeatmap/2)
+    expr_top <- rbind(top_cnv, top_met)
+
+    row_ha <- rowAnnotation(coef_cnv=expr_top$cnv, coef_met=expr_top$met)
+    ht <- ComplexHeatmap:::Heatmap(expr_top, right_annotation=row_ha)
+    ht = draw(ht)
+    ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')
+
+  }
+
+  if(input$integrationSelectHeatmap == "gene_cnv_res"){
+
+    data_table <- data_table[data_table$omics == 'gene_cnv_res',]
+    tmp <-  data.frame(cnv=data_table$coef[data_table$omics == 'cnv'],
+                       pval_cnv=data_table$pval[data_table$omics == 'cnv'],
+                       fdr_cnv=data_table$fdr[data_table$omics == 'cnv'],
+                       row.names = data_table$response[data_table$omics == 'cnv'])
+    tmp2 <- unique(rownames(tmp))
+    data_table <- cbind(cnv=tmp[tmp2,])
+    colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
+    rownames(data_table) <- tmp2
+    df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
+    if (input$significativityCriteriaHeatmap == 'pval'){
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap &
+                                     df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap, ]
+    } else {
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap &
+                                     df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap, ]
     }
 
-    df_heatmap_t <- t(df_heatmap)
-    if(input$integrationSelectHeatmap == 'gene_genomic_res'){
-      if('class' %in% colnames(data_table)){
-        data_table <- data_table[data_table$class == input$selectClassHeatmap,]
-        if (input$degSelectHeatmap == 'Only DEGs'){
-          data_table <- data_table[data_table$deg == TRUE, ]
-        }
-      }
+    top_cnv <- df_heatmap_t %>%
+      arrange(desc(abs(cnv))) %>%
+      head(input$numTopGenesHeatmap)
+    expr_top <- top_cnv
 
-      data_table <- data_table[data_table$omics == 'gene_genomic_res', ]
-      tmp <-  data.frame(cnv=data_table$coef[data_table$cnv_met == 'cnv'],
-                         pval_cnv=data_table$pval[data_table$cnv_met == 'cnv'],
-                         fdr_cnv=data_table$fdr[data_table$cnv_met == 'cnv'],
-                         row.names = data_table$response[data_table$cnv_met == 'cnv'])
+    row_ha <- rowAnnotation(foo1=runif(10), foo2=runif(10))
+            ht <- Heatmap(as.matrix(expr_top, right_annotation=row_ha))
+            ht = draw(ht)
+            ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')
 
-      tmp2 <- data.frame(met=data_table$coef[data_table$cnv_met == 'met'],
-                         pval_met=data_table$pval[data_table$cnv_met == 'met'],
-                         fdr_met=data_table$fdr[data_table$cnv_met == 'met'],
-                         row.names = data_table$response[data_table$cnv_met == 'met'])
+  }
 
-      tmp3 <- unique(c(rownames(tmp), rownames(tmp2)))
+  if(input$integrationSelectHeatmap == "gene_met_res"){
 
-      data_table <- cbind(cnv=tmp[tmp3,], met=tmp2[tmp3,])
-      colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
-      rownames(data_table) <- tmp3
-      df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
-      if (input$significativityCriteriaHeatmap == 'pval'){
-        df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap &
-                                       df_heatmap_t$pval_met <= input$pvalRangeHeatmap, ]
-      } else {
-        df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap &
-                                       df_heatmap_t$fdr_met <= input$FDRRangeHeatmap, ]
-      }
-      top50_met <- df_heatmap_t %>%
-        arrange(desc(abs(met))) %>%
-        head(input$numTopGenesHeatmap / 2)
-      top50_cnv <- df_heatmap_t %>%
-        arrange(desc(abs(cnv))) %>%
-        head(input$numTopGenesHeatmap / 2)
-      expr_top50 <- rbind(top50_cnv, top50_met)
-      if(nrow(expr_top50)>0){
-      ht <- Heatmap(as.matrix(expr_top50))#, annotation_row = final_top_genes)
-      ht = draw(ht)
-      ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')}
-    }else{
-      if(nrow(expr_top50)>0){
-      ht <- Heatmap(as.matrix(df_heatmap_t[1:input$numTopGenesHeatmap, ]))#, annotation_row = final_top_genes)
-      ht = draw(ht)
-      ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')}
+    data_table <- data_table[data_table$omics == 'gene_met_res',]
+    tmp <-  data.frame(met=data_table$coef[data_table$omics == 'met'],
+                       pval_met=data_table$pval[data_table$omics == 'met'],
+                       fdr_met=data_table$fdr[data_table$omics == 'met'],
+                       row.names = data_table$response[data_table$omics == 'met'])
+    tmp2 <- unique(rownames(tmp))
+    data_table <- cbind(met=tmp[tmp2,])
+    colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
+    rownames(data_table) <- tmp2
+    df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
+    if (input$significativityCriteriaHeatmap == 'pval'){
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_met <= input$pvalRangeHeatmap &
+                                     df_heatmap_t$pval_met <= input$pvalRangeHeatmap, ]
+    } else {
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_met <= input$FDRRangeHeatmap &
+                                     df_heatmap_t$fdr_met <= input$FDRRangeHeatmap, ]
     }
 
+    top_met <- df_heatmap_t %>%
+      arrange(desc(abs(met))) %>%
+      head(input$numTopGenesHeatmap)
+    expr_top <- top_met
+
+    row_ha <- rowAnnotation(foo1=runif(10), foo2=runif(10))
+    ht <- Heatmap(as.matrix(expr_top, right_annotation=row_ha))
+    ht = draw(ht)
+    ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')
+
+  }
+  if(input$integrationSelectHeatmap == "mirna_cnv_res"){
+
+    data_table <- data_table[data_table$cov != "(Intercept)",]
+    data_table <- data_table[data_table$omics == 'mirna_cnv_res',]
+    tmp <-  data.frame(mirna_cnv=data_table$coef[data_table$omics == 'mirna_cnv_res'],
+                       pval_mirna_cnv=data_table$pval[data_table$omics == 'mirna_cnv_res'],
+                       fdr_mirna_cnv=data_table$fdr[data_table$omics == 'mirna_cnv_res'],
+                       row.names = data_table$response[data_table$omics == 'mirna_cnv_res'])
+    tmp2 <- unique(rownames(tmp))
+    data_table <- cbind(met=tmp[tmp2,])
+    colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
+    rownames(data_table) <- tmp2
+    df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
+    if (input$significativityCriteriaHeatmap == 'pval'){
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_mirna_cnv <= input$pvalRangeHeatmap &
+                                     df_heatmap_t$pval_mirna_cnv <= input$pvalRangeHeatmap, ]
+    } else {
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_mirna_cnv <= input$FDRRangeHeatmap &
+                                     df_heatmap_t$fdr_mirna_cnv <= input$FDRRangeHeatmap, ]
+    }
+
+    df_heatmap_t <- as.data.frame(df_heatmap_t)
+    top_mirna_cnv <- df_heatmap_t %>%
+    arrange(desc(abs(mirna_cnv)))  %>%
+    head(input$numTopGenesHeatmap)
+    expr_top <- top_mirna_cnv
+
+    row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv)
+    ht <- ComplexHeatmap:::Heatmap(expr_top, right_annotation=row_ha)
+    ht = draw(ht)
+    ht2 <- makeInteractiveComplexHeatmap(input, output, session, ht, 'heatmap')
+
+  }
   })%>%bindEvent(input$integrationSelectHeatmap,
                  input$numTopGenesHeatmap,
                  input$FDRRangeHeatmap,
@@ -202,7 +310,7 @@
 }
 
 ######################################################################
-#######################################################################
+######################################################################
 
 .prepare_reactive_ridge <- function(data_table,
                                       input,
@@ -212,6 +320,9 @@
     df <- data_table
     if ('class' %in% names(data_table)) {
       df <- df[df$class == input$classSelectRidge, ]
+    }
+    if('gene_genomic_res' %in% colnames(data_table)){
+      df <- df[df$cnv_met == input$genomicTypeSelectRidge, ]
     }
     if(input$degSelectRidge == 'Only DEGs'){df <- df[df$deg == 'TRUE', ]}
     df <- df[df$omics == input$integrationSelectRidge, ]
@@ -236,7 +347,8 @@
                  input$integrationSelectRidge,
                  input$pvalRangeRidge,
                  input$FDRRangeRidge,
-                 input$significativityCriteriaRidge)
+                 input$significativityCriteriaRidge,
+                 input$genomicTypeSelectRidge)
 }
 
 #######################################################################
@@ -318,19 +430,18 @@
                                     input,
                                     output){
     reactive({
-      filtered_df <- data_table[data_table$omics == input$integrationSelectTable, ]
+      filtered_df <- data_table[data_table$omics == input$integrationSelectTable,]
       if('class' %in% names(filtered_df)){
         filtered_df <- filtered_df[filtered_df$class == input$classSelectTable,]}
-      #filtered_df <- filtered_df[filtered_df$chr_cov == input$chrSelectTable, ]
       if(input$significativityCriteriaTable == 'pval'){
         filtered_df <- filtered_df[filtered_df$pval >= input$pvalRangeTable[1] &
-                                     filtered_df$pval <= input$pvalRangeTable[2], ]
+                                     filtered_df$pval <= input$pvalRangeTable[2],]
       }else{
         filtered_df <- filtered_df[filtered_df$fdr >= input$FDRRangeTable[1] &
-                                     filtered_df$fdr <= input$FDRRangeTable[2], ]
+                                     filtered_df$fdr <= input$FDRRangeTable[2],]
       }
       if(input$degSelectTable == 'Only DEGs'){
-        filtered_df <- filtered_df[filtered_df$deg == 'TRUE', ]}
+        filtered_df <- filtered_df[filtered_df$deg == 'TRUE',]}
       return(filtered_df)
   })%>%bindEvent(input$integrationSelectTable,
                  input$classSelectTable,
@@ -465,4 +576,108 @@
     }
   })%>%bindEvent(input$genomicTypeSelectEnrich)
 }
+    
+#######################################################################
+########################################################################
 
+.prepare_reactive_circos <- function(data, input, output) {
+  reactive({
+
+    arranged_views <- list()    
+  tracks <- .create_tracks(data_table, data)
+
+if(c("cnv_track","met_track") %in% tracks){
+
+  composed_view_genomic <- .create_composed_view(cnv_track,
+                                                met_track,
+                                                cyto_track,
+                                                expr_track)
+  arranged_view_circos_genomic <- arrange_views(
+    title = 'Interactive Circos',
+    subtitle = 'subtitle',
+    views = composed_view_genomic,
+    # xDomain = list(chromosome = 'chr1')
+  )
+  arranged_views <- append(arranged_views, arranged_view_circos_genomic)
+
+  }
+if(!(cnv_track %in% tracks)){composed_view_met <- .create_composed_view(met_track,
+                                                                         cyto_track,
+                                                                         expr_track)
+arranged_view_circos_cnv_gene <- arrange_views(
+  title = 'Interactive Circos',
+  subtitle = 'subtitle',
+  views = composed_view_cnv_gene,
+  # xDomain = list(chromosome = 'chr1')
+)
+arranged_views <- append(arranged_views, arranged_view_circos_cnv_gene)
+}
+
+if(!(met_track %in% tracks)){composed_view_cnv <- .create_composed_view(cnv_track,
+                                                                        cyto_track,
+                                                                        expr_track)
+arranged_view_circos_met_gene <- arrange_views(
+  title = 'Interactive Circos',
+  subtitle = 'subtitle',
+  views = composed_view_met_gene,
+  # xDomain = list(chromosome = 'chr1')
+)
+arranged_views <- append(arranged_views, arranged_view_circos_met_gene)
+}
+
+
+    return(arranged_view_circos)
+  })
+}
+
+.create_composed_view <- function(tracks, layout) {
+
+  composed_views <- list()
+
+  if(c(track_expr, track_cnv, track_met)%in%tracks){
+
+    composed_view_circos_genomic <- compose_view(
+      multi = TRUE,
+      layout = layout,
+      tracks = add_multi_tracks(track_expr,
+                                track_cnv,
+                                track_met,
+                                track_cyto),
+      alignment = 'stack',
+      spacing = 0.01,
+      linkingId = "detail"
+    )
+    composed_views <- append(composed_views, composed_view_circos_genomic)
+  }
+
+if(!(track_cnv%in%tracks)){
+
+  composed_view_circos_met_gene <- compose_view(
+    multi = TRUE,
+    layout = layout,
+    tracks = add_multi_tracks(track_expr,
+                              track_met,
+                              track_cyto),
+    alignment = 'stack',
+    spacing = 0.01,
+    linkingId = "detail"
+  )
+  composed_views <- append(composed_views, composed_view_circos_met_gene)
+}
+  if(!(track_met%in%tracks)){
+
+    composed_view_circos_cnv_gene <- compose_view(
+      multi = TRUE,
+      layout = layout,
+      tracks = add_multi_tracks(track_expr,
+                                track_cnv,
+                                track_cyto),
+      alignment = 'stack',
+      spacing = 0.01,
+      linkingId = "detail"
+    )
+    composed_views <- append(composed_views, composed_view_circos_cnv_gene)
+  }
+
+  return(composed_views)
+}

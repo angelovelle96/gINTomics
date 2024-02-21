@@ -1,7 +1,4 @@
 
-
-
-
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
@@ -48,7 +45,6 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  # Input
                   selectInput(inputId = 'integrationSelectTable',
                               label = 'Integration Type:',
                               choices = unique(data_table$omics)),
@@ -113,7 +109,6 @@
             tabPanel('XXX',
              sidebarLayout(
                sidebarPanel(
-                 #input
                  selectInput(inputId = 'integrationSelectHisto',
                              label = 'Integration Type:',
                              choices = unique(data_table$omics)),
@@ -154,8 +149,6 @@
     tabPanel('TFs',
              sidebarLayout(
                sidebarPanel(
-                 #input
-
                  selectInput(inputId = 'classSelectHistoTFs',
                              label = 'Class:',
                              choices = unique(data_table$class)),
@@ -210,6 +203,9 @@
                   selectInput("classSelectRidge",
                               "Select Class:",
                               choices = unique(data_table$class)),
+                  selectInput(inputId = 'genomicTypeSelectRidge',
+                              label = 'Integration Type:',
+                              choices = unique(data_table$cnv_met)),
                   selectInput(inputId = 'degSelectRidge',
                               label = 'DEGs:',
                               choices = c('All','Only DEGs')),
@@ -234,7 +230,6 @@
                                 step = 0.005))
                 ),
                 mainPanel(
-                  # OUTPUT
                   plotOutput("ridgelinePlot")
                 )
               )
@@ -254,7 +249,6 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  #input
                   selectInput("integrationSelectVenn",
                               "Select Integration:",
                               choices = unique(data_table$omics)),
@@ -286,7 +280,6 @@
 
                 ),
                 mainPanel(
-                  # OUTPUT
                   plotlyOutput("venn_plot"),
                   dataTableOutput("common_genes_table")
                 )
@@ -301,6 +294,9 @@
 ###################################################################
 
 .gint_tabitem_page_heatmap <- function(data_table){
+  int <- intersect(c("gene_genomic_res", "gene_met_res",
+                     "gene_cnv_res", "mirna_cnv_res"),
+                   unique(data_table$omics))
   tabItem(tabName = "page_heatmap",
           fluidRow(
             box(title = "Subsection 1",
@@ -309,16 +305,15 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  #input
                   selectInput(inputId = 'integrationSelectHeatmap',
                               label = 'Integration Type:',
-                              choices = unique(data_table$omics)),
-                  numericInput("numTopGenesHeatmap",
-                               "Number of top genes:",
-                               value = 50,
-                               min = 1,
-                               max = 200),
-
+                              choices = int),
+                  sliderInput("numTopGenesHeatmap",
+                              "Number of top genes:",
+                              value = 50,
+                              min = 5,
+                              max = 200,
+                              step = 10),
                   selectInput("selectClassHeatmap",
                               "Select the class:",
                               choices = unique(data_table$class),
@@ -348,7 +343,6 @@
 
                 ),
                 mainPanel(
-                  # OUTPUT
                   InteractiveComplexHeatmapOutput('heatmap')
                 )
 
@@ -371,25 +365,42 @@
                 tabPanel('XXXX',
               sidebarLayout(
                 sidebarPanel(
-                  #input
                   selectInput(inputId = 'integrationSelectVolcano',
                               label = 'Integration Type:',
                               choices = unique(data_table$omics)),
                   selectInput(inputId = 'genomicTypeSelectVolcano',
                               label = 'Integration Type:',
                               choices = unique(data_table$cnv_met)),
-                  numericInput("num_top_genes",
+                  selectInput(inputId = 'degSelectVolcano',
+                              label = 'DEGs:',
+                              choices = c('All','Only DEGs')),
+                  sliderInput("numTopGenesVolcano",
                                "Number of top genes to visualize:",
-                               value = 50),
-                  sliderInput("pvalRangeVolcano",
-                              "P-Value Range:",
-                              min = 0,
-                              max = 1,
-                              value = c(0, 0.05),
-                              step = 0.005)
+                               value = 500,
+                               min = 100,
+                               max = 10000,
+                               step = 200),
+                  selectInput(inputId = 'significativityCriteriaVolcano',
+                              label = 'Significativity criteria:',
+                              choices = c('pval', 'FDR')),
+                  conditionalPanel(
+                    condition = "input.significativityCriteriaVolcano == 'pval'",
+                    sliderInput("pvalRangeVolcano",
+                                "P-Value Range:",
+                                min = 0,
+                                max = 1,
+                                value = c(0.05),
+                                step = 0.005)),
+                  conditionalPanel(
+                    condition = "input.significativityCriteriaVolcano == 'FDR'",
+                    sliderInput("FDRRangeVolcano",
+                                "FDR-Value Range:",
+                                min = 0,
+                                max = 1,
+                                value = c(0.05),
+                                step = 0.005))
                 ),
                 mainPanel(
-                  # OUTPUT
                   plotlyOutput('volcanoPlot')
                 )
               )
@@ -411,12 +422,19 @@
               tabsetPanel(
                 type = 'tabs',
                 tabPanel('XXXX',
-              # OUTPUT
+              sliderInput("numNodes",
+                          label = "Number of nodes",
+                          min = 10,
+                          max = 1000,
+                          value = 300),
               checkboxInput("layoutNetwork",
                            label = "Layout:",
                            value = FALSE),
               checkboxInput("deg",
                             label = "deg:",
+                            value = FALSE),
+              checkboxInput("physics",
+                            label = "Physics",
                             value = FALSE),
               visNetworkOutput("networkPlot",
                                height = 800,
@@ -437,7 +455,7 @@
                 "This is the content of Subsection 1."),
             mainPanel(
                 do.call("tabsetPanel", lapply(as.list(unique(data_table$omics)), function(x) tabPanel(x)))
-        )
+        )          ## USARE uiOutput("gosling_plot_circos_ui")
       )
   )
 }
@@ -512,8 +530,4 @@
     )
   ,skin = "purple")
 }
-
-
-
-
 
