@@ -16,13 +16,7 @@
       menuItem("Volcano Plot", tabName = "page_volcano"),
       menuItem("Circos Plot", tabName = "page_circos"),
       menuItem("Network", tabName = "page_network"),
-      menuItem("Enrichment", tabName = "page_enrichment",
-               menuSubItem("Gene Ontology",
-                           tabName = "GO"),
-               menuSubItem("Gene set",
-                           tabName = "gene_set"),
-               menuSubItem("Pathway",
-                           tabName = "path")),
+      menuItem("Enrichment", tabName = "page_enrichment"),
       menuItem("Class Comparison", tabName = "page_compare_class")
     )
     ,img(src = myImgResources, height = 100, width = 100, align="center"),
@@ -447,6 +441,38 @@
       )
   )
 }
+
+#############################################################
+##############################################################
+
+.gint_tabitem_enr <- function(data_table){
+  ns <- NS("prova")
+  tabItem(tabName = "page_enrichment",
+          fluidRow(
+            box(title = "Subsection 1",
+                "This is the content of Subsection 1."),
+            mainPanel(
+              tabsetPanel(
+                type = 'tabs',
+                tabPanel('XXXX',
+                         sidebarLayout(
+                           sidebarPanel(
+                             #input
+                             selectInput(inputId = ns('genomicTypeSelectEnrich'),
+                                         label = 'Integration Type:',
+                                         choices = unique(data_table$cnv_met)[!is.na(unique(data_table$cnv_met))]),
+                             selectInput(inputId = 'ClassSelectEnrich',
+                                         label = 'Class:',
+                                         choices = unique(data_table$class))
+
+                           ),
+                         mainPanel(textOutput(ns("gen_enrichment")),
+                                   plotlyOutput(ns("gen_dotplot")))),
+                        )
+                , tabPanel('DEGs'))
+            )
+          ))
+}
 ################################################################
 #################################################################
 
@@ -480,7 +506,8 @@
         .gint_tabitem_page_heatmap(data_table),
         .gint_tabitem_page_volcano(data_table),
         .gint_tabitem_page_network(data_table),
-        .gint_tabitem_page_circos(data_table)
+        .gint_tabitem_page_circos(data_table),
+        .gint_tabitem_enr(data_table)
       )
     )
   ,skin = "purple")
