@@ -11,8 +11,9 @@
                               legend_edges=network_data$legend_edges)
     network <- network%>%
       visHierarchicalLayout(enabled = input$layoutNetwork)%>%
-      visPhysics(enabled = input$physics)
-      #visConfigure(enabled = T)
+      visIgraphLayout(physics = input$physics,
+                      layout = "layout.fruchterman.reingold",
+                      randomSeed = 20)
 
     return(network)
     })
@@ -35,6 +36,9 @@
       ans$edges <- ans$edges[ans$edges$from%in%ssel,]
       ans$edges <- ans$edges[ans$edges$to%in%ssel,]
     }else{ans <- network_data}
+
+
+
     return(ans)
   })%>%bindEvent(input$layoutNetwork,
                  input$deg,
@@ -119,7 +123,7 @@
       data_volcano[data_volcano$pval <= input$pvalRangeVolcano, 'group'] <- "Significant"
 
       top_peaks <- data_volcano[with(data_volcano,
-                                     order(coef, pval)),][1:input$numTopGenesVolcano,]
+                                     order(pval, coef)),][1:input$numTopGenesVolcano,]
       data_volcano <- rbind(top_peaks, data_volcano[with(data_volcano,
                                                          order(-coef, pval)), ][1:10,])
 
@@ -130,7 +134,7 @@
       data_volcano[data_volcano$fdr <= input$FDRRangeVolcano, 'group'] <- "Significant"
 
       top_peaks <- data_volcano[with(data_volcano,
-                                     order(coef, fdr)),][1:input$numTopGenesVolcano,]
+                                     order(fdr, coef)),][1:input$numTopGenesVolcano,]
       data_volcano <- rbind(top_peaks, data_volcano[with(data_volcano,
                                                          order(-coef, fdr)),][1:10,])
 
@@ -429,18 +433,18 @@ observe({
                                     input,
                                     output){
     reactive({
-      filtered_df <- data_table[data_table$omics == input$integrationSelectTable, ]
+      filtered_df <- data_table[data_table$omics == input$integrationSelectTable,]
       if('class' %in% names(filtered_df)){
         filtered_df <- filtered_df[filtered_df$class == input$classSelectTable,]}
       if(input$significativityCriteriaTable == 'pval'){
         filtered_df <- filtered_df[filtered_df$pval >= input$pvalRangeTable[1] &
-                                     filtered_df$pval <= input$pvalRangeTable[2], ]
+                                     filtered_df$pval <= input$pvalRangeTable[2],]
       }else{
         filtered_df <- filtered_df[filtered_df$fdr >= input$FDRRangeTable[1] &
-                                     filtered_df$fdr <= input$FDRRangeTable[2], ]
+                                     filtered_df$fdr <= input$FDRRangeTable[2],]
       }
       if(input$degSelectTable == 'Only DEGs'){
-        filtered_df <- filtered_df[filtered_df$deg == 'TRUE', ]}
+        filtered_df <- filtered_df[filtered_df$deg == 'TRUE',]}
       return(filtered_df)
   })%>%bindEvent(input$integrationSelectTable,
                  input$classSelectTable,
@@ -457,45 +461,102 @@ observe({
 .prepare_reactive_circos <- function(data, input, output) {
   reactive({
 
+    arranged_views <- list()
+
   tracks <- .create_tracks(data_table, data)
 
-if(c("cnv_track","met_track") %in% tracks){composed_view_genomic <- .create_composed_view(cnv_track,
-                                                                                           met_track,
-                                                                                           cyto_track,
-                                                                                           expr_track)}
+if(c("cnv_track","met_track") %in% tracks){
+
+  composed_view_genomic <- .create_composed_view(cnv_track,
+                                                met_track,
+                                                cyto_track,
+                                                expr_track)
+  arranged_view_circos_genomic <- arrange_views(
+    title = 'Interactive Circos',
+    subtitle = 'subtitle',
+    views = composed_view_genomic,
+    # xDomain = list(chromosome = 'chr1')
+  )
+  arranged_views <- append(arranged_views, arranged_view_circos_genomic)
+
+  }
 if(!(cnv_track %in% tracks)){composed_view_met <- .create_composed_view(met_track,
                                                                          cyto_track,
-                                                                         expr_track)}
+                                                                         expr_track)
+arranged_view_circos_cnv_gene <- arrange_views(
+  title = 'Interactive Circos',
+  subtitle = 'subtitle',
+  views = composed_view_cnv_gene,
+  # xDomain = list(chromosome = 'chr1')
+)
+arranged_views <- append(arranged_views, arranged_view_circos_cnv_gene)
+}
+
 if(!(met_track %in% tracks)){composed_view_cnv <- .create_composed_view(cnv_track,
                                                                         cyto_track,
-                                                                        expr_track)}
+                                                                        expr_track)
+arranged_view_circos_met_gene <- arrange_views(
+  title = 'Interactive Circos',
+  subtitle = 'subtitle',
+  views = composed_view_met_gene,
+  # xDomain = list(chromosome = 'chr1')
+)
+arranged_views <- append(arranged_views, arranged_view_circos_met_gene)
+}
 
-
-    arranged_view_circos_genomic <- arrange_views(
-      title = 'Interactive Circos',
-      subtitle = 'subtitle',
-      views = composed_view_genomic,
-      # xDomain = list(chromosome = 'chr1')
-    )
 
     return(arranged_view_circos)
   })
 }
 
-
 .create_composed_view <- function(tracks, layout) {
 
+  composed_views <- list()
 
-  composed_view_circos <- compose_view(
+  if(c(track_expr, track_cnv, track_met)%in%tracks){
+
+    composed_view_circos_genomic <- compose_view(
+      multi = TRUE,
+      layout = layout,
+      tracks = add_multi_tracks(track_expr,
+                                track_cnv,
+                                track_met,
+                                track_cyto),
+      alignment = 'stack',
+      spacing = 0.01,
+      linkingId = "detail"
+    )
+    composed_views <- append(composed_views, composed_view_circos_genomic)
+  }
+
+if(!(track_cnv%in%tracks)){
+
+  composed_view_circos_met_gene <- compose_view(
     multi = TRUE,
     layout = layout,
-    tracks = add_multi_tracks(tracks),
+    tracks = add_multi_tracks(track_expr,
+                              track_met,
+                              track_cyto),
     alignment = 'stack',
     spacing = 0.01,
     linkingId = "detail"
   )
-
-  return(composed_view)
+  composed_views <- append(composed_views, composed_view_circos_met_gene)
 }
+  if(!(track_met%in%tracks)){
 
+    composed_view_circos_cnv_gene <- compose_view(
+      multi = TRUE,
+      layout = layout,
+      tracks = add_multi_tracks(track_expr,
+                                track_cnv,
+                                track_cyto),
+      alignment = 'stack',
+      spacing = 0.01,
+      linkingId = "detail"
+    )
+    composed_views <- append(composed_views, composed_view_circos_cnv_gene)
+  }
 
+  return(composed_views)
+}

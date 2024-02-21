@@ -1,7 +1,4 @@
 
-
-
-
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
@@ -54,7 +51,6 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  # Input
                   selectInput(inputId = 'integrationSelectTable',
                               label = 'Integration Type:',
                               choices = unique(data_table$omics)),
@@ -119,7 +115,6 @@
             tabPanel('XXX',
              sidebarLayout(
                sidebarPanel(
-                 #input
                  selectInput(inputId = 'integrationSelectHisto',
                              label = 'Integration Type:',
                              choices = unique(data_table$omics)),
@@ -160,8 +155,6 @@
     tabPanel('TFs',
              sidebarLayout(
                sidebarPanel(
-                 #input
-
                  selectInput(inputId = 'classSelectHistoTFs',
                              label = 'Class:',
                              choices = unique(data_table$class)),
@@ -243,7 +236,6 @@
                                 step = 0.005))
                 ),
                 mainPanel(
-                  # OUTPUT
                   plotOutput("ridgelinePlot")
                 )
               )
@@ -263,7 +255,6 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  #input
                   selectInput("integrationSelectVenn",
                               "Select Integration:",
                               choices = unique(data_table$omics)),
@@ -295,7 +286,6 @@
 
                 ),
                 mainPanel(
-                  # OUTPUT
                   plotlyOutput("venn_plot"),
                   dataTableOutput("common_genes_table")
                 )
@@ -321,7 +311,6 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  #input
                   selectInput(inputId = 'integrationSelectHeatmap',
                               label = 'Integration Type:',
                               choices = int),
@@ -360,7 +349,6 @@
 
                 ),
                 mainPanel(
-                  # OUTPUT
                   InteractiveComplexHeatmapOutput('heatmap')
                 )
 
@@ -383,7 +371,6 @@
                 tabPanel('XXXX',
               sidebarLayout(
                 sidebarPanel(
-                  #input
                   selectInput(inputId = 'integrationSelectVolcano',
                               label = 'Integration Type:',
                               choices = unique(data_table$omics)),
@@ -420,7 +407,6 @@
                                 step = 0.005))
                 ),
                 mainPanel(
-                  # OUTPUT
                   plotlyOutput('volcanoPlot')
                 )
               )
@@ -442,7 +428,11 @@
               tabsetPanel(
                 type = 'tabs',
                 tabPanel('XXXX',
-              # OUTPUT
+              sliderInput("numNodes",
+                          label = "Number of nodes",
+                          min = 10,
+                          max = 1000,
+                          value = 300),
               checkboxInput("layoutNetwork",
                            label = "Layout:",
                            value = FALSE),
@@ -513,8 +503,4 @@
     )
   ,skin = "purple")
 }
-
-
-
-
 

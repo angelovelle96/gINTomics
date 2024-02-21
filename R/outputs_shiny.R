@@ -122,13 +122,10 @@
         visOptions(highlightNearest = list(enabled = TRUE,
                                            degree = 2,
                                            hover = TRUE),
-                   nodesIdSelection = TRUE,
-                   manipulation = TRUE) %>%
-       # visPhysics() %>%
-        visIgraphLayout() %>%
+        nodesIdSelection = TRUE,
+        manipulation = TRUE) %>%
         visLayout(randomSeed = 20, improvedLayout = TRUE)
 }
-
 
 #########################################################################
 #########################################################################
@@ -229,10 +226,9 @@
          x = "Value",
          y = "Significativity") +
     theme_minimal() +
-    theme_ridges() +  # Aggiungi il tema specifico per ggridges
+    theme_ridges() +
     scale_x_continuous(limits = quantiles)
 }
-
 
 ############################################################################
 ############################################################################
@@ -336,7 +332,7 @@
 .render_circos <- function(circos_reactive){
 
   renderUI({
-    req(circos_reactive())
+    req(arranged_view_circos())
   })
 }
 
@@ -360,7 +356,7 @@ run_shiny <- function(multiomics_integration){
                                          input = input,
                                          output = output)
 
-    ### ------------------------ VENN SERVER ----------------------
+    ### ------------------------ VENN SERVER ---------------------------
     reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table, input = input, output = output)
     output$venn_plot <- gINTomics:::.render_venn(reactive_venn)
     output$common_genes_table <- gINTomics:::.render_venn_table(reactive_venn)
