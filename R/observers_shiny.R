@@ -585,50 +585,38 @@ observe({
 
 .prepare_reactive_circos <- function(data, input, output) {
   reactive({
-
-    arranged_views <- list()
+  arranged_views <- list()
   tracks <- .create_tracks(data_table, data)
-
-if(c("cnv_track","met_track") %in% tracks){
-
-  composed_view_genomic <- .create_composed_view(cnv_track,
-                                                met_track,
-                                                cyto_track,
-                                                expr_track)
-  arranged_view_circos_genomic <- arrange_views(
-    title = 'Interactive Circos',
-    subtitle = 'subtitle',
-    views = composed_view_genomic,
-    # xDomain = list(chromosome = 'chr1')
-  )
-  arranged_views <- append(arranged_views, arranged_view_circos_genomic)
-
+  composed_view_genomic <- .create_composed_view(tracks)
+  if("circos_genomic"%in%names(composed_view_genomic)){
+    arranged_view_circos_genomic <- arrange_views(
+      title = 'Interactive Circos',
+      subtitle = 'subtitle',
+      views = composed_view_genomic$circos_genomic,
+      # xDomain = list(chromosome = 'chr1')
+    )
+    arranged_views <- c(arranged_views, circos_genomic=arranged_view_circos_genomic)
   }
-if(!(cnv_track %in% tracks)){composed_view_met <- .create_composed_view(met_track,
-                                                                         cyto_track,
-                                                                         expr_track)
-arranged_view_circos_cnv_gene <- arrange_views(
-  title = 'Interactive Circos',
-  subtitle = 'subtitle',
-  views = composed_view_cnv_gene,
-  # xDomain = list(chromosome = 'chr1')
-)
-arranged_views <- append(arranged_views, arranged_view_circos_cnv_gene)
-}
 
-if(!(met_track %in% tracks)){composed_view_cnv <- .create_composed_view(cnv_track,
-                                                                        cyto_track,
-                                                                        expr_track)
-arranged_view_circos_met_gene <- arrange_views(
-  title = 'Interactive Circos',
-  subtitle = 'subtitle',
-  views = composed_view_met_gene,
-  # xDomain = list(chromosome = 'chr1')
-)
-arranged_views <- append(arranged_views, arranged_view_circos_met_gene)
-}
+  if("circos_cnv_gene"%in%names(composed_view_genomic)){
+    arranged_view_circos_genomic <- arrange_views(
+      title = 'Interactive Circos',
+      subtitle = 'subtitle',
+      views = composed_view_genomic$circos_cnv_gene,
+      # xDomain = list(chromosome = 'chr1')
+    )
+    arranged_views <- c(arranged_views, circos_cnv_gene=arranged_view_circos_genomic)
+  }
 
-
+  if("circos_met_gene"%in%names(composed_view_genomic)){
+    arranged_view_circos_genomic <- arrange_views(
+      title = 'Interactive Circos',
+      subtitle = 'subtitle',
+      views = composed_view_genomic$circos_met_gene,
+      # xDomain = list(chromosome = 'chr1')
+    )
+    arranged_views <- c(arranged_views, circos_met_gene=arranged_view_circos_genomic)
+  }
     return(arranged_view_circos)
   })
 }
@@ -640,50 +628,53 @@ arranged_views <- append(arranged_views, arranged_view_circos_met_gene)
 
   composed_views <- list()
 
-  if(c(track_expr, track_cnv, track_met)%in%tracks){
+  if(sum(c("track_expr", "track_cnv", "track_met")%in%names(tracks))==3){
 
     composed_view_circos_genomic <- compose_view(
       multi = TRUE,
       layout = layout,
-      tracks = add_multi_tracks(track_expr,
-                                track_cnv,
-                                track_met,
-                                track_cyto),
+      tracks = add_multi_tracks(tracks$track_expr,
+                                tracks$track_cnv,
+                                tracks$track_met,
+                                tracks$track_cyto),
       alignment = 'stack',
       spacing = 0.01,
       linkingId = "detail"
     )
-    composed_views <- append(composed_views, composed_view_circos_genomic)
+    composed_views <- c(composed_views, circos_genomic=composed_view_circos_genomic)
+  }else{
+
+    if(!("track_cnv"%in%names(tracks))){
+
+      composed_view_circos_met_gene <- compose_view(
+        multi = TRUE,
+        layout = layout,
+        tracks = add_multi_tracks(tracks$track_expr,
+                                  tracks$track_met,
+                                  tracks$track_cyto),
+        alignment = 'stack',
+        spacing = 0.01,
+        linkingId = "detail"
+      )
+      composed_views <- c(composed_views, circos_met_gene=composed_view_circos_met_gene)
+    }
+    if(!("track_met"%in%names(tracks))){
+
+      composed_view_circos_cnv_gene <- compose_view(
+        multi = TRUE,
+        layout = layout,
+        tracks = add_multi_tracks(tracks$track_expr,
+                                  tracks$track_cnv,
+                                  tracks$track_cyto),
+        alignment = 'stack',
+        spacing = 0.01,
+        linkingId = "detail"
+      )
+      composed_views <- c(composed_views, circos_cnv_gene=composed_view_circos_cnv_gene)
+    }
+
   }
 
-if(!(track_cnv%in%tracks)){
-
-  composed_view_circos_met_gene <- compose_view(
-    multi = TRUE,
-    layout = layout,
-    tracks = add_multi_tracks(track_expr,
-                              track_met,
-                              track_cyto),
-    alignment = 'stack',
-    spacing = 0.01,
-    linkingId = "detail"
-  )
-  composed_views <- append(composed_views, composed_view_circos_met_gene)
-}
-  if(!(track_met%in%tracks)){
-
-    composed_view_circos_cnv_gene <- compose_view(
-      multi = TRUE,
-      layout = layout,
-      tracks = add_multi_tracks(track_expr,
-                                track_cnv,
-                                track_cyto),
-      alignment = 'stack',
-      spacing = 0.01,
-      linkingId = "detail"
-    )
-    composed_views <- append(composed_views, composed_view_circos_cnv_gene)
-  }
 
   return(composed_views)
 }

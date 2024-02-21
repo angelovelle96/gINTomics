@@ -826,7 +826,9 @@ track_cyto <- add_single_track(
     value = 0.5
   ),
 )
+
   if ("gene_genomic_res" %in% unique(data_table$omics)){
+    #####da mettere in un'altra funzione
     track_cnv <- create_single_track(data=cnv_gr,
                                      dataValue='cov_value',
                                      x_axis="none",
@@ -883,8 +885,8 @@ track_cyto <- add_single_track(
                                      tooltipField4="cnv_met",
                                      tooltipAlt4="Integration Type:",
                                      legend=FALSE)
+   tracks <- c(tracks, track_cnv=track_cnv, track_met=track_met, track_expr=track_expr, track_cyto=track_cyto)
     }
-   tracks <- append(tracks, c(track_cnv, track_met, track_expr, track_cyto))
 
 
   if ("cnv_gene_res" %in% unique(data_table$omics)){
@@ -926,7 +928,7 @@ track_cyto <- add_single_track(
                                       tooltipAlt4="Integration Type:",
                                       legend=FALSE)
 
-    tracks <- append(tracks, c(track_cnv, track_expr, track_cyto))
+    tracks <- c(tracks,track_cnv=track_cnv, track_expr=track_expr, track_cyto=track_cyto)
     }
 
   if("met_gene_res"%in%unique(data_table$omics)){
@@ -969,7 +971,7 @@ track_cyto <- add_single_track(
                                       tooltipAlt4="Integration Type:",
                                       legend=FALSE)
 
-    tracks <- append(tracks, c(track_met, track_expr, track_cyto))
+    tracks <- c(tracks, track_met=track_met, track_expr=track_expr, track_cyto=track_cyto)
     }
 
 return(tracks)
