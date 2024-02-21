@@ -10,6 +10,8 @@ run_genomic_enrich(
   pvalueCutoff = 0.1,
   pAdjustMethod = "BH",
   ont = "all",
+  BPPARAM = BiocParallel::SerialParam(),
+  extracted_data = NULL,
   ...
 )
 }

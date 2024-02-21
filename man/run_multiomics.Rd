@@ -17,7 +17,7 @@ run_multiomics(
   norm_method_gene_expr = "TMM",
   norm_method_miRNA_expr = "TMM",
   class = NULL,
-  BBPARAM = SerialParam()
+  BPPARAM = SerialParam()
 )
 }
 \arguments{

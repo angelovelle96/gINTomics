@@ -17,6 +17,7 @@ run_tf_integration(
   norm_method_cov = "TMM",
   class = NULL,
   run_deg = T,
+  BPPARAM = SerialParam(),
   ...
 )
 }
