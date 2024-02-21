@@ -653,7 +653,7 @@ search_gene <- function(genes,
 
 ############################################
 
-
+#' @importFrom BiocGenerics lapply
 setMethod("lapply", "MultiClass",
           function(X, FUN){
             ans <- X
@@ -686,7 +686,7 @@ fdr <- function(pval_mat){
   data_table <- data
   data_table <- filter(data_table, cov != '(Intercept)')   # elimino intercetta
   rownames(data_table) <- 1:nrow(data_table)
-  data_table <- data_table[, !(names(data_table) %in% c('significativity', 'sign'))]
+  data_table <- data_table[, !(colnames(data_table) %in% c('significativity', 'sign'))]
   colnames(data)[colnames(data) == "response"] <- "gene"
   colnames(data)[colnames(data) == "start_response"] <- "start"
   colnames(data)[colnames(data) == "end_response"] <-"end"

@@ -133,15 +133,10 @@
 .build_venn <- function(venn_data){
     cnv_sign_genes <- venn_data$cnv_sign_genes
     met_sign_genes <- venn_data$met_sign_genes
-    common_genes <- venn_data$common_genes
-    if (length(common_genes) > 0) {
-      list_venn <- list(CNV = cnv_sign_genes$cov,
-                        MET = met_sign_genes$cov)
-      venn_diagram <- ggVennDiagram(list_venn, show_intersect = TRUE)
-      return(venn_diagram)
-    }else{
-      return(NULL)
-    }
+    list_venn <- list(CNV = cnv_sign_genes$cov,
+                      MET = met_sign_genes$cov)
+    venn_diagram <- ggVennDiagram(list_venn, show_intersect = TRUE)
+    return(venn_diagram)
 }
 #########################################################################
 #########################################################################
@@ -150,12 +145,8 @@
   renderPlotly({
     venn_data <- reactive_venn()
     venn_diagram <- .build_venn(venn_data)
-    if(!is.null(venn_diagram)){
-      plotly_venn <- ggplotly(venn_diagram)
-      return(plotly_venn)
-    } else {
-      return(NULL)
-    }
+    plotly_venn <- ggplotly(venn_diagram)
+    return(plotly_venn)
   })
 }
 
@@ -165,12 +156,8 @@
 .render_venn_table <- function(reactive_venn){
   renderDataTable({
     venn_data <- reactive_venn()
-    common_genes <- venn_data$common_genes
-    if (length(common_genes) > 0) {
-      data.frame(Genes = common_genes)
-    } else {
-      return(NULL)
-    }
+    common_genes <- base::intersect(unlist(venn_data$cnv_sign_genes), unlist(venn_data$met_sign_genes))
+    data.frame(Genes = common_genes)
   })
 }
 ############################################################################
@@ -347,17 +334,18 @@ run_shiny <- function(multiomics_integration){
   server <- function(input, output, session) {
 
     # ---------------------- NETWORK SERVER -----------------------------
-    tmp <- gINTomics:::.prepare_network(data_table)
+    nnet <- gINTomics:::.prepare_network(data_table)
     reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
                                                         input = input,
                                                         output = output,
-                                                        network_data = tmp)
+                                                        network_data = nnet)
     gINTomics:::.render_reactive_network(reactive_network = reactive_network,
                                          input = input,
                                          output = output)
 
-    ### ------------------------ VENN SERVER ---------------------------
-    reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table, input = input, output = output)
+
+    ### ------------------------ VENN SERVER ----------------------
+    reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table = data_table, input = input, output = output)
     output$venn_plot <- gINTomics:::.render_venn(reactive_venn)
     output$common_genes_table <- gINTomics:::.render_venn_table(reactive_venn)
 
@@ -382,6 +370,9 @@ run_shiny <- function(multiomics_integration){
     #### ------------------- TABLE SERVER ----------------------------
     reactive_table <- gINTomics:::.prepare_reactive_table(data_table, input = input, output = output)
     output$res_table <- gINTomics:::.render_table(reactive_table)
+    #### ------------------- ENRICHMENT SERVER ----------------------------
+    data_gen_enrich <- data_table[data_table$omics=="gene_genomic_res",]
+    callModule(gINTomics:::.background_srv, id = "prova", data_gen_enrich=data_gen_enrich)
   }
 
 

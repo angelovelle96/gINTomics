@@ -81,11 +81,8 @@
                                select = c('cov'))
     }
 
-    # Interseca i risultati e mostrali (geni comuni)
-    common_genes <- intersect(cnv_sign_genes, met_sign_genes)
     data_venn <- list(cnv_sign_genes = cnv_sign_genes,
-                met_sign_genes = met_sign_genes,
-                common_genes = common_genes)
+                met_sign_genes = met_sign_genes)
     return(data_venn)
     })%>%bindEvent(input$classSelectVenn,
                                          input$FDRRangeVenn,
@@ -456,13 +453,137 @@ observe({
 }
 
 #######################################################################
+########################################################################
+
+.background_srv <- function(input,
+                            output,
+                            session,
+                            data_gen_enrich){
+
+  gen_enr <- gINTomics:::.reactive_bg(FFUN = run_genomic_enrich,
+                                  data_gen_enrich = data_gen_enrich,
+                                  input = input,
+                                  output = output,
+                                  args = list(model_results = NULL,
+                                              qvalueCutoff = 1,
+                                              pvalueCutoff = 1,
+                                              extracted_data = data_gen_enrich))
+  check <- gINTomics:::.check_reactive_bg_enrich(reactive_enrich = gen_enr,
+                                                 input = input,
+                                                 output = output,
+                                                 session = session)
+
+  output$gen_enrichment <- renderText({
+    check()
+  })
+
+  gen_plot <- gINTomics:::.reactive_gen_dotplot(reactive_enrich = gen_enr,
+                                                 input = input,
+                                                 output = output,
+                                                 session = session)
+  gINTomics:::.render_gen_dotplot(gen_plot=gen_plot,
+                                  data_gen_enrich = data_gen_enrich,
+                                  input = input,
+                                  output = output,
+                                  session = session)
+
+}
+
+
 #######################################################################
+########################################################################
+
+.reactive_bg <- function(FFUN,
+                          args,
+                          data_gen_enrich,
+                          input,
+                          output){
+  reactive({
+    ans <- callr::r_bg(func = FFUN,
+                           args = args,
+                           supervise = T)
+    return(ans)
+  })
+}
+
+#######################################################################
+########################################################################
+
+.check_reactive_bg_enrich <- function(reactive_enrich,
+                                        input,
+                                        output,
+                                        session){
+  reactive({
+    invalidateLater(millis = 1000, session = session)
+    if (reactive_enrich()$is_alive()) {
+      x <- "Enrichment running in background, this may take several minutes"
+    } else {
+      x <- "Enrichment completed"
+    }
+    return(x)
+  })
+}
+
+#######################################################################
+########################################################################
+
+.reactive_gen_dotplot <- function(reactive_enrich,
+                                      input,
+                                      output,
+                                      session){
+  reactive({
+    if (reactive_enrich()$is_alive()){
+      invalidateLater(millis = 1000, session = session)
+      }
+    if (!reactive_enrich()$is_alive()) {
+      data <- reactive_enrich()$get_result()
+      if(sum(c("cnv", "met")%in%names(data))){
+      cnv <- data[["cnv"]][[1]][[1]]
+      cnv <- clusterProfiler::dotplot(cnv)
+      cnv <- ggplotly(cnv)
+      met <- data[["met"]][[1]][[1]]
+      met <- clusterProfiler::dotplot(met)
+      met <- ggplotly(met)
+      ans <- list(cnv=cnv, met=met)
+      }else{
+        ans <- data[[1]][[1]]
+        ans <- clusterProfiler::dotplot(ans)
+        cnv <- ggplotly(ans)
+      }
+      return(ans)
+      }
+  })
+}
+
+#######################################################################
+########################################################################
+
+.render_gen_dotplot <- function(gen_plot,
+                                data_gen_enrich,
+                                input,
+                                output,
+                                session){
+  observe({
+    if("gene_genomic_res"%in%data_gen_enrich$omics){
+      output$gen_dotplot <- renderPlotly({
+        ans=gen_plot()
+        ans=ans[[input$genomicTypeSelectEnrich]]
+      })
+    }else{
+      output$gen_dotplot <- renderPlotly({
+        gen_plot()
+      })
+    }
+  })%>%bindEvent(input$genomicTypeSelectEnrich)
+}
+    
+#######################################################################
+########################################################################
 
 .prepare_reactive_circos <- function(data, input, output) {
   reactive({
 
-    arranged_views <- list()
-
+    arranged_views <- list()    
   tracks <- .create_tracks(data_table, data)
 
 if(c("cnv_track","met_track") %in% tracks){

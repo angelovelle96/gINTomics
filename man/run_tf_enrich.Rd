@@ -11,6 +11,7 @@ run_tf_enrich(
   pAdjustMethod = "BH",
   ont = "all",
   BPPARAM = BiocParallel::SerialParam(),
+  extracted_data = NULL,
   ...
 )
 }

@@ -11,7 +11,7 @@
                         ont,
                         run_go=T,
                         run_kegg=T,
-                        run_reactome=T,
+                        run_reactome=F,
                         ...){
 
     kegg <- go <- reactome <- NULL
@@ -21,8 +21,14 @@
                       c("hsa", "mmu"))
     orgdb <- orgdb[species]
     organism <- organism[species]
-    ssel <- setNames(data$coef[data$pval<=0.05],
-                     data$entrez_response[data$pval<=0.05])
+    ssel <- setNames(data$coef[data$pval<=0.01],
+                     data$entrez_response[data$pval<=0.01])
+    if(length(ssel)>500){
+      tmp <- data[data$pval<=0.01,]
+      tmp <- tmp[order(abs(tmp$coef), decreasing = T),]
+      tmp <- tmp$entrez_response[1:500]
+      ssel <- ssel[names(ssel)%in%tmp]
+    }
     ssel <- ssel[!is.na(names(ssel))]
     ssel <- ssel[!is.na(ssel)]
     ssel <- ssel[!duplicated(names(ssel))]
@@ -30,7 +36,7 @@
     universe <- universe[!is.na(universe)]
     universe <- universe[!duplicated(universe)]
     if(run_kegg){
-        kegg <- enrichKEGG(gene = as.character(names(ssel)),
+        kegg <- clusterProfiler::enrichKEGG(gene = as.character(names(ssel)),
                            universe = as.character(universe),
                            organism = species,
                            pvalueCutoff = pvalueCutoff,
@@ -39,7 +45,7 @@
         )
     }
     if(run_go){
-        go <- enrichGO(gene = as.character(names(ssel)),
+        go <- clusterProfiler::enrichGO(gene = as.character(names(ssel)),
                        universe = as.character(universe),
                        OrgDb = orgdb,
                        pvalueCutoff = pvalueCutoff,
@@ -50,7 +56,7 @@
         )
     }
     if(run_reactome){
-      reactome <- enrichPathway(gene = as.character(names(ssel)),
+      reactome <- ReactomePA::enrichPathway(gene = as.character(names(ssel)),
                                universe = as.character(universe),
                                organism = organism,
                                pvalueCutoff = pvalueCutoff,
@@ -88,20 +94,24 @@ run_genomic_enrich <- function(model_results,
                        pvalueCutoff = 0.1,
                        pAdjustMethod="BH",
                        ont = "all",
+                       BPPARAM = BiocParallel::SerialParam(),
+                       extracted_data=NULL,
                        ...
 ){
-
-  if("gene_genomic_res"%in%names(model_results)){
+  data <- extracted_data
+  if(is.null(data)){
+    if("gene_genomic_res"%in%names(model_results)){
     model_results <- model_results[["gene_genomic_res"]]
+    }
+    if("gene_cnv_res"%in%names(model_results)){
+      model_results <- model_results[["gene_cnv_res"]]
+    }
+    if("gene_met_res"%in%names(model_results)){
+      model_results <- model_results[["gene_met_res"]]
+      }
+    data <- extract_model_res(model_results = model_results)
   }
-  if("gene_cnv_res"%in%names(model_results)){
-    model_results <- model_results[["gene_cnv_res"]]
-  }
-  if("gene_met_res"%in%names(model_results)){
-    model_results <- model_results[["gene_met_res"]]
-  }
-
-  data <- extract_model_res(model_results = model_results)
+  data <- data[data$cov!="(Intercept)",]
   if("class"%in%colnames(data)){
     tmp <- lapply(unique(data$class), function(x) data[data$class==x,])
     names(tmp) <- unique(data$class)
@@ -115,32 +125,34 @@ run_genomic_enrich <- function(model_results,
   }
 
   if("cnv_met"%in%colnames(data[[1]])){
-        enrichment_cnv <- lapply(data, function(x)
-        .def_enrich(data = x[x$cnv_met=="cnv",],
-                    species=species,
-                    pvalueCutoff = pvalueCutoff,
-                    pAdjustMethod=pAdjustMethod,
-                    ont = ont,
-                    ...))
-      enrichment_met <- lapply(data, function(x)
-        .def_enrich(data = x[x$cnv_met=="met",],
-                    species=species,
-                    pvalueCutoff = pvalueCutoff,
-                    pAdjustMethod=pAdjustMethod,
-                    ont = ont,
-                    ...))
+    tmp <- lapply(data, function(x) x[x$cnv_met=="cnv",])
+    enrichment_cnv <- BiocParallel::bplapply(tmp, gINTomics:::.def_enrich,
+                              species=species,
+                              pvalueCutoff = pvalueCutoff,
+                              pAdjustMethod=pAdjustMethod,
+                              ont = ont,
+                              BPPARAM = BPPARAM,
+                              ...)
+    tmp <- lapply(data, function(x) x[x$cnv_met=="met",])
+    enrichment_met <- BiocParallel::bplapply(tmp, gINTomics:::.def_enrich,
+                               species=species,
+                               pvalueCutoff = pvalueCutoff,
+                               pAdjustMethod=pAdjustMethod,
+                               ont = ont,
+                               BPPARAM = BPPARAM,
+                               ...)
 
       enrichment <- list(cnv=enrichment_cnv,
                          met=enrichment_met)
   }else{
 
-      enrichment <- lapply(data, function(x)
-        .def_enrich(data = x,
-                    species=species,
-                    pvalueCutoff = pvalueCutoff,
-                    pAdjustMethod=pAdjustMethod,
-                    ont = ont,
-                    ...))
+      enrichment <- BiocParallel::bplapply(data, gINTomics:::.def_enrich,
+                             species=species,
+                             pvalueCutoff = pvalueCutoff,
+                             pAdjustMethod=pAdjustMethod,
+                             ont = ont,
+                             BPPARAM = BPPARAM,
+                             ...)
 
   }
 
@@ -171,14 +183,19 @@ run_tf_enrich <- function(model_results,
                           pAdjustMethod="BH",
                           ont = "all",
                           BPPARAM = BiocParallel::SerialParam(),
+                          extracted_data=NULL,
                           ...
 ){
 
-  if("tf_res"%in%names(model_results)){
+  data <- extracted_data
+  if(is.null(data)){
+    if("tf_res"%in%names(model_results)){
     model_results <- model_results[["tf_res"]]
+    }
+    data <- extract_model_res(model_results = model_results)
   }
 
-  data <- extract_model_res(model_results = model_results)
+  data <- data[data$cov!="(Intercept)",]
   if("class"%in%colnames(data)){
     tmp <- lapply(unique(data$class), function(x) data[data$class==x,])
     names(tmp) <- unique(data$class)
@@ -191,13 +208,11 @@ run_tf_enrich <- function(model_results,
     data <- tmp
   }
 
-
   enrichment <- lapply(data, function(x){
-    x <- x[x$cov!="(Intercept)",]
     tmp <- unique(x$cov)
     tmp2 <- lapply(tmp, function(y) {
       check <- x$pval[x$cov==y]
-      check <- sum(check<=0.05)
+      check <- sum(check<=0.01)
       return(check)
       })
     names(tmp2) <- tmp
@@ -207,14 +222,13 @@ run_tf_enrich <- function(model_results,
     if(length(tmp2)>10) tmp2 <- tmp2[1:10]
     tmp <- lapply(names(tmp2), function(y) x[x$cov==y,])
     names(tmp) <- names(tmp2)
-    ans <- bplapply(tmp, .def_enrich,
+    enrichment <- bplapply(tmp, .def_enrich,
                     species=species,
                     pvalueCutoff = pvalueCutoff,
                     pAdjustMethod=pAdjustMethod,
                     ont = ont,
-                    run_kegg = T,
                     BPPARAM = BPPARAM)
-    return(ans)
+    return(enrichment)
     })
   return(enrichment)
 }

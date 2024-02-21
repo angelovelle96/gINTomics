@@ -15,6 +15,7 @@ run_genomic_integration(
   class = NULL,
   scale = T,
   run_deg = T,
+  BPPARAM = SerialParam(),
   ...
 )
 }

@@ -12,6 +12,7 @@ run_cnv_integration(
   norm_method = "TMM",
   class = NULL,
   run_deg = T,
+  BPPARAM = SerialParam(),
   ...
 )
 }
