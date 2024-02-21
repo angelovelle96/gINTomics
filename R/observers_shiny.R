@@ -158,12 +158,12 @@
                              session){
 observe({
 
-  if(!is.null(input$classSelectHeatmap)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
+  if(!is.null(input$selectClassHeatmap)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
                                           data_table <- data_table[data_table$class == input$selectClassHeatmap,]}
   if(input$degSelectHeatmap == "Only DEGs"){data_table <- data_table[data_table$deg == TRUE,]}
-  if(is.null(input$classSelectHeatmap)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]]$data$response_var}
+  if(is.null(input$selectClassHeatmap)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]]$data$response_var}
   data_table <- data_table[data_table$cov != '(Intercept)',]
-  df_heatmap_t <- t(df_heatmap)
+  df_heatmap_t <- t(as.matrix(df_heatmap))
 
   if(input$integrationSelectHeatmap == "gene_genomic_res"){
     data_table <- data_table[data_table$omics == 'gene_genomic_res',]
@@ -190,13 +190,15 @@ observe({
       df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap &
                                      df_heatmap_t$fdr_met <= input$FDRRangeHeatmap, ]
     }
+    if(nrow(df_heatmap_t)==0){return(NULL)}
     top_met <- df_heatmap_t %>%
       arrange(desc(abs(met))) %>%
-      head(input$numTopGenesHeatmap/2)
+      head(input$numTopGenesHeatmapCNV)
     top_cnv <- df_heatmap_t %>%
       arrange(desc(abs(cnv))) %>%
-      head(input$numTopGenesHeatmap/2)
-    expr_top <- rbind(top_cnv, top_met)
+      head(input$numTopGenesHeatmapMET)
+    expr_top <- rbind(top_cnv,
+                      top_met[!rownames(top_met)%in%rownames(top_cnv),])
 
     row_ha <- rowAnnotation(coef_cnv=expr_top$cnv, coef_met=expr_top$met)
     ht <- ComplexHeatmap:::Heatmap(expr_top, right_annotation=row_ha)
@@ -227,7 +229,7 @@ observe({
 
     top_cnv <- df_heatmap_t %>%
       arrange(desc(abs(cnv))) %>%
-      head(input$numTopGenesHeatmap)
+      head(input$numTopGenesHeatmapCNV)
     expr_top <- top_cnv
 
     row_ha <- rowAnnotation(foo1=runif(10), foo2=runif(10))
@@ -259,7 +261,7 @@ observe({
 
     top_met <- df_heatmap_t %>%
       arrange(desc(abs(met))) %>%
-      head(input$numTopGenesHeatmap)
+      head(input$numTopGenesHeatmapMET)
     expr_top <- top_met
 
     row_ha <- rowAnnotation(foo1=runif(10), foo2=runif(10))
@@ -292,7 +294,7 @@ observe({
     df_heatmap_t <- as.data.frame(df_heatmap_t)
     top_mirna_cnv <- df_heatmap_t %>%
     arrange(desc(abs(mirna_cnv)))  %>%
-    head(input$numTopGenesHeatmap)
+    head(input$numTopGenesHeatmapCNV)
     expr_top <- top_mirna_cnv
 
     row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv)
@@ -302,7 +304,8 @@ observe({
 
   }
   })%>%bindEvent(input$integrationSelectHeatmap,
-                 input$numTopGenesHeatmap,
+                 input$numTopGenesHeatmapCNV,
+                 input$numTopGenesHeatmapMET,
                  input$FDRRangeHeatmap,
                  input$pvalRangeHeatmap,
                  input$significativityCriteriaHeatmap,
@@ -576,14 +579,14 @@ observe({
     }
   })%>%bindEvent(input$genomicTypeSelectEnrich)
 }
-    
+
 #######################################################################
 ########################################################################
 
 .prepare_reactive_circos <- function(data, input, output) {
   reactive({
 
-    arranged_views <- list()    
+    arranged_views <- list()
   tracks <- .create_tracks(data_table, data)
 
 if(c("cnv_track","met_track") %in% tracks){
@@ -629,6 +632,9 @@ arranged_views <- append(arranged_views, arranged_view_circos_met_gene)
     return(arranged_view_circos)
   })
 }
+
+#######################################################################
+########################################################################
 
 .create_composed_view <- function(tracks, layout) {
 
