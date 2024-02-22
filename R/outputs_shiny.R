@@ -372,7 +372,10 @@ run_shiny <- function(multiomics_integration){
     output$res_table <- gINTomics:::.render_table(reactive_table)
     #### ------------------- ENRICHMENT SERVER ----------------------------
     data_gen_enrich <- data_table[data_table$omics=="gene_genomic_res",]
-    callModule(gINTomics:::.background_srv, id = "prova", data_gen_enrich=data_gen_enrich)
+    data_tf_enrich <- data_table[data_table$omics=="tf_res",]
+    callModule(gINTomics:::.background_srv, id = "prova",
+               data_gen_enrich=data_gen_enrich,
+               data_tf_enrich=data_tf_enrich)
   }
 
 

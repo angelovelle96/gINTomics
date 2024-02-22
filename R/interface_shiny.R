@@ -478,7 +478,7 @@
             mainPanel(
               tabsetPanel(
                 type = 'tabs',
-                tabPanel('XXXX',
+                tabPanel('Genomic',
                          sidebarLayout(
                            sidebarPanel(
                              #input
@@ -491,9 +491,19 @@
 
                            ),
                          mainPanel(textOutput(ns("gen_enrichment")),
-                                   plotlyOutput(ns("gen_dotplot")))),
+                                   plotlyOutput(ns("gen_dotplot"))))
                         )
-                , tabPanel('DEGs'))
+                , tabPanel('TF',
+                           sidebarLayout(
+                             sidebarPanel(
+                               #input
+                               selectInput(inputId = 'ClassSelectEnrich',
+                                           label = 'Class:',
+                                           choices = unique(data_table$class))
+
+                             ),
+                             mainPanel(textOutput(ns("tf_enrichment")),
+                                       plotlyOutput(ns("tf_dotplot"))))))
             )
           ))
 }
