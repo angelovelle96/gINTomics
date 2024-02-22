@@ -455,15 +455,21 @@
 ###################################################################
 
 .gint_tabitem_page_circos <- function(data_table){
-  tabItem(tabName = "page_circos",
-          fluidRow(
-            box(title = "Subsection 1",
-                "This is the content of Subsection 1."),
-            mainPanel(
-                do.call("tabsetPanel", lapply(as.list(unique(data_table$omics)), function(x) tabPanel(x, goslingOutput(paste0("circos_",x)))))
-        )          ## USARE uiOutput("gosling_plot_circos_ui")
-      )
-  )
+  # tabItem(tabName = "page_circos",
+  #         fluidRow(
+  #           box(title = "Subsection 1",
+  #               "This is the content of Subsection 1."),
+  #           mainPanel(
+  #               do.call("tabsetPanel", lapply(as.list(unique(data_table$omics)), function(x) tabPanel(x, goslingOutput(paste0("circos_",x)))))
+  #       )          ## USARE uiOutput("gosling_plot_circos_ui")
+  #     )
+  # )
+  use_gosling()
+  tabItem(tabName = "page_circos", fluidPage(use_gosling(),
+            fluidRow(column(6, goslingOutput('gosling_plot_circos')))))
+
+
+
 }
 
 #############################################################
