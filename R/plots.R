@@ -1,350 +1,335 @@
 
-#' Ridgeline plot
-#' @description
-#' The ridgeline plot allow to compare the distribution of significant and
-#' non significant coefficients.
-#' @param data Output of one of the integration functions or output of
-#' **run_multiomics**
-#' @param outliers logical. Should outliers be showed in the plot. Default is
-#' set to FALSE
-#' @import ggplot2 ggridges VennDetail cowplot
-#' @export
-#'
+.circos_preprocess <- function(data){
 
-ridgeline_plot <- function(data,
-                           outliers=F){
-
-    g1 <- g2 <- g <- NULL
-    data <- extract_model_res(data,
-                              outliers=outliers)
-    data <- data[data$cov!="(Intercept)",]
-    if(sum(c("significant_cnv", "significant_met")%in%data$significativity)!=0){
-
-      tmp <- data[data$significativity%in%c("significant_cnv",
-                                            "significant_met"),]
-
-      ven <- venndetail(list(CNV = tmp$response[tmp$cnv_met=="cnv"],
-                             Methylation = tmp$response[tmp$cnv_met=="met"]))
-
-      data_ns <- tmp[tmp$response%in%ven@result$Detail[
-        ven@result$Subset!="Shared"],]
-      if(nrow(data_ns)>0){
-          g1 <- ggplot(tmp2, aes(x = data_ns$coef,
-                                 y = data_ns$significativity,
-                                 fill=data_ns$significativity))+
-            geom_density_ridges() +
-            theme_ridges()+
-            guides(fill=guide_legend(title="Significativity"))+
-            xlab("coef")+
-            ylab("Significativity")
-          }
-
-      data_s <- tmp[tmp$response%in%ven@result$Detail[
-        ven@result$Subset=="Shared"],]
-      if(nrow(data_s)>0){
-          g2 <- ggplot(tmp2, aes(x = data_s$coef,
-                                 y = data_s$significativity,
-                                 fill=data_s$significativity))+
-            geom_density_ridges() +
-            theme_ridges()+
-            guides(fill=guide_legend(title="Significativity"))+
-            xlab("coef")+
-            ylab("Significativity")
-          }
-
-    }
-
-    data_r <- data[!data$cnv_met%in%c("cnv", "met"),]
-    #data_r <- data_r[data_r$omics=="tf_res",]
-    #data_r <- data_r[data_r$significativity!="not_significant",]
-
-    ############cambiare e fare un grafico per ogni omica (da selezionare nella shiny)
-    if("omics"%in%colnames(data_r)){
-      data_r$significativity[
-        data_r$significativity=="significant"] <- paste(data_r$significativity[
-          data_r$significativity=="significant"], data_r$omics[
-            data_r$significativity=="significant"],sep = "_")
-    }
-    if(nrow(data_r)>0){
-        g <- ggplot(data_r, aes(x = data_r$coef,
-                         y = data_r$significativity,
-                         fill=data_r$significativity))+
-          geom_density_ridges(panel_scaling=T) +
-          theme_ridges()+
-          guides(fill=guide_legend(title="Significativity"))+
-          xlab("coef")+
-          ylab("Significativity")
-        }
-
-}
-
-#' Chromosome distribution plot
-#' @description
-#' The chromosome distribution plot is a barplot showing the number of
-#' significant/non significant or positive/negative coefficients
-#' for each chromosome.
-#' @param data Output of one of the integration functions or output of
-#' **run_multiomics**
-#' @param outliers logical. Should outliers be showed in the plot. Default is
-#' set to TRUE
-#' @param show_sign logical. Should barplot colors be defined according to the
-#' sign of the coefficients ? In this case only significant coefficients will
-#' be included in the plot. Default set to FALSE.
-#' @import ggplot2 ggridges
-#' @importFrom gtools mixedsort
-#' @export
-
-chr_distribution_plot <- function(data,
-                           outliers=T,
-                           show_sign=F){
-
-  data <- extract_model_res(data,
-                            outliers=outliers)
-  data <- data[data$cov!="(Intercept)",]
-  data <- data[!is.na(data$chr_cov),]
-  if(show_sign){
-    data <- data[data$significativity=="significant",]
-    ggplot(data, aes(x = factor(data$chr_cov,
-                                levels=mixedsort(unique(data$chr_cov))),
-                     fill=data$sign))+
-      geom_bar(position="dodge", stat="count")+
-      xlab("Chromosome")+
-      guides(fill=guide_legend(title="Sign"))+
-      xlab("Chromosome")+
-      ylab("Count")
-
-  }else{
-  ggplot(data, aes(x = factor(data$chr_cov,
-                              levels=mixedsort(unique(data$chr_cov))),
-                   fill=data$significativity))+
-    geom_bar(position="dodge", stat="count")+
-      xlab("Chromosome")+
-      guides(fill=guide_legend(title="Significativity"))+
-      xlab("Chromosome")+
-      ylab("Count")
-        }
-}
-
-#' @import ComplexHeatmap
-
-.heatmap_sign <- function(model_results,
-                         outliers=T,
-                         number=50){
-
-  data <- extract_model_res(model_results, outliers=outliers)
-  data <- data[data$cov!="(Intercept)",]
-  data <- data[data$pval<=0.1,]
-  if(!"omics"%in%colnames(data)){
-    data$omics <- rep("omic", nrow(data))
-    tmp <- unique(data$omics)
-    data <- lapply(tmp, function(x) data[data$omics==x,])
-    names(data) <- tmp
-    input <- list()
-    input[["omic"]] <- model_results$data$response_var
-  }else{
-      tmp <- unique(data$omics)
-      data <- lapply(tmp, function(x) data[data$omics==x,])
-      names(data) <- tmp
-      input <- lapply(model_results, function(x) x$data$response_var)
-      }
-
-  input <- lapply(names(data), function(x)
-    input[[x]][, colnames(input[[x]])%in%data[[x]]$response])
-  names(input) <- names(data)
-  input <- lapply(input, function(x) sort(apply(x, 2, sd), decreasing = T))
-  input <- lapply(input, function(x) names(x)[seq(number)])
-  data <- lapply(data, function(x) x[order(x$pval, decreasing = F),])
-  data <- lapply(data, function(x) x[!duplicated(x$response),])
-  data <- lapply(names(input), function(x)
-    data[[x]][data[[x]]$response%in%input[[x]],])
-  names(data) <- names(input)
-
-  hheatmap <- lapply(data, function(x) data.frame(row.names = x$response,
-                                                  pvalue = x$pval))
-
-  hheatmap_gene <- cbind(TF=hheatmap$tf_res$pvalue,
-                         CNV=hheatmap$gene_cnv_res[rownames(hheatmap$tf_res),],
-                         MET=hheatmap$met_res[rownames(hheatmap$tf_res),],
-                         miRNA=hheatmap$mirna_target_res[rownames(hheatmap$tf_res),])
-
-
-  hheatmap <- plyr::rbind.fill(tmp)
-  hheatmap <- t(hheatmap)
-  colnames(hheatmap) <- names(tmp)
-  pval <- plyr::rbind.fill(tmp2)
-  pval <- t(pval)
-  colnames(pval) <- names(tmp2)
-
-  ComplexHeatmap::pheatmap(hheatmap, cluster_rows = F, cluster_cols = F)
-
-
-}
-
-
-#' @import circlize
-
-.ccircos_genLines_chr <- function(chr=c(1:22, "X", "Y", "MT"),
-                                    rregion,
-                                    vvalue,
-                                    ttrack,
-                                    ttype,
-                                    aarea,
-                                    ccol,
-                                    bbaseline,
-                                    ...){
-  for (i in chr) {
-
-    circos.genomicLines(region = rregion[which(rregion[,1] ==i) ,2:3],
-                        value = vvalue[which(rregion[,1] ==i)],
-                        sector.index = i,
-                        track.index = ttrack,
-                        type = ttype,
-                        area = aarea,
-                        col = ccol[which(rregion[,1] ==i)],
-                        baseline = bbaseline)
-
-
-  }
-
-}
-
-
-#' @import circlize
-
-.ccircos_genPoints_chr <- function(chr=c(1:22, "X", "Y", "MT"),
-                                  rregion,
-                                  vvalue,
-                                  ppch,
-                                  ccex,
-                                  ttrack,
-                                  ccol,
-                                  bbaseline){
-  for (i in chr) {
-
-    circos.genomicPoints(region = rregion[which(rregion[,1] ==i) ,2:3],
-                         value = vvalue[which(rregion[,1] ==i)],
-                         sector.index = i,
-                         track.index = ttrack,
-                         pch = ppch ,
-                         col = ccol,
-                         baseline = bbaseline,
-                         cex = ccex)
-
-
-  }
-
-}
-
-#' Circos plot
-#' @description
-#' This function will generate a Circos plot for an integration model. It will
-#' display in the first two layer the data of the covariates and of the
-#' response variable and when possible in the third layer the values of the
-#' significant coefficients
-#' @param model_results Output of an integration model. Not available for
-#' the entire **run_multiomics** output. You can provide one of the results
-#' of the MultiOmics object (e.g. muliomics$gene_cnv_res) or provide the
-#' results of one of the other integration functions.
-#' @param species Species information, default is "hg38". See
-#' **circos.initializeWithIdeogram** function from **circlize** package for
-#' further information
-#' @import circlize
-#' @importFrom gtools mixedsort
-#' @importFrom stats quantile
-#' @export
-
-circos_plot <- function(model_results,
-                        species="hg38"){
-
-    data <- extract_data(model_results)
-    coef <- "coef_layer"%in%names(data)
-    if(coef) {
-      colnames(data$coef_layer) <- gsub("cov", "mean",
-                                        colnames(data$coef_layer))
-      data$coef_layer <- data$coef_layer[data$coef_layer$pval<=0.05,]
-    }
-
-    tmp <- lapply(names(data), function(x) {
-      ans <- data[[x]]
-      ans$chromosome_name <- paste0("chr", ans$chromosome_name)
-      ans <- ans[ans$chromosome_name!="chrMT",]
-      ans$ccol <- rep("red3", nrow(ans))
-      ans$ccol[ans$mean<0] <- "royalblue4"
+  library(GenomicRanges)
+  dataframes <- lapply(unique(data$omics), function(x) {
+    single_omic_df <- data[data$omics==x,]
+    return(single_omic_df)
+  })
+  names(dataframes) <- paste0("df_", unique(data$omics))
+  if("df_gene_genomic_res"%in%names(dataframes)){
+    dataframes$df_cnv <- filter(dataframes$df_gene_genomic_res,
+                                cnv_met == 'cnv')
+    dataframes$df_met <- filter(dataframes$df_gene_genomic_res,
+                                cnv_met == 'met')
+    tmp <- lapply(which(names(dataframes)!="df_gene_genomic_res"), function(x){
+      ans <- dataframes[[x]]
+      ans <- ans[ans$cov!="(Intercept)",]
       return(ans)
     })
-    names(tmp) <- names(data)
-    data <- tmp
-    wwhich <- data$res_layer$mean>quantile(data$res_layer$mean,0.99)
-    data$res_layer$mean[wwhich] <- quantile(data$res_layer$mean, 0.99)
-    wwhich <- data$cov_layer$mean>quantile(data$cov_layer$mean,0.99)
-    data$cov_layer$mean[wwhich] <- quantile(data$cov_layer$mean, 0.99)
-    tmp <- unique(gtools::mixedsort(data$res_layer$chromosome_name))
-    circos.initializeWithIdeogram(species = species, chromosome.index = tmp)+
-    circos.genomicTrack(data, ylim=c(min(data$cov_layer$mean),
-                                     max(data$cov_layer$mean)))+
-    circos.genomicTrack(data, ylim=c(min(data$res_layer$mean),
-                                     max(data$res_layer$mean)))+
-    .ccircos_genLines_chr(chr = tmp,
-                         rregion = data$cov_layer[,4:6],
-                         vvalue = data$cov_layer$mean,
-                         ttrack = 3,
-                         ttype = "h",
-                         aarea = TRUE,
-                         ccol = data$cov_layer$ccol,
-                         bbaseline = 0,
-                         lwd = 1)+
-    .ccircos_genLines_chr(chr = tmp,
-                         rregion = data$res_layer[,4:6],
-                         vvalue = data$res_layer$mean,
-                         ttrack = 4,
-                         ttype = "h",
-                         aarea = TRUE,
-                         ccol = data$res_layer$ccol,
-                         bbaseline = 0,
-                         lwd = 1)+
-    if(coef) circos.genomicTrack(data, ylim=c(min(data$coef_layer$mean),
-                                              max(data$coef_layer$mean)))+
-      .ccircos_genLines_chr(chr = tmp,
-                           rregion = data$coef_layer[,5:7],
-                           vvalue = data$coef_layer$mean,
-                           ttrack = 5,
-                           ttype = "h",
-                           aarea = TRUE,
-                           ccol = data$coef_layer$ccol,
-                           bbaseline = 0,
-                           lwd = 1)
-
+    names(tmp) <- names(dataframes)[
+      which(names(dataframes)!="df_gene_genomic_res")]
+    dataframes <- tmp
+  }
+  gr <- lapply(dataframes, function(x){
+    ans <- makeGRangesFromDataFrame(x,
+                                    seqnames.field = 'chr',
+                                    start.field = 'start',
+                                    end.field = 'end',
+                                    keep.extra.columns = TRUE,
+                                    na.rm = TRUE)
+    return(ans)
+  })
+  return(gr)
 }
 
-
-
-#' PCA
-#' @description
-#' PCA plot
-#' @param model_results Output of one of the integration functions
-#' @import ggplot2
-#' @export
-#'
-
-plot_pca <- function(model_results){
-
-  data <- model_results$data$response_var
-  res <- prcomp(t(data))
-  tmp <- as.matrix(model_results$pval_data[, 2:ncol(model_results$pval_data)])
-  rownames(tmp) <- rownames(model_results$pval_data)
-  tmp <- apply(tmp, 1, function(x) sum(x<=0.05, na.rm = T))
-  ssel <- names(tmp)[tmp!=0]
-  ccol <- setNames(rep("not_significant", ncol(data)), colnames(data))
-  ccol[ssel] <- "significant"
-  ccol <- data.frame(row.names = names(ccol),
-                     Significativity= ccol)
-  ggplot2::autoplot(res, data=ccol, colour = "Significativity", label=F)
-
+############################################################################
+#############################################################################
+.create_single_track <- function(data,
+                                 dataValue,
+                                 x_axis,
+                                 xe_axis,
+                                 y_axis,
+                                 colorField,
+                                 colorDomain,
+                                 colorRange,
+                                 tooltipField1,
+                                 tooltipTitle,
+                                 tooltipAlt1,
+                                 tooltipField2,
+                                 tooltipAlt2,
+                                 tooltipField3,
+                                 tooltipAlt3,
+                                 tooltipField4,
+                                 tooltipAlt4,
+                                 legend) {
+  return(
+    add_single_track(
+      data = track_data_gr(data, chromosomeField = 'seqnames', genomicFields = c('start','end'), value = dataValue),
+      mark = 'bar',
+      x = visual_channel_x(field = 'start', type = 'genomic', axis = x_axis),
+      xe = visual_channel_x(field = 'end', type = 'genomic', axis = xe_axis),
+      y = visual_channel_y(field = dataValue, type = 'quantitative', axis = y_axis),
+      color = visual_channel_color(field = colorField, type = 'nominal', domain = colorDomain, range = colorRange),
+      tooltip = visual_channel_tooltips(
+        visual_channel_tooltip(field = "start", type = "genomic", alt = 'Start Position:'),
+        visual_channel_tooltip(field = "end", type = "genomic", alt = "End Position:"),
+        visual_channel_tooltip(field = tooltipField1, title = tooltipTitle, type = "quantitative", alt = paste(tooltipTitle, "Value:"), format = "0.2"),
+        visual_channel_tooltip(field = tooltipField2, type = 'nominal', alt = tooltipAlt2),
+        visual_channel_tooltip(field = tooltipField3, type = 'nominal', alt = tooltipAlt3),
+        visual_channel_tooltip(field = tooltipField4, type = 'nominal', alt = tooltipAlt4)
+      ),
+      size = list(value = 1),
+      legend = legend
+    )
+  )
 }
 
+#######################################################################
+########################################################################
+
+.create_tracks <- function(data_table, gr){
+
+  tracks <- list()
+
+  track_cyto <- add_single_track(
+    id = "track2",
+    data = track_data(
+      url = "https://raw.githubusercontent.com/sehilyi/gemini-datasets/master/data/UCSC.HG38.Human.CytoBandIdeogram.csv",
+      type = "csv",
+      chromosomeField = "Chromosome",
+      genomicFields = c("chromStart",
+                        "chromEnd")
+    ),
+    mark = "rect",
+    x = visual_channel_x(field = "chromStart",
+                         type = "genomic"),
+    xe = visual_channel_x(field = "chromEnd",
+                          type = "genomic"),
+    color = visual_channel_color(
+      field = "Stain",
+      type = "nominal",
+      domain = c(
+        "gneg",
+        "gpos25",
+        "gpos50",
+        "gpos75",
+        "gpos100",
+        "gvar",
+        "acen"           # acen: centromeric region (UCSC band files)
+      ),
+      range = c(
+        "white",
+        "#D9D9D9",
+        "#979797",
+        "#636363",
+        "black",
+        "#F0F0F0",
+        "red"
+      )
+    ),
+    stroke = visual_channel_stroke(
+      value = "lightgray"
+    ),
+    strokeWidth = visual_channel_stroke_width(
+      value = 0.5
+    ),
+  )
+
+  if ("gene_genomic_res" %in% unique(data_table$omics)){
+    #####da mettere in un'altra funzione
+    track_cnv <- .create_single_track(data=gr$df_cnv,
+                                     dataValue='cov_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="cov_value",
+                                     tooltipTitle="cnv",
+                                     tooltipAlt1="CNV Value:",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
+
+    track_met <- .create_single_track(data=gr$df_met,
+                                     dataValue='cov_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="cov_value",
+                                     tooltipTitle="met",
+                                     tooltipAlt1="MET Value:",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
+
+    track_expr <- .create_single_track(data=gr$df_cnv,
+                                      dataValue='response_value',
+                                      x_axis="none",
+                                      xe_axis="none",
+                                      y_axis="none",
+                                      colorField="direction_cov",
+                                      colorDomain=c("positive","negative"),
+                                      colorRange=c("red","blue"),
+                                      tooltipField1="response_value",
+                                      tooltipTitle="expr",
+                                      tooltipAlt1="Expression Value (log2):",
+                                      tooltipField2="gene",
+                                      tooltipAlt2="Gene Name:",
+                                      tooltipField3="class",
+                                      tooltipAlt3="Class:",
+                                      tooltipField4="cnv_met",
+                                      tooltipAlt4="Integration Type:",
+                                      legend=FALSE)
+    tracks <- c(tracks, list(track_cnv=track_cnv, track_met=track_met, track_expr=track_expr, track_cyto=track_cyto))
+  }
 
 
+  if ("cnv_gene_res" %in% unique(gr$omics)){
+    track_cnv <- .create_single_track(data=data$df_cnv_gene_res,
+                                     dataValue='cov_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="cov_value",
+                                     tooltipTitle="cnv",
+                                     tooltipAlt1="CNV Value:",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
+
+    track_expr <- .create_single_track(data=gr$df_cnv_gene_res,
+                                      dataValue='response_value',
+                                      x_axis="none",
+                                      xe_axis="none",
+                                      y_axis="none",
+                                      colorField="direction_cov",
+                                      colorDomain=c("positive","negative"),
+                                      colorRange=c("red","blue"),
+                                      tooltipField1="response_value",
+                                      tooltipTitle="expr",
+                                      tooltipAlt1="Expression Value (log2):",
+                                      tooltipField2="gene",
+                                      tooltipAlt2="Gene Name:",
+                                      tooltipField3="class",
+                                      tooltipAlt3="Class:",
+                                      tooltipField4="cnv_met",
+                                      tooltipAlt4="Integration Type:",
+                                      legend=FALSE)
+
+    tracks <- c(tracks,list(track_cnv=track_cnv, track_expr=track_expr, track_cyto=track_cyto))
+  }
+
+  if("met_gene_res"%in%unique(data_table$omics)){
+
+    track_met <- .create_single_track(data=gr$df_met_gene_res,
+                                     dataValue='cov_value',
+                                     x_axis="none",
+                                     xe_axis="none",
+                                     y_axis="none",
+                                     colorField="direction_cov",
+                                     colorDomain=c("positive","negative"),
+                                     colorRange=c("red","blue"),
+                                     tooltipField1="cov_value",
+                                     tooltipTitle="met",
+                                     tooltipAlt1="MET Value:",
+                                     tooltipField2="gene",
+                                     tooltipAlt2="Gene Name:",
+                                     tooltipField3="class",
+                                     tooltipAlt3="Class:",
+                                     tooltipField4="cnv_met",
+                                     tooltipAlt4="Integration Type:",
+                                     legend=FALSE)
+
+    track_expr <- .create_single_track(data=gr$df_met_gene_res,
+                                      dataValue='response_value',
+                                      x_axis="none",
+                                      xe_axis="none",
+                                      y_axis="none",
+                                      colorField="direction_cov",
+                                      colorDomain=c("positive","negative"),
+                                      colorRange=c("red","blue"),
+                                      tooltipField1="response_value",
+                                      tooltipTitle="expr",
+                                      tooltipAlt1="Expression Value (log2):",
+                                      tooltipField2="gene",
+                                      tooltipAlt2="Gene Name:",
+                                      tooltipField3="class",
+                                      tooltipAlt3="Class:",
+                                      tooltipField4="response",
+                                      tooltipAlt4="Integration Type:",
+                                      legend=FALSE)
+
+    tracks <- c(tracks, list(track_met=track_met, track_expr=track_expr, track_cyto=track_cyto))
+  }
+
+  return(tracks)
+}
+
+#######################################################################
+########################################################################
+
+.create_composed_view <- function(tracks, layout="circular") {
+
+  composed_views <- list()
+
+  if(sum(c("track_expr", "track_cnv", "track_met")%in%names(tracks))==3){
+
+    composed_view_circos_genomic <- compose_view(
+      multi = TRUE,
+      layout = layout,
+      tracks = add_multi_tracks(tracks$track_expr,
+                                tracks$track_cnv,
+                                tracks$track_met,
+                                tracks$track_cyto),
+      alignment = 'stack',
+      spacing = 0.01,
+      linkingId = "detail"
+    )
+    composed_views <- c(composed_views, list(circos_genomic=composed_view_circos_genomic))
+  }else{
+
+    if(!("track_cnv"%in%names(tracks))){
+
+      composed_view_circos_met_gene <- compose_view(
+        multi = TRUE,
+        layout = layout,
+        tracks = add_multi_tracks(tracks$track_expr,
+                                  tracks$track_met,
+                                  tracks$track_cyto),
+        alignment = 'stack',
+        spacing = 0.01,
+        linkingId = "detail"
+      )
+      composed_views <- c(composed_views, list(circos_met_gene=composed_view_circos_met_gene))
+    }
+    if(!("track_met"%in%names(tracks))){
+
+      composed_view_circos_cnv_gene <- compose_view(
+        multi = TRUE,
+        layout = layout,
+        tracks = add_multi_tracks(tracks$track_expr,
+                                  tracks$track_cnv,
+                                  tracks$track_cyto),
+        alignment = 'stack',
+        spacing = 0.01,
+        linkingId = "detail"
+      )
+      composed_views <- c(composed_views, list(circos_cnv_gene=composed_view_circos_cnv_gene))
+    }
+
+  }
 
 
-
-
+  return(composed_views)
+}
