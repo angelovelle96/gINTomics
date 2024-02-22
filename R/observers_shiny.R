@@ -158,10 +158,10 @@
                              session){
 observe({
 
-  if(!is.null(input$selectClassHeatmap)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
+  if("class"%in%colnames(data_table)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
                                           data_table <- data_table[data_table$class == input$selectClassHeatmap,]}
-  if(input$degSelectHeatmap == "Only DEGs"){data_table <- data_table[data_table$deg == TRUE,]}
-  if(is.null(input$selectClassHeatmap)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]]$data$response_var}
+  if("deg"%in%colnames(data_table) & input$degSelectHeatmap == "Only DEGs"){data_table <- data_table[data_table$deg,]}
+  if(!"class"%in%colnames(data_table)){ df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]]$data$response_var}
   data_table <- data_table[data_table$cov != '(Intercept)',]
   df_heatmap_t <- t(as.matrix(df_heatmap))
 
@@ -184,10 +184,10 @@ observe({
     rownames(data_table) <- tmp3
     df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
     if (input$significativityCriteriaHeatmap == 'pval'){
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap &
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap |
                                      df_heatmap_t$pval_met <= input$pvalRangeHeatmap, ]
     } else {
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap &
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap |
                                      df_heatmap_t$fdr_met <= input$FDRRangeHeatmap, ]
     }
     if(nrow(df_heatmap_t)==0){return(NULL)}
@@ -220,11 +220,11 @@ observe({
     rownames(data_table) <- tmp2
     df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
     if (input$significativityCriteriaHeatmap == 'pval'){
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap &
-                                     df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap, ]
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv >= input$pvalRangeHeatmap[1] &
+                                     df_heatmap_t$pval_cnv <= input$pvalRangeHeatmap[2], ]
     } else {
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap &
-                                     df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap, ]
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv >= input$FDRRangeHeatmap[1] &
+                                     df_heatmap_t$fdr_cnv <= input$FDRRangeHeatmap[2], ]
     }
 
     top_cnv <- df_heatmap_t %>%
@@ -252,11 +252,11 @@ observe({
     rownames(data_table) <- tmp2
     df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
     if (input$significativityCriteriaHeatmap == 'pval'){
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_met <= input$pvalRangeHeatmap &
-                                     df_heatmap_t$pval_met <= input$pvalRangeHeatmap, ]
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_met >= input$pvalRangeHeatmap[1] &
+                                     df_heatmap_t$pval_met <= input$pvalRangeHeatmap[2], ]
     } else {
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_met <= input$FDRRangeHeatmap &
-                                     df_heatmap_t$fdr_met <= input$FDRRangeHeatmap, ]
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_met >= input$FDRRangeHeatmap[1] &
+                                     df_heatmap_t$fdr_met <= input$FDRRangeHeatmap[2], ]
     }
 
     top_met <- df_heatmap_t %>%
@@ -284,11 +284,11 @@ observe({
     rownames(data_table) <- tmp2
     df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
     if (input$significativityCriteriaHeatmap == 'pval'){
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_mirna_cnv <= input$pvalRangeHeatmap &
-                                     df_heatmap_t$pval_mirna_cnv <= input$pvalRangeHeatmap, ]
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_mirna_cnv >= input$pvalRangeHeatmap[1] &
+                                     df_heatmap_t$pval_mirna_cnv <= input$pvalRangeHeatmap[2], ]
     } else {
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_mirna_cnv <= input$FDRRangeHeatmap &
-                                     df_heatmap_t$fdr_mirna_cnv <= input$FDRRangeHeatmap, ]
+      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_mirna_cnv >= input$FDRRangeHeatmap[1] &
+                                     df_heatmap_t$fdr_mirna_cnv <= input$FDRRangeHeatmap[2], ]
     }
 
     df_heatmap_t <- as.data.frame(df_heatmap_t)
@@ -309,7 +309,9 @@ observe({
                  input$FDRRangeHeatmap,
                  input$pvalRangeHeatmap,
                  input$significativityCriteriaHeatmap,
-                 input$selectClassHeatmap)
+                 input$selectClassHeatmap,
+                 input$degSelectHeatmap
+                 )
 }
 
 ######################################################################
@@ -461,17 +463,17 @@ observe({
 .background_srv <- function(input,
                             output,
                             session,
-                            data_gen_enrich){
+                            data_gen_enrich,
+                            data_tf_enrich){
 
-  gen_enr <- gINTomics:::.reactive_bg(FFUN = run_genomic_enrich,
-                                  data_gen_enrich = data_gen_enrich,
+  gen_enr <- gINTomics:::.run_bg(FFUN = run_genomic_enrich,
                                   input = input,
                                   output = output,
                                   args = list(model_results = NULL,
                                               qvalueCutoff = 1,
                                               pvalueCutoff = 1,
                                               extracted_data = data_gen_enrich))
-  check <- gINTomics:::.check_reactive_bg_enrich(reactive_enrich = gen_enr,
+  check <- gINTomics:::.check_reactive_bg_enrich(bg_enrich = gen_enr,
                                                  input = input,
                                                  output = output,
                                                  session = session)
@@ -480,7 +482,7 @@ observe({
     check()
   })
 
-  gen_plot <- gINTomics:::.reactive_gen_dotplot(reactive_enrich = gen_enr,
+  gen_plot <- gINTomics:::.reactive_gen_dotplot(bg_enrich = gen_enr,
                                                  input = input,
                                                  output = output,
                                                  session = session)
@@ -490,35 +492,49 @@ observe({
                                   output = output,
                                   session = session)
 
+
+  tf_enr <- gINTomics:::.run_bg(FFUN = run_tf_enrich,
+                                 input = input,
+                                 output = output,
+                                 args = list(model_results = NULL,
+                                             qvalueCutoff = 1,
+                                             pvalueCutoff = 1,
+                                             extracted_data = data_tf_enrich))
+  check_tf <- gINTomics:::.check_reactive_bg_enrich(bg_enrich = tf_enr,
+                                                 input = input,
+                                                 output = output,
+                                                 session = session)
+  output$tf_enrichment <- renderText({
+    check_tf()
+  })
 }
 
 
 #######################################################################
 ########################################################################
 
-.reactive_bg <- function(FFUN,
-                          args,
-                          data_gen_enrich,
-                          input,
-                          output){
-  reactive({
+.run_bg <- function(FFUN,
+                    args,
+                    input,
+                    output){
+  #reactive({
     ans <- callr::r_bg(func = FFUN,
                            args = args,
                            supervise = T)
     return(ans)
-  })
+  #})
 }
 
 #######################################################################
 ########################################################################
 
-.check_reactive_bg_enrich <- function(reactive_enrich,
+.check_reactive_bg_enrich <- function(bg_enrich,
                                         input,
                                         output,
                                         session){
   reactive({
     invalidateLater(millis = 1000, session = session)
-    if (reactive_enrich()$is_alive()) {
+    if (bg_enrich$is_alive()) {
       x <- "Enrichment running in background, this may take several minutes"
     } else {
       x <- "Enrichment completed"
@@ -530,16 +546,16 @@ observe({
 #######################################################################
 ########################################################################
 
-.reactive_gen_dotplot <- function(reactive_enrich,
-                                      input,
-                                      output,
-                                      session){
+.reactive_gen_dotplot <- function(bg_enrich,
+                                  input,
+                                  output,
+                                  session){
   reactive({
-    if (reactive_enrich()$is_alive()){
+    if (bg_enrich$is_alive()){
       invalidateLater(millis = 1000, session = session)
       }
-    if (!reactive_enrich()$is_alive()) {
-      data <- reactive_enrich()$get_result()
+    if (!bg_enrich$is_alive()) {
+      data <- bg_enrich$get_result()
       if(sum(c("cnv", "met")%in%names(data))){
       cnv <- data[["cnv"]][[1]][[1]]
       cnv <- clusterProfiler::dotplot(cnv)
