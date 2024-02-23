@@ -466,12 +466,20 @@
   # )
   use_gosling()
   tabItem(tabName = "page_circos", fluidPage(use_gosling(),
-            fluidRow(column(6, goslingOutput('gosling_plot_circos')))))
-
+          sidebarLayout(sidebarPanel(
+            selectInput(inputId = "circosClass",choices = unique(data_table$class), label = "Class"),
+            selectInput(inputId = "circosLayout",choices = c("circular", "linear"), label = "Layout"), width = 3),
+            mainPanel(column(12,goslingOutput('gosling_plot_circos'),
+                             div(style="height: 200px;")))),
+          tags$head(tags$style(
+            HTML('.container-fluid {background-color: #ffffff;}')
+            )
+          )))
 
 
 }
-
+# '/* body */.content-wrapper, .right-side {background-color: #7d848b;}'
+#"body {background-color: #ffffff; /* white background color */}"
 #############################################################
 ##############################################################
 

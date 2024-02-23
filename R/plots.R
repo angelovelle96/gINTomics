@@ -36,23 +36,24 @@
 ############################################################################
 #############################################################################
 .create_single_track <- function(data,
-                                 dataValue,
-                                 x_axis,
-                                 xe_axis,
-                                 y_axis,
-                                 colorField,
-                                 colorDomain,
-                                 colorRange,
-                                 tooltipField1,
-                                 tooltipTitle,
-                                 tooltipAlt1,
-                                 tooltipField2,
-                                 tooltipAlt2,
-                                 tooltipField3,
-                                 tooltipAlt3,
-                                 tooltipField4,
-                                 tooltipAlt4,
-                                 legend) {
+                                 dataValue=NULL,
+                                 x_axis=NULL,
+                                 xe_axis=NULL,
+                                 y_axis=NULL,
+                                 colorField=NULL,
+                                 colorDomain=NULL,
+                                 colorRange=NULL,
+                                 tooltipField1=NULL,
+                                 tooltipTitle=NULL,
+                                 tooltipAlt1=NULL,
+                                 tooltipField2=NULL,
+                                 tooltipAlt2=NULL,
+                                 tooltipField3=NULL,
+                                 tooltipAlt3=NULL,
+                                 tooltipField4=NULL,
+                                 tooltipAlt4=NULL,
+                                 legend=NULL,
+                                 colorType=NULL) {
   return(
     add_single_track(
       data = track_data_gr(data, chromosomeField = 'seqnames', genomicFields = c('start','end'), value = dataValue),
@@ -60,7 +61,7 @@
       x = visual_channel_x(field = 'start', type = 'genomic', axis = x_axis),
       xe = visual_channel_x(field = 'end', type = 'genomic', axis = xe_axis),
       y = visual_channel_y(field = dataValue, type = 'quantitative', axis = y_axis),
-      color = visual_channel_color(field = colorField, type = 'nominal', domain = colorDomain, range = colorRange),
+      color = visual_channel_color(field = colorField, type = colorType, domain = colorDomain, range = colorRange, legend = legend),
       tooltip = visual_channel_tooltips(
         visual_channel_tooltip(field = "start", type = "genomic", alt = 'Start Position:'),
         visual_channel_tooltip(field = "end", type = "genomic", alt = "End Position:"),
@@ -69,8 +70,7 @@
         visual_channel_tooltip(field = tooltipField3, type = 'nominal', alt = tooltipAlt3),
         visual_channel_tooltip(field = tooltipField4, type = 'nominal', alt = tooltipAlt4)
       ),
-      size = list(value = 1),
-      legend = legend
+      size = list(value = 1)
     )
   )
 }
@@ -78,7 +78,7 @@
 #######################################################################
 ########################################################################
 
-.create_tracks <- function(data_table, gr){
+.create_tracks <- function(data, gr){
 
   tracks <- list()
 
@@ -126,7 +126,7 @@
     ),
   )
 
-  if ("gene_genomic_res" %in% unique(data_table$omics)){
+  if ("gene_genomic_res" %in% unique(data$omics)){
     #####da mettere in un'altra funzione
     track_cnv <- .create_single_track(data=gr$df_cnv,
                                      dataValue='cov_value',
@@ -145,7 +145,8 @@
                                      tooltipAlt3="Class:",
                                      tooltipField4="cnv_met",
                                      tooltipAlt4="Integration Type:",
-                                     legend=FALSE)
+                                     legend=T,
+                                     colorType="nominal")
 
     track_met <- .create_single_track(data=gr$df_met,
                                      dataValue='cov_value',
@@ -164,16 +165,17 @@
                                      tooltipAlt3="Class:",
                                      tooltipField4="cnv_met",
                                      tooltipAlt4="Integration Type:",
-                                     legend=FALSE)
+                                     legend=FALSE,
+                                     colorType="nominal")
 
     track_expr <- .create_single_track(data=gr$df_cnv,
                                       dataValue='response_value',
                                       x_axis="none",
                                       xe_axis="none",
                                       y_axis="none",
-                                      colorField="direction_cov",
-                                      colorDomain=c("positive","negative"),
-                                      colorRange=c("red","blue"),
+                                      colorField="response_value",
+                                      colorDomain=NULL,
+                                      colorRange=NULL,
                                       tooltipField1="response_value",
                                       tooltipTitle="expr",
                                       tooltipAlt1="Expression Value (log2):",
@@ -183,7 +185,8 @@
                                       tooltipAlt3="Class:",
                                       tooltipField4="cnv_met",
                                       tooltipAlt4="Integration Type:",
-                                      legend=FALSE)
+                                      legend=T,
+                                      colorType="quantitative")
     tracks <- c(tracks, list(track_cnv=track_cnv, track_met=track_met, track_expr=track_expr, track_cyto=track_cyto))
   }
 
@@ -206,7 +209,8 @@
                                      tooltipAlt3="Class:",
                                      tooltipField4="cnv_met",
                                      tooltipAlt4="Integration Type:",
-                                     legend=FALSE)
+                                     legend=FALSE,
+                                     colorType="nominal")
 
     track_expr <- .create_single_track(data=gr$df_cnv_gene_res,
                                       dataValue='response_value',
@@ -225,12 +229,13 @@
                                       tooltipAlt3="Class:",
                                       tooltipField4="cnv_met",
                                       tooltipAlt4="Integration Type:",
-                                      legend=FALSE)
+                                      legend=FALSE,
+                                      colorType="quantitative")
 
     tracks <- c(tracks,list(track_cnv=track_cnv, track_expr=track_expr, track_cyto=track_cyto))
   }
 
-  if("met_gene_res"%in%unique(data_table$omics)){
+  if("met_gene_res"%in%unique(data$omics)){
 
     track_met <- .create_single_track(data=gr$df_met_gene_res,
                                      dataValue='cov_value',
@@ -249,7 +254,8 @@
                                      tooltipAlt3="Class:",
                                      tooltipField4="cnv_met",
                                      tooltipAlt4="Integration Type:",
-                                     legend=FALSE)
+                                     legend=FALSE,
+                                     colorType="nominal")
 
     track_expr <- .create_single_track(data=gr$df_met_gene_res,
                                       dataValue='response_value',
@@ -268,7 +274,8 @@
                                       tooltipAlt3="Class:",
                                       tooltipField4="response",
                                       tooltipAlt4="Integration Type:",
-                                      legend=FALSE)
+                                      legend=FALSE,
+                                      colorType="quantitative")
 
     tracks <- c(tracks, list(track_met=track_met, track_expr=track_expr, track_cyto=track_cyto))
   }
@@ -279,7 +286,7 @@
 #######################################################################
 ########################################################################
 
-.create_composed_view <- function(tracks, layout="circular") {
+.create_composed_view <- function(tracks,width, height) {
 
   composed_views <- list()
 
@@ -287,14 +294,15 @@
 
     composed_view_circos_genomic <- compose_view(
       multi = TRUE,
-      layout = layout,
-      tracks = add_multi_tracks(tracks$track_expr,
+      tracks = add_multi_tracks(tracks$track_cyto,
+                                tracks$track_expr,
                                 tracks$track_cnv,
-                                tracks$track_met,
-                                tracks$track_cyto),
+                                tracks$track_met),
       alignment = 'stack',
       spacing = 0.01,
-      linkingId = "detail"
+      linkingId = "detail",
+      width = width,
+      height = height
     )
     composed_views <- c(composed_views, list(circos_genomic=composed_view_circos_genomic))
   }else{
@@ -303,7 +311,6 @@
 
       composed_view_circos_met_gene <- compose_view(
         multi = TRUE,
-        layout = layout,
         tracks = add_multi_tracks(tracks$track_expr,
                                   tracks$track_met,
                                   tracks$track_cyto),
@@ -317,7 +324,6 @@
 
       composed_view_circos_cnv_gene <- compose_view(
         multi = TRUE,
-        layout = layout,
         tracks = add_multi_tracks(tracks$track_expr,
                                   tracks$track_cnv,
                                   tracks$track_cyto),

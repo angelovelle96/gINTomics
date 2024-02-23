@@ -601,40 +601,26 @@ observe({
 
 .prepare_reactive_circos <- function(data, input, output) {
   reactive({
-  arranged_views <- list()
-  tracks <- .create_tracks(data_table, data)
-  composed_view_genomic <- .create_composed_view(tracks)
-  if("circos_genomic"%in%names(composed_view_genomic)){
-    arranged_view_circos_genomic <- arrange_views(
-      title = 'Interactive Circos',
-      subtitle = 'subtitle',
-      views = composed_view_genomic$circos_genomic,
-      # xDomain = list(chromosome = 'chr1')
-    )
-    arranged_views <- c(arranged_views, circos_genomic=arranged_view_circos_genomic)
+  if("class"%in%colnames(data)) data <- data[data$class==input$circosClass,]
+  gr <- .circos_preprocess(data = data)
+  tracks <- .create_tracks(data = data, gr = gr)
+  width=800
+  height=800
+  if(input$circosLayout=="linear"){
+    width=800
+    height=100
   }
-
-  if("circos_cnv_gene"%in%names(composed_view_genomic)){
-    arranged_view_circos_genomic <- arrange_views(
-      title = 'Interactive Circos',
-      subtitle = 'subtitle',
-      views = composed_view_genomic$circos_cnv_gene,
-      # xDomain = list(chromosome = 'chr1')
-    )
-    arranged_views <- c(arranged_views, circos_cnv_gene=arranged_view_circos_genomic)
-  }
-
-  if("circos_met_gene"%in%names(composed_view_genomic)){
-    arranged_view_circos_genomic <- arrange_views(
-      title = 'Interactive Circos',
-      subtitle = 'subtitle',
-      views = composed_view_genomic$circos_met_gene,
-      # xDomain = list(chromosome = 'chr1')
-    )
-    arranged_views <- c(arranged_views, circos_met_gene=arranged_view_circos_genomic)
-  }
-    return(arranged_view_circos)
-  })
+  composed_view <- .create_composed_view(tracks, height=height, width=width)
+  arranged_view <- lapply(composed_view, function(x){
+    arrange_views(
+    title = 'Interactive Circos',
+    subtitle = 'subtitle',
+    views = x,
+    layout = input$circosLayout)
+    })
+  return(arranged_view)
+  })%>%bindEvent(input$circosClass,
+                 input$circosLayout)
 }
 
 
