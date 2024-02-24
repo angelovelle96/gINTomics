@@ -191,7 +191,6 @@
   })
 }
 
-
 ############################################################################
 ############################################################################
 
@@ -343,7 +342,6 @@ run_shiny <- function(multiomics_integration){
                                          input = input,
                                          output = output)
 
-
     ### ------------------------ VENN SERVER ----------------------
     reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table = data_table, input = input, output = output)
     output$venn_plot <- gINTomics:::.render_venn(reactive_venn)
@@ -365,8 +363,8 @@ run_shiny <- function(multiomics_integration){
 
     ## ----------------------- HISTO SERVER TF --------------------------
     reactive_histo_tf <- gINTomics:::.prepare_reactive_histo_tf(data_table, input = input, output = output)
-    output$histogramPlotTFs <- gINTomics:::.render_histo_TF(reactive_histo_tf, by_chr = F)
-    output$histogramPlotTFsByChromosome <- gINTomics:::.render_histo_TF(reactive_histo_tf, by_chr = T)
+    output$histogramPlotTFs <- gINTomics:::.render_histo_TF(reactive_histo_tf, by_chr = FALSE)
+    output$histogramPlotTFsByChromosome <- gINTomics:::.render_histo_TF(reactive_histo_tf, by_chr = TRUE)
     #### ------------------- TABLE SERVER ----------------------------
     reactive_table <- gINTomics:::.prepare_reactive_table(data_table, input = input, output = output)
     output$res_table <- gINTomics:::.render_table(reactive_table)
@@ -390,7 +388,6 @@ run_shiny <- function(multiomics_integration){
 
       gosling(component_id = "component_1",
               reactive_circos()[[1]])
-
     })
   }
 
