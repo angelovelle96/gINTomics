@@ -493,9 +493,11 @@ setMethod("extract_model_res", "list",
             data$response_value <- tmp[data$response]
             tmp <-  apply(model_results$data$covariates, 2, mean)
             names(tmp) <- gsub("_cov", "", names(tmp))
-            names(tmp) <- gsub("_cnv", "", names(tmp))
-            names(tmp) <- gsub("_met", "", names(tmp))
-            data$cov_value <- tmp[data$cov]
+            tmp2 <- c(length(grep("_cnv$", names(tmp)))>0,
+                      length(grep("_met$", names(tmp)))>0)
+            if(sum(tmp2)==2){
+              data$cov_value <- tmp[rownames(data)]
+              }else{data$cov_value <- tmp[data$cov]}
             mmin <- quantile(data$coef, 0.25) - 1.5*IQR(data$coef)
             mmax <- quantile(data$coef, 0.75) + 1.5*IQR(data$coef)
 

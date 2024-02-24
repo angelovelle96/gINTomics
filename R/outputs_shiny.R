@@ -376,17 +376,18 @@ run_shiny <- function(multiomics_integration){
                data_tf_enrich=data_tf_enrich)
 
     #### ------------------- CIRCOS SERVER ----------------------------
-    tmp <- .circos_preprocess(data = data$data)
-    tmp2 <- .create_tracks(data_table = data$data, gr = tmp)
-    tmp3 <- .create_composed_view(tracks = tmp2)
-    tmp4 <- arrange_views(
-      title = 'Interactive Circos',
-      subtitle = 'subtitle',
-      views = tmp3$circos_genomic)
+    # tmp2 <- .create_tracks(data_table = data$data, gr = tmp)
+    # tmp3 <- .create_composed_view(tracks = tmp2)
+    # tmp4 <- arrange_views(
+    #   title = 'Interactive Circos',
+    #   subtitle = 'subtitle',
+    #   views = tmp3$circos_genomic)
+    #tmp <- .circos_preprocess(data = data$data)
+    reactive_circos <- .prepare_reactive_circos(data = data$data, input = input, output = output)
     output$gosling_plot_circos <- renderGosling({
 
       gosling(component_id = "component_1",
-              tmp4)
+              reactive_circos()[[1]])
     })
   }
 
