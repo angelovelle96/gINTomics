@@ -142,7 +142,8 @@
                                step = 0.005))
                ),
                mainPanel(
-                 plotlyOutput('histogramPlot')
+                 plotlyOutput('histogramPlot'),
+                 DT::dataTableOutput('histogramTable')
                )
              )
     ),
@@ -232,7 +233,8 @@
                                 step = 0.005))
                 ),
                 mainPanel(
-                  plotOutput("ridgelinePlot")
+                  plotOutput("ridgelinePlot"),
+                  DT::dataTableOutput('ridgelineTable')
                 )
               )
             )
@@ -362,16 +364,16 @@
                     condition = "input.significativityCriteriaHeatmap == 'pval'",
                     sliderInput("pvalRangeHeatmap",
                                 "P-Value Range:",
-                                min = 0,
-                                max = 1,
+                                min = 0.01,
+                                max = 0.5,
                                 value = 0.05,
                                 step = 0.005)),
                   conditionalPanel(
                     condition = "input.significativityCriteriaHeatmap == 'FDR'",
                     sliderInput("FDRRangeHeatmap",
                                 "FDR-Value Range:",
-                                min = 0,
-                                max = 1,
+                                min = 0.01,
+                                max = 0.5,
                                 value = 0.05,
                                 step = 0.005))
 
@@ -453,15 +455,34 @@
                 type = 'tabs',
                 tabPanel('XXXX',
               sliderInput("numNodes",
-                          label = "Number of nodes",
+                          label = "Number of Nodes",
                           min = 10,
-                          max = 1000,
+                          max = nrow(data_table),
                           value = 300),
+              selectInput(inputId = 'significativityCriteriaNetwork',
+                          label = 'Significativity criteria:',
+                          choices = c('pval', 'FDR')),
+              conditionalPanel(
+                condition = "input.significativityCriteriaNetwork == 'pval'",
+                sliderInput("pvalNetwork",
+                            "P-Value:",
+                            min = 0,
+                            max = 1,
+                            value = c(0.05),
+                            step = 0.005)),
+              conditionalPanel(
+                condition = "input.significativityCriteriaNetwork == 'FDR'",
+                sliderInput("fdrNetwork",
+                            "FDR:",
+                            min = 0,
+                            max = 1,
+                            value = c(0.05),
+                            step = 0.005)),
               checkboxInput("layoutNetwork",
-                           label = "Layout:",
+                           label = "Switch to tree Layout:",
                            value = FALSE),
-              checkboxInput("deg",
-                            label = "deg:",
+              checkboxInput("degNetwork",
+                            label = "Visualize only DEGs:",
                             value = FALSE),
               checkboxInput("physics",
                             label = "Physics",
