@@ -421,10 +421,10 @@ run_shiny <- function(multiomics_integration){
                                                 input = input,
                                                 output = output)
     output$gosling_plot_circos <- renderGosling({
-
       gosling(component_id = "component_1",
-              reactive_circos()[[1]])
+              reactive_circos())
     })
+
   }
 
 

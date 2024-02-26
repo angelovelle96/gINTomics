@@ -984,16 +984,19 @@
   #     )
   # )
   use_gosling()
-  tabItem(tabName = "circosIntegration", fluidPage(use_gosling(),
-          sidebarLayout(sidebarPanel(
-            selectInput(inputId = "circosClass",choices = unique(data_table$class), label = "Class"),
-            selectInput(inputId = "circosLayout",choices = c("circular", "linear"), label = "Layout"), width = 3),
-            mainPanel(column(12,goslingOutput('gosling_plot_circos'),
-                             div(style="height: 200px;")))),
-          tags$head(tags$style(
-            HTML('.container-fluid {background-color: #ffffff;}')
+  tabItem(tabName = "page_circos",fluidPage(use_gosling(),
+            sidebarLayout(
+              sidebarPanel(
+                selectInput(inputId = "circosClass",choices = unique(data_table$class), label = "Class"),
+                selectInput(inputId = "circosType",choices = c("Gene", "miRNA"), label = "Gene/miRNA"),
+                selectInput(inputId = "circosLayout",choices = c("circular", "linear"), label = "Layout"), width = 3),
+              mainPanel(column(12,goslingOutput('gosling_plot_circos'),
+                               div(style="height: 200px;")))),
+            tags$head(tags$style(
+              HTML('.container-fluid {background-color: #ffffff;}')
             )
           )))
+
 
 
 }
