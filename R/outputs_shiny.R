@@ -384,11 +384,12 @@ run_shiny <- function(multiomics_integration){
     #   views = tmp3$circos_genomic)
     #tmp <- .circos_preprocess(data = data$data)
     reactive_circos <- .prepare_reactive_circos(data = data$data, input = input, output = output)
-    output$gosling_plot_circos <- renderGosling({
 
+    output$gosling_plot_circos <- renderGosling({
       gosling(component_id = "component_1",
-              reactive_circos()[[1]])
+              reactive_circos())
     })
+
   }
 
 
