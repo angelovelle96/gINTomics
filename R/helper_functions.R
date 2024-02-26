@@ -391,6 +391,7 @@ create_multiassay <- function(methylation=NULL,
 
 ####################################################
 #' @importFrom reshape2 melt
+#' @importFrom dplyr left_join
 #' @importFrom stats IQR quantile
 
 setMethod("extract_model_res", "list",
@@ -466,27 +467,31 @@ setMethod("extract_model_res", "list",
                                                species = species,
                                                ...)
               }
-            tmp2 <- data$cov
-            tmp <- intersect(tmp2, rownames(genes_info))
+            tmp2 <- data.frame(gene = as.character(data$cov))
+            tmp <- intersect(tmp2$gene, rownames(genes_info))
             tmp <- genes_info[tmp,]
-            data$chr_cov <- tmp[as.character(tmp2),"chromosome_name"]
-            data$cytoband_cov <- tmp[as.character(tmp2), "band"]
-            data$start_cov <- tmp[as.character(tmp2), "start_position"]
-            data$end_cov <- tmp[as.character(tmp2), "end_position"]
-            data$ensg_cov <- tmp[as.character(tmp2), "ensembl_gene_id"]
-            data$entrez_cov <- tmp[as.character(tmp2), "entrezgene_id"]
-            data$hgnc_cov <- tmp[as.character(tmp2), "hgnc_symbol"]
+            tmp$gene <- rownames(tmp)
+            tmp <- left_join(tmp2, tmp, by = "gene")
+            data$chr_cov <- tmp[,"chromosome_name"]
+            data$cytoband_cov <- tmp[, "band"]
+            data$start_cov <- as.numeric(tmp[, "start_position"])
+            data$end_cov <- as.numeric(tmp[, "end_position"])
+            data$ensg_cov <- tmp[, "ensembl_gene_id"]
+            data$entrez_cov <- tmp[, "entrezgene_id"]
+            data$hgnc_cov <- tmp[, "hgnc_symbol"]
 
-            tmp2 <- data$response
-            tmp <- intersect(tmp2, rownames(genes_info))
+            tmp2 <- data.frame(gene = as.character(data$response))
+            tmp <- intersect(tmp2$gene, rownames(genes_info))
             tmp <- genes_info[tmp,]
-            data$chr_response <- tmp[as.character(tmp2),"chromosome_name"]
-            data$cytoband_response <- tmp[as.character(tmp2),"band"]
-            data$start_response <- tmp[as.character(tmp2),"start_position"]
-            data$end_response <- tmp[as.character(tmp2),"end_position"]
-            data$ensg_response <- tmp[as.character(tmp2),"ensembl_gene_id"]
-            data$entrez_response <- tmp[as.character(tmp2),"entrezgene_id"]
-            data$hgnc_response <- tmp[as.character(tmp2), "hgnc_symbol"]
+            tmp$gene <- rownames(tmp)
+            tmp <- left_join(tmp2, tmp, by = "gene")
+            data$chr_response <- tmp[,"chromosome_name"]
+            data$cytoband_response <- tmp[,"band"]
+            data$start_response <- as.numeric(tmp[,"start_position"])
+            data$end_response <- as.numeric(tmp[,"end_position"])
+            data$ensg_response <- tmp[,"ensembl_gene_id"]
+            data$entrez_response <- tmp[,"entrezgene_id"]
+            data$hgnc_response <- tmp[, "hgnc_symbol"]
 
             colnames(data)[colnames(data)=="value"] <- "coef"
             tmp <-  apply(model_results$data$response_var, 2, mean)
@@ -695,7 +700,7 @@ fdr <- function(pval_mat){
   colnames(data)[colnames(data) == "chr_response"] <-"chr"
   data$direction_cov <- ifelse(data$cov_value < 0, 'negative', 'positive')
   data$direction_coef <- ifelse(data$coef < 0, 'negative', 'positive')
-  data$cov_value <- abs(data$cov_value)
+  #data$cov_value <- abs(data$cov_value)
   data$coef <- abs(data$coef)
   ans <- list(data=data, data_table=data_table)
   return(ans)
