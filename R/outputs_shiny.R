@@ -168,7 +168,8 @@
             textposition = 'top right') %>%
       layout(title = "Volcano Plot") %>%
       layout(width = 1000,
-             height = 700)
+             height = 700) #%>%
+    #add_text(data = volcano_data, text=~cov)
 
 }
 #######################################################################

@@ -59,8 +59,8 @@
       ans$nodes <- ans$nodes[ans$nodes$id%in%ssel,]
       ans$edges <- ans$edges[ans$edges$from%in%ssel,]
       ans$edges <- ans$edges[ans$edges$to%in%ssel,]
-      nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
-      ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
+      # nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
+      # ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
     }
 
     return(ans)
@@ -184,10 +184,12 @@ observe({
   if ("deg" %in% colnames(data_table) & input$degSelectHeatmap == "Only DEGs") {
     df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
     data_table <- data_table[data_table$deg,]
+    df_heatmap <- df_heatmap[, unique(data_table$response)]
   }
 
   if (!"class" %in% colnames(data_table)) {
     df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]]$data$response_var
+    data_table <- data_table[data_table$omics == input$integrationSelectHeatmap,]
   }
 
   df_heatmap_t <- t(as.matrix(df_heatmap))
