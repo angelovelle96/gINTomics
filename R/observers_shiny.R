@@ -742,7 +742,8 @@ observe({
   }
   composed_view <- .create_composed_view(tracks, height=height, width=width)
   if(input$circosType=="Gene"){
-    ssel <- intersect(c("circos_genomic"), names(composed_view))
+    ssel <- intersect(c("circos_genomic", "circos_met_gene", "circos_met_gene"),
+                      names(composed_view))
   }
   if(input$circosType=="miRNA"){
     ssel <- intersect(c("circos_genomic_mirna"), names(composed_view))
@@ -751,12 +752,16 @@ observe({
   arranged_view <- arrange_views(title = 'Interactive Circos',
                                   subtitle = 'subtitle',
                                   views = composed_view,
-                                  layout = input$circosLayout)
+                                  layout = input$circosLayout,
+                                 xDomain = list(
+                                    chromosome = input$circosChr
+                                  ), assembly="hg38")
 
   return(arranged_view)
   })%>%bindEvent(input$circosClass,
                  input$circosLayout,
-                 input$circosType)
+                 input$circosType,
+                 input$circosChr)
 }
 
 

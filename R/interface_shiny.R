@@ -911,12 +911,16 @@
   #       )          ## USARE uiOutput("gosling_plot_circos_ui")
   #     )
   # )
-  use_gosling()
+  chr <- unique(data_table$chr_response)
+  chr <- c("All", paste0("chr", gtools::mixedsort(chr[!is.na(chr)])))
   tabItem(tabName = "circosIntegration",fluidPage(use_gosling(),
             sidebarLayout(
               sidebarPanel(
                 selectInput(inputId = "circosClass",choices = unique(data_table$class), label = "Class"),
                 selectInput(inputId = "circosType",choices = c("Gene", "miRNA"), label = "Gene/miRNA"),
+                selectInput(inputId = "circosChr",choices = chr, label = "Chromosome"),
+                actionButton("circosDownload_png","PNG",icon = icon("cloud-arrow-down")),
+                actionButton("circosDownload_pdf","PDF",icon = icon("cloud-arrow-down")),
                 selectInput(inputId = "circosLayout",choices = c("circular", "linear"), label = "Layout"), width = 3),
               mainPanel(column(12,goslingOutput('gosling_plot_circos'),
                                div(style="height: 200px;")))),

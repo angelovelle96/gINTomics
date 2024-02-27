@@ -432,6 +432,12 @@ run_shiny <- function(multiomics_integration){
       gosling(component_id = "component_1",
               reactive_circos())
     })
+    observe({
+      export_pdf(component_id = "component_1")
+    })%>%bindEvent(input$circosDownload_pdf)
+    observe({
+      export_png(component_id = "component_1")
+    })%>%bindEvent(input$circosDownload_png)
 
   }
 

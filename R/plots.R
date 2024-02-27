@@ -58,7 +58,8 @@
                                  tooltipField4=NULL,
                                  tooltipAlt4=NULL,
                                  legend=NULL,
-                                 colorType=NULL) {
+                                 colorType=NULL,
+                                 title=NULL) {
   return(
     add_single_track(
       data = track_data_gr(data, chromosomeField = 'seqnames', genomicFields = c('start','end'), value = dataValue),
@@ -76,7 +77,7 @@
         visual_channel_tooltip(field = tooltipField4, type = 'nominal', alt = tooltipAlt4)
       ),
       size = list(value = 1)
-    )
+    , title=title)
   )
 }
 
@@ -88,10 +89,10 @@
   tracks <- list()
   track_cyto <- .create_cyto_track()
   if ("gene_genomic_res" %in% unique(data$omics)){
-    #####da mettere in un'altra funzione
+    gr$df_cnv$cnv_met2 <- "cnv/met"
     track_cnv <- .create_cnv_track(gr$df_cnv)
     track_met <- .create_met_track(gr$df_met)
-    track_expr <- .create_expr_track(gr$df_cnv)
+    track_expr <- .create_expr_track(gr$df_cnv, genomic=T)
     track_coef_cnv <- .create_coef_track(gr$df_cnv)
     track_coef_met <- .create_coef_track(gr$df_met)
     tracks <- c(tracks, list(track_cnv=track_cnv,
@@ -102,22 +103,33 @@
   }
 
   if ("df_gene_cnv_res" %in% unique(names(gr))){
+    gr$df_gene_cnv_res$cnv_met <- "cnv"
     track_cnv <- .create_cnv_track(gr$df_gene_cnv_res)
     track_expr <- .create_expr_track(gr$df_gene_cnv_res)
-    tracks <- c(tracks,list(track_cnv=track_cnv, track_expr=track_expr))
+    track_coef_cnv <- .create_coef_track(gr$df_gene_cnv_res)
+    tracks <- c(tracks,list(track_cnv=track_cnv,
+                            track_expr=track_expr,
+                            track_coef_cnv=track_coef_cnv))
   }
 
   if("df_gene_met_res"%in%unique(names(gr))){
+    gr$df_gene_met_res$cnv_met <- "met"
     track_met <- .create_met_track(gr$df_gene_met_res)
     track_expr <- .create_expr_track(gr$df_gene_met_res)
-    tracks <- c(tracks, list(track_met=track_met, track_expr=track_expr))
+    track_coef_met <- .create_coef_track(gr$df_gene_met_res)
+    tracks <- c(tracks, list(track_met=track_met,
+                             track_expr=track_expr,
+                             track_coef_met=track_coef_met))
   }
 
     if ("df_mirna_cnv_res" %in% unique(names(gr))){
+      gr$df_mirna_cnv_res$cnv_met <- "cnv"
       track_mirna_cnv <- .create_cnv_track(gr$df_mirna_cnv_res)
       track_mirna_expr <- .create_expr_track(gr$df_mirna_cnv_res)
+      track_mirna_coef_cnv <- .create_coef_track(gr$df_mirna_cnv_res)
       tracks <- c(tracks,list(track_mirna_cnv=track_mirna_cnv,
-                              track_mirna_expr=track_mirna_expr))
+                              track_mirna_expr=track_mirna_expr,
+                              track_mirna_coef_cnv=track_mirna_coef_cnv))
     }
   tracks <- c(tracks,list(track_cyto=track_cyto))
   return(tracks)
@@ -153,7 +165,8 @@
                                       tooltipField4="cnv_met",
                                       tooltipAlt4="Integration Type:",
                                       legend=FALSE,
-                                      colorType="nominal")
+                                      colorType="nominal",
+                                      title="CNV")
     return(track_cnv)
     }
 
@@ -186,7 +199,8 @@
                                     tooltipField4="cnv_met",
                                     tooltipAlt4="Integration Type:",
                                     legend=FALSE,
-                                    colorType="nominal")
+                                    colorType="nominal",
+                                    title="MET")
   return(track_met)
 
 }
@@ -194,8 +208,8 @@
 #######################################################################
 ########################################################################
 
-.create_expr_track <- function(gr){
-
+.create_expr_track <- function(gr, genomic=F){
+ cnv_met <- ifelse(genomic, "cnv_met2", "cnv_met")
   track_expr <- .create_single_track(data=gr,
                                      dataValue='response_value',
                                      x_axis="none",
@@ -211,10 +225,11 @@
                                      tooltipAlt2="Gene Name:",
                                      tooltipField3="class",
                                      tooltipAlt3="Class:",
-                                     tooltipField4="cnv_met",
+                                     tooltipField4=cnv_met,
                                      tooltipAlt4="Integration Type:",
                                      legend=T,
-                                     colorType="quantitative")
+                                     colorType="quantitative",
+                                     title="Expression")
   return(track_expr)
 }
 
@@ -240,7 +255,8 @@
                                     tooltipField4="cnv_met",
                                     tooltipAlt4="Integration Type:",
                                     legend=FALSE,
-                                    colorType="nominal")
+                                    colorType="nominal",
+                                    title="Coefficients")
   return(track_coef)
 }
 
@@ -327,9 +343,10 @@
 
       composed_view_circos_met_gene <- compose_view(
         multi = TRUE,
-        tracks = add_multi_tracks(tracks$track_expr,
+        tracks = add_multi_tracks(tracks$track_cyto,
+                                  tracks$track_expr,
                                   tracks$track_met,
-                                  tracks$track_cyto),
+                                  tracks$track_coef_met),
         alignment = 'stack',
         spacing = 0.01,
         linkingId = "detail"
@@ -340,9 +357,10 @@
 
       composed_view_circos_cnv_gene <- compose_view(
         multi = TRUE,
-        tracks = add_multi_tracks(tracks$track_expr,
+        tracks = add_multi_tracks(tracks$track_cyto,
+                                  tracks$track_expr,
                                   tracks$track_cnv,
-                                  tracks$track_cyto),
+                                  tracks$track_coef_cnv),
         alignment = 'stack',
         spacing = 0.01,
         linkingId = "detail"
@@ -357,7 +375,8 @@
       multi = TRUE,
       tracks = add_multi_tracks(tracks$track_cyto,
                                 tracks$track_mirna_expr,
-                                tracks$track_mirna_cnv),
+                                tracks$track_mirna_cnv,
+                                tracks$track_mirna_coef_cnv),
       alignment = 'stack',
       spacing = 0.01,
       linkingId = "detail",
