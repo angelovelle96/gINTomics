@@ -197,13 +197,15 @@
  }
 
 
-   #' @import Homo.sapiens Mus.musculus
+   #' @import Homo.sapiens Mus.musculus TxDb.Hsapiens.UCSC.hg38.knownGene
+   #' @import TxDb.Mmusculus.UCSC.mm10.knownGene
    #' @importFrom stringr str_wrap
    #' @importFrom stats setNames
    #' @importFrom plyr rbind.fill
    #' @importFrom GenomicFeatures genes
    #' @importFrom dplyr mutate_all
    #' @importFrom BiocGenerics which.max
+   #' @importFrom AnnotationDbi select
 
    .download_gene_info_org <- function(genes,
                                    species = "hsa",
@@ -215,13 +217,32 @@
                                                     paste(tmp,
                                                           sep = " ",
                                                           collapse = ", "))))
-     if(species=="hsa") dataset <- Homo.sapiens
-     if(species=="mmu") dataset <- Mus.musculus
+     if(species=="hsa"){
+       dataset <- Homo.sapiens
+       dataset2 <- TxDb.Hsapiens.UCSC.hg38.knownGene
+       }
+     if(species=="mmu"){
+       dataset <- Mus.musculus
+       dataset2 <- TxDb.Mmusculus.UCSC.mm10.knownGene
+       }
      genes <- unique(genes)
-     all_genes <- suppressMessages(genes(dataset,
-                                         columns=c("SYMBOL",
-                                                   "MAP",
-                                                   "ENSEMBL")))
+     all_pos <- suppressMessages(genes(dataset2))
+     all_genes <- suppressMessages(select(x = dataset,
+                                        keys = names(all_pos),
+                                        keytype = "ENTREZID",
+                                        columns = intersect(c("ENSEMBL",
+                                                              "SYMBOL",
+                                                              "MAP"),
+                                                            columns(dataset))))
+     all_genes <- all_genes[!duplicated(all_genes$ENTREZID),]
+     rownames(all_genes) <- all_genes$ENTREZID
+     tmp <- intersect(rownames(all_genes), names(all_pos))
+     all_pos <- all_pos[tmp,]
+     all_genes <- all_genes[tmp,]
+     all_pos$ENSEMBL <- all_genes$ENSEMBL
+     all_pos$SYMBOL <- all_genes$SYMBOL
+     all_pos$MAP <- all_genes$MAP
+     all_genes <- all_pos
      all_genes <- as.data.frame(all_genes)
      all_genes <- mutate_all(all_genes, function(x)
        unlist(lapply(x, function(y) y[1])))
