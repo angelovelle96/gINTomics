@@ -27,9 +27,10 @@
 .select_deg_network <- function(data_table,
                                 network_data,
                                 input,
-                                output){
+                                output,
+                                deg = FALSE){
   reactive({
-    if(input$degNetwork==FALSE){
+    if(deg==FALSE){
     ans <- network_data
     data_table <- data_table[data_table$cov != "(Intercept)",]
     if(input$significativityCriteriaNetwork == "pval"){
@@ -46,7 +47,7 @@
     ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
     }
 
-    if(input$degNetwork==TRUE){
+    if(deg==TRUE){
       ans <- network_data
       data_table <- data_table[data_table$cov != "(Intercept)",]
       if(input$significativityCriteriaNetwork == "pval"){
@@ -129,6 +130,8 @@
     if(!"class"%in%colnames(data_table)) {data_table$class <- data_table$omics}
     if(type=="genomic"){
 
+      if(input$genomicIntegrationSelectVolcano=="gene_genomic_res"){
+
       if("gene_genomic_res"%in%unique(data_table$omics)){
         data_volcano <- data_table[data_table$omics == 'gene_genomic_res',]
         data_volcano <- data_volcano[data_volcano$cnv_met == input$genomicTypeSelectVolcano,]
@@ -138,6 +141,10 @@
       }
       if("met_gene_res"%in%unique(data_table$omics)){
         data_volcano <- data_table[data_table$omics == 'met_gene_res',]
+      }
+      }
+      if(input$genomicIntegrationSelectVolcano=="mirna_cnv_res"){
+        data_volcano <- data_table[data_table$omics == 'mirna_cnv_res',]
       }
       if(deg==TRUE){data_volcano <- data_volcano[data_volcano$deg,]}
     }
@@ -163,6 +170,7 @@
   })%>%bindEvent(input$genomicTypeSelectVolcano,
                  input$FDRRangeVolcano,
                  input$pvalRangeVolcano,
+                 input$genomicIntegrationSelectVolcano,
                  input$significativityCriteriaVolcano)
 }
 #######################################################################
@@ -358,6 +366,7 @@ observe({
       df <- df[df$class == input$classSelectRidge,]
     }
     if(type == "genomic"){
+      if(input$genomicIntegrationSelectRidge == "gene_genomic_res"){
       if("gene_genomic_res"%in%unique(df$omics)){
       df <- df[df$omics == "gene_genomic_res",]
       df <- df[df$cnv_met == input$genomicTypeSelectRidge,]
@@ -368,6 +377,10 @@ observe({
       }
       if("met_gene_res"%in%unique(df$omics)){
         df <- df[df$omics == "met_gene_res",]
+      }
+      }
+      if((input$genomicIntegrationSelectRidge=="mirna_cnv_res")){
+        df <- df[df$omics == "mirna_cnv_res",]
       }
 
       if(deg == TRUE){df <- df[df$deg,]}
@@ -394,6 +407,7 @@ observe({
                  input$pvalRangeRidge,
                  input$FDRRangeRidge,
                  input$significativityCriteriaRidge,
+                 input$genomicIntegrationSelectRidge,
                  input$genomicTypeSelectRidge)
 }
 

@@ -348,7 +348,8 @@ run_shiny <- function(multiomics_integration){
     reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
                                                         input = input,
                                                         output = output,
-                                                        network_data = nnet)
+                                                        network_data = nnet,
+                                                        deg = FALSE)
     gINTomics:::.render_reactive_network(reactive_network = reactive_network,
                                          input = input,
                                          output = output)

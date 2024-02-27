@@ -89,9 +89,14 @@
             tabPanel("Volcano Plot",
                      sidebarLayout(
                        sidebarPanel(
+                         selectInput("genomicIntegrationSelectVolcano",
+                                     label = "Gene/miRNA:",
+                                     choices = intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res"))),
+                         conditionalPanel(
+                           condition = "input.genomicIntegrationSelectVolcano=='gene_genomic_res'",
                            selectInput(inputId = 'genomicTypeSelectVolcano',
                                        label = 'Integration Type:',
-                                       choices = intersect(unique(data_table$cnv_met), c("cnv", "met"))),
+                                       choices = intersect(unique(data_table$cnv_met), c("cnv", "met")))),
                          selectInput(inputId = 'significativityCriteriaVolcano',
                                      label = 'Significativity criteria:',
                                      choices = c('pval', 'FDR')),
@@ -122,9 +127,15 @@
                          selectInput("classSelectRidge",
                                      "Select Class:",
                                      choices = unique(data_table$class)),
+                         selectInput("genomicIntegrationSelectRidge",
+                                     label = "Gene/miRNA:",
+                                     choices = intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res"))),
+                         conditionalPanel(
+                           condition = "input.genomicIntegrationSelectRidge=='gene_genomic_res'",
+
                            selectInput(inputId = 'genomicTypeSelectRidge',
                                        label = 'Genomic Type:',
-                                       choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))),
+                                       choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
                          selectInput(inputId = 'significativityCriteriaRidge',
                                      label = 'Significativity criteria:',
                                      choices = c('pval', 'FDR')),
@@ -563,9 +574,6 @@
               checkboxInput("layoutNetwork",
                            label = "Switch to tree Layout:",
                            value = FALSE),
-              checkboxInput("degNetwork",
-                            label = "Visualize only DEGs:",
-                            value = FALSE),
               checkboxInput("physics",
                             label = "Physics",
                             value = FALSE),
