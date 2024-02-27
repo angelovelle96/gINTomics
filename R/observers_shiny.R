@@ -77,15 +77,14 @@
 #################################################################
 .prepare_reactive_venn <- function(data_table,
                                    input,
-                                   output){
+                                   output,
+                                   type = "genomic"){
   reactive_venn <- reactive({
-    if(input$integrationSelectVenn=='gene_genomic_res') {
+    if(type=="genomic") {
       data_table <- data_table[data_table$omics == 'gene_genomic_res', ]
     }else{
       return(NULL)}
     if('class' %in% names(data_table)){data_table <- data_table[data_table$class == input$classSelectVenn, ]}
-    # Leggi il range di pval e in base a questo prendi i cnv e met significativi
-    if(input$degSelectVenn == 'Only DEGs' & 'class' %in% names(data_table)){data_table <- data_table[data_table$deg == 'TRUE', ] }
 
     if(input$significativityCriteriaVenn == 'pval'){
 
@@ -112,33 +111,37 @@
                 met_sign_genes = met_sign_genes)
     return(data_venn)
     })%>%bindEvent(input$classSelectVenn,
-                                         input$FDRRangeVenn,
-                                         input$pvalRangeVenn,
-                                         input$integrationSelectVenn,
-                                         input$significativityCriteriaVenn,
-                                         input$degSelectVenn)
+                   input$FDRRangeVenn,
+                   input$pvalRangeVenn,
+                   input$significativityCriteriaVenn)
 }
 #####################################################################
 ######################################################################
 
 .prepare_reactive_volcano <- function(data_table,
                                       input,
-                                      output){
+                                      output,
+                                      type = "genomic",
+                                      deg = FALSE){
   reactive({
-    deg <- TRUE
-    if(!"class"%in%colnames(data_table)) data_table$class <- data_table$omics
-    deg <- FALSE
-    if (input$integrationSelectVolcano == 'gene_genomic_res'){
-      data_volcano <- data_table[data_table$omics == 'gene_genomic_res',]
-      data_volcano <- data_volcano[
-        data_volcano$cnv_met == input$genomicTypeSelectVolcano,]
-    } else {
-      data_volcano <- data_table[
-        data_table$omics == input$integrationSelectVolcano,]
+
+
+    if(!"class"%in%colnames(data_table)) {data_table$class <- data_table$omics}
+    if(type=="genomic"){
+
+      if("gene_genomic_res"%in%unique(data_table$omics)){
+        data_volcano <- data_table[data_table$omics == 'gene_genomic_res',]
+        data_volcano <- data_volcano[data_volcano$cnv_met == input$genomicTypeSelectVolcano,]
+      }
+      if("cnv_gene_res"%in%unique(data_table$omics)){
+        data_volcano <- data_table[data_table$omics == 'cnv_gene_res',]
+      }
+      if("met_gene_res"%in%unique(data_table$omics)){
+        data_volcano <- data_table[data_table$omics == 'met_gene_res',]
+      }
+      if(deg==TRUE){data_volcano <- data_volcano[data_volcano$deg,]}
     }
-    if(input$degSelectVolcano == 'Only DEGs' & 'class' %in% colnames(data_table)){
-      data_volcano <- data_volcano[data_volcano$deg,]
-    }
+
     if(input$significativityCriteriaVolcano == 'pval'){
       data_volcano["group"] <- "Not Significant"
       data_volcano[data_volcano$pval <= input$pvalRangeVolcano, 'group'] <- "Significant"
@@ -158,10 +161,8 @@
     }
     return(data_volcano)
   })%>%bindEvent(input$genomicTypeSelectVolcano,
-                 input$integrationSelectVolcano,
                  input$FDRRangeVolcano,
                  input$pvalRangeVolcano,
-                 input$degSelectVolcano,
                  input$significativityCriteriaVolcano)
 }
 #######################################################################
@@ -346,21 +347,32 @@ observe({
 ######################################################################
 
 .prepare_reactive_ridge <- function(data_table,
-                                      input,
-                                      output){
+                                    input,
+                                    output,
+                                    type = "genomic",
+                                    deg = FALSE){
 
   reactive({
     df <- data_table
-    if ('class' %in% colnames(data_table)) {
+    if ('class' %in% colnames(df)) {
       df <- df[df$class == input$classSelectRidge,]
     }
-    if(input$integrationSelectRidge == "gene_genomic_res"){
+    if(type == "genomic"){
+      if("gene_genomic_res"%in%unique(df$omics)){
+      df <- df[df$omics == "gene_genomic_res",]
       df <- df[df$cnv_met == input$genomicTypeSelectRidge,]
-      #df <- na.omit(df[df$cnv_met != "NA",])
       df <- df[!is.na(df$cnv_met),]
+      }
+      if("cnv_gene_res"%in%unique(df$omics)){
+        df <- df[df$omics == "cnv_gene_res",]
+      }
+      if("met_gene_res"%in%unique(df$omics)){
+        df <- df[df$omics == "met_gene_res",]
+      }
+
+      if(deg == TRUE){df <- df[df$deg,]}
     }
-    if(input$degSelectRidge == 'Only DEGs'){df <- df[df$deg,]}
-    df <- df[df$omics == input$integrationSelectRidge, ]
+
     if (input$significativityCriteriaRidge == 'pval') {
       df$significance <- ifelse(df$pval >= input$pvalRangeRidge[1] &
                                   df$pval <= input$pvalRangeRidge[2],
@@ -379,7 +391,6 @@ observe({
     ans <- list(df=df, quantiles=c(lower_quantile, upper_quantile))
     return(ans)
   })%>%bindEvent(input$classSelectRidge,
-                 input$integrationSelectRidge,
                  input$pvalRangeRidge,
                  input$FDRRangeRidge,
                  input$significativityCriteriaRidge,
@@ -391,19 +402,30 @@ observe({
 
 .prepare_reactive_ridge_table <- function(data_table,
                                     input,
-                                    output){
+                                    output,
+                                    type = "genomic",
+                                    deg = FALSE){
 
   reactive({
     df <- data_table
     if ('class' %in% colnames(data_table)) {
       df <- df[df$class == input$classSelectRidge,]
     }
-    if(input$integrationSelectRidge == "gene_genomic_res"){
-      df <- df[df$cnv_met == input$genomicTypeSelectRidge,]
-      df <- df[!is.na(df$cnv_met),]
+    if(type=="genomic"){
+      if("gene_genomic_res"%in%unique(df$omics)){
+        df <- df[df$omics == "gene_genomic_res", ]
+        df <- df[df$cnv_met == input$genomicTypeSelectRidge,]
+        df <- df[!is.na(df$cnv_met),]
+      }
+      if("cnv_gene_res"%in%unique(df$omics)){
+        df <- df[df$omics == "cnv_gene_res", ]
+      }
+      if("met_gene_res"%in%unique(df$omics)){
+        df <- df[df$omics == "met_gene_res", ]
+      }
+      if(deg==TRUE){df <- df[df$deg,]}
     }
-    if(input$degSelectRidge == 'Only DEGs'){df <- df[df$deg==TRUE,]}
-    df <- df[df$omics == input$integrationSelectRidge, ]
+
     if (input$significativityCriteriaRidge == 'pval') {
       df <- df[df$pval >= input$pvalRangeRidge[1] &
                                   df$pval <= input$pvalRangeRidge[2],
@@ -416,10 +438,8 @@ observe({
 
     return(df)
   })%>%bindEvent(input$classSelectRidge,
-                 input$integrationSelectRidge,
                  input$pvalRangeRidge,
                  input$FDRRangeRidge,
-                 input$degSelectRidge,
                  input$significativityCriteriaRidge,
                  input$genomicTypeSelectRidge)
 }
