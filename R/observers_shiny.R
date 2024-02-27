@@ -180,17 +180,17 @@
                              multiomics_integration,
                              input,
                              output,
-                             session){
+                             session,
+                             type = "genomic",
+                             deg = FALSE){
 observe({
-
-  data_table <- data_table[data_table$cov != '(Intercept)',]
 
   if ("class" %in% colnames(data_table)) {
     df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
     data_table <- data_table[data_table$class == input$selectClassHeatmap,]
   }
 
-  if ("deg" %in% colnames(data_table) & input$degSelectHeatmap == "Only DEGs") {
+  if ("deg"%in%colnames(data_table) & input$degSelectHeatmap == "Only DEGs") {
     df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
     data_table <- data_table[data_table$deg,]
     df_heatmap <- df_heatmap[, unique(data_table$response)]
@@ -365,7 +365,11 @@ observe({
     if ('class' %in% colnames(df)) {
       df <- df[df$class == input$classSelectRidge,]
     }
-    if(type == "genomic"){
+    IntegrationSelectRidge = input$genomicIntegrationSelectRidge
+    if(type == "transcript"){
+      IntegrationSelectRidge = input$trascriptIntegrationSelectRidge
+    }
+  }
       if(input$genomicIntegrationSelectRidge == "gene_genomic_res"){
       if("gene_genomic_res"%in%unique(df$omics)){
       df <- df[df$omics == "gene_genomic_res",]
@@ -384,6 +388,12 @@ observe({
       }
 
       if(deg == TRUE){df <- df[df$deg,]}
+    }
+
+    if(type=="transcript"){
+      df <- df[df$omics == input$genomicIntegrationSelectRidge,]
+
+      if(deg==TRUE){df <- df[df$deg,]}
     }
 
     if (input$significativityCriteriaRidge == 'pval') {
@@ -440,6 +450,12 @@ observe({
       if(deg==TRUE){df <- df[df$deg,]}
     }
 
+    if(type=="transcript"){
+      df <- df[df$omics == input$genomicIntegrationSelectRidge,]
+
+      if(deg==TRUE){df <- df[df$deg,]}
+    }
+
     if (input$significativityCriteriaRidge == 'pval') {
       df <- df[df$pval >= input$pvalRangeRidge[1] &
                                   df$pval <= input$pvalRangeRidge[2],
@@ -463,37 +479,54 @@ observe({
 
 .prepare_reactive_histo <- function(data_table,
                                     input,
-                                    output){
+                                    output,
+                                    type = "genomic",
+                                    deg = FALSE){
   reactive({
-    data_table <- data_table[!is.na(data_table$chr_cov),]
     chr_order <- gtools::mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
-    df_filtered_histo <- data_table[data_table$omics == input$integrationSelectHisto, ]
-    if(input$chrSelectHisto != "All"){
-      df_filtered_histo <- df_filtered_histo[df_filtered_histo$chr_cov == input$chrSelectHisto, ]
+
+    if(type == "genomic"){
+      if(input$integrationGenomicSelectHisto == "gene_genomic_res"){
+        df_filtered_histo <- data_table[data_table$omics == input$integrationGenomicSelectHisto,]
+        df_filtered_histo <- data_table[data_table$cnv_met == input$TypeGenomicSelect,]
+      }
+      if(input$integrationGenomicSelectHisto == "cnv_genomic_res"){
+        df_filtered_histo <- data_table[data_table$omics == input$integrationGenomicSelectHisto,]
+      }
+        if(input$integrationGenomicSelectHisto == "met_genomic_res"){
+          df_filtered_histo <- data_table[data_table$omics == input$integrationGenomicSelectHisto,]
+        }
+      if(input$integrationGenomicSelectHisto == "mirna_cnv_res"){
+        df_filtered_histo <- data_table[data_table$omics == input$integrationGenomicSelectHisto,]
+      }
+
     }
-    if('class' %in% colnames(df_filtered_histo)){df_filtered_histo <- df_filtered_histo[df_filtered_histo$class == input$classSelectHisto, ]
+    df_filtered_histo <- df_filtered_histo[!is.na(df_filtered_histo$chr_cov),]
+
+    if(input$chrSelectHisto != "All"){
+      df_filtered_histo <- df_filtered_histo[df_filtered_histo$chr_cov == input$chrSelectHisto,]
+    }
+    if('class' %in% colnames(df_filtered_histo)){df_filtered_histo <- df_filtered_histo[df_filtered_histo$class == input$classSelectHisto,]
     }
     if(input$significativityCriteriaHisto == 'pval'){
       df_filtered_histo$significance <- ifelse(df_filtered_histo$pval >= input$pvalRangeHisto[1] &
-                                                 df_filtered_histo$pval <= input$pvalRangeHisto[2], "Significant",
+                                               df_filtered_histo$pval <= input$pvalRangeHisto[2], "Significant",
                                                "Not Significant")
     }else{
       df_filtered_histo$significance <- ifelse(df_filtered_histo$fdr >= input$FDRRangeHisto[1] &
-                                                 df_filtered_histo$fdr <= input$FDRRangeHisto[2], "Significant",
+                                               df_filtered_histo$fdr <= input$FDRRangeHisto[2], "Significant",
                                                "Not Significant")
     }
-    if(input$degSelectHisto == 'Only DEGs' & 'class' %in% names(df_filtered_histo)){
-      df_filtered_histo <- df_filtered_histo[df_filtered_histo$deg,]
-    }
+
     return(df_filtered_histo)
   })%>%bindEvent(input$classSelectHisto,
-                 input$integrationSelectHisto,
+                 input$integrationGenomicSelectHisto,
+                 input$TypeGenomicSelect,
                  input$chrSelectHisto,
                  input$pvalRangeHisto,
                  input$FDRRangeHisto,
-                 input$degSelectHisto,
                  input$significativityCriteriaHisto)
 }
 
@@ -501,13 +534,32 @@ observe({
 ########################################################################
 .prepare_reactive_histo_table <- function(data_table,
                                           input,
-                                          output){
+                                          output,
+                                          type = "genomic",
+                                          deg = FALSE){
   reactive({
-    data_table <- data_table[!is.na(data_table$chr_cov),]
     chr_order <- gtools::mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
-    df_filtered_histo <- data_table[data_table$omics == input$integrationSelectHisto,]
+
+    if(type == "genomic"){
+      if(input$integrationGenomicSelectHisto == "gene_genomic_res"){
+        df_filtered_histo <- data_table[data_table$omics == input$integrationGenomicSelectHisto,]
+        df_filtered_histo <- data_table[data_table$cnv_met == input$TypeGenomicSelect,]
+      }
+        if(input$integrationGenomicSelectHisto == "cnv_genomic_res"){
+          df_filtered_histo <- data_table[data_table$omics == input$integrationGenomicSelectHisto,]
+        }
+        if(input$integrationGenomicSelectHisto == "met_genomic_res"){
+          df_filtered_histo <- data_table[data_table$omics == input$integrationGenomicSelectHisto,]
+        }
+        if(input$integrationGenomicSelectHisto == "mirna_cnv_res"){
+          df_filtered_histo <- data_table[data_table$omics == input$integrationGenomicSelectHisto,]
+        }
+
+    }
+    df_filtered_histo <- df_filtered_histo[!is.na(df_filtered_histo$chr_cov),]
+
     if(input$chrSelectHisto != "All"){
       df_filtered_histo <- df_filtered_histo[df_filtered_histo$chr_cov == input$chrSelectHisto,]
     }
@@ -520,16 +572,14 @@ observe({
       df_filtered_histo <- df_filtered_histo[df_filtered_histo$fdr >= input$FDRRangeHisto[1] &
                                                  df_filtered_histo$fdr <= input$FDRRangeHisto[2],]
     }
-    if(input$degSelectHisto == 'Only DEGs' & 'class' %in% colnames(df_filtered_histo)){
-      df_filtered_histo <- df_filtered_histo[df_filtered_histo$deg,]
-    }
+
     return(df_filtered_histo)
   })%>%bindEvent(input$classSelectHisto,
-                 input$integrationSelectHisto,
+                 input$integrationGenomicSelectHisto,
+                 input$TypeGenomicSelect,
                  input$chrSelectHisto,
                  input$pvalRangeHisto,
                  input$FDRRangeHisto,
-                 input$degSelectHisto,
                  input$significativityCriteriaHisto)
 }
 #######################################################################

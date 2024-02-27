@@ -382,16 +382,35 @@ run_shiny <- function(multiomics_integration){
                                                           type = "genomic",
                                                           deg = FALSE)
     output$ridgelinePlot <- gINTomics:::.render_ridge(reactive_ridge)
+
+    reactive_ridge_transcript <- gINTomics:::.prepare_reactive_ridge(data_table,
+                                                          input = input,
+                                                          output = output,
+                                                          type = "transcript",
+                                                          deg = FALSE)
+    output$ridgelinePlotTranscript <- gINTomics:::.render_ridge(reactive_ridge_transcript)
+
+
     reactive_ridge_table <- gINTomics:::.prepare_reactive_ridge_table(data_table,
                                                                       input = input,
                                                                       output = output,
                                                                       type = "genomic",
                                                                       deg = FALSE)
     output$ridgelineTable <- gINTomics:::.render_ridge_table(reactive_ridge_table)
+
+
+    reactive_ridge_tableTranscript <- gINTomics:::.prepare_reactive_ridge_table(data_table,
+                                                                      input = input,
+                                                                      output = output,
+                                                                      type = "transcript",
+                                                                      deg = FALSE)
+    output$ridgelineTableTranscript <- gINTomics:::.render_ridge_table(reactive_ridge_tableTranscript)
     ## ----------------------- HISTO SERVER --------------------------
     reactive_histo <- gINTomics:::.prepare_reactive_histo(data_table,
                                                           input = input,
-                                                          output = output)
+                                                          output = output,
+                                                          type = "genomic",
+                                                          deg = FALSE)
     output$histogramPlot <- gINTomics:::.render_histo(reactive_histo)
 
     reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(data_table,
