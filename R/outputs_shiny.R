@@ -354,6 +354,15 @@ run_shiny <- function(multiomics_integration){
                                          input = input,
                                          output = output)
 
+    reactive_network_deg <- gINTomics:::.select_deg_network(data_table = data_table,
+                                                        input = input,
+                                                        output = output,
+                                                        network_data = nnet,
+                                                        deg = TRUE)
+    gINTomics:::.render_reactive_network(reactive_network = reactive_network_deg,
+                                         input = input,
+                                         output = output)
+
     ### ------------------------ VENN SERVER ----------------------
     reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
                                                         input = input,
@@ -369,6 +378,13 @@ run_shiny <- function(multiomics_integration){
                                                               type = "genomic",
                                                               deg = FALSE)
     output$volcanoPlot <- gINTomics:::.render_volcano(reactive_volcano)
+
+    reactive_volcano_transcript <- gINTomics:::.prepare_reactive_volcano(data_table,
+                                                              input = input,
+                                                              output = output,
+                                                              type = "transcript",
+                                                              deg = FALSE)
+    output$transcriptVolcanoPlot <- gINTomics:::.render_volcano(reactive_volcano_transcript)
     ## -------------------------- HEATMAP SERVER ------------------------
     gINTomics:::.prepare_reactive_heatmap(data_table=data_table,
                                           multiomics_integration = multiomics_integration,
@@ -413,10 +429,28 @@ run_shiny <- function(multiomics_integration){
                                                           deg = FALSE)
     output$histogramPlot <- gINTomics:::.render_histo(reactive_histo)
 
+    reactive_histo_transcript <- gINTomics:::.prepare_reactive_histo(data_table,
+                                                          input = input,
+                                                          output = output,
+                                                          type = "transcript",
+                                                          deg = FALSE)
+    output$histogramPlotTranscript <- gINTomics:::.render_histo(reactive_histo_transcript)
+
+
+
     reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(data_table,
                                                                       input = input,
-                                                                      output = output)
+                                                                      output = output,
+                                                                      type = "genomic",
+                                                                      deg = FALSE)
     output$histogramTable <- gINTomics:::.render_histo_table(reactive_histo_table)
+
+    reactive_histo_table_transcript <- gINTomics:::.prepare_reactive_histo_table(data_table,
+                                                                      input = input,
+                                                                      output = output,
+                                                                      type = "transcript",
+                                                                      deg = FALSE)
+    output$histogramTableTranscript <- gINTomics:::.render_histo_table(reactive_histo_table_transcript)
     ## ----------------------- HISTO SERVER TF --------------------------
     reactive_histo_tf <- gINTomics:::.prepare_reactive_histo_tf(data_table,
                                                                 input = input,
