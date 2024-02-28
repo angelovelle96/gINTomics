@@ -354,72 +354,96 @@ observe({
 ######################################################################
 ######################################################################
 
-.prepare_reactive_ridge <- function(data_table,
-                                    input,
-                                    output,
-                                    type = "genomic",
-                                    deg = FALSE){
-
+.prepare_reactive_ridge <- function(data_table, input, output, type = "genomic", deg = FALSE) {
   reactive({
+    integrationSelect <- input$genomicIntegrationSelectRidge
+    classSelect <- input$genomicIntegrationSelectRidge
+    significativityCriteria <- input$genomicSignificativityCriteriaRidge
+    pvalRange <- input$genomicPvalRangeRidge
+    fdrRange <- input$genomicFdrRangeRidge
+    typeSelect <- input$genomicTypeSelectRidge
+
     df <- data_table
-    if ('class' %in% colnames(df)) {
-      df <- df[df$class == input$classSelectRidge,]
-    }
-    IntegrationSelectRidge = input$genomicIntegrationSelectRidge
-    if(type == "transcript"){
-      IntegrationSelectRidge = input$trascriptIntegrationSelectRidge
-    }
-  }
-      if(input$genomicIntegrationSelectRidge == "gene_genomic_res"){
-      if("gene_genomic_res"%in%unique(df$omics)){
-      df <- df[df$omics == "gene_genomic_res",]
-      df <- df[df$cnv_met == input$genomicTypeSelectRidge,]
-      df <- df[!is.na(df$cnv_met),]
+
+    if (type == "genomic") {
+      if ('class' %in% colnames(df)) {
+        df <- df[df$class == classSelect, ]
       }
-      if("cnv_gene_res"%in%unique(df$omics)){
-        df <- df[df$omics == "cnv_gene_res",]
+      if (integrationSelect == "gene_genomic_res") {
+        if ("gene_genomic_res" %in% unique(df$omics)) {
+          df <- df[df$omics == "gene_genomic_res", ]
+          df <- df[df$cnv_met == typeSelect, ]
+          df <- df[!is.na(df$cnv_met), ]
+        }
+        if ("cnv_gene_res" %in% unique(df$omics)) {
+          df <- df[df$omics == "cnv_gene_res", ]
+        }
+        if ("met_gene_res" %in% unique(df$omics)) {
+          df <- df[df$omics == "met_gene_res", ]
+        }
       }
-      if("met_gene_res"%in%unique(df$omics)){
-        df <- df[df$omics == "met_gene_res",]
+      if ((integrationSelect == "mirna_cnv_res")) {
+        df <- df[df$omics == "mirna_cnv_res", ]
       }
+      if (significativityCriteria == 'pval') {
+        df$significance <- ifelse(df$pval >= pvalRange[1] & df$pval <= pvalRange[2],
+                                  "Significant", "Not Significant")
+      } else {
+        df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
+                                  "Significant", "Not Significant")
       }
-      if((input$genomicIntegrationSelectRidge=="mirna_cnv_res")){
+
+      if (deg == TRUE) {
+        df <- df[df$deg, ]
+      }
+    } else {
+      integrationSelect <- input$transcriptIntegrationSelectRidge
+      classSelect <- input$transcriptIntegrationSelectRidge
+      significativityCriteria <- input$transcriptSignificativityCriteriaRidge
+      pvalRange <- input$transcriptPvalRangeRidge
+      fdrRange <- input$transcriptFdrRangeRidge
+
+      if ('class' %in% colnames(df)) {
+        df <- df[df$class == input$classSelect, ]
+      }
+      if (integrationSelect == "mirna_cnv_res") {
         df <- df[df$omics == "mirna_cnv_res",]
       }
+      if ((integrationSelect == "mirna_cnv_res")) {
+        df <- df[df$omics == "mirna_cnv_res", ]
+      }
 
-      if(deg == TRUE){df <- df[df$deg,]}
+      if (significativityCriteria == 'pval') {
+        df$significance <- ifelse(df$pval >= pvalRange[1] & df$pval <= pvalRange[2],
+                                  "Significant", "Not Significant")
+      } else {
+        df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
+                                  "Significant", "Not Significant")
+      }
+
+      if (deg == TRUE) {
+        df <- df[df$deg, ]
+      }
+
     }
 
-    if(type=="transcript"){
-      df <- df[df$omics == input$genomicIntegrationSelectRidge,]
-
-      if(deg==TRUE){df <- df[df$deg,]}
-    }
-
-    if (input$significativityCriteriaRidge == 'pval') {
-      df$significance <- ifelse(df$pval >= input$pvalRangeRidge[1] &
-                                  df$pval <= input$pvalRangeRidge[2],
-                                "Significant",
-                                "Not Significant")
-    } else {
-      df$significance <- ifelse(df$fdr >= input$FDRRangeRidge[1] &
-                                  df$fdr <= input$FDRRangeRidge[2],
-                                "Significant",
-                                "Not Significant")
-    }
-    lower_quantile <- quantile(df$coef,
-                               0.001)
-    upper_quantile <- quantile(df$coef,
-                               0.999)
-    ans <- list(df=df, quantiles=c(lower_quantile, upper_quantile))
+    lower_quantile <- quantile(df$coef, 0.001)
+    upper_quantile <- quantile(df$coef, 0.999)
+    ans <- list(df = df, quantiles = c(lower_quantile, upper_quantile))
     return(ans)
-  })%>%bindEvent(input$classSelectRidge,
-                 input$pvalRangeRidge,
-                 input$FDRRangeRidge,
-                 input$significativityCriteriaRidge,
-                 input$genomicIntegrationSelectRidge,
-                 input$genomicTypeSelectRidge)
+  }) %>% bindEvent(input$genomicIntegrationSelectRidge,
+                   input$genomicIntegrationSelectRidge,
+                   input$genomicSignificativityCriteriaRidge,
+                   input$genomicPvalRangeRidge,
+                   input$genomicFdrRangeRidge,
+                   input$genomicTypeSelectRidge,
+                   input$transcriptIntegrationSelectRidge,
+                   input$transcriptIntegrationSelectRidge,
+                   input$transcriptSignificativityCriteriaRidge,
+                   input$transcriptPvalRangeRidge,
+                   input$transcriptFdrRangeRidge)
 }
+
 
 #######################################################################
 ########################################################################
@@ -431,48 +455,92 @@ observe({
                                     deg = FALSE){
 
   reactive({
+    integrationSelect <- input$genomicIntegrationSelectRidge
+    classSelect <- input$genomicIntegrationSelectRidge
+    significativityCriteria <- input$genomicSignificativityCriteriaRidge
+    pvalRange <- input$genomicPvalRangeRidge
+    fdrRange <- input$genomicFdrRangeRidge
+    typeSelect <- input$genomicTypeSelectRidge
+
     df <- data_table
-    if ('class' %in% colnames(data_table)) {
-      df <- df[df$class == input$classSelectRidge,]
-    }
-    if(type=="genomic"){
-      if("gene_genomic_res"%in%unique(df$omics)){
-        df <- df[df$omics == "gene_genomic_res", ]
-        df <- df[df$cnv_met == input$genomicTypeSelectRidge,]
-        df <- df[!is.na(df$cnv_met),]
-      }
-      if("cnv_gene_res"%in%unique(df$omics)){
-        df <- df[df$omics == "cnv_gene_res", ]
-      }
-      if("met_gene_res"%in%unique(df$omics)){
-        df <- df[df$omics == "met_gene_res", ]
-      }
-      if(deg==TRUE){df <- df[df$deg,]}
-    }
 
-    if(type=="transcript"){
-      df <- df[df$omics == input$genomicIntegrationSelectRidge,]
+    if (type == "genomic") {
+      if ('class' %in% colnames(df)) {
+        df <- df[df$class == classSelect, ]
+      }
+      if (integrationSelect == "gene_genomic_res") {
+        if ("gene_genomic_res" %in% unique(df$omics)) {
+          df <- df[df$omics == "gene_genomic_res", ]
+          df <- df[df$cnv_met == typeSelect, ]
+          df <- df[!is.na(df$cnv_met), ]
+        }
+        if ("cnv_gene_res" %in% unique(df$omics)) {
+          df <- df[df$omics == "cnv_gene_res", ]
+        }
+        if ("met_gene_res" %in% unique(df$omics)) {
+          df <- df[df$omics == "met_gene_res", ]
+        }
+      }
+      if ((integrationSelect == "mirna_cnv_res")) {
+        df <- df[df$omics == "mirna_cnv_res", ]
+      }
+      if (significativityCriteria == 'pval') {
+        df$significance <- ifelse(df$pval >= pvalRange[1] & df$pval <= pvalRange[2],
+                                  "Significant", "Not Significant")
+      } else {
+        df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
+                                  "Significant", "Not Significant")
+      }
 
-      if(deg==TRUE){df <- df[df$deg,]}
-    }
-
-    if (input$significativityCriteriaRidge == 'pval') {
-      df <- df[df$pval >= input$pvalRangeRidge[1] &
-                                  df$pval <= input$pvalRangeRidge[2],
-      ]
+      if (deg == TRUE) {
+        df <- df[df$deg, ]
+      }
     } else {
-      df <- df[df$fdr >= input$FDRRangeRidge[1] &
-                                  df$fdr <= input$FDRRangeRidge[2],
-      ]
+      integrationSelect <- input$transcriptIntegrationSelectRidge
+      classSelect <- input$transcriptIntegrationSelectRidge
+      significativityCriteria <- input$transcriptSignificativityCriteriaRidge
+      pvalRange <- input$transcriptPvalRangeRidge
+      fdrRange <- input$transcriptFdrRangeRidge
+
+      if ('class' %in% colnames(df)) {
+        df <- df[df$class == input$classSelect, ]
+      }
+      if (integrationSelect == "mirna_cnv_res") {
+        df <- df[df$omics == "mirna_cnv_res",]
+      }
+      if ((integrationSelect == "mirna_cnv_res")) {
+        df <- df[df$omics == "mirna_cnv_res", ]
+      }
+
+      if (significativityCriteria == 'pval') {
+        df$significance <- ifelse(df$pval >= pvalRange[1] & df$pval <= pvalRange[2],
+                                  "Significant", "Not Significant")
+      } else {
+        df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
+                                  "Significant", "Not Significant")
+      }
+
+      if (deg == TRUE) {
+        df <- df[df$deg, ]
+      }
+
     }
+
 
     return(df)
-  })%>%bindEvent(input$classSelectRidge,
-                 input$pvalRangeRidge,
-                 input$FDRRangeRidge,
-                 input$significativityCriteriaRidge,
-                 input$genomicTypeSelectRidge)
+  }) %>% bindEvent(input$genomicIntegrationSelectRidge,
+                   input$genomicIntegrationSelectRidge,
+                   input$genomicSignificativityCriteriaRidge,
+                   input$genomicPvalRangeRidge,
+                   input$genomicFdrRangeRidge,
+                   input$genomicTypeSelectRidge,
+                   input$transcriptIntegrationSelectRidge,
+                   input$transcriptIntegrationSelectRidge,
+                   input$transcriptSignificativityCriteriaRidge,
+                   input$transcriptPvalRangeRidge,
+                   input$transcriptFdrRangeRidge)
 }
+
 
 #######################################################################
 ########################################################################
