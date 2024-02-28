@@ -1,8 +1,10 @@
 
 .render_reactive_network <- function(reactive_network,
                                      input,
-                                     output){
+                                     output,
+                                     deg = FALSE){
   observe({
+    if(deg==FALSE){
   output$networkPlot <- renderVisNetwork({
     network_data <- reactive_network()
     network <- .build_network(nodes=network_data$nodes,
@@ -17,6 +19,22 @@
 
     return(network)
     })
+    } else {
+      output$networkPlotDEG <- renderVisNetwork({
+        network_data <- reactive_network()
+        network <- .build_network(nodes=network_data$nodes,
+                                  edges=network_data$edges,
+                                  legend_nodes=network_data$legend_nodes,
+                                  legend_edges=network_data$legend_edges)
+        network <- network%>%
+          visHierarchicalLayout(enabled = input$layoutNetwork)%>%
+          visIgraphLayout(physics = input$physics,
+                          layout = "layout.fruchterman.reingold",
+                          randomSeed = 20)
+
+        return(network)
+      })
+    }
   })%>%bindEvent(input$layoutNetwork,
                  input$physics)
 }
@@ -33,15 +51,15 @@
     if(deg==FALSE){
       numNodes <- input$numNodes
       significativityCriteria <- input$significativityCriteriaNetwork
-      pvalNetwork <- input$pvalNetwork
-      fdrNetwork <- input$fdrNetwork
+      pval <- input$pvalNetwork
+      fdr <- input$fdrNetwork
 
     ans <- network_data
     #data_table <- data_table[data_table$cov != "(Intercept)",]
     if(significativityCriteria == "pval"){
-      data_table <- data_table[data_table$pval <= pvalNetwork,]
+      data_table <- data_table[data_table$pval <= pval,]
     } else {
-      data_table <- data_table[data_table$fdr <= fdrNetwork,]
+      data_table <- data_table[data_table$fdr <= fdr,]
     }
     ssel <- unique(data_table$response)
     ssel <- head(ssel, numNodes)
@@ -52,18 +70,18 @@
     ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
     }
 
-    if(deg==TRUE){
+    if(deg==TRUE & "class"%in%colnames(data_table)){
       numNodes <- input$numNodesDEG
       significativityCriteria <- input$significativityCriteriaNetworkDEG
-      pvalNetwork <- input$pvalNetworkDEG
-      fdrNetwork <- input$fdrNetworkDEG
+      pval <- input$pvalNetworkDEG
+      fdr <- input$fdrNetworkDEG
 
       ans <- network_data
       #data_table <- data_table[data_table$cov != "(Intercept)",]
       if(significativityCriteria == "pval"){
-        data_table <- data_table[data_table$pval <= pvalNetwork,]
+        data_table <- data_table[data_table$pval <= pval,]
       } else {
-        data_table <- data_table[data_table$fdr <= fdrNetwork,]
+        data_table <- data_table[data_table$fdr <= fdr,]
       }
       ssel <- unique(data_table$response[data_table$deg])
       ssel <- head(ssel, numNodes)
@@ -72,7 +90,7 @@
       ans$edges <- ans$edges[ans$edges$to%in%ssel,]
       # nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
       # ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
-    }
+    }else{return(NULL)}
 
     return(ans)
   })%>%bindEvent(input$layoutNetwork,
@@ -99,7 +117,7 @@
 
     if(deg==FALSE & "gene_genomic_res"%in%unique(data_table$omics)) {
       classSelect <- input$classSelectVenn
-      pvalRnage <- input$pvalRangeVenn
+      pvalRange <- input$pvalRangeVenn
       fdrRange <- input$fdrRangeVenn
       significativityCriteria <- input$significativityCriteriaVenn
 
@@ -110,12 +128,12 @@
       if(significativityCriteria == 'pval'){
 
         cnv_sign_genes <- subset(data_table,
-                                 cnv_met == 'cnv' & pval >= pvalRnage[1] &
-                                   pval <= pvalRnage[2],
+                                 cnv_met == 'cnv' & pval >= pvalRange[1] &
+                                   pval <= pvalRange[2],
                                  select = c('cov'))
         met_sign_genes <- subset(data_table,
-                                 cnv_met == 'met' & pval >= pvalRnage[1] &
-                                   pval <= pvalRnage[2],
+                                 cnv_met == 'met' & pval >= pvalRange[1] &
+                                   pval <= pvalRange[2],
                                  select = c('cov'))
       }else{
         cnv_sign_genes <- subset(data_table,
@@ -133,27 +151,36 @@
 
 
     }
+    if(deg==FALSE & !"gene_genomic_res"%in%unique(data_table$omics)) {
+      if("cnv_genomic_res"%in%unique(data_table$omics)){
+        data_venn <- data_table[data_table$omics=="cnv_genomic_res",]
+      }
+      if("met_genomic_res"%in%unique(data_table$omics)){
+          data_venn <- data_table[data_table$omics=="met_genomic_res",]
+      }
+    }
+
     if(deg==TRUE & "gene_genomic_res"%in%unique(data_table$omics)){
 
       classSelect <- input$classSelectVennDEG
       significativityCriteria <- input$significativityCriteriaVennDEG
       pvalRange <- input$pvalRangeVennDEG
-      fdrRange <- input$fdrRangeVenn
+      fdrRange <- input$fdrRangeVennDEG
 
       if('class'%in%colnames(data_table)){
         data_table <- data_table[data_table$class == classSelect, ]
         data_table <- data_table[data_table$deg,]
-        }
+
 
       if(significativityCriteria == 'pval'){
 
         cnv_sign_genes <- subset(data_table,
-                                 cnv_met == 'cnv' & pval >= pvalRnage[1] &
-                                   pval <= pvalRnage[2],
+                                 cnv_met == 'cnv' & pval >= pvalRange[1] &
+                                   pval <= pvalRange[2],
                                  select = c('cov'))
         met_sign_genes <- subset(data_table,
-                                 cnv_met == 'met' & pval >= pvalRnage[1] &
-                                   pval <= pvalRnage[2],
+                                 cnv_met == 'met' & pval >= pvalRange[1] &
+                                   pval <= pvalRange[2],
                                  select = c('cov'))
       }else{
         cnv_sign_genes <- subset(data_table,
@@ -169,9 +196,20 @@
       data_venn <- list(cnv_sign_genes = cnv_sign_genes,
                         met_sign_genes = met_sign_genes)
 
+      }else(return(NULL))
+
 
     }
-    if(!"gene_genomic_res"%in%unique(data_table$omics)){return(NULL)}
+    if(deg==TRUE & !"gene_genomic_res"%in%unique(data_table$omics)){
+      if("cnv_genomic_res"%in%unique(data_table$omics)){
+        data_venn <- data_table[data_table$omics=="cnv_genomic_res",]
+      }
+      if("met_genomic_res"%in%unique(data_table$omics)){
+        data_venn <- data_table[data_table$omics=="met_genomic_res",]
+      }
+    }
+
+   # if(!"gene_genomic_res"%in%unique(data_table$omics)){return(NULL)}
 
     return(data_venn)
     })%>%bindEvent(input$classSelectVenn,

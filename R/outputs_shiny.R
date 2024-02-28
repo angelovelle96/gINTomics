@@ -142,14 +142,36 @@
 ##########################################################################
 ##########################################################################
 
-.render_venn_table <- function(reactive_venn){
+.render_venn_table <- function(reactive_venn) {
   renderDataTable({
     venn_data <- reactive_venn()
-    common_genes <- base::intersect(unlist(venn_data$cnv_sign_genes),
-                                    unlist(venn_data$met_sign_genes))
-    data.frame(Genes = common_genes)
+
+    if (!is.null(venn_data$cnv_sign_genes) && !is.null(venn_data$met_sign_genes)) {
+      cnv_genes <- unlist(venn_data$cnv_sign_genes)
+      met_genes <- unlist(venn_data$met_sign_genes)
+
+      if (length(cnv_genes) > 0 & length(met_genes) > 0) {
+        common_genes <- base::intersect(cnv_genes, met_genes)
+        data.frame(Genes = common_genes)
+      } else if (length(cnv_genes) == 1 & length(met_genes) == 1) {
+        data.frame(CNV_Genes = cnv_genes, MET_Genes = met_genes, stringsAsFactors = FALSE)
+      } else {
+        # Handle other cases as needed
+        # For instance, return an empty data frame
+        data.frame(Genes = character(), stringsAsFactors = FALSE)
+      }
+    } else if (!is.null(venn_data$cnv_sign_genes)) {
+      data.frame(CNV_Genes = unlist(venn_data$cnv_sign_genes), stringsAsFactors = FALSE)
+    } else if (!is.null(venn_data$met_sign_genes)) {
+      data.frame(MET_Genes = unlist(venn_data$met_sign_genes), stringsAsFactors = FALSE)
+    } else {
+      # Handle case where both cnv_sign_genes and met_sign_genes are NULL
+      data.frame(Genes = character(), stringsAsFactors = FALSE)
+    }
   })
 }
+
+
 ############################################################################
 ############################################################################
 
@@ -344,32 +366,31 @@ run_shiny <- function(multiomics_integration){
   server <- function(input, output, session) {
 
     # ---------------------- NETWORK SERVER -----------------------------
-    # nnet <- gINTomics:::.prepare_network(data_table)
-    # reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
-    #                                                     input = input,
-    #                                                     output = output,
-    #                                                     network_data = nnet,
-    #                                                     deg = FALSE)
-    # gINTomics:::.render_reactive_network(reactive_network = reactive_network,
-    #                                      input = input,
-    #                                      output = output,
-    #                                      deg = FALSE)
+    nnet <- gINTomics:::.prepare_network(data_table)
+    reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
+                                                        input = input,
+                                                        output = output,
+                                                        network_data = nnet,
+                                                        deg = FALSE)
+    gINTomics:::.render_reactive_network(reactive_network = reactive_network,
+                                         input = input,
+                                         output = output,
+                                         deg = FALSE)
 
-    # reactive_network_deg <- gINTomics:::.select_deg_network(data_table = data_table,
-    #                                                     input = input,
-    #                                                     output = output,
-    #                                                     network_data = nnet,
-    #                                                     deg = TRUE)
-    # gINTomics:::.render_reactive_network(reactive_network = reactive_network_deg,
-    #                                      input = input,
-    #                                      output = output,
-    #                                      deg = TRUE)
+    reactive_network_deg <- gINTomics:::.select_deg_network(data_table = data_table,
+                                                        input = input,
+                                                        output = output,
+                                                        network_data = nnet,
+                                                        deg = TRUE)
+    gINTomics:::.render_reactive_network(reactive_network = reactive_network_deg,
+                                         input = input,
+                                         output = output,
+                                         deg = TRUE)
 
     ### ------------------------ VENN SERVER ----------------------
     reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
                                                         input = input,
                                                         output = output,
-                                                        type = "genomic",
                                                         deg = FALSE)
     output$venn_plot<- gINTomics:::.render_venn(reactive_venn)
     output$common_genes_table <- gINTomics:::.render_venn_table(reactive_venn)
@@ -377,9 +398,9 @@ run_shiny <- function(multiomics_integration){
     reactive_venn_deg <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
                                                         input = input,
                                                         output = output,
-                                                        type = "genomic",
                                                         deg = TRUE)
-    output$venn_plot_deg<- gINTomics:::.render_venn(reactive_venn_deg)
+    output$venn_plotDEG<- gINTomics:::.render_venn(reactive_venn_deg)
+    output$venn_tableDEG <- gINTomics:::.render_venn_table(reactive_venn_deg)
 
     ## -------------------------- VOLCANO SERVER ------------------------
     reactive_volcano <- gINTomics:::.prepare_reactive_volcano(data_table,
@@ -395,6 +416,15 @@ run_shiny <- function(multiomics_integration){
                                                               type = "transcript",
                                                               deg = FALSE)
     output$transcriptVolcanoPlot <- gINTomics:::.render_volcano(reactive_volcano_transcript)
+
+    reactive_volcano_deg <- gINTomics:::.prepare_reactive_volcano(data_table,
+                                                                         input = input,
+                                                                         output = output,
+                                                                         type = "transcript",
+                                                                         deg = TRUE)
+    output$volcanoPlotDEG <- gINTomics:::.render_volcano(reactive_volcano_deg)
+
+
     ## -------------------------- HEATMAP SERVER ------------------------
     gINTomics:::.prepare_reactive_heatmap(data_table=data_table,
                                           multiomics_integration = multiomics_integration,

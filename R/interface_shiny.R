@@ -525,49 +525,49 @@
 ########################################################################
 #########################################################################
 
-# .gint_subItem_networkTranscript <- function(data_table){
-#   tabItem(tabName = "networkTranscript",
-#           fluidRow(
-#             box(title = "Subsection 1",
-#                 "This is the content of Subsection 1."),
-#             mainPanel(
-#               sliderInput("numNodes",
-#                           label = "Number of Nodes",
-#                           min = 10,
-#                           max = nrow(data_table),
-#                           value = 300),
-#               selectInput(inputId = 'significativityCriteriaNetwork',
-#                           label = 'Significativity criteria:',
-#                           choices = c('pval', 'FDR')),
-#               conditionalPanel(
-#                 condition = "input.significativityCriteriaNetwork == 'pval'",
-#                 sliderInput("pvalNetwork",
-#                             "P-Value:",
-#                             min = 0,
-#                             max = 1,
-#                             value = c(0.05),
-#                             step = 0.005)),
-#               conditionalPanel(
-#                 condition = "input.significativityCriteriaNetwork == 'FDR'",
-#                 sliderInput("fdrNetwork",
-#                             "FDR:",
-#                             min = 0,
-#                             max = 1,
-#                             value = c(0.05),
-#                             step = 0.005)),
-#               checkboxInput("layoutNetwork",
-#                            label = "Switch to tree Layout:",
-#                            value = FALSE),
-#               checkboxInput("physics",
-#                             label = "Physics",
-#                             value = FALSE),
-#               visNetworkOutput("networkPlot",
-#                                height = 800,
-#                                width = 1600)
-#             )
-#       )
-#   )
-# }
+.gint_subItem_networkTranscript <- function(data_table){
+  tabItem(tabName = "networkTranscript",
+          fluidRow(
+            box(title = "Subsection 1",
+                "This is the content of Subsection 1."),
+            mainPanel(
+              sliderInput("numNodes",
+                          label = "Number of Nodes",
+                          min = 10,
+                          max = nrow(data_table),
+                          value = 300),
+              selectInput(inputId = 'significativityCriteriaNetwork',
+                          label = 'Significativity criteria:',
+                          choices = c('pval', 'FDR')),
+              conditionalPanel(
+                condition = "input.significativityCriteriaNetwork == 'pval'",
+                sliderInput("pvalNetwork",
+                            "P-Value:",
+                            min = 0,
+                            max = 1,
+                            value = c(0.05),
+                            step = 0.005)),
+              conditionalPanel(
+                condition = "input.significativityCriteriaNetwork == 'FDR'",
+                sliderInput("fdrNetwork",
+                            "FDR:",
+                            min = 0,
+                            max = 1,
+                            value = c(0.05),
+                            step = 0.005)),
+              checkboxInput("layoutNetwork",
+                           label = "Switch to tree Layout:",
+                           value = FALSE),
+              checkboxInput("physics",
+                            label = "Physics",
+                            value = FALSE),
+              visNetworkOutput("networkPlot",
+                               height = 800,
+                               width = 1600)
+            )
+      )
+  )
+}
 
 # ##################################################################
 # ###################################################################
@@ -652,7 +652,7 @@
                                                      step = 0.005)),
                                        conditionalPanel(
                                          condition = "input.significativityCriteriaVennDEG == 'FDR'",
-                                         sliderInput("fdrRangeVenn",
+                                         sliderInput("fdrRangeVennDEG",
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
@@ -660,36 +660,36 @@
                                                      step = 0.005))
                                      ),
                                      mainPanel(
-                                       plotlyOutput("venn_plot_deg"),
-                                       dataTableOutput("common_genes_table")
+                                       plotlyOutput("venn_plotDEG"),
+                                       dataTableOutput("venn_tableDEG")
                                      )
                                    )
                           ),
                           tabPanel("Volcano Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("genomicIntegrationSelectVolcano",
+                                       selectInput("genomicIntegrationSelectVolcanoDEG",
                                                    label = "Gene/miRNA:",
                                                    choices = intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res"))),
                                        conditionalPanel(
-                                         condition = "input.genomicIntegrationSelectVolcano=='gene_genomic_res'",
-                                         selectInput(inputId = 'genomicTypeSelectVolcano',
+                                         condition = "input.genomicIntegrationSelectVolcanoDEG=='gene_genomic_res'",
+                                         selectInput(inputId = 'genomicTypeSelectVolcanoDEG',
                                                      label = 'Integration Type:',
                                                      choices = intersect(unique(data_table$cnv_met), c("cnv", "met")))),
-                                       selectInput(inputId = 'genomicSignificativityCriteriaVolcano',
+                                       selectInput(inputId = 'genomicSignificativityCriteriaVolcanoDEG',
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaVolcano == 'pval'",
-                                         sliderInput("genomicPvalRangeVolcano",
+                                         condition = "input.genomicSignificativityCriteriaVolcanoDEG == 'pval'",
+                                         sliderInput("genomicPvalRangeVolcanoDEG",
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0.05),
                                                      step = 0.005)),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaVolcano == 'FDR'",
-                                         sliderInput("genomicFdrRangeVolcano",
+                                         condition = "input.genomicSignificativityCriteriaVolcanoDEG == 'FDR'",
+                                         sliderInput("genomicFdrRangeVolcanoDEG",
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
@@ -697,38 +697,38 @@
                                                      step = 0.005))
                                      ),
                                      mainPanel(
-                                       plotlyOutput('volcanoPlot')
+                                       plotlyOutput('volcanoPlotDEG')
                                      )
                                    )),
                           tabPanel("RidgeLine Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("genomicClassSelectRidge",
+                                       selectInput("genomicClassSelectRidgeDEG",
                                                    "Select Class:",
                                                    choices = unique(data_table$class)),
-                                       selectInput("genomicIntegrationSelectRidge",
+                                       selectInput("genomicIntegrationSelectRidgeDEG",
                                                    label = "Gene/miRNA:",
                                                    choices = intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res"))),
                                        conditionalPanel(
-                                         condition = "input.genomicIntegrationSelectRidge=='gene_genomic_res'",
+                                         condition = "input.genomicIntegrationSelectRidgeDEG=='gene_genomic_res'",
 
-                                         selectInput(inputId = 'genomicTypeSelectRidge',
+                                         selectInput(inputId = 'genomicTypeSelectRidgeDEG',
                                                      label = 'Genomic Type:',
                                                      choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
-                                       selectInput(inputId = 'genomicSignificativityCriteriaRidge',
+                                       selectInput(inputId = 'genomicSignificativityCriteriaRidgeDEG',
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaRidge == 'pval'",
-                                         sliderInput("genomicPvalRangeRidge",
+                                         condition = "input.genomicSignificativityCriteriaRidgeDEG == 'pval'",
+                                         sliderInput("genomicPvalRangeRidgeDEG",
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
                                                      step = 0.005)),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaRidge == 'FDR'",
-                                         sliderInput("genomicFdrRangeRidge",
+                                         condition = "input.genomicSignificativityCriteriaRidgeDEG == 'FDR'",
+                                         sliderInput("genomicFdrRangeRidgeDEG",
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
@@ -736,8 +736,8 @@
                                                      step = 0.005))
                                      ),
                                      mainPanel(
-                                       plotOutput("ridgelinePlot"),
-                                       DT::dataTableOutput('ridgelineTable')
+                                       plotOutput("ridgelinePlotDEG"),
+                                       DT::dataTableOutput('ridgelineTableDEG')
                                      )
                                    ))
               )
@@ -894,49 +894,49 @@
 #############################################################
 ##############################################################
 
-# .gint_subItem_networkDEGs <- function(data_table){
-#   tabItem(tabName = "networkDEGs",
-#           fluidRow(
-#             box(title = "Subsection 1",
-#                 "This is the content of Subsection 1."),
-#             mainPanel(
-#                          sliderInput("numNodesDEG",
-#                                      label = "Number of Nodes",
-#                                      min = 10,
-#                                      max = nrow(data_table),
-#                                      value = 300),
-#                          selectInput(inputId = 'significativityCriteriaNetworkDEG',
-#                                      label = 'Significativity criteria:',
-#                                      choices = c('pval', 'FDR')),
-#                          conditionalPanel(
-#                            condition = "input.significativityCriteriaNetworkDEG == 'pval'",
-#                            sliderInput("pvalNetworkDEG",
-#                                        "P-Value:",
-#                                        min = 0,
-#                                        max = 1,
-#                                        value = c(0.05),
-#                                        step = 0.005)),
-#                          conditionalPanel(
-#                            condition = "input.significativityCriteriaNetworkDEG == 'FDR'",
-#                            sliderInput("fdrNetworkDEG",
-#                                        "FDR:",
-#                                        min = 0,
-#                                        max = 1,
-#                                        value = c(0.05),
-#                                        step = 0.005)),
-#                          checkboxInput("layoutNetworkDEG",
-#                                        label = "Switch to tree Layout:",
-#                                        value = FALSE),
-#                          checkboxInput("physicsDEG",
-#                                        label = "Physics",
-#                                        value = FALSE),
-#                          visNetworkOutput("networkPlotDEG",
-#                                           height = 800,
-#                                           width = 1600)
-#                 )
-#           )
-#   )
-# }
+.gint_subItem_networkDEGs <- function(data_table){
+  tabItem(tabName = "networkDEGs",
+          fluidRow(
+            box(title = "Subsection 1",
+                "This is the content of Subsection 1."),
+            mainPanel(
+                         sliderInput("numNodesDEG",
+                                     label = "Number of Nodes",
+                                     min = 10,
+                                     max = nrow(data_table),
+                                     value = 300),
+                         selectInput(inputId = 'significativityCriteriaNetworkDEG',
+                                     label = 'Significativity criteria:',
+                                     choices = c('pval', 'FDR')),
+                         conditionalPanel(
+                           condition = "input.significativityCriteriaNetworkDEG == 'pval'",
+                           sliderInput("pvalNetworkDEG",
+                                       "P-Value:",
+                                       min = 0,
+                                       max = 1,
+                                       value = c(0.05),
+                                       step = 0.005)),
+                         conditionalPanel(
+                           condition = "input.significativityCriteriaNetworkDEG == 'FDR'",
+                           sliderInput("fdrNetworkDEG",
+                                       "FDR:",
+                                       min = 0,
+                                       max = 1,
+                                       value = c(0.05),
+                                       step = 0.005)),
+                         checkboxInput("layoutNetworkDEG",
+                                       label = "Switch to tree Layout:",
+                                       value = FALSE),
+                         checkboxInput("physicsDEG",
+                                       label = "Physics",
+                                       value = FALSE),
+                         visNetworkOutput("networkPlotDEG",
+                                          height = 800,
+                                          width = 1600)
+                )
+          )
+  )
+}
 
 #############################################################
 ##############################################################
@@ -1111,12 +1111,12 @@
 
          .gint_subItem_coefDistribTranscript(data_table),
          .gint_subItem_chrDistribTranscript(data_table),
-         #.gint_subItem_networkTranscript(data_table),
+         .gint_subItem_networkTranscript(data_table),
         # .gint_subItem_enrichTranscript(data_table),
          .gint_subItem_coefDistribDEGs(data_table),
         # .gint_subItem_HeatmapDEGs(data_table),
         # .gint_subItem_chrDistribDEGs(data_table),
-         #.gint_subItem_networkDEGs(data_table),
+         .gint_subItem_networkDEGs(data_table),
          .gint_subItem_circosCompleteInt(data_table),
          .gint_subItem_tableCompleteInt(data_table)
       )
