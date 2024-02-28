@@ -344,32 +344,42 @@ run_shiny <- function(multiomics_integration){
   server <- function(input, output, session) {
 
     # ---------------------- NETWORK SERVER -----------------------------
-    nnet <- gINTomics:::.prepare_network(data_table)
-    reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
-                                                        input = input,
-                                                        output = output,
-                                                        network_data = nnet,
-                                                        deg = FALSE)
-    gINTomics:::.render_reactive_network(reactive_network = reactive_network,
-                                         input = input,
-                                         output = output)
+    # nnet <- gINTomics:::.prepare_network(data_table)
+    # reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
+    #                                                     input = input,
+    #                                                     output = output,
+    #                                                     network_data = nnet,
+    #                                                     deg = FALSE)
+    # gINTomics:::.render_reactive_network(reactive_network = reactive_network,
+    #                                      input = input,
+    #                                      output = output,
+    #                                      deg = FALSE)
 
-    reactive_network_deg <- gINTomics:::.select_deg_network(data_table = data_table,
-                                                        input = input,
-                                                        output = output,
-                                                        network_data = nnet,
-                                                        deg = TRUE)
-    gINTomics:::.render_reactive_network(reactive_network = reactive_network_deg,
-                                         input = input,
-                                         output = output)
+    # reactive_network_deg <- gINTomics:::.select_deg_network(data_table = data_table,
+    #                                                     input = input,
+    #                                                     output = output,
+    #                                                     network_data = nnet,
+    #                                                     deg = TRUE)
+    # gINTomics:::.render_reactive_network(reactive_network = reactive_network_deg,
+    #                                      input = input,
+    #                                      output = output,
+    #                                      deg = TRUE)
 
     ### ------------------------ VENN SERVER ----------------------
     reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
                                                         input = input,
                                                         output = output,
-                                                        type = "genomic")
+                                                        type = "genomic",
+                                                        deg = FALSE)
     output$venn_plot<- gINTomics:::.render_venn(reactive_venn)
     output$common_genes_table <- gINTomics:::.render_venn_table(reactive_venn)
+
+    reactive_venn_deg <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
+                                                        input = input,
+                                                        output = output,
+                                                        type = "genomic",
+                                                        deg = TRUE)
+    output$venn_plot_deg<- gINTomics:::.render_venn(reactive_venn_deg)
 
     ## -------------------------- VOLCANO SERVER ------------------------
     reactive_volcano <- gINTomics:::.prepare_reactive_volcano(data_table,

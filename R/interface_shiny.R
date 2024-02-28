@@ -72,7 +72,7 @@
                                 step = 0.005)),
                   conditionalPanel(
                     condition = "input.significativityCriteriaVenn == 'FDR'",
-                    sliderInput("FDRRangeVenn",
+                    sliderInput("fdrRangeVenn",
                                 "FDR-Value Range:",
                                 min = 0,
                                 max = 1,
@@ -525,49 +525,49 @@
 ########################################################################
 #########################################################################
 
-.gint_subItem_networkTranscript <- function(data_table){
-  tabItem(tabName = "networkTranscript",
-          fluidRow(
-            box(title = "Subsection 1",
-                "This is the content of Subsection 1."),
-            mainPanel(
-              sliderInput("numNodes",
-                          label = "Number of Nodes",
-                          min = 10,
-                          max = nrow(data_table),
-                          value = 300),
-              selectInput(inputId = 'significativityCriteriaNetwork',
-                          label = 'Significativity criteria:',
-                          choices = c('pval', 'FDR')),
-              conditionalPanel(
-                condition = "input.significativityCriteriaNetwork == 'pval'",
-                sliderInput("pvalNetwork",
-                            "P-Value:",
-                            min = 0,
-                            max = 1,
-                            value = c(0.05),
-                            step = 0.005)),
-              conditionalPanel(
-                condition = "input.significativityCriteriaNetwork == 'FDR'",
-                sliderInput("fdrNetwork",
-                            "FDR:",
-                            min = 0,
-                            max = 1,
-                            value = c(0.05),
-                            step = 0.005)),
-              checkboxInput("layoutNetwork",
-                           label = "Switch to tree Layout:",
-                           value = FALSE),
-              checkboxInput("physics",
-                            label = "Physics",
-                            value = FALSE),
-              visNetworkOutput("networkPlot",
-                               height = 800,
-                               width = 1600)
-            )
-      )
-  )
-}
+# .gint_subItem_networkTranscript <- function(data_table){
+#   tabItem(tabName = "networkTranscript",
+#           fluidRow(
+#             box(title = "Subsection 1",
+#                 "This is the content of Subsection 1."),
+#             mainPanel(
+#               sliderInput("numNodes",
+#                           label = "Number of Nodes",
+#                           min = 10,
+#                           max = nrow(data_table),
+#                           value = 300),
+#               selectInput(inputId = 'significativityCriteriaNetwork',
+#                           label = 'Significativity criteria:',
+#                           choices = c('pval', 'FDR')),
+#               conditionalPanel(
+#                 condition = "input.significativityCriteriaNetwork == 'pval'",
+#                 sliderInput("pvalNetwork",
+#                             "P-Value:",
+#                             min = 0,
+#                             max = 1,
+#                             value = c(0.05),
+#                             step = 0.005)),
+#               conditionalPanel(
+#                 condition = "input.significativityCriteriaNetwork == 'FDR'",
+#                 sliderInput("fdrNetwork",
+#                             "FDR:",
+#                             min = 0,
+#                             max = 1,
+#                             value = c(0.05),
+#                             step = 0.005)),
+#               checkboxInput("layoutNetwork",
+#                            label = "Switch to tree Layout:",
+#                            value = FALSE),
+#               checkboxInput("physics",
+#                             label = "Physics",
+#                             value = FALSE),
+#               visNetworkOutput("networkPlot",
+#                                height = 800,
+#                                width = 1600)
+#             )
+#       )
+#   )
+# }
 
 # ##################################################################
 # ###################################################################
@@ -634,7 +634,6 @@
             mainPanel(
               tabsetPanel(type = "tabs",
                           tabPanel("Venn Diagram",
-
                                    sidebarLayout(
                                      sidebarPanel(
                                        selectInput("classSelectVennDEG",
@@ -653,7 +652,7 @@
                                                      step = 0.005)),
                                        conditionalPanel(
                                          condition = "input.significativityCriteriaVennDEG == 'FDR'",
-                                         sliderInput("FDRRangeVenn",
+                                         sliderInput("fdrRangeVenn",
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
@@ -661,7 +660,7 @@
                                                      step = 0.005))
                                      ),
                                      mainPanel(
-                                       plotlyOutput("venn_plot"),
+                                       plotlyOutput("venn_plot_deg"),
                                        dataTableOutput("common_genes_table")
                                      )
                                    )
@@ -895,49 +894,49 @@
 #############################################################
 ##############################################################
 
-.gint_subItem_networkDEGs <- function(data_table){
-  tabItem(tabName = "networkDEGs",
-          fluidRow(
-            box(title = "Subsection 1",
-                "This is the content of Subsection 1."),
-            mainPanel(
-                         sliderInput("numNodesDEG",
-                                     label = "Number of Nodes",
-                                     min = 10,
-                                     max = nrow(data_table),
-                                     value = 300),
-                         selectInput(inputId = 'significativityCriteriaNetworkDEG',
-                                     label = 'Significativity criteria:',
-                                     choices = c('pval', 'FDR')),
-                         conditionalPanel(
-                           condition = "input.significativityCriteriaNetworkDEG == 'pval'",
-                           sliderInput("pvalNetworkDEG",
-                                       "P-Value:",
-                                       min = 0,
-                                       max = 1,
-                                       value = c(0.05),
-                                       step = 0.005)),
-                         conditionalPanel(
-                           condition = "input.significativityCriteriaNetworkDEG == 'FDR'",
-                           sliderInput("fdrNetworkDEG",
-                                       "FDR:",
-                                       min = 0,
-                                       max = 1,
-                                       value = c(0.05),
-                                       step = 0.005)),
-                         checkboxInput("layoutNetworkDEG",
-                                       label = "Switch to tree Layout:",
-                                       value = FALSE),
-                         checkboxInput("physicsDEG",
-                                       label = "Physics",
-                                       value = FALSE),
-                         visNetworkOutput("networkPlotDEG",
-                                          height = 800,
-                                          width = 1600)
-                )
-          )
-  )
-}
+# .gint_subItem_networkDEGs <- function(data_table){
+#   tabItem(tabName = "networkDEGs",
+#           fluidRow(
+#             box(title = "Subsection 1",
+#                 "This is the content of Subsection 1."),
+#             mainPanel(
+#                          sliderInput("numNodesDEG",
+#                                      label = "Number of Nodes",
+#                                      min = 10,
+#                                      max = nrow(data_table),
+#                                      value = 300),
+#                          selectInput(inputId = 'significativityCriteriaNetworkDEG',
+#                                      label = 'Significativity criteria:',
+#                                      choices = c('pval', 'FDR')),
+#                          conditionalPanel(
+#                            condition = "input.significativityCriteriaNetworkDEG == 'pval'",
+#                            sliderInput("pvalNetworkDEG",
+#                                        "P-Value:",
+#                                        min = 0,
+#                                        max = 1,
+#                                        value = c(0.05),
+#                                        step = 0.005)),
+#                          conditionalPanel(
+#                            condition = "input.significativityCriteriaNetworkDEG == 'FDR'",
+#                            sliderInput("fdrNetworkDEG",
+#                                        "FDR:",
+#                                        min = 0,
+#                                        max = 1,
+#                                        value = c(0.05),
+#                                        step = 0.005)),
+#                          checkboxInput("layoutNetworkDEG",
+#                                        label = "Switch to tree Layout:",
+#                                        value = FALSE),
+#                          checkboxInput("physicsDEG",
+#                                        label = "Physics",
+#                                        value = FALSE),
+#                          visNetworkOutput("networkPlotDEG",
+#                                           height = 800,
+#                                           width = 1600)
+#                 )
+#           )
+#   )
+# }
 
 #############################################################
 ##############################################################
@@ -1112,12 +1111,12 @@
 
          .gint_subItem_coefDistribTranscript(data_table),
          .gint_subItem_chrDistribTranscript(data_table),
-         .gint_subItem_networkTranscript(data_table),
+         #.gint_subItem_networkTranscript(data_table),
         # .gint_subItem_enrichTranscript(data_table),
          .gint_subItem_coefDistribDEGs(data_table),
         # .gint_subItem_HeatmapDEGs(data_table),
         # .gint_subItem_chrDistribDEGs(data_table),
-         .gint_subItem_networkDEGs(data_table),
+         #.gint_subItem_networkDEGs(data_table),
          .gint_subItem_circosCompleteInt(data_table),
          .gint_subItem_tableCompleteInt(data_table)
       )

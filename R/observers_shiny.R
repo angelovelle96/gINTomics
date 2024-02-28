@@ -94,42 +94,94 @@
 .prepare_reactive_venn <- function(data_table,
                                    input,
                                    output,
-                                   type = "genomic"){
+                                   deg = FALSE){
   reactive_venn <- reactive({
-    if(type=="genomic") {
+
+    if(deg==FALSE & "gene_genomic_res"%in%unique(data_table$omics)) {
+      classSelect <- input$classSelectVenn
+      pvalRnage <- input$pvalRangeVenn
+      fdrRange <- input$fdrRangeVenn
+      significativityCriteria <- input$significativityCriteriaVenn
+
       data_table <- data_table[data_table$omics == 'gene_genomic_res', ]
-    }else{
-      return(NULL)}
-    if('class' %in% names(data_table)){data_table <- data_table[data_table$class == input$classSelectVenn, ]}
 
-    if(input$significativityCriteriaVenn == 'pval'){
+      if('class'%in%colnames(data_table)){data_table <- data_table[data_table$class == classSelect, ]}
 
-      cnv_sign_genes <- subset(data_table,
-                               cnv_met == 'cnv' & pval >= input$pvalRangeVenn[1] &
-                                 pval <= input$pvalRangeVenn[2],
-                               select = c('cov'))
-      met_sign_genes <- subset(data_table,
-                               cnv_met == 'met' & pval >= input$pvalRangeVenn[1] &
-                                 pval <= input$pvalRangeVenn[2],
-                               select = c('cov'))
-    }else{
-      cnv_sign_genes <- subset(data_table,
-                               cnv_met == 'cnv' & fdr >= input$FDRRangeVenn[1] &
-                                 fdr <= input$FDRRangeVenn[2],
-                               select = c('cov'))
-      met_sign_genes <- subset(data_table,
-                               cnv_met == 'met' & fdr >= input$FDRRangeVenn[1] &
-                                 fdr <= input$FDRRangeVenn[2],
-                               select = c('cov'))
+      if(significativityCriteria == 'pval'){
+
+        cnv_sign_genes <- subset(data_table,
+                                 cnv_met == 'cnv' & pval >= pvalRnage[1] &
+                                   pval <= pvalRnage[2],
+                                 select = c('cov'))
+        met_sign_genes <- subset(data_table,
+                                 cnv_met == 'met' & pval >= pvalRnage[1] &
+                                   pval <= pvalRnage[2],
+                                 select = c('cov'))
+      }else{
+        cnv_sign_genes <- subset(data_table,
+                                 cnv_met == 'cnv' & fdr >= fdrRange[1] &
+                                   fdr <= fdrRange[2],
+                                 select = c('cov'))
+        met_sign_genes <- subset(data_table,
+                                 cnv_met == 'met' & fdr >= fdrRange[1] &
+                                   fdr <= fdrRange[2],
+                                 select = c('cov'))
+      }
+
+      data_venn <- list(cnv_sign_genes = cnv_sign_genes,
+                        met_sign_genes = met_sign_genes)
+
+
     }
+    if(deg==TRUE & "gene_genomic_res"%in%unique(data_table$omics)){
 
-    data_venn <- list(cnv_sign_genes = cnv_sign_genes,
-                met_sign_genes = met_sign_genes)
+      classSelect <- input$classSelectVennDEG
+      significativityCriteria <- input$significativityCriteriaVennDEG
+      pvalRange <- input$pvalRangeVennDEG
+      fdrRange <- input$fdrRangeVenn
+
+      if('class'%in%colnames(data_table)){
+        data_table <- data_table[data_table$class == classSelect, ]
+        data_table <- data_table[data_table$deg,]
+        }
+
+      if(significativityCriteria == 'pval'){
+
+        cnv_sign_genes <- subset(data_table,
+                                 cnv_met == 'cnv' & pval >= pvalRnage[1] &
+                                   pval <= pvalRnage[2],
+                                 select = c('cov'))
+        met_sign_genes <- subset(data_table,
+                                 cnv_met == 'met' & pval >= pvalRnage[1] &
+                                   pval <= pvalRnage[2],
+                                 select = c('cov'))
+      }else{
+        cnv_sign_genes <- subset(data_table,
+                                 cnv_met == 'cnv' & fdr >= fdrRange[1] &
+                                   fdr <= fdrRange[2],
+                                 select = c('cov'))
+        met_sign_genes <- subset(data_table,
+                                 cnv_met == 'met' & fdr >= fdrRange[1] &
+                                   fdr <= fdrRange[2],
+                                 select = c('cov'))
+      }
+
+      data_venn <- list(cnv_sign_genes = cnv_sign_genes,
+                        met_sign_genes = met_sign_genes)
+
+
+    }
+    if(!"gene_genomic_res"%in%unique(data_table$omics)){return(NULL)}
+
     return(data_venn)
     })%>%bindEvent(input$classSelectVenn,
-                   input$FDRRangeVenn,
+                   input$fdrRangeVenn,
                    input$pvalRangeVenn,
-                   input$significativityCriteriaVenn)
+                   input$significativityCriteriaVenn,
+                   input$classSelectVennDEG,
+                   input$fdrRangeVennDEG,
+                   input$pvalRangeVennDEG,
+                   input$significativityCriteriaVennDEG)
 }
 #####################################################################
 ######################################################################
