@@ -283,9 +283,11 @@
                              input,
                              output,
                              session,
-                             type = "genomic",
                              deg = FALSE){
 observe({
+
+
+
   if ("class" %in% colnames(data_table)) {
     df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
     data_table <- data_table[data_table$class == input$selectClassHeatmap,]
