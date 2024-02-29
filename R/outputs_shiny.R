@@ -420,7 +420,7 @@ run_shiny <- function(multiomics_integration){
     reactive_volcano_deg <- gINTomics:::.prepare_reactive_volcano(data_table,
                                                                          input = input,
                                                                          output = output,
-                                                                         type = "transcript",
+                                                                         type = "all",
                                                                          deg = TRUE)
     output$volcanoPlotDEG <- gINTomics:::.render_volcano(reactive_volcano_deg)
 

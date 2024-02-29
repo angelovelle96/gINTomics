@@ -231,7 +231,7 @@
                                       deg = FALSE){
   reactive({
     if(!"class"%in%colnames(data_table)) {data_table$class <- data_table$omics}
-    if(type == "genomic"){
+    if(type == "genomic" & deg == FALSE){
 
     integrationSelect <- input$genomicIntegrationSelectVolcano
     typeSelect <- input$genomicTypeSelectVolcano
@@ -255,7 +255,6 @@
     if(integrationSelect=="mirna_cnv_res"){
       data_volcano <- data_table[data_table$omics == 'mirna_cnv_res',]
     }
-    if(deg==TRUE){data_volcano <- data_volcano[data_volcano$deg,]}
 
     if(significativityCriteria == 'pval'){
       data_volcano["group"] <- "Not Significant"
@@ -283,7 +282,6 @@
       fdrRange <- input$transcriptFdrRangeVolcano
 
       data_volcano <- data_table[data_table$omics == integrationSelect,]
-      if(deg==TRUE){data_volcano <- data_volcano[data_volcano$deg,]}
       if(significativityCriteria == 'pval'){
         data_volcano["group"] <- "Not Significant"
         data_volcano[data_volcano$pval <= pvalRange, 'group'] <- "Significant"
@@ -291,7 +289,36 @@
                                        order(pval, coef)),]
         data_volcano <- rbind(top_peaks, data_volcano[with(data_volcano,
                                                            order(-coef, pval)), ][1:10,])
+        data_volcano$pval_fdr <- -log10(data_volcano$pval)
+      }else{
+        data_volcano[data_volcano$fdr <= fdrRange, 'group'] <- "Significant"
+        top_peaks <- data_volcano[with(data_volcano,
+                                       order(fdr, coef)),]
+        data_volcano <- rbind(top_peaks, data_volcano[with(data_volcano,
+                                                           order(-coef, fdr)),][1:10,])
+        data_volcano$pval_fdr <- -log10(data_volcano$fdr)
+      }
+    }
+    if(deg == TRUE & "class"%in%colnames(data_table)){
 
+      integrationSelect <- input$integrationSelectVolcanoDEG
+      significativityCriteria <- input$significativityCriteriaVolcanoDEG
+      pvalRange <- input$pvalRangeVolcanoDEG
+      fdrRange <- input$fdrRangeVolcanoDEG
+      typeSelect <- input$typeSelectVolcanoDEG
+
+      data_volcano <- data_table[data_table$deg,]
+      data_table <- data_table[data_table$integrationSelect,]
+      if(integrationSelect == "gene_genomic_res"){
+      data_table <- data_table[data_table$typeSelect,]
+      }
+      if(significativityCriteria == 'pval'){
+        data_volcano["group"] <- "Not Significant"
+        data_volcano[data_volcano$pval <= pvalRange, 'group'] <- "Significant"
+        top_peaks <- data_volcano[with(data_volcano,
+                                       order(pval, coef)),]
+        data_volcano <- rbind(top_peaks, data_volcano[with(data_volcano,
+                                                           order(-coef, pval)), ][1:10,])
         data_volcano$pval_fdr <- -log10(data_volcano$pval)
       }else{
         data_volcano[data_volcano$fdr <= fdrRange, 'group'] <- "Significant"
@@ -311,7 +338,12 @@
                  input$transcriptIntegrationSelectVolcano,
                  input$transcriptSignificativityCriteriaVolcano,
                  input$transcriptPvalRangeVolcano,
-                 input$transcriptFdrRangeVolcano)
+                 input$transcriptFdrRangeVolcano,
+                 input$integrationSelectVolcanoDEG,
+                 input$significativityCriteriaVolcanoDEG,
+                 input$pvalRangeVolcanoDEG,
+                 input$fdrRangeVolcanoDEG,
+                 input$typeSelectVolcanoDEG)
 }
 #######################################################################
 #######################################################################
@@ -330,7 +362,7 @@ observe({
     data_table <- data_table[data_table$class == input$selectClassHeatmap,]
   }
 
-  if ("deg"%in%colnames(data_table) & input$degSelectHeatmap == "Only DEGs") {
+  if ("deg"%in%colnames(data_table)) {
     df_heatmap <- multiomics_integration[[input$integrationSelectHeatmap]][[input$selectClassHeatmap]]$data$response_var
     data_table <- data_table[data_table$deg,]
     df_heatmap <- df_heatmap[, unique(data_table$response)]
@@ -531,7 +563,7 @@ observe({
         df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
                                   "Significant", "Not Significant")
       }
-      if (deg == TRUE) {
+      if (deg == TRUE & "class"%in%colnames(df)) {
         df <- df[df$deg, ]
       }
     }
@@ -542,7 +574,7 @@ observe({
       pvalRange <- input$transcriptPvalRangeRidge
       fdrRange <- input$transcriptFdrRangeRidge
 
-      if ('class' %in% colnames(df)) {
+      if ('class'%in%colnames(df)) {
         df <- df[df$class == input$classSelect, ]
       }
         df <- df[df$omics == integrationSelect,]
@@ -553,7 +585,7 @@ observe({
         df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
                                   "Significant", "Not Significant")
       }
-      if (deg == TRUE) {
+      if (deg == TRUE & "class"%in%colnames(df)) {
         df <- df[df$deg, ]
       }
     }
@@ -624,7 +656,9 @@ observe({
       if (deg == TRUE) {
         df <- df[df$deg, ]
       }
-    } else {
+    }
+
+    if(type == "transcript"){
       integrationSelect <- input$transcriptIntegrationSelectRidge
       classSelect <- input$transcripClassSelectRidge
       significativityCriteria <- input$transcriptSignificativityCriteriaRidge
@@ -632,7 +666,7 @@ observe({
       fdrRange <- input$transcriptFdrRangeRidge
 
       if ('class' %in% colnames(df)) {
-        df <- df[df$class == input$classSelect, ]
+        df <- df[df$class == input$classSelect,]
       }
 
       df <- df[df$omics == integrationSelect,]
@@ -648,9 +682,7 @@ observe({
       if (deg == TRUE) {
         df <- df[df$deg, ]
       }
-
     }
-
     return(df)
   }) %>% bindEvent(input$genomicIntegrationSelectRidge,
                    input$genomicClassSelectRidge,
