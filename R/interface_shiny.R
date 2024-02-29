@@ -1,7 +1,7 @@
 
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
-  addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
+  addResourcePath(prefix = "imgResources", system.file(directoryPath = "www/", package = "gINTomics"))
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home", tabName = "home", icon = icon("home")),
