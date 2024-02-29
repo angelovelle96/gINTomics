@@ -15,7 +15,7 @@
                menuSubItem("Chromosome Distribution", tabName = "histoTranscript"),
                menuSubItem("Heatmap", tabName = "heatmapTranscript"),
                menuSubItem("Network", tabName = "networkTranscript"),
-               menuSubItem("Enrichment", tabName = "enrichTrascript")),
+               menuSubItem("Enrichment", tabName = "enrichTranscript")),
       menuItem("DEGs", tabName = "degsPage", startExpanded = TRUE,
                menuSubItem("Coefficients Distribution", tabName = "coefDistribDEGs"),
                menuSubItem("Heatmap", tabName = "heatmapDEGs"),
@@ -373,9 +373,12 @@
                              selectInput(inputId = ns('genomicTypeSelectEnrich'),
                                          label = 'Integration Type:',
                                          choices = unique(data_table$cnv_met)[!is.na(unique(data_table$cnv_met))]),
-                             selectInput(inputId = 'ClassSelectEnrich',
+                             selectInput(inputId = ns('genomicClassSelectEnrich'),
                                          label = 'Class:',
-                                         choices = unique(data_table$class))
+                                         choices = unique(data_table$class)),
+                             selectInput(inputId = ns('genomicDBSelectEnrich'),
+                                         label = 'Database:',
+                                         choices = c("go", "kegg"))
 
                            ),
                            mainPanel(textOutput(ns("gen_enrichment")),
@@ -389,6 +392,34 @@
 ##################################################################
 ###################################################################
 
+.gint_subItem_enrichTranscript <- function(data_table){
+  ns <- NS("prova")
+  tabItem(tabName = "enrichTranscript",
+          fluidRow(
+            box(title = "Subsection 1",
+                "This is the content of Subsection 1."),
+            mainPanel(
+
+              sidebarLayout(
+                sidebarPanel(
+                  #input
+                  selectInput(inputId = ns('transcriptionalClassSelectEnrich'),
+                              label = 'Class:',
+                              choices = unique(data_table$class)),
+                  selectInput(inputId = ns('transcriptionalDBSelectEnrich'),
+                              label = 'Database:',
+                              choices = c("go", "kegg"))
+                ),
+                mainPanel(textOutput(ns("tf_enrichment")),
+                          uiOutput(ns("tf_dotplot"))))
+            )
+
+
+          ))
+}
+
+##################################################################
+###################################################################
 
 
 .gint_subItem_coefDistribTranscript <- function(data_table){
@@ -584,60 +615,6 @@
   )
 }
 
-# ##################################################################
-# ###################################################################
-#
-# .gint_subItem_enrichTranscript <- function(data_table){
-#   tabItem(tabName = "enrichTrascript",
-#           fluidRow(
-#             box(title = "Subsection 1",
-#                 "This is the content of Subsection 1."),
-#             mainPanel(
-#               tabsetPanel(
-#                 type = 'tabs',
-#                 tabPanel('XXXX',
-#                          sliderInput("numNodes2",
-#                                      label = "Number of Nodes",
-#                                      min = 10,
-#                                      max = nrow(data_table),
-#                                      value = 300),
-#                          selectInput(inputId = 'significativityCriteriaNetwork2',
-#                                      label = 'Significativity criteria:',
-#                                      choices = c('pval', 'FDR')),
-#                          conditionalPanel(
-#                            condition = "input.significativityCriteriaNetwork == 'pval'",
-#                            sliderInput("pvalNetwork2",
-#                                        "P-Value:",
-#                                        min = 0,
-#                                        max = 1,
-#                                        value = c(0.05),
-#                                        step = 0.005)),
-#                          conditionalPanel(
-#                            condition = "input.significativityCriteriaNetwork == 'FDR'",
-#                            sliderInput("fdrNetwork2",
-#                                        "FDR:",
-#                                        min = 0,
-#                                        max = 1,
-#                                        value = c(0.05),
-#                                        step = 0.005)),
-#                          checkboxInput("layoutNetwork2",
-#                                        label = "Switch to tree Layout:",
-#                                        value = FALSE),
-#                          checkboxInput("degNetwork2",
-#                                        label = "Visualize only DEGs:",
-#                                        value = FALSE),
-#                          checkboxInput("physics2",
-#                                        label = "Physics",
-#                                        value = FALSE),
-#                          visNetworkOutput("networkPlot",
-#                                           height = 800,
-#                                           width = 1600)
-#                 )
-#                 , tabPanel('DEGs'))
-#             )
-#           )
-#   )
-# }
 # ##################################################################
 # ###################################################################
 #
@@ -1073,12 +1050,12 @@
         .gint_subItem_coefDistribGenomic(data_table),
         .gint_subItem_HeatmapGenomic(data_table),
         .gint_subItem_chrDistribGenomic(data_table),
-        .gint_tabitem_enr(data_table),#,
+        .gint_tabitem_enr(data_table),
 
          .gint_subItem_coefDistribTranscript(data_table),
         # .gint_subItem_chrDistribTranscript(data_table),
          .gint_subItem_networkTranscript(data_table),
-        # .gint_subItem_enrichTranscript(data_table),
+         .gint_subItem_enrichTranscript(data_table),
         # .gint_subItem_coefDistribDEGs(data_table),
         # .gint_subItem_HeatmapDEGs(data_table),
         # .gint_subItem_chrDistribDEGs(data_table),

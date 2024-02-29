@@ -725,7 +725,8 @@ observe({
                             output,
                             session,
                             data_gen_enrich,
-                            data_tf_enrich){
+                            data_tf_enrich,
+                            name){
 
   gen_enr <- gINTomics:::.run_bg(FFUN = run_genomic_enrich,
                                   input = input,
@@ -747,12 +748,9 @@ observe({
                                                  input = input,
                                                  output = output,
                                                  session = session)
-  gINTomics:::.render_gen_dotplot(gen_plot=gen_plot,
-                                  data_gen_enrich = data_gen_enrich,
-                                  input = input,
-                                  output = output,
-                                  session = session)
-
+  output$gen_dotplot <- renderPlotly({
+            gen_plot()
+          })
 
   tf_enr <- gINTomics:::.run_bg(FFUN = run_tf_enrich,
                                  input = input,
@@ -768,6 +766,29 @@ observe({
   output$tf_enrichment <- renderText({
     check_tf()
   })
+  tf_plot <- gINTomics:::.reactive_tf_dotplot(bg_enrich = tf_enr,
+                                                input = input,
+                                                output = output,
+                                                session = session)
+
+  ns <- NS(name)
+  output$tf_dotplot <- renderUI({
+    plots <- tf_plot()
+    plot_list <- lapply(seq_along(plots), function(i) {
+      plotlyOutput(ns(names(plots)[i]))
+    })
+    do.call(tagList, plot_list)
+  })
+  observe({
+    plots <- tf_plot()
+    for (i in 1:length(plots)) {
+      output[[names(plots)[i]]] <- renderPlotly({
+        plots[i]
+      })
+    }
+  })
+
+
 }
 
 
@@ -814,49 +835,59 @@ observe({
   reactive({
     if (bg_enrich$is_alive()){
       invalidateLater(millis = 1000, session = session)
-      }
+    }
+    class <- input$genomicClassSelectEnrich
+    db <- input$genomicDBSelectEnrich
+    type <- input$genomicTypeSelectEnrich
     if (!bg_enrich$is_alive()) {
       data <- bg_enrich$get_result()
-      if(sum(c("cnv", "met")%in%names(data))){
-      cnv <- data[["cnv"]][[1]][[1]]
-      cnv <- clusterProfiler::dotplot(cnv)
-      cnv <- ggplotly(cnv)
-      met <- data[["met"]][[1]][[1]]
-      met <- clusterProfiler::dotplot(met)
-      met <- ggplotly(met, width = 800, height = 700)
-      ans <- list(cnv=cnv, met=met)
+      if(sum(c("cnv", "met")%in%names(data))==2){
+      ans <- data[[type]][[class]][[db]]
+      ans <- clusterProfiler::dotplot(ans)
+      ans <- ggplotly(ans)
       }else{
-        ans <- data[[1]][[1]]
-        ans <- clusterProfiler::dotplot(ans) + scale_y_discrete(labels=function(x) str_wrap(x, width=40))
-
-        cnv <- ggplotly(ans, width = 800 ,height = 700)
+        ans <- data[[class]][[db]]
+        ans <- clusterProfiler::dotplot(ans)+
+          scale_y_discrete(labels=function(x) str_wrap(x, width=40))
+        ans <- ggplotly(ans, width = 800 ,height = 700)
       }
       return(ans)
       }
   })
 }
 
+
 #######################################################################
 ########################################################################
 
-.render_gen_dotplot <- function(gen_plot,
-                                data_gen_enrich,
-                                input,
-                                output,
-                                session){
-  observe({
-    if("gene_genomic_res"%in%data_gen_enrich$omics){
-      output$gen_dotplot <- renderPlotly({
-        ans=gen_plot()
-        ans=ans[[input$genomicTypeSelectEnrich]]
-      })
-    }else{
-      output$gen_dotplot <- renderPlotly({
-        gen_plot()
-      })
+.reactive_tf_dotplot <- function(bg_enrich,
+                                  input,
+                                  output,
+                                  session){
+  reactive({
+    if (bg_enrich$is_alive()){
+      invalidateLater(millis = 1000, session = session)
     }
-  })%>%bindEvent(input$genomicTypeSelectEnrich)
+    class <- input$transcriptionalClassSelectEnrich
+    db <- input$transcriptionalDBSelectEnrich
+    if (!bg_enrich$is_alive()) {
+      data <- bg_enrich$get_result()
+      tf <- names(data[[class]])
+      ans <- lapply(tf, function(x){
+        ans <- data[[class]][[x]][[db]]
+        if(!is.null(ans)){
+        ans <- clusterProfiler::dotplot(ans)+
+          scale_y_discrete(labels=function(y) str_wrap(y, width=40))
+        ans <- ggplotly(ans, width = 800 ,height = 700)
+        return(ans)
+        }else{return(NULL)}
+      })
+      names(ans) <- tf
+      return(ans)
+    }
+  })
 }
+
 
 #######################################################################
 ########################################################################

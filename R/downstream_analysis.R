@@ -8,6 +8,7 @@
                         species,
                         pvalueCutoff,
                         pAdjustMethod,
+                        qvalueCutoff,
                         ont,
                         run_go=T,
                         run_kegg=T,
@@ -41,6 +42,7 @@
                            organism = species,
                            pvalueCutoff = pvalueCutoff,
                            pAdjustMethod=pAdjustMethod,
+                           qvalueCutoff=qvalueCutoff,
                            ...
         )
     }
@@ -50,6 +52,7 @@
                        OrgDb = orgdb,
                        pvalueCutoff = pvalueCutoff,
                        pAdjustMethod=pAdjustMethod,
+                       qvalueCutoff=qvalueCutoff,
                        ont = ont,
                        readable = T,
                        ...
@@ -61,6 +64,7 @@
                                organism = organism,
                                pvalueCutoff = pvalueCutoff,
                                pAdjustMethod=pAdjustMethod,
+                               qvalueCutoff=qvalueCutoff,
                                readable = T,
                                ...
       )
@@ -93,6 +97,7 @@ run_genomic_enrich <- function(model_results,
                        species="hsa",
                        pvalueCutoff = 0.1,
                        pAdjustMethod="BH",
+                       qvalueCutoff=0.1,
                        ont = "all",
                        BPPARAM = BiocParallel::SerialParam(),
                        extracted_data=NULL,
@@ -130,6 +135,7 @@ run_genomic_enrich <- function(model_results,
                               species=species,
                               pvalueCutoff = pvalueCutoff,
                               pAdjustMethod=pAdjustMethod,
+                              qvalueCutoff=qvalueCutoff,
                               ont = ont,
                               BPPARAM = BPPARAM,
                               ...)
@@ -138,6 +144,7 @@ run_genomic_enrich <- function(model_results,
                                species=species,
                                pvalueCutoff = pvalueCutoff,
                                pAdjustMethod=pAdjustMethod,
+                               qvalueCutoff=qvalueCutoff,
                                ont = ont,
                                BPPARAM = BPPARAM,
                                ...)
@@ -150,6 +157,7 @@ run_genomic_enrich <- function(model_results,
                              species=species,
                              pvalueCutoff = pvalueCutoff,
                              pAdjustMethod=pAdjustMethod,
+                             qvalueCutoff=qvalueCutoff,
                              ont = ont,
                              BPPARAM = BPPARAM,
                              ...)
@@ -180,6 +188,7 @@ return(enrichment)
 run_tf_enrich <- function(model_results,
                           species="hsa",
                           pvalueCutoff = 0.1,
+                          qvalueCutoff = 0.1,
                           pAdjustMethod="BH",
                           ont = "all",
                           BPPARAM = BiocParallel::SerialParam(),
@@ -222,10 +231,11 @@ run_tf_enrich <- function(model_results,
     if(length(tmp2)>10) tmp2 <- tmp2[1:10]
     tmp <- lapply(names(tmp2), function(y) x[x$cov==y,])
     names(tmp) <- names(tmp2)
-    enrichment <- bplapply(tmp, .def_enrich,
+    enrichment <- BiocParallel::bplapply(tmp, gINTomics:::.def_enrich,
                     species=species,
                     pvalueCutoff = pvalueCutoff,
                     pAdjustMethod=pAdjustMethod,
+                    qvalueCutoff = qvalueCutoff,
                     ont = ont,
                     BPPARAM = BPPARAM)
     return(enrichment)
