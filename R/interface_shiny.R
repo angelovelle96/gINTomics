@@ -430,7 +430,7 @@
                                        selectInput(inputId = 'transcriptIntegrationSelectRidge',
                                                    label = 'Integration Type:',
                                                    choices = intersect(unique(data_table$omics), c("tf_res", "tf_mirna_res", "mirna_target_res"))),
-                                       selectInput("trancriptClassSelectRidge",
+                                       selectInput("transcriptClassSelectRidge",
                                                    "Select Class:",
                                                    choices = unique(data_table$class)),
 
@@ -665,28 +665,28 @@
                           tabPanel("Volcano Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("genomicIntegrationSelectVolcanoDEG",
+                                       selectInput("integrationSelectVolcanoDEG",
                                                    label = "Gene/miRNA:",
-                                                   choices = intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res"))),
+                                                   choices = unique(data_table$omics)),
                                        conditionalPanel(
-                                         condition = "input.genomicIntegrationSelectVolcanoDEG=='gene_genomic_res'",
-                                         selectInput(inputId = 'genomicTypeSelectVolcanoDEG',
+                                         condition = "input.integrationSelectVolcanoDEG=='gene_genomic_res'",
+                                         selectInput(inputId = 'typeSelectVolcanoDEG',
                                                      label = 'Integration Type:',
                                                      choices = intersect(unique(data_table$cnv_met), c("cnv", "met")))),
-                                       selectInput(inputId = 'genomicSignificativityCriteriaVolcanoDEG',
+                                       selectInput(inputId = 'significativityCriteriaVolcanoDEG',
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaVolcanoDEG == 'pval'",
-                                         sliderInput("genomicPvalRangeVolcanoDEG",
+                                         condition = "input.significativityCriteriaVolcanoDEG == 'pval'",
+                                         sliderInput("pvalRangeVolcanoDEG",
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0.05),
                                                      step = 0.005)),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaVolcanoDEG == 'FDR'",
-                                         sliderInput("genomicFdrRangeVolcanoDEG",
+                                         condition = "input.significativityCriteriaVolcanoDEG == 'FDR'",
+                                         sliderInput("fdrRangeVolcanoDEG",
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
@@ -700,32 +700,29 @@
                           tabPanel("RidgeLine Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("genomicClassSelectRidgeDEG",
-                                                   "Select Class:",
-                                                   choices = unique(data_table$class)),
-                                       selectInput("genomicIntegrationSelectRidgeDEG",
+                                       selectInput("integrationSelectRidgeDEG",
                                                    label = "Gene/miRNA:",
-                                                   choices = intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res"))),
+                                                   choices = unique(data_table$omics)),
                                        conditionalPanel(
-                                         condition = "input.genomicIntegrationSelectRidgeDEG=='gene_genomic_res'",
+                                         condition = "input.integrationSelectRidgeDEG=='gene_genomic_res'",
 
-                                         selectInput(inputId = 'genomicTypeSelectRidgeDEG',
+                                         selectInput(inputId = 'typeSelectRidgeDEG',
                                                      label = 'Genomic Type:',
                                                      choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
-                                       selectInput(inputId = 'genomicSignificativityCriteriaRidgeDEG',
+                                       selectInput(inputId = 'significativityCriteriaRidgeDEG',
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaRidgeDEG == 'pval'",
-                                         sliderInput("genomicPvalRangeRidgeDEG",
+                                         condition = "input.significativityCriteriaRidgeDEG == 'pval'",
+                                         sliderInput("pvalRangeRidgeDEG",
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
                                                      step = 0.005)),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaRidgeDEG == 'FDR'",
-                                         sliderInput("genomicFdrRangeRidgeDEG",
+                                         condition = "input.significativityCriteriaRidgeDEG == 'FDR'",
+                                         sliderInput("fdrRangeRidgeDEG",
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
@@ -745,97 +742,94 @@
 
 ##################################################################
 ###################################################################
-#
-# .gint_subItem_HeatmapDEGs <- function(data_table){
-#   tabItem(tabName = "heatmapDEGs",
-#           fluidRow(
-#             box(title = "Page containing data table",
-#                 "This is the content of Page 1."),
-#             mainPanel(
-#               tabsetPanel(type = 'tabs',
-#                           tabPanel('XXX',
-#                                    sidebarLayout(
-#                                      sidebarPanel(
-#                                        selectInput(inputId = 'integrationSelectHisto2',
-#                                                    label = 'Integration Type:',
-#                                                    choices = unique(data_table$omics)),
-#                                        selectInput(inputId = 'classSelectHisto2',
-#                                                    label = 'Class:',
-#                                                    choices = unique(data_table$class)),
-#                                        selectInput(inputId = 'chrSelectHisto2',
-#                                                    label = 'Chr:',
-#                                                    choices = c('All', unique(data_table$chr_cov))),
-#                                        selectInput(inputId = 'degSelectHisto2',
-#                                                    label = 'DEGs:',
-#                                                    choices = c('All', 'Only DEGs')),
-#                                        selectInput(inputId = 'significativityCriteriaHisto2',
-#                                                    label = 'Significativity criteria:',
-#                                                    choices = c('pval', 'FDR')),
-#                                        conditionalPanel(
-#                                          condition = "input.significativityCriteriaHisto == 'pval'",
-#                                          sliderInput("pvalRangeHisto2",
-#                                                      "P-Value Range:",
-#                                                      min = 0,
-#                                                      max = 1,
-#                                                      value = c(0, 0.05),
-#                                                      step = 0.005)),
-#                                        conditionalPanel(
-#                                          condition = "input.significativityCriteriaHisto == 'FDR'",
-#                                          sliderInput("FDRRangeHisto2",
-#                                                      "FDR-Value Range:",
-#                                                      min = 0,
-#                                                      max = 1,
-#                                                      value = c(0, 0.05),
-#                                                      step = 0.005))
-#                                      ),
-#                                      mainPanel(
-#                                        plotlyOutput('histogramPlot'),
-#                                        DT::dataTableOutput('histogramTable')
-#                                      )
-#                                    )
-#                           ),
-#                           tabPanel('TFs',
-#                                    sidebarLayout(
-#                                      sidebarPanel(
-#                                        selectInput(inputId = 'classSelectHistoTFs',
-#                                                    label = 'Class:',
-#                                                    choices = unique(data_table$class)),
-#                                        selectInput(inputId = 'degSelectHistoTFs2',
-#                                                    label = 'DEGs:',
-#                                                    choices = c('All', 'Only DEGs')),
-#                                        selectInput(inputId = 'significativityCriteriaHistoTFs2',
-#                                                    label = 'Significativity criteria:',
-#                                                    choices = c('pval', 'FDR'),),
-#                                        conditionalPanel(
-#                                          condition = "input.significativityCriteriaHistoTFs == 'pval'",
-#                                          sliderInput("pvalRangeHistoTFs2",
-#                                                      "P-Value Range:",
-#                                                      min = 0,
-#                                                      max = 1,
-#                                                      value = c(0, 0.10),
-#                                                      step = 0.005)),
-#                                        conditionalPanel(
-#                                          condition = "input.significativityCriteriaHistoTFs == 'FDR'",
-#                                          sliderInput("FDRRangeHistoTFs2",
-#                                                      "FDR-Value Range:",
-#                                                      min = 0,
-#                                                      max = 1,
-#                                                      value = c(0, 0.10),
-#                                                      step = 0.005))
-#                                      ),
-#                                      mainPanel(
-#                                        plotlyOutput('histogramPlotTFs'),
-#                                        plotlyOutput('histogramPlotTFsByChromosome')
-#                                      )
-#                                    ))
-#               )
-#             )
-#           )
-#   )
-# }
-#
-# #############################################################
-# ##############################################################
+
+.gint_subItem_HeatmapDEGs <- function(data_table){
+  tabItem(tabName = "heatmapDEGs",
+          fluidRow(
+            box(title = "Subsection 1",
+                "This is the content of Subsection 1."),
+            mainPanel(
+
+              sidebarLayout(
+                sidebarPanel(
+                  selectInput(inputId = 'integrationSelectHeatmapDEG',
+                              label = 'Integration Type:',
+                              choices = unique(data_table$omics)),
+                  conditionalPanel(
+                    condition = "input.integrationSelectHeatmapDEG == 'gene_genomic_res'",
+                    sliderInput("numTopGenesHeatmapCNVDEG",
+                                "Number of top genes (CNV):",
+                                value = 10,
+                                min = 1,
+                                max = 200,
+                                step = 10),
+                    sliderInput("numTopGenesHeatmapMETDEG",
+                                "Number of top genes (MET):",
+                                value = 10,
+                                min = 1,
+                                max = 200,
+                                step = 10)),
+                  conditionalPanel(
+                    condition = "input.integrationSelectHeatmapDEG == 'cnv_gene_res'",
+                    sliderInput("numTopGenesHeatmapCNVonlyDEG",
+                                "Number of top genes:",
+                                value = 10,
+                                min = 1,
+                                max = 200,
+                                step = 10)),
+                  conditionalPanel(
+                    condition = "input.integrationSelectHeatmapDEG == 'met_gene_res'",
+                    sliderInput("numTopGenesHeatmapMETonlyDEG",
+                                "Number of top genes:",
+                                value = 10,
+                                min = 1,
+                                max = 200,
+                                step = 10)),
+                  conditionalPanel(
+                    condition = "input.integrationSelectHeatmapDEG == 'mirna_cnv_res'",
+                    sliderInput("numTopGenesHeatmapmirna_cnvDEG",
+                                "Number of top genes:",
+                                value = 10,
+                                min = 1,
+                                max = 200,
+                                step = 10)),
+                  selectInput("selectClassHeatmap",
+                              "Select the class:",
+                              choices = unique(data_table$class),
+                              multiple = FALSE),
+                  selectInput(inputId = 'significativityCriteriaHeatmapDEG',
+                              label = 'Significativity criteria:',
+                              choices = c('pval', 'FDR')),
+                  conditionalPanel(
+                    condition = "input.significativityCriteriaHeatmapDEG == 'pval'",
+                    sliderInput("pvalRangeHeatmapDEG",
+                                "P-Value Range:",
+                                min = 0.01,
+                                max = 0.5,
+                                value = 0.05,
+                                step = 0.005)),
+                  conditionalPanel(
+                    condition = "input.significativityCriteriaHeatmapDEG == 'FDR'",
+                    sliderInput("FDRRangeHeatmapDEG",
+                                "FDR-Value Range:",
+                                min = 0.01,
+                                max = 0.5,
+                                value = 0.05,
+                                step = 0.005))
+
+                ),
+                mainPanel(
+                  InteractiveComplexHeatmapOutput('heatmapDEG')
+                )
+
+              )
+            )
+          )
+  )
+}
+
+#############################################################
+##############################################################
 #
 # .gint_subItem_chrDistribDEGs <- function(data_table){
 #   tabItem(tabName = "histoDEGs",
@@ -1020,10 +1014,7 @@
             box(title = "Page containing data tables.",
                 "1. ."),
             mainPanel(
-              tabsetPanel(type = "tabs",
-                          tabPanel("Venn",
-
-                                   sidebarLayout(
+                          sidebarLayout(
                                      sidebarPanel(
                                        selectInput(inputId = 'integrationSelectTable',
                                                    label = 'Integration Type:',
@@ -1065,8 +1056,8 @@
                                            style = 'overflow-x: auto;',
                                            DT::dataTableOutput('res_table')
                                          )
-                                       )
-                                     )
+
+
                                    )
                           )
               )
@@ -1110,7 +1101,7 @@
          .gint_subItem_networkTranscript(data_table),
         # .gint_subItem_enrichTranscript(data_table),
          .gint_subItem_coefDistribDEGs(data_table),
-        # .gint_subItem_HeatmapDEGs(data_table),
+         .gint_subItem_HeatmapDEGs(data_table),
         # .gint_subItem_chrDistribDEGs(data_table),
          .gint_subItem_networkDEGs(data_table),
          .gint_subItem_circosCompleteInt(data_table),
