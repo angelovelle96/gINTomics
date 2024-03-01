@@ -793,7 +793,7 @@
                                 min = 1,
                                 max = 200,
                                 step = 10)),
-                  selectInput("selectClassHeatmap",
+                  selectInput("selectClassHeatmapDEG",
                               "Select the class:",
                               choices = unique(data_table$class),
                               multiple = FALSE),
@@ -830,58 +830,63 @@
 
 #############################################################
 ##############################################################
-#
-# .gint_subItem_chrDistribDEGs <- function(data_table){
-#   tabItem(tabName = "histoDEGs",
-#           fluidRow(
-#             box(title = "Subsection 1",
-#                 "This is the content of Subsection 1."),
-#             mainPanel(
-#               sidebarLayout(
-#                 sidebarPanel(
-#                   selectInput(inputId = 'integrationSelectRidge2',
-#                               label = 'Integration Type:',
-#                               choices = unique(data_table$omics)),
-#                   selectInput("classSelectRidge2",
-#                               "Select Class:",
-#                               choices = unique(data_table$class)),
-#                   conditionalPanel(
-#                     condition = "input.integrationSelectRidge == 'gene_genomic_res'",
-#                     selectInput(inputId = 'genomicTypeSelectRidge2',
-#                                 label = 'Genomic Type:',
-#                                 choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
-#                   selectInput(inputId = 'degSelectRidge2',
-#                               label = 'DEGs:',
-#                               choices = c('All','Only DEGs')),
-#                   selectInput(inputId = 'significativityCriteriaRidge2',
-#                               label = 'Significativity criteria:',
-#                               choices = c('pval', 'FDR')),
-#                   conditionalPanel(
-#                     condition = "input.significativityCriteriaRidge == 'pval'",
-#                     sliderInput("pvalRangeRidge2",
-#                                 "P-Value Range:",
-#                                 min = 0,
-#                                 max = 1,
-#                                 value = c(0, 0.05),
-#                                 step = 0.005)),
-#                   conditionalPanel(
-#                     condition = "input.significativityCriteriaRidge == 'FDR'",
-#                     sliderInput("FDRRangeRidge2",
-#                                 "FDR-Value Range:",
-#                                 min = 0,
-#                                 max = 1,
-#                                 value = c(0, 0.05),
-#                                 step = 0.005))
-#                 ),
-#                 mainPanel(
-#                   plotOutput("ridgelinePlot"),
-#                   DT::dataTableOutput('ridgelineTable')
-#                 )
-#               )
-#             )
-#           )
-#   )
-# }
+
+.gint_subItem_chrDistribDEGs <- function(data_table){
+  tabItem(tabName = "histoDEGs",
+          fluidRow(
+            box(title = "Subsection 1",
+                "This is the content of Subsection 1."),
+            mainPanel(
+              tabsetPanel(
+                type = 'tabs',
+                tabPanel('XXX',
+                         sidebarLayout(
+                           sidebarPanel(
+                             selectInput(inputId = 'integrationSelectHistoDEG',
+                                         label = 'Integration Type:',
+                                         choices = unique(data_table$omics)),
+                             conditionalPanel(
+                               condition = "input.integrationSelectHistoDEG=='gene_genomic_res'",
+                               selectInput(inputId = "typeSelectDEG",
+                                           label = "Type Selection",
+                                           choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
+                             selectInput(inputId = 'classSelectHistoDEG',
+                                         label = 'Class:',
+                                         choices = unique(data_table$class)),
+                             selectInput(inputId = 'chrSelectHistoDEG',
+                                         label = 'Chr:',
+                                         choices = c('All', unique(data_table$chr_cov))),
+                             selectInput(inputId = 'significativityCriteriaHistoDEG',
+                                         label = 'Significativity criteria:',
+                                         choices = c('pval', 'FDR')),
+                             conditionalPanel(
+                               condition = "input.significativityCriteriaHistoDEG == 'pval'",
+                               sliderInput("pvalRangeHistoDEG",
+                                           "P-Value Range:",
+                                           min = 0,
+                                           max = 1,
+                                           value = c(0, 0.05),
+                                           step = 0.005)),
+                             conditionalPanel(
+                               condition = "input.significativityCriteriaHistoDEG == 'FDR'",
+                               sliderInput("fdrRangeHistoDEG",
+                                           "FDR-Value Range:",
+                                           min = 0,
+                                           max = 1,
+                                           value = c(0, 0.05),
+                                           step = 0.005))
+                           ),
+                           mainPanel(
+                             plotlyOutput('histogramPlotDEG'),
+                             DT::dataTableOutput('histogramTableDEG')
+                           )
+                         )
+                )
+              )
+            )
+          )
+  )
+}
 #############################################################
 ##############################################################
 
@@ -1102,7 +1107,7 @@
         # .gint_subItem_enrichTranscript(data_table),
          .gint_subItem_coefDistribDEGs(data_table),
          .gint_subItem_HeatmapDEGs(data_table),
-        # .gint_subItem_chrDistribDEGs(data_table),
+         .gint_subItem_chrDistribDEGs(data_table),
          .gint_subItem_networkDEGs(data_table),
          .gint_subItem_circosCompleteInt(data_table),
          .gint_subItem_tableCompleteInt(data_table)

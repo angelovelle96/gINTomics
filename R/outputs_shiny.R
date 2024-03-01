@@ -430,7 +430,14 @@ run_shiny <- function(multiomics_integration){
                                           multiomics_integration = multiomics_integration,
                                           input=input,
                                           output=output,
-                                          session = session)
+                                          session = session,
+                                          deg = FALSE)
+    gINTomics:::.prepare_reactive_heatmap(data_table=data_table,
+                                          multiomics_integration = multiomics_integration,
+                                          input=input,
+                                          output=output,
+                                          session = session,
+                                          deg = TRUE)
     ## ---------------------- RIDGE SERVER ------------------------
     reactive_ridge <- gINTomics:::.prepare_reactive_ridge(data_table,
                                                           input = input,
@@ -482,16 +489,6 @@ run_shiny <- function(multiomics_integration){
                                                           type = "genomic",
                                                           deg = FALSE)
     output$histogramPlot <- gINTomics:::.render_histo(reactive_histo)
-
-    reactive_histo_transcript <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                          input = input,
-                                                          output = output,
-                                                          type = "transcript",
-                                                          deg = FALSE)
-    output$histogramPlotTranscript <- gINTomics:::.render_histo(reactive_histo_transcript)
-
-
-
     reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(data_table,
                                                                       input = input,
                                                                       output = output,
@@ -499,12 +496,31 @@ run_shiny <- function(multiomics_integration){
                                                                       deg = FALSE)
     output$histogramTable <- gINTomics:::.render_histo_table(reactive_histo_table)
 
+    reactive_histo_transcript <- gINTomics:::.prepare_reactive_histo(data_table,
+                                                          input = input,
+                                                          output = output,
+                                                          type = "transcript",
+                                                          deg = FALSE)
+    output$histogramPlotTranscript <- gINTomics:::.render_histo(reactive_histo_transcript)
     reactive_histo_table_transcript <- gINTomics:::.prepare_reactive_histo_table(data_table,
                                                                       input = input,
                                                                       output = output,
                                                                       type = "transcript",
                                                                       deg = FALSE)
     output$histogramTableTranscript <- gINTomics:::.render_histo_table(reactive_histo_table_transcript)
+
+    reactive_histo_deg <- gINTomics:::.prepare_reactive_histo(data_table,
+                                                                     input = input,
+                                                                     output = output,
+                                                                     type = "all",
+                                                                     deg = TRUE)
+    output$histogramPlotDEG <- gINTomics:::.render_histo(reactive_histo_deg)
+    reactive_histo_table_deg <- gINTomics:::.prepare_reactive_histo_table(data_table,
+                                                                                 input = input,
+                                                                                 output = output,
+                                                                                 type = "all",
+                                                                                 deg = TRUE)
+    output$histogramTableDEG <- gINTomics:::.render_histo_table(reactive_histo_table_deg)
     ## ----------------------- HISTO SERVER TF --------------------------
     reactive_histo_tf <- gINTomics:::.prepare_reactive_histo_tf(data_table,
                                                                 input = input,
