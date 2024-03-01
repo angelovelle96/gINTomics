@@ -382,7 +382,9 @@
 
                            ),
                            mainPanel(textOutput(ns("gen_enrichment")),
-                                     plotlyOutput(ns("gen_dotplot"))))
+                                     plotlyOutput(ns("gen_dotplot")),
+                                     HTML(paste0(rep("<br>", 20), collapse = "")),
+                                     DT::dataTableOutput(ns("gen_enrich_table"))))
                 )
 
 
