@@ -1,7 +1,7 @@
 
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
-  addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
+  addResourcePath(prefix = "imgResources", system.file(directoryPath = "www/", package = "gINTomics"))
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home", tabName = "home", icon = icon("home")),
@@ -14,7 +14,7 @@
                menuSubItem("Coefficients Distribution", tabName = "coefDistribTranscript"),
                menuSubItem("Chromosome Distribution", tabName = "histoTranscript"),
                menuSubItem("Network", tabName = "networkTranscript"),
-               menuSubItem("Enrichment", tabName = "enrichTrascript")),
+               menuSubItem("Enrichment", tabName = "enrichTranscript")),
       menuItem("DEGs", tabName = "degsPage", startExpanded = TRUE,
                menuSubItem("Coefficients Distribution", tabName = "coefDistribDEGs"),
                menuSubItem("Heatmap", tabName = "heatmapDEGs"),
@@ -34,7 +34,7 @@
 
 .gint_tabitem_home <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
-  addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
+  addResourcePath(prefix = "imgResources", system.file(directoryPath = "www/", package = "gINTomics"))
   tabItem(tabName = "home",
           fluidRow(box(title = "Welcome to gINTomics Interactive Visualizer",
             "This is the home page content."),
@@ -369,13 +369,18 @@
                              selectInput(inputId = ns('genomicTypeSelectEnrich'),
                                          label = 'Integration Type:',
                                          choices = unique(data_table$cnv_met)[!is.na(unique(data_table$cnv_met))]),
-                             selectInput(inputId = 'ClassSelectEnrich',
+                             selectInput(inputId = ns('genomicClassSelectEnrich'),
                                          label = 'Class:',
-                                         choices = unique(data_table$class))
+                                         choices = unique(data_table$class)),
+                             selectInput(inputId = ns('genomicDBSelectEnrich'),
+                                         label = 'Database:',
+                                         choices = c("go", "kegg"))
 
                            ),
                            mainPanel(textOutput(ns("gen_enrichment")),
-                                     plotlyOutput(ns("gen_dotplot"))))
+                                     plotlyOutput(ns("gen_dotplot")),
+                                     HTML(paste0(rep("<br>", 20), collapse = "")),
+                                     DT::dataTableOutput(ns("gen_enrich_table"))))
                 )
 
 
@@ -385,6 +390,34 @@
 ##################################################################
 ###################################################################
 
+.gint_subItem_enrichTranscript <- function(data_table){
+  ns <- NS("prova")
+  tabItem(tabName = "enrichTranscript",
+          fluidRow(
+            box(title = "Subsection 1",
+                "This is the content of Subsection 1."),
+            mainPanel(
+
+              sidebarLayout(
+                sidebarPanel(
+                  #input
+                  selectInput(inputId = ns('transcriptionalClassSelectEnrich'),
+                              label = 'Class:',
+                              choices = unique(data_table$class)),
+                  selectInput(inputId = ns('transcriptionalDBSelectEnrich'),
+                              label = 'Database:',
+                              choices = c("go", "kegg"))
+                ),
+                mainPanel(textOutput(ns("tf_enrichment")),
+                          uiOutput(ns("tf_dotplot"))))
+            )
+
+
+          ))
+}
+
+##################################################################
+###################################################################
 
 
 .gint_subItem_coefDistribTranscript <- function(data_table){
@@ -568,9 +601,219 @@
 
 # ##################################################################
 # ###################################################################
+# .gint_subItem_coefDistribDEGs <- function(data_table){
+#   tabItem(tabName = "coefDistribDEGs",
+#           fluidRow(
+#             box(title = "Page containing data tables.",
+#                 "1. ."),
+#             mainPanel(
+#               tabsetPanel(type = "tabs",
+#                           tabPanel("Venn",
 #
-# .gint_subItem_enrichTranscript <- function(data_table){
-#   tabItem(tabName = "enrichTrascript",
+#                                    sidebarLayout(
+#                                      sidebarPanel(
+#                                        selectInput(inputId = 'integrationSelectTable2',
+#                                                    label = 'Integration Type:',
+#                                                    choices = unique(data_table$omics)),
+#                                        selectInput(inputId = 'classSelectTable2',
+#                                                    label = 'Class:',
+#                                                    choices = unique(data_table$class)),
+#                                        selectInput(inputId = 'chrSelectTable2',
+#                                                    label = 'Chr:',
+#                                                    choices = unique(data_table$chr_cov)),
+#                                        selectInput(inputId = 'degSelectTable2',
+#                                                    label = 'DEGs2:',
+#                                                    choices = c('All', 'Only DEGs')),
+#                                        selectInput(inputId = 'significativityCriteriaTable2',
+#                                                    label = 'Significativity criteria:',
+#                                                    choices = c('pval', 'FDR')),
+#                                        conditionalPanel(
+#                                          condition = "input.significativityCriteriaTable == 'pval'",
+#                                          sliderInput("pvalRangeTable2",
+#                                                      "P-Value Range:",
+#                                                      min = 0.001,
+#                                                      max = 1,
+#                                                      value = c(0.001, 0.05),
+#                                                      step = 0.005)),
+#                                        conditionalPanel(
+#                                          condition = "input.significativityCriteriaTable == 'FDR'",
+#                                          sliderInput("FDRRangeTable2",
+#                                                      "FDR-Value Range:",
+#                                                      min = 0.001,
+#                                                      max = 1,
+#                                                      value = c(0.001, 0.05),
+#                                                      step = 0.005))
+#                                      ),
+#                                      fluidRow(
+#                                        column(
+#                                          width = 12,
+#                                          offset = 1,
+#                                          tags$div(
+#                                            style = 'overflow-x: auto;',
+#                                            DT::dataTableOutput('res_table')
+#                                          )
+#                                        )
+#                                      )
+#                                    )
+#                           ),
+#                           tabPanel("Volcano"),
+#                           tabPanel("Ridge")
+#               )
+#             )
+#           )
+#   )
+# }
+#
+# ##################################################################
+# ###################################################################
+#
+# .gint_subItem_HeatmapDEGs <- function(data_table){
+#   tabItem(tabName = "heatmapDEGs",
+#           fluidRow(
+#             box(title = "Page containing data table",
+#                 "This is the content of Page 1."),
+#             mainPanel(
+#               tabsetPanel(type = 'tabs',
+#                           tabPanel('XXX',
+#                                    sidebarLayout(
+#                                      sidebarPanel(
+#                                        selectInput(inputId = 'integrationSelectHisto2',
+#                                                    label = 'Integration Type:',
+#                                                    choices = unique(data_table$omics)),
+#                                        selectInput(inputId = 'classSelectHisto2',
+#                                                    label = 'Class:',
+#                                                    choices = unique(data_table$class)),
+#                                        selectInput(inputId = 'chrSelectHisto2',
+#                                                    label = 'Chr:',
+#                                                    choices = c('All', unique(data_table$chr_cov))),
+#                                        selectInput(inputId = 'degSelectHisto2',
+#                                                    label = 'DEGs:',
+#                                                    choices = c('All', 'Only DEGs')),
+#                                        selectInput(inputId = 'significativityCriteriaHisto2',
+#                                                    label = 'Significativity criteria:',
+#                                                    choices = c('pval', 'FDR')),
+#                                        conditionalPanel(
+#                                          condition = "input.significativityCriteriaHisto == 'pval'",
+#                                          sliderInput("pvalRangeHisto2",
+#                                                      "P-Value Range:",
+#                                                      min = 0,
+#                                                      max = 1,
+#                                                      value = c(0, 0.05),
+#                                                      step = 0.005)),
+#                                        conditionalPanel(
+#                                          condition = "input.significativityCriteriaHisto == 'FDR'",
+#                                          sliderInput("FDRRangeHisto2",
+#                                                      "FDR-Value Range:",
+#                                                      min = 0,
+#                                                      max = 1,
+#                                                      value = c(0, 0.05),
+#                                                      step = 0.005))
+#                                      ),
+#                                      mainPanel(
+#                                        plotlyOutput('histogramPlot'),
+#                                        DT::dataTableOutput('histogramTable')
+#                                      )
+#                                    )
+#                           ),
+#                           tabPanel('TFs',
+#                                    sidebarLayout(
+#                                      sidebarPanel(
+#                                        selectInput(inputId = 'classSelectHistoTFs',
+#                                                    label = 'Class:',
+#                                                    choices = unique(data_table$class)),
+#                                        selectInput(inputId = 'degSelectHistoTFs2',
+#                                                    label = 'DEGs:',
+#                                                    choices = c('All', 'Only DEGs')),
+#                                        selectInput(inputId = 'significativityCriteriaHistoTFs2',
+#                                                    label = 'Significativity criteria:',
+#                                                    choices = c('pval', 'FDR'),),
+#                                        conditionalPanel(
+#                                          condition = "input.significativityCriteriaHistoTFs == 'pval'",
+#                                          sliderInput("pvalRangeHistoTFs2",
+#                                                      "P-Value Range:",
+#                                                      min = 0,
+#                                                      max = 1,
+#                                                      value = c(0, 0.10),
+#                                                      step = 0.005)),
+#                                        conditionalPanel(
+#                                          condition = "input.significativityCriteriaHistoTFs == 'FDR'",
+#                                          sliderInput("FDRRangeHistoTFs2",
+#                                                      "FDR-Value Range:",
+#                                                      min = 0,
+#                                                      max = 1,
+#                                                      value = c(0, 0.10),
+#                                                      step = 0.005))
+#                                      ),
+#                                      mainPanel(
+#                                        plotlyOutput('histogramPlotTFs'),
+#                                        plotlyOutput('histogramPlotTFsByChromosome')
+#                                      )
+#                                    ))
+#               )
+#             )
+#           )
+#   )
+# }
+#
+# #############################################################
+# ##############################################################
+#
+# .gint_subItem_chrDistribDEGs <- function(data_table){
+#   tabItem(tabName = "histoDEGs",
+#           fluidRow(
+#             box(title = "Subsection 1",
+#                 "This is the content of Subsection 1."),
+#             mainPanel(
+#               sidebarLayout(
+#                 sidebarPanel(
+#                   selectInput(inputId = 'integrationSelectRidge2',
+#                               label = 'Integration Type:',
+#                               choices = unique(data_table$omics)),
+#                   selectInput("classSelectRidge2",
+#                               "Select Class:",
+#                               choices = unique(data_table$class)),
+#                   conditionalPanel(
+#                     condition = "input.integrationSelectRidge == 'gene_genomic_res'",
+#                     selectInput(inputId = 'genomicTypeSelectRidge2',
+#                                 label = 'Genomic Type:',
+#                                 choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
+#                   selectInput(inputId = 'degSelectRidge2',
+#                               label = 'DEGs:',
+#                               choices = c('All','Only DEGs')),
+#                   selectInput(inputId = 'significativityCriteriaRidge2',
+#                               label = 'Significativity criteria:',
+#                               choices = c('pval', 'FDR')),
+#                   conditionalPanel(
+#                     condition = "input.significativityCriteriaRidge == 'pval'",
+#                     sliderInput("pvalRangeRidge2",
+#                                 "P-Value Range:",
+#                                 min = 0,
+#                                 max = 1,
+#                                 value = c(0, 0.05),
+#                                 step = 0.005)),
+#                   conditionalPanel(
+#                     condition = "input.significativityCriteriaRidge == 'FDR'",
+#                     sliderInput("FDRRangeRidge2",
+#                                 "FDR-Value Range:",
+#                                 min = 0,
+#                                 max = 1,
+#                                 value = c(0, 0.05),
+#                                 step = 0.005))
+#                 ),
+#                 mainPanel(
+#                   plotOutput("ridgelinePlot"),
+#                   DT::dataTableOutput('ridgelineTable')
+#                 )
+#               )
+#             )
+#           )
+#   )
+# }
+# #############################################################
+# ##############################################################
+#
+# .gint_subItem_networkDEGs <- function(data_table){
+#   tabItem(tabName = "networkDEGs",
 #           fluidRow(
 #             box(title = "Subsection 1",
 #                 "This is the content of Subsection 1."),
@@ -579,16 +822,19 @@
 #                 type = 'tabs',
 #                 tabPanel('XXXX',
 #                          sliderInput("numNodes2",
+#                          sliderInput("numNodes3",
 #                                      label = "Number of Nodes",
 #                                      min = 10,
 #                                      max = nrow(data_table),
 #                                      value = 300),
 #                          selectInput(inputId = 'significativityCriteriaNetwork2',
+#                          selectInput(inputId = 'significativityCriteriaNetwork3',
 #                                      label = 'Significativity criteria:',
 #                                      choices = c('pval', 'FDR')),
 #                          conditionalPanel(
 #                            condition = "input.significativityCriteriaNetwork == 'pval'",
 #                            sliderInput("pvalNetwork2",
+#                            sliderInput("pvalNetwork3",
 #                                        "P-Value:",
 #                                        min = 0,
 #                                        max = 1,
@@ -597,6 +843,7 @@
 #                          conditionalPanel(
 #                            condition = "input.significativityCriteriaNetwork == 'FDR'",
 #                            sliderInput("fdrNetwork2",
+#                            sliderInput("fdrNetwork3",
 #                                        "FDR:",
 #                                        min = 0,
 #                                        max = 1,
@@ -609,6 +856,13 @@
 #                                        label = "Visualize only DEGs:",
 #                                        value = FALSE),
 #                          checkboxInput("physics2",
+#                          checkboxInput("layoutNetwork3",
+#                                        label = "Switch to tree Layout:",
+#                                        value = FALSE),
+#                          checkboxInput("degNetwork3",
+#                                        label = "Visualize only DEGs:",
+#                                        value = FALSE),
+#                          checkboxInput("physics3",
 #                                        label = "Physics",
 #                                        value = FALSE),
 #                          visNetworkOutput("networkPlot",
@@ -620,6 +874,7 @@
 #           )
 #   )
 # }
+
 ##################################################################
 ###################################################################
 
@@ -934,6 +1189,7 @@
   )
 }
 
+
 #############################################################
 ##############################################################
 .gint_subItem_circosCompleteInt <- function(data_table){
@@ -1076,7 +1332,7 @@
 
 .create_ui <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
-  addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
+  addResourcePath(prefix = "imgResources", system.file(directoryPath = "www/", package = "gINTomics"))
   dashboardPage(
     dashboardHeader(title = span("gINTomics",
                                  span("Visualizer 1.0",
@@ -1104,7 +1360,7 @@
          .gint_subItem_coefDistribTranscript(data_table),
          .gint_subItem_chrDistribTranscript(data_table),
          .gint_subItem_networkTranscript(data_table),
-        # .gint_subItem_enrichTranscript(data_table),
+         .gint_subItem_enrichTranscript(data_table),
          .gint_subItem_coefDistribDEGs(data_table),
          .gint_subItem_HeatmapDEGs(data_table),
          .gint_subItem_chrDistribDEGs(data_table),
