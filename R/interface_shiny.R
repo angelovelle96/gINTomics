@@ -368,7 +368,7 @@
                   selectInput(inputId = ns('genomicTypeSelectEnrich'),
                               label = 'Integration Type:',
                               choices = unique(data_table$cnv_met)[!is.na(unique(data_table$cnv_met))]),
-                  selectInput(inputId = 'ClassSelectEnrich',
+                  selectInput(inputId = ns('genomicClassSelectEnrich'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
                   selectInput(inputId = ns('genomicDBSelectEnrich'),

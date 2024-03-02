@@ -1011,7 +1011,6 @@
     }
   })
 }
-
 #######################################################################
 ########################################################################
 #' @importFrom plotly renderPlotly
@@ -1042,78 +1041,6 @@
     }
   })
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#' #######################################################################
-#' ########################################################################
-#' #' @importFrom clusterProfiler dotplot
-#'
-#' .reactive_gen_dotplot <- function(bg_enrich,
-#'                                   input,
-#'                                   output,
-#'                                   session){
-#'   reactive({
-#'     if (bg_enrich$is_alive()){
-#'       invalidateLater(millis = 1000,
-#'                       session = session)
-#'     }
-#'     if (!bg_enrich$is_alive()) {
-#'       data <- bg_enrich$get_result()
-#'       if(sum(c("cnv", "met")%in%names(data))){
-#'         cnv <- data[["cnv"]][[1]][[1]]
-#'         cnv <- dotplot(cnv)
-#'         cnv <- ggplotly(cnv)
-#'         met <- data[["met"]][[1]][[1]]
-#'         met <- dotplot(met)
-#'         met <- ggplotly(met, width = 800, height = 700)
-#'         ans <- list(cnv=cnv, met=met)
-#'       }else{
-#'         ans <- data[[1]][[1]]
-#'         ans <- dotplot(ans) + scale_y_discrete(labels=function(x) str_wrap(x, width=40))
-#'         cnv <- ggplotly(ans, width = 800 ,height = 700)
-#'       }
-#'       return(ans)
-#'     }
-#'   })
-#' }
-#'
-#' #######################################################################
-#' ########################################################################
-#' @importFrom plotly renderPlotly
-
-# .render_gen_dotplot <- function(gen_plot,
-#                                 data_gen_enrich,
-#                                 input,
-#                                 output,
-#                                 session){
-#   observe({
-#     if("gene_genomic_res"%in%data_gen_enrich$omics){
-#       output$gen_dotplot <- renderPlotly({
-#         ans=gen_plot()
-#         ans=ans[[input$genomicTypeSelectEnrich]]
-#       })
-#     }else{
-#       output$gen_dotplot <- renderPlotly({
-#         gen_plot()
-#       })
-#     }
-#   })%>%bindEvent(input$genomicTypeSelectEnrich)
-# }
-
 #######################################################################
 ########################################################################
 #' @importFrom shiny.gosling arrange_views
