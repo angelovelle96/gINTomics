@@ -155,31 +155,27 @@
   renderDataTable({
     venn_data <- reactive_venn()
 
-    if (!is.null(venn_data$cnv_sign_genes) && !is.null(venn_data$met_sign_genes)) {
+    if (!is.null(venn_data$cnv_sign_genes) && !is.null(venn_data$met_sign_genes)){
       cnv_genes <- unlist(venn_data$cnv_sign_genes)
       met_genes <- unlist(venn_data$met_sign_genes)
 
-      if (length(cnv_genes) > 0 & length(met_genes) > 0) {
+      if(length(cnv_genes) > 0 & length(met_genes) > 0){
         common_genes <- base::intersect(cnv_genes, met_genes)
         data.frame(Genes = common_genes)
-      } else if (length(cnv_genes) == 1 & length(met_genes) == 1) {
+      }else if(length(cnv_genes) == 1 & length(met_genes) == 1){
         data.frame(CNV_Genes = cnv_genes, MET_Genes = met_genes, stringsAsFactors = FALSE)
-      } else {
-        # Handle other cases as needed
-        # For instance, return an empty data frame
+      }else{
         data.frame(Genes = character(), stringsAsFactors = FALSE)
       }
-    } else if (!is.null(venn_data$cnv_sign_genes)) {
+    }else if(!is.null(venn_data$cnv_sign_genes)){
       data.frame(CNV_Genes = unlist(venn_data$cnv_sign_genes), stringsAsFactors = FALSE)
-    } else if (!is.null(venn_data$met_sign_genes)) {
+    }else if(!is.null(venn_data$met_sign_genes)){
       data.frame(MET_Genes = unlist(venn_data$met_sign_genes), stringsAsFactors = FALSE)
-    } else {
-      # Handle case where both cnv_sign_genes and met_sign_genes are NULL
+    }else{
       data.frame(Genes = character(), stringsAsFactors = FALSE)
     }
   })
 }
-
 
 ############################################################################
 ############################################################################
@@ -256,7 +252,6 @@
     return(ridge_plot)
   })
 }
-
 
 ############################################################################
 ############################################################################

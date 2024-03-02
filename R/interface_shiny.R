@@ -1,3 +1,6 @@
+#' @importFrom shiny addResourcePath
+#' @importFrom shiny dashboardSidebar
+
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
@@ -30,6 +33,8 @@
 
 #############################################################
 ##############################################################
+#' @importFrom shiny addResourcePath
+#' @importFrom shiny tabItem
 
 .gint_tabitem_home <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
@@ -43,6 +48,7 @@
 
 ###################################################################
 ####################################################################
+#' @importFrom shiny tabItem
 
 .gint_subItem_coefDistribGenomic <- function(data_table){
   tabItem(tabName = "coefDistribGenomic",
@@ -939,49 +945,7 @@
 
 
 }
-# '/* body */.content-wrapper, .right-side {background-color: #7d848b;}'
-#"body {background-color: #ffffff; /* white background color */}"
-#############################################################
-##############################################################
-#
-# .gint_tabitem_enr <- function(data_table){
-#   ns <- NS("prova")
-#   tabItem(tabName = "page_enrichment",
-#           fluidRow(
-#             box(title = "Subsection 1",
-#                 "This is the content of Subsection 1."),
-#             mainPanel(
-#               tabsetPanel(
-#                 type = 'tabs',
-#                 tabPanel('Genomic',
-#                          sidebarLayout(
-#                            sidebarPanel(
-#                              #input
-#                              selectInput(inputId = ns('genomicTypeSelectEnrich'),
-#                                          label = 'Integration Type:',
-#                                          choices = unique(data_table$cnv_met)[!is.na(unique(data_table$cnv_met))]),
-#                              selectInput(inputId = 'ClassSelectEnrich',
-#                                          label = 'Class:',
-#                                          choices = unique(data_table$class))
-#
-#                            ),
-#                          mainPanel(textOutput(ns("gen_enrichment")),
-#                                    plotlyOutput(ns("gen_dotplot"))))
-#                         )
-#                 , tabPanel('TF',
-#                            sidebarLayout(
-#                              sidebarPanel(
-#                                #input
-#                                selectInput(inputId = 'ClassSelectEnrich',
-#                                            label = 'Class:',
-#                                            choices = unique(data_table$class))
-#
-#                              ),
-#                              mainPanel(textOutput(ns("tf_enrichment")),
-#                                        plotlyOutput(ns("tf_dotplot"))))))
-#             )
-#           ))
-# }
+
 ################################################################
 #################################################################
 

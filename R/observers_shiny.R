@@ -250,6 +250,7 @@
                                                      order(-coef, pval)), ][1:10,])
       data_table$pval_fdr <- -log10(data_table$pval)
     }else{
+      data_table["group"] <- "Not Significant"
       data_table[data_table$fdr <= fdrRange, 'group'] <- "Significant"
       top_peaks <- data_table[with(data_table,
                                    order(fdr, coef)),]
@@ -319,8 +320,7 @@
     if(!"class"%in%colnames(data_table) & deg == FALSE){
       df_heatmap <- multiomics_integration[[integrationSelect]]$data$response_var
       data_table <- data_table[data_table$omics == integrationSelect,]
-      data_table <- data_table[data_table$class == classSelect,]
-    }
+    }else{return(NULL)}
     if("class"%in%colnames(data_table) & deg == TRUE){
       df_heatmap <- multiomics_integration[[integrationSelect]][[classSelect]]$data$response_var
       data_table <- data_table[data_table$omics == integrationSelect,]
@@ -383,6 +383,8 @@
       }else{
         df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= fdrRange,]
       }
+      if (nrow(df_heatmap_t) == 0){
+        return(NULL)}
       top_cnv <- df_heatmap_t %>%
         arrange(desc(abs(cnv))) %>%
         head(numTopCNVonly)
@@ -412,6 +414,8 @@
       }else{
         df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_met <= fdrRange,]
       }
+      if (nrow(df_heatmap_t) == 0){
+        return(NULL)}
       top_met <- df_heatmap_t %>%
         arrange(desc(abs(met))) %>%
         head(numTopMETonly)
@@ -441,6 +445,8 @@
       }else{
         df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_mirna_cnv <= fdrRange,]
       }
+      if (nrow(df_heatmap_t) == 0){
+        return(NULL)}
       df_heatmap_t <- as.data.frame(df_heatmap_t)
       top_mirna_cnv <- df_heatmap_t %>%
         arrange(desc(abs(mirna_cnv)))  %>%
@@ -504,7 +510,7 @@
       pvalRange <- input$transcriptPvalRangeRidge
       fdrRange <- input$transcriptFdrRangeRidge
     }
-    if(type == "all" & deg == TRUE){
+    if(type == "all" & deg == TRUE & "class"%in%colnames(data_table)){
       integrationSelect <- input$integrationSelectRidgeDEG
       significativityCriteria <- input$significativityCriteriaRidgeDEG
       pvalRange <- input$pvalRangeRidgeDEG
@@ -512,8 +518,9 @@
       typeSelect <- input$typeSelectRidgeDEG
       classSelect <- input$classSelectRidgeDEG
       df <- df[df$deg,]
+      df <- df[df$class == classSelect,]
     }
-    df <- df[df$class == classSelect,]
+    if("class"%in%colnames(data_table)){df <- df[df$class == classSelect,]}
     if(integrationSelect == "gene_genomic_res"){
       df <- df[df$cnv_met == typeSelect,]
       df <- df[!is.na(df$cnv_met), ]
@@ -526,6 +533,8 @@
       df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
                                 "Significant", "Not Significant")
     }
+    if (nrow(df) == 0){
+      return(NULL)}
     lower_quantile <- quantile(df$coef, 0.001)
     upper_quantile <- quantile(df$coef, 0.999)
     ans <- list(df = df, quantiles = c(lower_quantile, upper_quantile))
@@ -598,7 +607,9 @@
       df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
                                 "Significant", "Not Significant")
     }
-    return(df)
+    if (nrow(df) == 0){
+      return(NULL)}else{
+    return(df)}
   }) %>% bindEvent(input$genomicIntegrationSelectRidge,
                    input$genomicClassSelectRidge,
                    input$genomicSignificativityCriteriaRidge,
@@ -682,7 +693,9 @@
                                         "Significant",
                                         "Not Significant")
     }
-    return(data_table)
+    if (nrow(data_table) == 0){
+      return(NULL)}else{
+    return(data_table)}
   })%>%bindEvent(input$genomicIntegrationSelectHisto,
                  input$genomicTypeSelect,
                  input$genomicClassSelectHisto,
@@ -770,7 +783,9 @@
                                         "Significant",
                                         "Not Significant")
     }
-    return(data_table)
+    if (nrow(data_table) == 0){
+      return(NULL)}else{
+    return(data_table)}
   })%>%bindEvent(input$genomicIntegrationSelectHisto,
                  input$genomicTypeSelect,
                  input$genomicClassSelectHisto,
