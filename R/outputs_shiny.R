@@ -85,50 +85,59 @@
 
 #########################################################################
 #########################################################################
+#' @importFrom visNetwork visNetwork
+#' @importFrom visNetwork visGroups
+#' @importFrom visNetwork visLegend
+#' @importFrom visNetwork visEdges
+#' @importFrom visNetwork visOptions
+#' @importFrom visNetwork visLayout
+
 .build_network <- function(nodes,
                            edges,
                            legend_nodes,
                            legend_edges){
-      visNetwork(nodes,
-                 edges,
-                 width = "100%") %>%
-        visGroups(groupname = 'TF',
-                  color = '#FFBA01') %>%
-        visGroups(groupname = 'Target',
-                  color = '#CCE7C9') %>%
-        visGroups(groupname = 'miRNA',
-                  color = '#9969C7') %>%
-        visLegend(addEdges = legend_edges,
-                  addNodes = legend_nodes,
-                  useGroups = FALSE,
-                  width = 0.2,
-                  position = 'right',
-                  main = 'Legend') %>%
-        visEdges(shadow = TRUE,
-                 smooth = FALSE,
-                 arrows = list(to = list(enabled = TRUE)),
-                 color = list(color = "black", highlight = "red")) %>%
-        visOptions(highlightNearest = list(enabled = TRUE,
-                                           degree = 2,
-                                           hover = TRUE),
-        nodesIdSelection = TRUE,
-        manipulation = TRUE) %>%
-        visLayout(randomSeed = 20, improvedLayout = TRUE)
+  visNetwork(nodes,
+             edges,
+             width = "100%") %>%
+    visGroups(groupname = 'TF',
+              color = '#FFBA01') %>%
+    visGroups(groupname = 'Target',
+              color = '#CCE7C9') %>%
+    visGroups(groupname = 'miRNA',
+              color = '#9969C7') %>%
+    visLegend(addEdges = legend_edges,
+              addNodes = legend_nodes,
+              useGroups = FALSE,
+              width = 0.2,
+              position = 'right',
+              main = 'Legend') %>%
+    visEdges(shadow = TRUE,
+             smooth = FALSE,
+             arrows = list(to = list(enabled = TRUE)),
+             color = list(color = "black", highlight = "red")) %>%
+    visOptions(highlightNearest = list(enabled = TRUE,
+                                       degree = 2,
+                                       hover = TRUE),
+               nodesIdSelection = TRUE,
+               manipulation = TRUE) %>%
+    visLayout(randomSeed = 20, improvedLayout = TRUE)
 }
 
 #########################################################################
 #########################################################################
+#' @importFrom ggVennDiagram ggVennDiagram
 
 .build_venn <- function(venn_data){
-    cnv_sign_genes <- venn_data$cnv_sign_genes
-    met_sign_genes <- venn_data$met_sign_genes
-    list_venn <- list(CNV = cnv_sign_genes$cov,
-                      MET = met_sign_genes$cov)
-    venn_diagram <- ggVennDiagram(list_venn, show_intersect = TRUE)
-    return(venn_diagram)
+  cnv_sign_genes <- venn_data$cnv_sign_genes
+  met_sign_genes <- venn_data$met_sign_genes
+  list_venn <- list(CNV = cnv_sign_genes$cov,
+                    MET = met_sign_genes$cov)
+  venn_diagram <- ggVennDiagram(list_venn, show_intersect = TRUE)
+  return(venn_diagram)
 }
 #########################################################################
 #########################################################################
+#' @importFrom plotly ggplotly
 
 .render_venn <- function(reactive_venn){
   renderPlotly({
@@ -174,24 +183,25 @@
 
 ############################################################################
 ############################################################################
+#' @importFrom plotly plot_ly
 
 .build_volcano <- function(volcano_data){
-    plot_ly(volcano_data,
-            x = ~coef,
-            y = ~pval_fdr,
-            mode = 'markers',
-            color =  ~group,
-            symbol = ~class,
-            text =  ~paste("Group:", group, "<br>",
-                           "Class:", class,"<br>",
-                           "Name:", cov, "<br>",
-                           "Pval/FDR:", pval_fdr, "<br>",
-                           "coef", coef),
-            textposition = 'top right') %>%
-      layout(title = "Volcano Plot") %>%
-      layout(width = 1000,
-             height = 700) #%>%
-    #add_text(data = volcano_data, text=~cov)
+  plot_ly(volcano_data,
+          x = ~coef,
+          y = ~pval_fdr,
+          mode = 'markers',
+          color =  ~group,
+          symbol = ~class,
+          text =  ~paste("Group:", group, "<br>",
+                         "Class:", class,"<br>",
+                         "Name:", cov, "<br>",
+                         "Pval/FDR:", pval_fdr, "<br>",
+                         "coef", coef),
+          textposition = 'top right') %>%
+    layout(title = "Volcano Plot") %>%
+    layout(width = 1000,
+           height = 700) #%>%
+  #add_text(data = volcano_data, text=~cov)
 
 }
 #######################################################################
@@ -208,6 +218,7 @@
 
 ############################################################################
 ############################################################################
+#' @importFrom ggplot2 ggplot
 
 .build_ridge <- function(ridge_data,
                          quantiles){
@@ -233,6 +244,7 @@
 
 ############################################################################
 ############################################################################
+#' @importFrom shiny renderPlot
 
 .render_ridge <- function(reactive_ridge){
   renderPlot({
@@ -248,6 +260,7 @@
 
 ############################################################################
 ############################################################################
+#' @importFrom ggplot2 ggplot
 
 .build_histo <- function(histo_data){
   ggplot(histo_data,
@@ -261,20 +274,22 @@
 
 ############################################################################
 ############################################################################
+#' @importFrom plotly ggplotly
 
 .render_histo <- function(reactive_histo){
   renderPlotly({
     histo_data <- reactive_histo()
     histo_plot <- ggplotly(.build_histo(histo_data = histo_data))
     return(histo_plot)
-    })
+  })
 }
 
 ############################################################################
 ############################################################################
+#' @importFrom DT renderDataTable
 
 .render_histo_table <- function(reactive_histo_table){
-  DT::renderDataTable({
+  renderDataTable({
     table_data <- reactive_histo_table()
     ttable <- .build_table(table_data)
     return(ttable)
@@ -283,6 +298,7 @@
 
 ############################################################################
 ############################################################################
+#' @importFrom plotly plot_ly
 
 .build_histo_TF <- function(histo_data){
   plot_ly(histo_data,
@@ -294,6 +310,7 @@
 
 ############################################################################
 ############################################################################
+#' @importFrom plotly plot_ly
 
 .build_histo_TFbyChr <- function(histo_data){
   plot_ly(histo_data,
@@ -318,27 +335,30 @@
 }
 ############################################################################
 ############################################################################
+#' @importFrom DT renderDataTable
 
 .render_ridge_table <- function(reactive_ridge_table){
-  DT::renderDataTable({
+  renderDataTable({
     table_data <- reactive_ridge_table()
     ttable <- .build_table(table_data)
     return(ttable)
-})
+  })
 }
 ############################################################################
 ############################################################################
+#' @importFrom DT datatable
 
 .build_table <- function(table_data){
-  DT::datatable(table_data,
-                options = list(orderClasses = TRUE))
+  datatable(table_data,
+            options = list(orderClasses = TRUE))
 }
 
 ############################################################################
 ############################################################################
+#' @importFrom DT renderDataTable
 
 .render_table <- function(reactive_table){
-  DT::renderDataTable({
+  renderDataTable({
     table_data <- reactive_table()
     ttable <- .build_table(table_data)
     return(ttable)
@@ -347,6 +367,7 @@
 
 ############################################################################
 ############################################################################
+#' @importFrom shiny renderUI
 
 .render_circos <- function(circos_reactive){
 
@@ -378,10 +399,10 @@ run_shiny <- function(multiomics_integration){
                                          deg = FALSE)
 
     reactive_network_deg <- gINTomics:::.select_deg_network(data_table = data_table,
-                                                        input = input,
-                                                        output = output,
-                                                        network_data = nnet,
-                                                        deg = TRUE)
+                                                            input = input,
+                                                            output = output,
+                                                            network_data = nnet,
+                                                            deg = TRUE)
     gINTomics:::.render_reactive_network(reactive_network = reactive_network_deg,
                                          input = input,
                                          output = output,
@@ -396,9 +417,9 @@ run_shiny <- function(multiomics_integration){
     output$common_genes_table <- gINTomics:::.render_venn_table(reactive_venn)
 
     reactive_venn_deg <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
-                                                        input = input,
-                                                        output = output,
-                                                        deg = TRUE)
+                                                            input = input,
+                                                            output = output,
+                                                            deg = TRUE)
     output$venn_plotDEG<- gINTomics:::.render_venn(reactive_venn_deg)
     output$venn_tableDEG <- gINTomics:::.render_venn_table(reactive_venn_deg)
 
@@ -411,17 +432,17 @@ run_shiny <- function(multiomics_integration){
     output$volcanoPlot <- gINTomics:::.render_volcano(reactive_volcano)
 
     reactive_volcano_transcript <- gINTomics:::.prepare_reactive_volcano(data_table,
-                                                              input = input,
-                                                              output = output,
-                                                              type = "transcript",
-                                                              deg = FALSE)
+                                                                         input = input,
+                                                                         output = output,
+                                                                         type = "transcript",
+                                                                         deg = FALSE)
     output$transcriptVolcanoPlot <- gINTomics:::.render_volcano(reactive_volcano_transcript)
 
     reactive_volcano_deg <- gINTomics:::.prepare_reactive_volcano(data_table,
-                                                                         input = input,
-                                                                         output = output,
-                                                                         type = "all",
-                                                                         deg = TRUE)
+                                                                  input = input,
+                                                                  output = output,
+                                                                  type = "all",
+                                                                  deg = TRUE)
     output$volcanoPlotDEG <- gINTomics:::.render_volcano(reactive_volcano_deg)
 
 
@@ -461,24 +482,24 @@ run_shiny <- function(multiomics_integration){
     output$ridgelinePlotTranscript <- gINTomics:::.render_ridge(reactive_ridge_transcript)
 
     reactive_ridge_tableTranscript <- gINTomics:::.prepare_reactive_ridge_table(data_table,
-                                                                      input = input,
-                                                                      output = output,
-                                                                      type = "transcript",
-                                                                      deg = FALSE)
+                                                                                input = input,
+                                                                                output = output,
+                                                                                type = "transcript",
+                                                                                deg = FALSE)
     output$ridgelineTableTranscript <- gINTomics:::.render_ridge_table(reactive_ridge_tableTranscript)
 
     reactive_ridge_deg <- gINTomics:::.prepare_reactive_ridge(data_table,
-                                                                     input = input,
-                                                                     output = output,
-                                                                     type = "all",
-                                                                     deg = TRUE)
+                                                              input = input,
+                                                              output = output,
+                                                              type = "all",
+                                                              deg = TRUE)
     output$ridgelinePlotDEG <- gINTomics:::.render_ridge(reactive_ridge_deg)
 
     reactive_ridge_tableDEG <- gINTomics:::.prepare_reactive_ridge_table(data_table,
-                                                                                input = input,
-                                                                                output = output,
-                                                                                type = "all",
-                                                                                deg = TRUE)
+                                                                         input = input,
+                                                                         output = output,
+                                                                         type = "all",
+                                                                         deg = TRUE)
     output$ridgelineTableDEG <- gINTomics:::.render_ridge_table(reactive_ridge_tableDEG)
 
 
@@ -497,29 +518,29 @@ run_shiny <- function(multiomics_integration){
     output$histogramTable <- gINTomics:::.render_histo_table(reactive_histo_table)
 
     reactive_histo_transcript <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                          input = input,
-                                                          output = output,
-                                                          type = "transcript",
-                                                          deg = FALSE)
+                                                                     input = input,
+                                                                     output = output,
+                                                                     type = "transcript",
+                                                                     deg = FALSE)
     output$histogramPlotTranscript <- gINTomics:::.render_histo(reactive_histo_transcript)
     reactive_histo_table_transcript <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                      input = input,
-                                                                      output = output,
-                                                                      type = "transcript",
-                                                                      deg = FALSE)
+                                                                                 input = input,
+                                                                                 output = output,
+                                                                                 type = "transcript",
+                                                                                 deg = FALSE)
     output$histogramTableTranscript <- gINTomics:::.render_histo_table(reactive_histo_table_transcript)
 
     reactive_histo_deg <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                                     input = input,
-                                                                     output = output,
-                                                                     type = "all",
-                                                                     deg = TRUE)
+                                                              input = input,
+                                                              output = output,
+                                                              type = "all",
+                                                              deg = TRUE)
     output$histogramPlotDEG <- gINTomics:::.render_histo(reactive_histo_deg)
     reactive_histo_table_deg <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                                 input = input,
-                                                                                 output = output,
-                                                                                 type = "all",
-                                                                                 deg = TRUE)
+                                                                          input = input,
+                                                                          output = output,
+                                                                          type = "all",
+                                                                          deg = TRUE)
     output$histogramTableDEG <- gINTomics:::.render_histo_table(reactive_histo_table_deg)
     ## ----------------------- HISTO SERVER TF --------------------------
     reactive_histo_tf <- gINTomics:::.prepare_reactive_histo_tf(data_table,
@@ -568,5 +589,3 @@ run_shiny <- function(multiomics_integration){
 
   shiny::shinyApp(ui, server)
 }
-
-
