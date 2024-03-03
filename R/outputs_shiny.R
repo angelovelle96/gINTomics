@@ -383,7 +383,7 @@ run_shiny <- function(multiomics_integration){
 
     # ---------------------- NETWORK SERVER -----------------------------
     nnet <- gINTomics:::.prepare_network(data_table)
-    reactive_network <- gINTomics:::.select_deg_network(data_table = data_table,
+    reactive_network <- gINTomics:::.select_network(data_table = data_table,
                                                         input = input,
                                                         output = output,
                                                         network_data = nnet,
@@ -393,7 +393,7 @@ run_shiny <- function(multiomics_integration){
                                          output = output,
                                          deg = FALSE)
 
-    reactive_network_deg <- gINTomics:::.select_deg_network(data_table = data_table,
+    reactive_network_deg <- gINTomics:::.select_network(data_table = data_table,
                                                             input = input,
                                                             output = output,
                                                             network_data = nnet,

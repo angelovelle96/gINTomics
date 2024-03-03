@@ -7,7 +7,7 @@
                                      output,
                                      deg = FALSE){
   observe({
-    if(deg==FALSE){
+    if(!deg){
       output$networkPlot <- renderVisNetwork({
         network_data <- reactive_network()
         network <- .build_network(nodes=network_data$nodes,
@@ -45,57 +45,44 @@
 ################################################################
 #################################################################
 
-.select_deg_network <- function(data_table,
-                                network_data,
-                                input,
-                                output,
-                                deg = FALSE){
+.select_network <- function(data_table,
+                            network_data,
+                            input,
+                            output,
+                            deg = FALSE){
   reactive({
-    if(deg==FALSE){
+    data_table <- data_table[data_table$omics%in%c("tf_res",
+                                                   "tf_mirna_res",
+                                                   "mirna_target_res"),]
+    if(!deg){
       numNodes <- input$numNodes
       significativityCriteria <- input$significativityCriteriaNetwork
       pval <- input$pvalNetwork
       fdr <- input$fdrNetwork
-
-      ans <- network_data
-      #data_table <- data_table[data_table$cov != "(Intercept)",]
-      if(significativityCriteria == "pval"){
-        data_table <- data_table[data_table$pval <= pval,]
-      } else {
-        data_table <- data_table[data_table$fdr <= fdr,]
-      }
-      ssel <- unique(data_table$response)
-      ssel <- head(ssel, numNodes)
-      ans$nodes <- ans$nodes[ans$nodes$id%in%ssel,]
-      ans$edges <- ans$edges[ans$edges$from%in%ssel,]
-      ans$edges <- ans$edges[ans$edges$to%in%ssel,]
-      nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
-      ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
-    }
-
-    if(deg==TRUE & "class"%in%colnames(data_table)){
+    }else{
       numNodes <- input$numNodesDEG
       significativityCriteria <- input$significativityCriteriaNetworkDEG
       pval <- input$pvalNetworkDEG
       fdr <- input$fdrNetworkDEG
-
-      ans <- network_data
-      #data_table <- data_table[data_table$cov != "(Intercept)",]
-      if(significativityCriteria == "pval"){
-        data_table <- data_table[data_table$pval <= pval,]
-      } else {
-        data_table <- data_table[data_table$fdr <= fdr,]
       }
-      ssel <- unique(data_table$response[data_table$deg])
-      ssel <- head(ssel, numNodes)
-      ans$nodes <- ans$nodes[ans$nodes$id%in%ssel,]
-      ans$edges <- ans$edges[ans$edges$from%in%ssel,]
+      ans <- network_data
+      if(significativityCriteria == "pval"){
+        ffrom <- data_table$cov[data_table$pval <= pval]
+        tto <- data_table$response[data_table$pval <= pval]
+      } else {
+        ffrom <- data_table$cov[data_table$fdr <= fdr]
+        tto <- data_table$response[data_table$fdr <= fdr]
+      }
+      if(deg){
+        tto <- intersect(tto,unique(data_table$response[data_table$deg]))
+        }
+      ans$edges <- ans$edges[ans$edges$from%in%ffrom,]
+      ans$edges <- ans$edges[ans$edges$to%in%tto,]
+      ssel <- head(intersect(ans$nodes$id, tto), numNodes)
       ans$edges <- ans$edges[ans$edges$to%in%ssel,]
-      # nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
-      # ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
-    }else{return(NULL)}
-
-    return(ans)
+      nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
+      ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
+      return(ans)
   })%>%bindEvent(input$layoutNetwork,
                  input$numNodes,
                  input$significativityCriteriaNetwork,
