@@ -466,5 +466,3 @@ dot_plotly <- function(enrich_result, showCategory=10, width=800, height=700){
   return(ans)
 
 }
-
-
