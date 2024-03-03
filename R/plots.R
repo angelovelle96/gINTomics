@@ -395,7 +395,6 @@
 
 dot_plotly <- function(enrich_result, showCategory=10, width=800, height=700){
   df <- fortify(enrich_result, showCategory = showCategory)
-  df <- dplyr::mutate(df, x = eval(parse(text = x)))
   df$Description <- as.character(df$Description)
   df <- df[order(df$GeneRatio, decreasing = T),]
   df$Description <- unlist(lapply(df$Description, function(label) {
