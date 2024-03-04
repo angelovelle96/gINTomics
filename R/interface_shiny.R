@@ -1,5 +1,4 @@
-#' @importFrom shiny addResourcePath
-#' @importFrom shiny dashboardSidebar
+#' @import shiny
 
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
@@ -33,8 +32,7 @@
 
 #############################################################
 ##############################################################
-#' @importFrom shiny addResourcePath
-#' @importFrom shiny tabItem
+#' @import shiny
 
 .gint_tabitem_home <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
@@ -48,7 +46,9 @@
 
 ###################################################################
 ####################################################################
-#' @importFrom shiny tabItem
+#' @import shiny
+#' @importFrom plotly plotlyOutput
+#' @importFrom DT dataTableOutput
 
 .gint_subItem_coefDistribGenomic <- function(data_table){
   tabItem(tabName = "coefDistribGenomic",
@@ -167,7 +167,7 @@
                                        plotOutput("ridgelinePlot"),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                       DT::dataTableOutput('ridgelineTable')
+                                       dataTableOutput('ridgelineTable')
                                        )
                                      )
                                    ))
@@ -179,6 +179,9 @@
 
 ####################################################
 #####################################################
+#' @import shiny
+#' @importFrom plotly plotlyOutput
+#' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
 
 .gint_subItem_HeatmapGenomic  <- function(data_table){
 
@@ -245,7 +248,7 @@
                     sliderInput("pvalRangeHeatmap",
                                 "P-Value Range:",
                                 min = 0.01,
-                                max = 0.5,
+                                max = 1,
                                 value = 0.05,
                                 step = 0.005)),
                   conditionalPanel(
@@ -253,7 +256,7 @@
                     sliderInput("FDRRangeHeatmap",
                                 "FDR-Value Range:",
                                 min = 0.01,
-                                max = 0.5,
+                                max = 1,
                                 value = 0.05,
                                 step = 0.005))
 
@@ -272,8 +275,11 @@
 ###########################################################
 #' @import shiny
 #' @importFrom gtools mixedsort
+#' @importFrom plotly plotlyOutput
+#' @importFrom DT dataTableOutput
 
 .gint_subItem_chrDistribGenomic <- function(data_table){
+  chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
   tabItem(tabName = "histoGenomic",
           fluidRow(
             box(title = "Page containing data table",
@@ -295,7 +301,7 @@
                                                    choices = unique(data_table$class)),
                                        selectInput(inputId = 'genomicChrSelectHisto',
                                                    label = 'Chr:',
-                                                   choices = c('All', mixedsort(unique(data_table$chr_cov)))),
+                                                   choices = chr),
                                        selectInput(inputId = 'genomicSignificativityCriteriaHisto',
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
@@ -320,7 +326,7 @@
                                        plotlyOutput('histogramPlot'),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                       DT::dataTableOutput('histogramTable')
+                                       dataTableOutput('histogramTable')
                                        )
                                      )
                                    )
@@ -331,6 +337,8 @@
 
 #############################################################
 ##############################################################
+#' @import shiny
+#' @importFrom plotly plotlyOutput
 
 .gint_tabitem_enr <- function(data_table){
   ns <- NS("prova")
@@ -339,10 +347,8 @@
             box(title = "Subsection 1",
                 "This is the content of Subsection 1."),
             mainPanel(
-
               sidebarLayout(
                 sidebarPanel(
-                  #input
                   selectInput(inputId = ns('genomicTypeSelectEnrich'),
                               label = 'Integration Type:',
                               choices = unique(data_table$cnv_met)[!is.na(unique(data_table$cnv_met))]),
@@ -352,12 +358,11 @@
                   selectInput(inputId = ns('genomicDBSelectEnrich'),
                               label = 'Database:',
                               choices = c("go", "kegg"))
-
                 ),
                 mainPanel(textOutput(ns("gen_enrichment")),
                           plotlyOutput(ns("gen_dotplot")),
                           HTML(paste0(rep("<br>", 20), collapse = "")),
-                          DT::dataTableOutput(ns("gen_enrich_table"))))
+                          dataTableOutput(ns("gen_enrich_table"))))
             )
 
 
@@ -366,6 +371,8 @@
 
 ##################################################################
 ###################################################################
+#' @import shiny
+
 .gint_subItem_enrichTranscript <- function(data_table){
   ns <- NS("prova")
   tabItem(tabName = "enrichTranscript",
@@ -376,7 +383,6 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  #input
                   selectInput(inputId = ns('transcriptionalClassSelectEnrich'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
@@ -394,8 +400,9 @@
 
 ##################################################################
 ###################################################################
-
-
+#' @import shiny
+#' @importFrom plotly plotlyOutput
+#' @importFrom DT dataTableOutput
 
 .gint_subItem_coefDistribTranscript <- function(data_table){
   tabItem(tabName = "coefDistribTranscript",
@@ -468,7 +475,7 @@
                                        plotOutput("ridgelinePlotTranscript"),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                       DT::dataTableOutput('ridgelineTableTranscript')
+                                       dataTableOutput('ridgelineTableTranscript')
                                        )
                                      )
                                    ))
@@ -479,8 +486,13 @@
 }
 ################################################################
 #################################################################
+#' @import shiny
+#' @importFrom gtools mixedsort
+#' @importFrom plotly plotlyOutput
+#' @importFrom DT dataTableOutput
 
 .gint_subItem_chrDistribTranscript <- function(data_table){
+  chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
   tabItem(tabName = "histoTranscript",
           fluidRow(
             box(title = "Subsection 1",
@@ -497,7 +509,7 @@
                               choices = unique(data_table$class)),
                   selectInput(inputId = 'transcriptChrSelectHisto',
                               label = 'Chr:',
-                              choices = c('All', mixedsort(unique(data_table$chr_cov)))),
+                              choices = chr),
                   selectInput(inputId = 'transcriptSignificativityCriteriaHisto',
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
@@ -522,7 +534,7 @@
                   plotlyOutput('histogramPlotTranscript'),
                   tags$div(
                     style = 'overflow-x: auto;',
-                  DT::dataTableOutput('histogramTableTranscript')
+                  dataTableOutput('histogramTableTranscript')
                   )
                 )
               )
@@ -532,6 +544,8 @@
 }
 ########################################################################
 #########################################################################
+#' @import shiny
+#' @importFrom visNetwork visNetworkOutput
 
 .gint_subItem_networkTranscript <- function(data_table){
   tabItem(tabName = "networkTranscript",
@@ -539,6 +553,8 @@
             box(title = "Subsection 1",
                 "This is the content of Subsection 1."),
             mainPanel(
+              sidebarLayout(
+                sidebarPanel(
               sliderInput("numNodes",
                           label = "Number of Nodes",
                           min = 10,
@@ -568,16 +584,21 @@
                             value = FALSE),
               checkboxInput("physics",
                             label = "Physics",
-                            value = FALSE),
+                            value = FALSE)),
+              mainPanel(
               visNetworkOutput("networkPlot",
                                height = 800,
                                width = 1600)
+              )
+            )
             )
           )
   )
 }
 
-
+#' @import shiny
+#' @importFrom plotly plotlyOutput
+#' @importFrom DT dataTableOutput
 
 .gint_subItem_coefDistribDEGs <- function(data_table){
   tabItem(tabName = "coefDistribDEGs",
@@ -692,7 +713,7 @@
                                        plotOutput("ridgelinePlotDEG"),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                       DT::dataTableOutput('ridgelineTableDEG')
+                                       dataTableOutput('ridgelineTableDEG')
                                        )
                                      )
                                    ))
@@ -704,6 +725,8 @@
 
 ##################################################################
 ###################################################################
+#' @import shiny
+#' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
 
 .gint_subItem_HeatmapDEGs <- function(data_table){
   tabItem(tabName = "heatmapDEGs",
@@ -769,7 +792,7 @@
                     sliderInput("pvalRangeHeatmapDEG",
                                 "P-Value Range:",
                                 min = 0.01,
-                                max = 0.5,
+                                max = 1,
                                 value = 0.05,
                                 step = 0.005)),
                   conditionalPanel(
@@ -777,7 +800,7 @@
                     sliderInput("FDRRangeHeatmapDEG",
                                 "FDR-Value Range:",
                                 min = 0.01,
-                                max = 0.5,
+                                max = 1,
                                 value = 0.05,
                                 step = 0.005))
 
@@ -794,8 +817,13 @@
 
 #############################################################
 ##############################################################
+#' @import shiny
+#' @importFrom gtools mixedsort
+#' @importFrom plotly plotlyOutput
+#' @importFrom DT dataTableOutput
 
 .gint_subItem_chrDistribDEGs <- function(data_table){
+  chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
   tabItem(tabName = "histoDEGs",
           fluidRow(
             box(title = "Subsection 1",
@@ -816,7 +844,7 @@
                               choices = unique(data_table$class)),
                   selectInput(inputId = 'chrSelectHistoDEG',
                               label = 'Chr:',
-                              choices = c('All', unique(data_table$chr_cov))),
+                              choices = chr),
                   selectInput(inputId = 'significativityCriteriaHistoDEG',
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
@@ -841,7 +869,7 @@
                   plotlyOutput('histogramPlotDEG'),
                   tags$div(
                     style = 'overflow-x: auto;',
-                  DT::dataTableOutput('histogramTableDEG')
+                  dataTableOutput('histogramTableDEG')
                   )
                 )
               )
@@ -851,6 +879,8 @@
 }
 #############################################################
 ##############################################################
+#' @import shiny
+#' @importFrom visNetwork visNetworkOutput
 
 .gint_subItem_networkDEGs <- function(data_table){
   tabItem(tabName = "networkDEGs",
@@ -858,6 +888,8 @@
             box(title = "Subsection 1",
                 "This is the content of Subsection 1."),
             mainPanel(
+              sidebarLayout(
+                sidebarPanel(
               sliderInput("numNodesDEG",
                           label = "Number of Nodes",
                           min = 10,
@@ -887,10 +919,13 @@
                             value = FALSE),
               checkboxInput("physicsDEG",
                             label = "Physics",
-                            value = FALSE),
+                            value = FALSE)),
+              mainPanel(
               visNetworkOutput("networkPlotDEG",
                                height = 800,
                                width = 1600)
+              )
+              )
             )
           )
   )
@@ -898,6 +933,10 @@
 
 #############################################################
 ##############################################################
+#' @import shiny
+#' @importFrom gtools mixedsort
+#' @importFrom shiny.gosling goslingOutput
+
 .gint_subItem_circosCompleteInt <- function(data_table){
   # tabItem(tabName = "page_circos",
   #         fluidRow(
@@ -909,7 +948,7 @@
   #     )
   # )
   chr <- unique(data_table$chr_response)
-  chr <- c("All", paste0("chr", gtools::mixedsort(chr[!is.na(chr)])))
+  chr <- c("All", paste0("chr", mixedsort(chr[!is.na(chr)])))
   tabItem(tabName = "circosIntegration",fluidPage(use_gosling(),
                                                   sidebarLayout(
                                                     sidebarPanel(
@@ -932,6 +971,8 @@
 
 ################################################################
 #################################################################
+#' @import shiny
+#' @importFrom DT dataTableOutput
 
 .gint_subItem_tableCompleteInt <- function(data_table){
   tabItem(tabName = "fullTable",
@@ -973,17 +1014,15 @@
                                 value = c(0.001, 0.05),
                                 step = 0.005))
                 ),
-                fluidRow(
-                  column(
-                    width = 12,
-                    offset = 1,
+                mainPanel(
+
                     tags$div(
                       style = 'overflow-x: auto;',
-                      DT::dataTableOutput('res_table')
+                      dataTableOutput('res_table')
                     )
 
 
-                  )
+
                 )
               )
             )
@@ -993,6 +1032,8 @@
 
 #############################################################
 ##############################################################
+#' @import shiny
+
 .create_ui <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics2.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")

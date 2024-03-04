@@ -9,6 +9,7 @@ run_genomic_enrich(
   species = "hsa",
   pvalueCutoff = 0.1,
   pAdjustMethod = "BH",
+  qvalueCutoff = 0.1,
   ont = "all",
   BPPARAM = BiocParallel::SerialParam(),
   extracted_data = NULL,

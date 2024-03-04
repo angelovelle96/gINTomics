@@ -8,6 +8,7 @@ run_tf_enrich(
   model_results,
   species = "hsa",
   pvalueCutoff = 0.1,
+  qvalueCutoff = 0.1,
   pAdjustMethod = "BH",
   ont = "all",
   BPPARAM = BiocParallel::SerialParam(),

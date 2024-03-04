@@ -109,8 +109,8 @@
       pvalRange <- input$pvalRangeVenn
       fdrRange <- input$fdrRangeVenn
       significativityCriteria <- input$significativityCriteriaVenn
-      data_table <- data_table[data_table$omics == 'gene_genomic_res', ]
-      if('class'%in%colnames(data_table)){
+      data_table <- data_table[data_table$omics == "gene_genomic_res", ]
+      if("class"%in%colnames(data_table)){
         data_table <- data_table[data_table$class == classSelect, ]
       }
       if(significativityCriteria == 'pval'){
@@ -136,11 +136,11 @@
                         met_sign_genes = met_sign_genes)
     }
     if(deg==FALSE & !"gene_genomic_res"%in%unique(data_table$omics)) {
-      if("cnv_genomic_res"%in%unique(data_table$omics)){
-        data_venn <- data_table[data_table$omics=="cnv_genomic_res",]
+      if("gene_cnv_res"%in%unique(data_table$omics)){
+        data_venn <- data_table[data_table$omics=="gene_cnv_res",]
       }
-      if("met_genomic_res"%in%unique(data_table$omics)){
-        data_venn <- data_table[data_table$omics=="met_genomic_res",]
+      if("gene_met_res"%in%unique(data_table$omics)){
+        data_venn <- data_table[data_table$omics=="gene_met_res",]
       }
     }
     if(deg==TRUE & "gene_genomic_res"%in%unique(data_table$omics)){
@@ -175,14 +175,13 @@
       }else(return(NULL))
     }
     if(deg==TRUE & !"gene_genomic_res"%in%unique(data_table$omics)){
-      if("cnv_genomic_res"%in%unique(data_table$omics)){
-        data_venn <- data_table[data_table$omics=="cnv_genomic_res",]
+      if("gene_cnv_res"%in%unique(data_table$omics)){
+        data_venn <- data_table[data_table$omics=="gene_cnv_res",]
       }
-      if("met_genomic_res"%in%unique(data_table$omics)){
-        data_venn <- data_table[data_table$omics=="met_genomic_res",]
+      if("gene_met_res"%in%unique(data_table$omics)){
+        data_venn <- data_table[data_table$omics=="gene_met_res",]
       }
     }
-    # if(!"gene_genomic_res"%in%unique(data_table$omics)){return(NULL)}
     return(data_venn)
   })%>%bindEvent(input$classSelectVenn,
                  input$fdrRangeVenn,
@@ -322,22 +321,39 @@
     if (integrationSelect == "gene_genomic_res"){
      ans <-  .prepare_gen_heatmap(data_table = data_table,
                                   df_heatmap = df_heatmap,
-                                  df_heatmap_t = df_heatmap_t)
+                                  df_heatmap_t = df_heatmap_t,
+                                  significativityCriteria,
+                                  pvalRange,
+                                  fdrRange,
+                                  numTopCNV,
+                                  numTopMET)
     }
-    if(integrationSelect == "cnv_genomic_res"){
+    if(integrationSelect == "gene_met_res"){
       ans <-  .prepare_cnv_heatmap(data_table = data_table,
                                    df_heatmap = df_heatmap,
-                                   df_heatmap_t = df_heatmap_t)
+                                   df_heatmap_t = df_heatmap_t,
+                                   significativityCriteria,
+                                   pvalRange,
+                                   fdrRange,
+                                   numTopCNVonly)
     }
-    if(integrationSelect == "met_genomic_res"){
+    if(integrationSelect == "gene_cnv_res"){
       ans <-  .prepare_met_heatmap(data_table = data_table,
                                    df_heatmap = df_heatmap,
-                                   df_heatmap_t = df_heatmap_t)
+                                   df_heatmap_t = df_heatmap_t,
+                                   significativityCriteria,
+                                   pvalRange,
+                                   fdrRange,
+                                   numTopMETonly)
     }
     if(integrationSelect == "mirna_cnv_res"){
       ans <-  .prepare_mirna_heatmap(data_table = data_table,
                                    df_heatmap = df_heatmap,
-                                   df_heatmap_t = df_heatmap_t)
+                                   df_heatmap_t = df_heatmap_t,
+                                   significativityCriteria,
+                                   pvalRange,
+                                   fdrRange,
+                                   numTopMiCNV)
     }
     if(is.null(ans)) return(NULL)
     if(deg == FALSE){
@@ -375,7 +391,12 @@
 
 .prepare_gen_heatmap <- function(data_table,
                                   df_heatmap,
-                                  df_heatmap_t){
+                                  df_heatmap_t,
+                                  significativityCriteria,
+                                  pvalRange,
+                                  fdrRange,
+                                  numTopCNV,
+                                  numTopMET){
 
     tmp <- data.frame(cnv = data_table$coef[
                         data_table$cnv_met == 'cnv'],
@@ -432,7 +453,11 @@
 
 .prepare_cnv_heatmap <- function(data_table,
                                  df_heatmap,
-                                 df_heatmap_t){
+                                 df_heatmap_t,
+                                 significativityCriteria,
+                                 pvalRange,
+                                 fdrRange,
+                                 numTopCNVonly){
 
     tmp <-  data.frame(cnv=data_table$coef[
                          data_table$omics == 'cnv'],
@@ -472,7 +497,11 @@
 
 .prepare_met_heatmap <- function(data_table,
                                  df_heatmap,
-                                 df_heatmap_t){
+                                 df_heatmap_t,
+                                 significativityCriteria,
+                                 pvalRange,
+                                 fdrRange,
+                                 numTopMETonly){
 
     tmp <-  data.frame(met=data_table$coef[
                          data_table$omics == 'met'],
@@ -512,7 +541,11 @@
 
 .prepare_mirna_heatmap <- function(data_table,
                                  df_heatmap,
-                                 df_heatmap_t){
+                                 df_heatmap_t,
+                                 significativityCriteria,
+                                 pvalRange,
+                                 fdrRange,
+                                 numTopMiCNV){
 
     tmp <-  data.frame(mirna_cnv=data_table$coef[
                          data_table$omics == 'mirna_cnv_res'],
@@ -730,7 +763,9 @@
       fdrRange <- input$fdrRangeHistoDEG
       typeSelect <- input$typeSelectDEG
     }
-    chr_order <- gtools::mixedsort(unique(data_table$chr_cov))
+    data_table <- data_table[!is.na(data_table$chr_cov),]
+    data_table <- data_table[!is.na(data_table$chr_response),]
+    chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
     data_table <- data_table[data_table$omics == integrationSelect,]
