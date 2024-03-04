@@ -270,6 +270,8 @@
 
 ##########################################################
 ###########################################################
+#' @import shiny
+#' @importFrom gtools mixedsort
 
 .gint_subItem_chrDistribGenomic <- function(data_table){
   tabItem(tabName = "histoGenomic",
@@ -293,7 +295,7 @@
                                                    choices = unique(data_table$class)),
                                        selectInput(inputId = 'genomicChrSelectHisto',
                                                    label = 'Chr:',
-                                                   choices = c('All', unique(data_table$chr_cov))),
+                                                   choices = c('All', mixedsort(unique(data_table$chr_cov)))),
                                        selectInput(inputId = 'genomicSignificativityCriteriaHisto',
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
@@ -495,7 +497,7 @@
                               choices = unique(data_table$class)),
                   selectInput(inputId = 'transcriptChrSelectHisto',
                               label = 'Chr:',
-                              choices = c('All', unique(data_table$chr_cov))),
+                              choices = c('All', mixedsort(unique(data_table$chr_cov)))),
                   selectInput(inputId = 'transcriptSignificativityCriteriaHisto',
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
@@ -947,7 +949,7 @@
                               choices = unique(data_table$class)),
                   selectInput(inputId = 'chrSelectTable',
                               label = 'Chr:',
-                              choices = unique(data_table$chr_cov)),
+                              choices = c("All", mixedsort(unique(data_table$chr_cov)))),
                   selectInput(inputId = 'degSelectTable',
                               label = 'DEGs:',
                               choices = c('All', 'Only DEGs')),
