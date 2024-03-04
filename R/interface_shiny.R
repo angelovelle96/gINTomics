@@ -86,7 +86,10 @@
                                      ),
                                      mainPanel(
                                        plotlyOutput("venn_plot"),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        dataTableOutput("common_genes_table")
+                                       )
                                      )
                                    )
                           ),
@@ -162,7 +165,10 @@
                                      ),
                                      mainPanel(
                                        plotOutput("ridgelinePlot"),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        DT::dataTableOutput('ridgelineTable')
+                                       )
                                      )
                                    ))
               )
@@ -270,10 +276,7 @@
           fluidRow(
             box(title = "Page containing data table",
                 "This is the content of Page 1."),
-            mainPanel(
-              tabsetPanel(type = 'tabs',
-                          tabPanel('XXX',
-                                   sidebarLayout(
+            mainPanel(sidebarLayout(
                                      sidebarPanel(
                                        selectInput(inputId = 'genomicIntegrationSelectHisto',
                                                    label = 'Integration Type:',
@@ -313,45 +316,12 @@
                                      ),
                                      mainPanel(
                                        plotlyOutput('histogramPlot'),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        DT::dataTableOutput('histogramTable')
+                                       )
                                      )
                                    )
-                          ),
-                          tabPanel('TFs',
-                                   sidebarLayout(
-                                     sidebarPanel(
-                                       selectInput(inputId = 'classSelectHistoTFs',
-                                                   label = 'Class:',
-                                                   choices = unique(data_table$class)),
-                                       selectInput(inputId = 'degSelectHistoTFs',
-                                                   label = 'DEGs:',
-                                                   choices = c('All', 'Only DEGs')),
-                                       selectInput(inputId = 'significativityCriteriaHistoTFs',
-                                                   label = 'Significativity criteria:',
-                                                   choices = c('pval', 'FDR'),),
-                                       conditionalPanel(
-                                         condition = "input.significativityCriteriaHistoTFs == 'pval'",
-                                         sliderInput("pvalRangeHistoTFs",
-                                                     "P-Value Range:",
-                                                     min = 0,
-                                                     max = 1,
-                                                     value = c(0, 0.10),
-                                                     step = 0.005)),
-                                       conditionalPanel(
-                                         condition = "input.significativityCriteriaHistoTFs == 'FDR'",
-                                         sliderInput("FDRRangeHistoTFs",
-                                                     "FDR-Value Range:",
-                                                     min = 0,
-                                                     max = 1,
-                                                     value = c(0, 0.10),
-                                                     step = 0.005))
-                                     ),
-                                     mainPanel(
-                                       plotlyOutput('histogramPlotTFs'),
-                                       plotlyOutput('histogramPlotTFsByChromosome')
-                                     )
-                                   ))
-              )
             )
           )
   )
@@ -494,7 +464,10 @@
                                      ),
                                      mainPanel(
                                        plotOutput("ridgelinePlotTranscript"),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        DT::dataTableOutput('ridgelineTableTranscript')
+                                       )
                                      )
                                    ))
               )
@@ -545,7 +518,10 @@
                 ),
                 mainPanel(
                   plotlyOutput('histogramPlotTranscript'),
+                  tags$div(
+                    style = 'overflow-x: auto;',
                   DT::dataTableOutput('histogramTableTranscript')
+                  )
                 )
               )
             )
@@ -712,7 +688,10 @@
                                      ),
                                      mainPanel(
                                        plotOutput("ridgelinePlotDEG"),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        DT::dataTableOutput('ridgelineTableDEG')
+                                       )
                                      )
                                    ))
               )
@@ -858,7 +837,10 @@
                 ),
                 mainPanel(
                   plotlyOutput('histogramPlotDEG'),
+                  tags$div(
+                    style = 'overflow-x: auto;',
                   DT::dataTableOutput('histogramTableDEG')
+                  )
                 )
               )
             )

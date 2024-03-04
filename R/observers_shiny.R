@@ -234,7 +234,7 @@
       top_peaks <- data_table[with(data_table,
                                    order(pval, coef)),]
       data_table <- rbind(top_peaks, data_table[with(data_table,
-                                                     order(-coef, pval)), ][1:10,])
+                                                     order(-coef, pval)),][1:10,])
       data_table$pval_fdr <- -log10(data_table$pval)
     }else{
       data_table["group"] <- "Not Significant"
