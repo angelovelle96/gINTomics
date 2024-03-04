@@ -28,7 +28,6 @@
 #' "none".
 #' @import MultiAssayExperiment SummarizedExperiment
 #' @importFrom methods new
-#' @importFrom plyr rbind.fill
 #' @export
 run_multiomics <- function(data,
                            interactions_met=NULL,
@@ -40,9 +39,7 @@ run_multiomics <- function(data,
                            normalize_miRNA_expr=T,
                            normalize_gene_expr=T,
                            norm_method_gene_expr="TMM",
-                           norm_method_miRNA_expr="TMM",
-                           class=NULL,
-                           BPPARAM=SerialParam()){
+                           norm_method_miRNA_expr="TMM"){
 
 
 
@@ -57,134 +54,72 @@ run_multiomics <- function(data,
 
     normalize_gene_expr2 <- normalize_gene_expr
     normalize_miRNA_expr2 <- normalize_miRNA_expr
-    if(!is.null(data@ExperimentList$gene_exp))
-      data <- c(data, gene_exp_original=data@ExperimentList$gene_exp)
-    if(!is.null(data@ExperimentList$miRNA_exp))
-      data <- c(data, miRNA_exp_original=data@ExperimentList$miRNA_exp)
-
-    deg_gene <- T
-    deg_mirna <- T
-    gene_genomic_res <- NULL
-    geno <- F
-    if(!is.null(data@ExperimentList$cnv_data) &
-       !is.null(data@ExperimentList$gene_exp)&
-       !is.null(data@ExperimentList$methylation)){
-      message("--------------Running gene genomic integration--------------")
-      gene_genomic_res <- run_genomic_integration(
-        expression = t(assay(data, i = "gene_exp")),
-        cnv_data = t(assay(data, i = "cnv_data")),
-        methylation = t(assay(data, i = "methylation")),
-        sequencing_data = RNAseq,
-        normalize=normalize_gene_expr,
-        norm_method=norm_method_gene_expr,
-        class=class,
-        run_deg=deg_gene,
-        BPPARAM=BPPARAM)
-      if(!is.null(class)){
-        tmp <- lapply(gene_genomic_res, function(x)
-          as.data.frame(t(x$residuals)))
-        tmp2 <- rbind.fill(tmp)
-        rownames(tmp2) <- unlist(lapply(tmp, rownames))
-        rresiduals <- t(tmp2)
-      }else{
-        rresiduals <- gene_genomic_res$residuals
-      }
-      data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
-        rownames(rresiduals),]
-      assay(data@ExperimentList$gene_exp) <- as.matrix(rresiduals[,
-        colnames(assay(data@ExperimentList$gene_exp))])
-      RNAseq <- F
-      normalize_gene_expr2 <- F
-      geno <- T
-      deg_gene <- F
-    }
-
-
+    data <- c(data, gene_exp_original=data@ExperimentList$gene_exp)
     gene_cnv_res <- NULL
     if(!is.null(data@ExperimentList$cnv_data) &
-       !is.null(data@ExperimentList$gene_exp) &
-       geno==F){
-      message("----------------Running gene CNV integration----------------")
-      gene_cnv_res <- run_cnv_integration(
-        expression = t(assay(data, i = "gene_exp")),
-        cnv_data = t(assay(data, i = "cnv_data")),
-        sequencing_data = RNAseq,
-        normalize=normalize_gene_expr,
-        norm_method=norm_method_gene_expr,
-        class=class,
-        run_deg=deg_gene,
-        BPPARAM=BPPARAM)
-    if(!is.null(class)){
-      tmp <- lapply(gene_cnv_res, function(x)
-        as.data.frame(t(x$residuals)))
-      tmp2 <- rbind.fill(tmp)
-      rownames(tmp2) <- unlist(lapply(tmp, rownames))
-      rresiduals <- t(tmp2)
-    }else{
-      rresiduals <- gene_cnv_res$residuals
-    }
-      data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
-        rownames(rresiduals),]
-      assay(data@ExperimentList$gene_exp) <- as.matrix(rresiduals[,
-        colnames(assay(data@ExperimentList$gene_exp))])
-    RNAseq <- F
-    normalize_gene_expr2 <- F
-    deg_gene <- F
+         !is.null(data@ExperimentList$gene_exp)){
+          gene_cnv_res <- run_cnv_integration(
+            expression = t(assay(data, i = "gene_exp")),
+            cnv_data = t(assay(data, i = "cnv_data")),
+            sequencing_data = RNAseq,
+            normalize=normalize_gene_expr,
+            norm_method=norm_method_gene_expr,
+            BPPARAM=SerialParam())
+        data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
+          rownames(gene_cnv_res$residuals),
+          colnames(gene_cnv_res$residuals)]
+        assay(data@ExperimentList$gene_exp) <- as.matrix(gene_cnv_res$residuals[
+          rownames(assay(data, i = "gene_exp")),
+          colnames(assay(data, i = "gene_exp"))])
+        RNAseq <- F
+        normalize_gene_expr2 <- F
       }
 
-    gene_met_res <- NULL
-    if(!is.null(data@ExperimentList$methylation) &
-       !is.null(data@ExperimentList$gene_exp) &
-       geno==F){
-      message("------------Running gene methylation integration------------")
-      gene_met_res <- run_met_integration(
-        expression = t(assay(data, i = "gene_exp")),
-        methylation = t(assay(data, i = "methylation")),
-        sequencing_data = RNAseq,
-        class=class,
-        run_deg=deg_gene,
-        normalize = normalize_gene_expr2,
-        norm_method=norm_method_gene_expr,
-        BPPARAM=BPPARAM)
-      deg_gene <- F
-    }
 
+    data <- c(data, miRNA_exp_original=data@ExperimentList$miRNA_exp)
     mirna_cnv_res <- NULL
     if(!is.null(data@ExperimentList$miRNA_cnv_data) &
        !is.null(data@ExperimentList$miRNA_exp)){
-      message("---------------Running miRNA CNV integration----------------")
       mirna_cnv_res <- run_cnv_integration(
         expression = t(assay(data, i = "miRNA_exp")),
         cnv_data = t(assay(data, i = "miRNA_cnv_data")),
         sequencing_data = miRNAseq,
         normalize=normalize_miRNA_expr,
         norm_method=norm_method_miRNA_expr,
-        class=class,
-        run_deg=deg_mirna,
-        BPPARAM=BPPARAM)
-      if(!is.null(class)){
-        tmp <- lapply(mirna_cnv_res, function(x)
-          as.data.frame(t(x$residuals)))
-        tmp2 <- rbind.fill(tmp)
-        rownames(tmp2) <- unlist(lapply(tmp, rownames))
-        rresiduals <- t(tmp2)
-      }else{
-        rresiduals <- mirna_cnv_res$residuals
-      }
+        BPPARAM=SerialParam())
       data@ExperimentList$miRNA_exp <- data@ExperimentList$miRNA_exp[
-        rownames(rresiduals),]
-      assay(data@ExperimentList$miRNA_exp) <- as.matrix(rresiduals[,
-        colnames(assay(data@ExperimentList$miRNA_exp))])
+        rownames(mirna_cnv_res$residuals),
+        colnames(mirna_cnv_res$residuals)]
+      assay(data@ExperimentList$miRNA_exp) <- as.matrix(mirna_cnv_res$residuals[
+        rownames(assay(data, i = "miRNA_exp")),
+        colnames(assay(data, i = "miRNA_exp"))])
       miRNAseq <- F
       normalize_miRNA_expr2 <- F
-      deg_mirna <- F
+
     }
 
+    met_res <- NULL
+    if(!is.null(data@ExperimentList$methylation) &
+       !is.null(data@ExperimentList$gene_exp)){
+      met_res <- run_met_integration(
+        expression = t(assay(data, i = "gene_exp")),
+        methylation = t(assay(data, i = "methylation")),
+        sequencing_data = RNAseq,
+        normalize = normalize_gene_expr2,
+        norm_method=norm_method_gene_expr)
+      tmp <- t(assay(data, i = "gene_exp_original"))
+      tmp <- tmp[rownames(met_res$data$response_var),
+                 colnames(met_res$data$response_var)]
+      if(normalize_gene_expr) tmp <-  .data_norm(tmp,
+                                                method = norm_method_gene_expr)
+      met_res$data$response_var <- tmp
+
+    }
 
 
     tf_res <- NULL
     if(!is.null(data@ExperimentList$gene_exp)){
-      message("-------------------Running TF integration-------------------")
+
       tf_res <- run_tf_integration(
         expression = t(assay(data,i = "gene_exp")),
         tf_expression = t(assay(data,i = "gene_exp_original")),
@@ -194,39 +129,43 @@ run_multiomics <- function(data,
         norm_method=norm_method_gene_expr,
         normalize_cov = normalize_gene_expr,
         norm_method_cov = norm_method_gene_expr,
-        class=class,
-        run_deg=deg_gene,
-        type="tf",
-        BPPARAM=BPPARAM)
-      deg_gene <- F
+        type="tf")
+      tmp <- t(assay(data, i = "gene_exp_original"))
+      tmp <- tmp[rownames(tf_res$data$response_var),
+                 colnames(tf_res$data$response_var)]
+      if(normalize_gene_expr) tmp <-  .data_norm(tmp,
+                                                method = norm_method_gene_expr)
+      tf_res$data$response_var <- tmp
     }
 
 
     tf_mirna_res <- NULL
     if(!is.null(data@ExperimentList$miRNA_exp) &
        !is.null(data@ExperimentList$gene_exp)){
-      message("----------------Running TF miRNA integration----------------")
-      tf_mirna_res <- run_tf_integration(
-        expression = t(assay(data,i = "miRNA_exp")),
-        tf_expression = t(assay(data,i = "gene_exp_original")),
-        interactions = interactions_tf_miRNA,
-        sequencing_data = miRNAseq,
-        normalize=normalize_miRNA_expr2,
-        norm_method=norm_method_miRNA_expr,
-        normalize_cov = normalize_gene_expr,
-        norm_method_cov = norm_method_gene_expr,
-        class=class,
-        run_deg=deg_mirna,
-        type="tf_miRNA",
-        BPPARAM=BPPARAM)
-      deg_mirna <- F
+
+        tf_mirna_res <- run_tf_integration(
+          expression = t(assay(data,i = "miRNA_exp")),
+          tf_expression = t(assay(data,i = "gene_exp_original")),
+          interactions = interactions_tf_miRNA,
+          sequencing_data = miRNAseq,
+          normalize=normalize_miRNA_expr2,
+          norm_method=norm_method_miRNA_expr,
+          normalize_cov = normalize_gene_expr,
+          norm_method_cov = norm_method_gene_expr,
+          type="tf_miRNA")
+        tmp <- t(assay(data, i = "miRNA_exp_original"))
+        tmp <- tmp[rownames(tf_mirna_res$data$response_var),
+                   colnames(tf_mirna_res$data$response_var)]
+        if(normalize_miRNA_expr) tmp <-  .data_norm(tmp,
+                                                  method = norm_method_miRNA_expr)
+        tf_mirna_res$data$response_var <- tmp
     }
 
 
     mirna_target_res <- NULL
     if(!is.null(data@ExperimentList$miRNA_exp) &
        !is.null(data@ExperimentList$gene_exp)){
-      message("--------------Running miRNA target integration--------------")
+
       mirna_target_res <- run_tf_integration(
         expression = t(assay(data,i = "gene_exp")),
         tf_expression = t(assay(data,i = "miRNA_exp_original")),
@@ -236,56 +175,24 @@ run_multiomics <- function(data,
         norm_method=norm_method_gene_expr,
         normalize_cov = normalize_miRNA_expr,
         norm_method_cov = norm_method_miRNA_expr,
-        class=class,
-        run_deg=deg_gene,
-        type="miRNA_target",
-        BPPARAM=BPPARAM)
-      deg_gene <- F
+        type="miRNA_target")
+      tmp <- t(assay(data, i = "gene_exp_original"))
+      tmp <- tmp[rownames(mirna_target_res$data$response_var),
+                 colnames(mirna_target_res$data$response_var)]
+      if(normalize_gene_expr) tmp <-  .data_norm(tmp,
+                                                 method = norm_method_gene_expr)
+      mirna_target_res$data$response_var <- tmp
     }
 
   ans <- new("MultiOmics", Filter(Negate(is.null),
                                   list(gene_cnv_res=gene_cnv_res,
-                                       gene_genomic_res=gene_genomic_res,
                                        mirna_cnv_res=mirna_cnv_res,
-                                       gene_met_res=gene_met_res,
+                                       met_res=met_res,
                                        tf_res=tf_res,
                                        tf_mirna_res=tf_mirna_res,
                                        mirna_target_res=mirna_target_res)))
   return(ans)
 }
-
-
-##########################################
-.def_cnv_integration <- function(expression,
-                                cnv_data,
-                                sequencing_data,
-                                normalize,
-                                norm_method,
-                                BPPARAM,
-                                ...){
-
-  if(sequencing_data==T){
-    cnv_res <- .run_edgeR_integration(response_var = expression,
-                                      covariates = cnv_data,
-                                      normalize = normalize,
-                                      norm_method = norm_method,
-                                      BPPARAM = BPPARAM,
-                                      ...)
-    if(normalize){
-      cnv_res$data$response_var <- .data_norm(cnv_res$data$response_var,
-                                              method = norm_method)
-    }
-  }else{
-    cnv_res <- .run_lm_integration(response_var = expression,
-                                   covariates = cnv_data,
-                                   normalize = normalize,
-                                   norm_method = norm_method,
-                                   BPPARAM = BPPARAM,
-                                   ...)
-  }
-  return(cnv_res)
-}
-
 
 #' Integration of expression and Copy Number Variations
 #' @description
@@ -312,86 +219,27 @@ run_cnv_integration <- function(expression,
                                 sequencing_data=T,
                                 normalize=T,
                                 norm_method="TMM",
-                                class=NULL,
-                                run_deg=T,
-                                BPPARAM=SerialParam(),
                                 ...){
 
-  if(is.null(class)){
-    cnv_res <- .def_cnv_integration(expression = expression,
-                                   cnv_data = cnv_data,
-                                   sequencing_data = sequencing_data,
-                                   normalize = normalize,
-                                   norm_method = norm_method,
-                                   BPPARAM = BPPARAM,
-                                   ...)
-  }else{
-    if(!is.character(class) |
-       length(class)!=nrow(expression) |
-       !identical(names(class),rownames(expression))){
-        stop(str_wrap("class should be a named character vector, names should
-                      match sample names contained in expression data"))
-    }
-
-    tmp <- unique(class)
-    tmp <- lapply(tmp, function(x) names(class)[class==x])
-    names(tmp) <- unique(class)
-    cnv_res <- lapply(tmp, function(x){
-      ans <- .def_cnv_integration(expression = expression[x,],
-                                 cnv_data = cnv_data[x,],
-                                 sequencing_data = sequencing_data,
-                                 normalize = normalize,
-                                 norm_method = norm_method,
-                                 BPPARAM = BPPARAM,
-                                 ...)
-      return(ans)
-    })
-    deg <- NULL
-    if(run_deg){
-      deg <- .find_deg(eexpression = t(expression),
-                       class = class,
-                       normalize = normalize,
-                       norm_method = norm_method)
-      deg <- list(rownames(deg)[deg$FDR<=0.1])
+  if(sequencing_data==T){
+    cnv_res <- .run_edgeR_integration(response_var = expression,
+                                     covariates = cnv_data,
+                                     normalize = normalize,
+                                     norm_method = norm_method,
+                                     ...)
+    if(normalize){
+      cnv_res$data$response_var <- .data_norm(cnv_res$data$response_var,
+                                             method = norm_method)
       }
-    cnv_res <- new("MultiClass", c(cnv_res, deg=deg))
+  }else{
+    cnv_res <- .run_lm_integration(response_var = expression,
+                                  covariates = cnv_data,
+                                  normalize = normalize,
+                                  norm_method = norm_method,
+                                  ...)
   }
   return(cnv_res)
 }
-
-
-##################################
-.def_met_integration <- function( expression,
-                                 methylation,
-                                 sequencing_data,
-                                 normalize,
-                                 norm_method,
-                                 BPPARAM,
-                                 ...){
-
-  if(sequencing_data==T){
-    met_res <- .run_edgeR_integration(response_var = expression,
-                                      covariates = methylation,
-                                      normalize = normalize,
-                                      norm_method = norm_method,
-                                      BPPARAM = BPPARAM,
-                                      ...)
-    if(normalize){
-      met_res$data$response_var <- .data_norm(met_res$data$response_var,
-                                              method = norm_method)
-    }
-  }else{
-    met_res <- .run_lm_integration(response_var = expression,
-                                   covariates = methylation,
-                                   normalize = normalize,
-                                   norm_method = norm_method,
-                                   BPPARAM = BPPARAM,
-                                   ...)
-  }
-  return(met_res)
-}
-
-
 
 
 #' Integration of expression and methylation
@@ -420,286 +268,27 @@ run_met_integration <- function( expression,
                                  sequencing_data=T,
                                  normalize=T,
                                  norm_method="TMM",
-                                 class=NULL,
-                                 run_deg=T,
-                                 BPPARAM=SerialParam(),
                                  ...){
 
-  if(is.null(class)){
-    met_res <- .def_met_integration(expression = expression,
-                                    methylation = methylation,
-                                    sequencing_data = sequencing_data,
-                                    normalize = normalize,
-                                    norm_method = norm_method,
-                                    BPPARAM = BPPARAM,
-                                    ...)
-  }else{
-    if(!is.character(class) |
-       length(class)!=nrow(expression) |
-       !identical(names(class),rownames(expression))){
-      stop(str_wrap("class should be a named character vector, names should
-                      match sample names contained in expression data"))
-    }
-
-    tmp <- unique(class)
-    tmp <- lapply(tmp, function(x) names(class)[class==x])
-    names(tmp) <- unique(class)
-    met_res <- lapply(tmp, function(x){
-      ans <- .def_met_integration(expression = expression[x,],
-                                  methylation = methylation[x,],
-                                  sequencing_data = sequencing_data,
-                                  normalize = normalize,
-                                  norm_method = norm_method,
-                                  BPPARAM = BPPARAM,
-                                  ...)
-      return(ans)
-    })
-    deg <- NULL
-    if(run_deg){
-      deg <- .find_deg(eexpression = t(expression),
-                       class = class,
-                       normalize = normalize,
-                       norm_method = norm_method)
-      deg <- list(rownames(deg)[deg$FDR<=0.1])
-    }
-    met_res <- new("MultiClass", c(met_res, deg=deg))
-  }
-  return(met_res)
-}
-
-####################################
-.def_genomic_integration <- function(expression,
-                                    cnv_data,
-                                    methylation,
-                                    sequencing_data,
-                                    normalize,
-                                    norm_method,
-                                    interactions,
-                                    scale,
-                                    BPPARAM,
-                                    ...){
-
-
-  if(scale){
-    original_cnv <- cnv_data
-    original_met <- methylation
-    colnames(original_cnv) <- paste0(colnames(original_cnv), "_cnv")
-    colnames(original_met) <- paste0(colnames(original_met), "_met")
-    cnv_data <- scale(cnv_data)
-    methylation <- scale(methylation)
-  }
-
-  if(is.null(interactions)){
-
-    tmp <- Reduce(intersect,
-                  list(colnames(expression),
-                       colnames(cnv_data),
-                       colnames(methylation)))
-    expression <- expression[, tmp]
-    cnv_data <- cnv_data[, tmp]
-    methylation <- methylation[, tmp]
-    colnames(cnv_data) <- paste0(colnames(cnv_data), "_cnv")
-    colnames(methylation) <- paste0(colnames(methylation), "_met")
-    message("Generating interactions")
-    interactions <- lapply(seq_along(colnames(expression)), function(x)
-      c(colnames(cnv_data)[x], colnames(methylation)[x]))
-    names(interactions) <- colnames(expression)
-  }
-
-
-
   if(sequencing_data==T){
-
-
-    gen_res <- .run_edgeR_integration(response_var = expression,
-                                      covariates = cbind(cnv_data, methylation),
-                                      normalize = normalize,
-                                      norm_method = norm_method,
-                                      interactions = interactions,
-                                      BPPARAM = BPPARAM,
-                                      ...)
-    if(normalize){
-      gen_res$data$response_var <- .data_norm(gen_res$data$response_var,
-                                              method = norm_method)
-    }
-  }else{
-    gen_res <- .run_lm_integration(response_var = expression,
-                                   covariates = cbind(cnv_data, methylation),
-                                   normalize = normalize,
-                                   norm_method = norm_method,
-                                   interactions = interactions,
-                                   BPPARAM = BPPARAM,
-                                   ...)
-  }
-
-  if(scale){
-    tmp <- cbind(original_cnv, original_met[rownames(original_cnv),])
-    gen_res$data$covariates <- tmp[rownames(gen_res$data$covariates),
-                                   colnames(gen_res$data$covariates)]
-  }
-  return(gen_res)
-}
-
-
-
-#' Integration of expression, Copy Number Variations and methylation data
-#' @description
-#' This function will perform an integration of expression data and Copy Number
-#' Variations data
-#' @param expression Matrix or data.frame containing the expression values
-#' for each model. Rows represent samples, while each column represents
-#' the different response variables of the models.
-#' @param cnv_data Matrix or data.frame containing the Copy Number variation
-#' status for the models. Rows represent samples, while columns represent
-#' the different covariates. If **interactions** are not provided, they will be
-#' automatically generated and for each gene contained in **expression**
-#' the model will look for the same gene in **cnv_data**
-#' @param methylation Matrix or data.frame containing the methylation
-#' values for the models. Rows represent samples, while columns represent
-#' the different covariates. If **interactions** are not provided, they will be
-#' automatically generated and for each gene contained in **expression**
-#' the model will look for the same gene in **methylation**
-#' #' @param sequencing_data logical. Are expression data obtained from RNA
-#' sequencing ? Default is set to TRUE
-#' @param normalize logical.Should expression data be
-#' normalized ? Default is set to TRUE
-#' @param norm_method Normalization method to be used for
-#' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
-#' "none".
-#' @param interactions A list of character vectors containing the interactions
-#' between response variable and covariates. The names of the list should
-#' match the response variables while the character contained in each element
-#' of the list should match the covariates. If NULL (default), the interactions
-#' will be automatically defined according to response variable's colnames.
-#' @importFrom plyr rbind.fill
-#' @export
-run_genomic_integration <- function(expression,
-                                cnv_data,
-                                methylation,
-                                sequencing_data=T,
-                                normalize=T,
-                                norm_method="TMM",
-                                interactions=NULL,
-                                class=NULL,
-                                scale=T,
-                                run_deg=T,
-                                BPPARAM = SerialParam(),
-                                ...){
-
-
-  if(is.null(class)){
-    gen_res <- .def_genomic_integration(expression = expression,
-                                        cnv_data = cnv_data,
-                                        methylation = methylation,
-                                        sequencing_data = sequencing_data,
-                                        normalize = normalize,
-                                        norm_method = norm_method,
-                                        interactions = interactions,
-                                        scale = scale,
-                                        BPPARAM = BPPARAM,
-                                        ...)
-  }else{
-    if(!is.character(class) |
-       length(class)!=nrow(expression) |
-       !identical(names(class),rownames(expression))){
-      stop(str_wrap("class should be a named character vector, names should
-                      match sample names contained in expression data"))
-    }
-
-    tmp <- unique(class)
-    tmp <- lapply(tmp, function(x) names(class)[class==x])
-    names(tmp) <- unique(class)
-    gen_res <- lapply(tmp, function(x){
-      ans <- .def_genomic_integration(expression = expression[x,],
-                                      cnv_data = cnv_data[x,],
-                                      methylation = methylation[x,],
-                                      sequencing_data = sequencing_data,
-                                      normalize = normalize,
-                                      norm_method = norm_method,
-                                      interactions = interactions,
-                                      scale = scale,
-                                      BPPARAM = BPPARAM,
-                                      ...)
-      return(ans)
-    })
-    deg <- NULL
-    if(run_deg){
-      deg <- .find_deg(eexpression = t(expression),
-                       class = class,
-                       normalize = normalize,
-                       norm_method = norm_method)
-      deg <- list(rownames(deg)[deg$FDR<=0.1])
-    }
-    gen_res <- new("MultiClass", c(gen_res, deg=deg))
-  }
-  return(gen_res)
-}
-
-################################
-.def_tf_integration <- function(expression,
-                                tf_expression,
-                                interactions,
-                                type,
-                                sequencing_data,
-                                species,
-                                normalize,
-                                norm_method,
-                                normalize_cov,
-                                norm_method_cov,
-                                BPPARAM,
-                                ...){
-
-  if(is.null(interactions)){
-    if(!type%in%c("tf_miRNA", "tf", "miRNA_target"))
-      stop(str_wrap("If interactions are not provided, type should be one
-                      of tf_miRNA, tf, miRNA_target"))
-    if(type=="tf_miRNA"){
-      interactions <- .download_tf_mirna(miRNAs = colnames(expression),
-                                         species = species)
-    }
-
-    if(type=="tf"){
-      interactions <- .download_tf(genes = colnames(expression),
-                                   species = species)
-    }
-
-    if(type=="miRNA_target"){
-      interactions <- .download_mirna_target(miRNAs = colnames(tf_expression),
-                                             species = species)
-    }
-
-
-  }
-
-  if(normalize_cov) tf_expression <- .data_norm(tf_expression,
-                                                method = norm_method_cov)
-
-
-  if(sequencing_data==T){
-    tf_res <- .run_edgeR_integration(response_var = expression,
-                                     covariates = tf_expression,
-                                     interactions = interactions,
+    met_res <- .run_edgeR_integration(response_var = expression,
+                                     covariates = methylation,
                                      normalize = normalize,
                                      norm_method = norm_method,
-                                     BPPARAM = BPPARAM,
                                      ...)
     if(normalize){
-      tf_res$data$response_var <- .data_norm(tf_res$data$response_var,
+      met_res$data$response_var <- .data_norm(met_res$data$response_var,
                                              method = norm_method)
     }
   }else{
-    tf_res <- .run_lm_integration(response_var = expression,
-                                  covariates = tf_expression,
-                                  interactions = interactions,
+    met_res <- .run_lm_integration(response_var = expression,
+                                  covariates = methylation,
                                   normalize = normalize,
                                   norm_method = norm_method,
-                                  BPPARAM = BPPARAM,
                                   ...)
   }
-  return(tf_res)
+  return(met_res)
 }
-
-
 
 
 #' Integration of expression and Transcription Factors / Generic Regulators
@@ -749,62 +338,54 @@ run_tf_integration <- function( expression,
                                 norm_method="TMM",
                                 normalize_cov=T,
                                 norm_method_cov="TMM",
-                                class=NULL,
-                                run_deg=T,
-                                BPPARAM=SerialParam(),
                                 ...){
 
+    if(is.null(interactions)){
+      if(!type%in%c("tf_miRNA", "tf", "miRNA_target"))
+        stop(str_wrap("If interactions are not provided, type should be one
+                      of tf_miRNA, tf, miRNA_target"))
+      if(type=="tf_miRNA"){
+       interactions <- .download_tf_mirna(miRNAs = colnames(expression),
+                                          species = species)
+      }
 
-  if(is.null(class)){
-    tf_res <- .def_tf_integration(expression=expression,
-                                  tf_expression=tf_expression,
-                                  interactions=interactions,
-                                  type=type,
-                                  sequencing_data=sequencing_data,
-                                  species=species,
-                                  normalize=normalize,
-                                  norm_method=norm_method,
-                                  normalize_cov=normalize_cov,
-                                  norm_method_cov=norm_method_cov,
-                                  BPPARAM = BPPARAM,
-                                  ...)
-  }else{
-    if(!is.character(class) |
-       length(class)!=nrow(expression) |
-       !identical(names(class),rownames(expression))){
-      stop(str_wrap("class should be a named character vector, names should
-                      match sample names contained in expression data"))
+      if(type=="tf"){
+        interactions <- .download_tf(genes = colnames(expression),
+                                    species = species)
+      }
+
+      if(type=="miRNA_target"){
+        interactions <- .download_mirna_target(miRNAs = colnames(tf_expression),
+                                              species = species)
+      }
+
+
     }
 
-    tmp <- unique(class)
-    tmp <- lapply(tmp, function(x) names(class)[class==x])
-    names(tmp) <- unique(class)
-    tf_res <- lapply(tmp, function(x){
-      ans <- .def_tf_integration(expression=expression[x,],
-                                 tf_expression=tf_expression[x,],
-                                 interactions=interactions,
-                                 type=type,
-                                 sequencing_data=sequencing_data,
-                                 species=species,
-                                 normalize=normalize,
-                                 norm_method=norm_method,
-                                 normalize_cov=normalize_cov,
-                                 norm_method_cov=norm_method_cov,
-                                 BPPARAM = BPPARAM,
-                                 ...)
-      return(ans)
-    })
-    deg <- NULL
-    if(run_deg){
-      deg <- .find_deg(eexpression = t(expression),
-                       class = class,
-                       normalize = normalize,
-                       norm_method = norm_method)
-      deg <- list(rownames(deg)[deg$FDR<=0.1])
+    if(normalize_cov) tf_expression <- .data_norm(tf_expression,
+                                                 method = norm_method_cov)
+
+
+    if(sequencing_data==T){
+      tf_res <- .run_edgeR_integration(response_var = expression,
+                                      covariates = tf_expression,
+                                      interactions = interactions,
+                                      normalize = normalize,
+                                      norm_method = norm_method,
+                                      ...)
+      if(normalize){
+        tf_res$data$response_var <- .data_norm(tf_res$data$response_var,
+                                               method = norm_method)
+      }
+    }else{
+      tf_res <- .run_lm_integration(response_var = expression,
+                                   covariates = tf_expression,
+                                   interactions = interactions,
+                                   normalize = normalize,
+                                   norm_method = norm_method,
+                                   ...)
     }
-    tf_res <- new("MultiClass", c(tf_res, deg=deg))
-  }
-  return(tf_res)
+    return(tf_res)
 }
 
 

@@ -10,9 +10,6 @@ run_met_integration(
   sequencing_data = T,
   normalize = T,
   norm_method = "TMM",
-  class = NULL,
-  run_deg = T,
-  BPPARAM = SerialParam(),
   ...
 )
 }
