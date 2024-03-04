@@ -993,28 +993,28 @@
 
 #############################################################
 ##############################################################
-
 .create_ui <- function(data_table){
-  myImgResources <- "imgResources/logo_gINTomics.png"
+  myImgResources <- "imgResources/logo_gINTomics2.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
   dashboardPage(
     dashboardHeader(title = span("gINTomics",
                                  span("Visualizer 1.0",
                                       style = "color: gray; font-size: 16px")),
                     tags$li(a(href="https://github.com/angelovelle96/gINTomics",
-                              img(src = myImgResources,
-                                  height = 80,
-                                  width = 80),
-                              style = "padding-top:1px; padding-bottom:1px;"),
+                              img(src = myImgResources, height="120px"),
+                              style = "padding-top:10px; padding-bottom:100px; height: 80px;"),
                             class = "dropdown"),
                     tags$li(class = "dropdown",
                             tags$style(".main-header {max-height: 80px}"),
-                            tags$style(".main-header .logo {height: 80px;}"),
+                            tags$style(".main-header .logo {height: 80px;
+                                       line-height: 80px !important;
+                                       padding: 0 0px;}"),
                             tags$style(".sidebar-toggle {height: 80px;}"))
-                    #tags$style(".navbar {min-height:80px !important}")
     ),
     .gint_dashboardsidebar(),
     dashboardBody(
+      tags$head(tags$style(
+        HTML('.content-wrapper, .right-side {background-color: #ffffff;}'))),
       tabItems(
         .gint_tabitem_home(data_table),
         .gint_subItem_coefDistribGenomic(data_table),
