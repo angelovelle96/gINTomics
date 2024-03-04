@@ -86,7 +86,10 @@
                                      ),
                                      mainPanel(
                                        plotlyOutput("venn_plot"),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        dataTableOutput("common_genes_table")
+                                       )
                                      )
                                    )
                           ),
@@ -162,7 +165,10 @@
                                      ),
                                      mainPanel(
                                        plotOutput("ridgelinePlot"),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        DT::dataTableOutput('ridgelineTable')
+                                       )
                                      )
                                    ))
               )
@@ -264,16 +270,15 @@
 
 ##########################################################
 ###########################################################
+#' @import shiny
+#' @importFrom gtools mixedsort
 
 .gint_subItem_chrDistribGenomic <- function(data_table){
   tabItem(tabName = "histoGenomic",
           fluidRow(
             box(title = "Page containing data table",
                 "This is the content of Page 1."),
-            mainPanel(
-              tabsetPanel(type = 'tabs',
-                          tabPanel('XXX',
-                                   sidebarLayout(
+            mainPanel(sidebarLayout(
                                      sidebarPanel(
                                        selectInput(inputId = 'genomicIntegrationSelectHisto',
                                                    label = 'Integration Type:',
@@ -290,7 +295,7 @@
                                                    choices = unique(data_table$class)),
                                        selectInput(inputId = 'genomicChrSelectHisto',
                                                    label = 'Chr:',
-                                                   choices = c('All', unique(data_table$chr_cov))),
+                                                   choices = c('All', mixedsort(unique(data_table$chr_cov)))),
                                        selectInput(inputId = 'genomicSignificativityCriteriaHisto',
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
@@ -313,45 +318,12 @@
                                      ),
                                      mainPanel(
                                        plotlyOutput('histogramPlot'),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        DT::dataTableOutput('histogramTable')
+                                       )
                                      )
                                    )
-                          ),
-                          tabPanel('TFs',
-                                   sidebarLayout(
-                                     sidebarPanel(
-                                       selectInput(inputId = 'classSelectHistoTFs',
-                                                   label = 'Class:',
-                                                   choices = unique(data_table$class)),
-                                       selectInput(inputId = 'degSelectHistoTFs',
-                                                   label = 'DEGs:',
-                                                   choices = c('All', 'Only DEGs')),
-                                       selectInput(inputId = 'significativityCriteriaHistoTFs',
-                                                   label = 'Significativity criteria:',
-                                                   choices = c('pval', 'FDR'),),
-                                       conditionalPanel(
-                                         condition = "input.significativityCriteriaHistoTFs == 'pval'",
-                                         sliderInput("pvalRangeHistoTFs",
-                                                     "P-Value Range:",
-                                                     min = 0,
-                                                     max = 1,
-                                                     value = c(0, 0.10),
-                                                     step = 0.005)),
-                                       conditionalPanel(
-                                         condition = "input.significativityCriteriaHistoTFs == 'FDR'",
-                                         sliderInput("FDRRangeHistoTFs",
-                                                     "FDR-Value Range:",
-                                                     min = 0,
-                                                     max = 1,
-                                                     value = c(0, 0.10),
-                                                     step = 0.005))
-                                     ),
-                                     mainPanel(
-                                       plotlyOutput('histogramPlotTFs'),
-                                       plotlyOutput('histogramPlotTFsByChromosome')
-                                     )
-                                   ))
-              )
             )
           )
   )
@@ -494,7 +466,10 @@
                                      ),
                                      mainPanel(
                                        plotOutput("ridgelinePlotTranscript"),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        DT::dataTableOutput('ridgelineTableTranscript')
+                                       )
                                      )
                                    ))
               )
@@ -522,7 +497,7 @@
                               choices = unique(data_table$class)),
                   selectInput(inputId = 'transcriptChrSelectHisto',
                               label = 'Chr:',
-                              choices = c('All', unique(data_table$chr_cov))),
+                              choices = c('All', mixedsort(unique(data_table$chr_cov)))),
                   selectInput(inputId = 'transcriptSignificativityCriteriaHisto',
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
@@ -545,7 +520,10 @@
                 ),
                 mainPanel(
                   plotlyOutput('histogramPlotTranscript'),
+                  tags$div(
+                    style = 'overflow-x: auto;',
                   DT::dataTableOutput('histogramTableTranscript')
+                  )
                 )
               )
             )
@@ -712,7 +690,10 @@
                                      ),
                                      mainPanel(
                                        plotOutput("ridgelinePlotDEG"),
+                                       tags$div(
+                                         style = 'overflow-x: auto;',
                                        DT::dataTableOutput('ridgelineTableDEG')
+                                       )
                                      )
                                    ))
               )
@@ -858,7 +839,10 @@
                 ),
                 mainPanel(
                   plotlyOutput('histogramPlotDEG'),
+                  tags$div(
+                    style = 'overflow-x: auto;',
                   DT::dataTableOutput('histogramTableDEG')
+                  )
                 )
               )
             )
@@ -965,7 +949,7 @@
                               choices = unique(data_table$class)),
                   selectInput(inputId = 'chrSelectTable',
                               label = 'Chr:',
-                              choices = unique(data_table$chr_cov)),
+                              choices = c("All", mixedsort(unique(data_table$chr_cov)))),
                   selectInput(inputId = 'degSelectTable',
                               label = 'DEGs:',
                               choices = c('All', 'Only DEGs')),

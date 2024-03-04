@@ -234,7 +234,7 @@
       top_peaks <- data_table[with(data_table,
                                    order(pval, coef)),]
       data_table <- rbind(top_peaks, data_table[with(data_table,
-                                                     order(-coef, pval)), ][1:10,])
+                                                     order(-coef, pval)),][1:10,])
       data_table$pval_fdr <- -log10(data_table$pval)
     }else{
       data_table["group"] <- "Not Significant"
@@ -836,6 +836,10 @@
                                     input,
                                     output){
   reactive({
+    chr_order <- gtools::mixedsort(unique(data_table$chr_cov))
+    chr_order <- chr_order[!is.na(chr_order)]
+    data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
+
     filtered_df <- data_table[!is.na(data_table$chr_cov),]
     filtered_df <- filtered_df[filtered_df$omics == input$integrationSelectTable,]
     if('class' %in% colnames(filtered_df)){
