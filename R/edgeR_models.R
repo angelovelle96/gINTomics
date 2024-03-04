@@ -13,7 +13,7 @@
                                     norm_method = "TMM",
                                     steady_covariates = NULL,
                                     reference = NULL,
-                                    BPPARAM = BiocParallel::SerialParam()) {
+                                    BPPARAM = SerialParam()) {
 
     tmp <- .data_check(response_var = response_var,
                       covariates = covariates,
@@ -61,14 +61,15 @@
     coef_pval_mat <- .building_result_matrices(model_results = model_res,
                                               type = "edgeR",
                                               single_cov = single_cov)
-    tmp <- lapply(fit_gene, function(x) as.data.frame(residuals(x)))
+    tmp <- bplapply(fit_gene, function(x) as.data.frame(residuals(x)),
+                    BPPARAM = BPPARAM)
     rresiduals <- rbind.fill(tmp)
     colnames(rresiduals) <- rownames(response_var)
     rownames(rresiduals) <- names(tmp)
     results <- list(
-      model_results = model_res,
       coef_data = coef_pval_mat$coef,
       pval_data = coef_pval_mat$pval,
+      fdr_data = fdr(coef_pval_mat$pval),
       residuals = rresiduals,
       data = list(response_var = response_var,
                   covariates = covariates,
