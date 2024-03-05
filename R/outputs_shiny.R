@@ -1,20 +1,16 @@
 .prepare_network <- function(data_table){
-
+  tmp <- intersect(c('cov', 'response', 'pval', 'fdr', 'coef', 'class', 'omics'), colnames(data_table))
   all <- subset(data_table, omics %in% c('tf_res',
                                          'tf_mirna_res',
                                          'mirna_target_res'),
-                select = c('response',
-                           'cov',
-                           'coef',
-                           'pval',
-                           'fdr',
-                           'omics'))
+                select = tmp)
 
   nodes <- data.frame(gene = c(all$cov, all$response))
-  edges <- subset(all, select = c('cov', 'response', 'pval', 'fdr', 'coef'))
+  edges <- subset(all, select = tmp)
   nodes <- unique(nodes)
   names(nodes) <- 'id'
-  names(edges) <- c('from', 'to', 'pval', 'fdr', 'coef')
+  names(edges) <- gsub("cov", "from", names(edges))
+  names(edges) <- gsub("response", "to", names(edges))
   tf_list <- all[all$omics=='tf_res', 'cov']
   tf_list2 <- all[all$omics=='tf_mirna_res', 'cov']
   mirna_list <- all[all$omics=='tf_mirna_res', 'response']
@@ -243,6 +239,7 @@
 #' @importFrom shiny renderPlot
 
 .render_ridge <- function(reactive_ridge){
+  if(!is.null(reactive_ridge)){
   renderPlot({
     tmp <- reactive_ridge()
     ridge_data <- tmp$df
@@ -251,6 +248,9 @@
                                quantiles = quantiles)
     return(ridge_plot)
   })
+  }else{
+    textOutput("no")
+  }
 }
 
 ############################################################################
@@ -537,6 +537,19 @@ run_shiny <- function(multiomics_integration){
                                                                           type = "all",
                                                                           deg = TRUE)
     output$histogramTableDEG <- gINTomics:::.render_histo_table(reactive_histo_table_deg)
+    output$download_csv_histo_gen <- downloadHandler(
+      filename = function(){
+        "data_table.csv"
+      },
+      content = function(file){
+        reactive_histo_table_deg <- gINTomics:::.prepare_reactive_histo_table(data_table,
+                                                                input,
+                                                                output,
+                                                                type = "genomic",
+                                                                deg = FALSE)
+        write.csv(reactive_histo_table_deg, file, row.names = FALSE)
+      }
+    )
     ## ----------------------- HISTO SERVER TF --------------------------
     reactive_histo_tf <- gINTomics:::.prepare_reactive_histo_tf(data_table,
                                                                 input = input,
@@ -550,6 +563,14 @@ run_shiny <- function(multiomics_integration){
                                                           input = input,
                                                           output = output)
     output$res_table <- gINTomics:::.render_table(reactive_table)
+    output$download_csv_table <- downloadHandler(
+      filename = function(){
+        "data_table.csv"
+      },
+      content = function(file){
+        write.csv(data_table, file, row.names = FALSE)
+      }
+    )
     #### ------------------- ENRICHMENT SERVER ----------------------------
     data_gen_enrich <- data_table[data_table$omics=="gene_genomic_res",]
     data_tf_enrich <- data_table[data_table$omics=="tf_res",]

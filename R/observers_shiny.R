@@ -8,7 +8,8 @@
                                      deg = FALSE){
   observe({
     if(!deg){
-      output$networkPlot <- renderVisNetwork({
+
+        output$networkPlot <- renderVisNetwork({
         network_data <- reactive_network()
         network <- .build_network(nodes=network_data$nodes,
                                   edges=network_data$edges,
@@ -30,8 +31,8 @@
                                   legend_nodes=network_data$legend_nodes,
                                   legend_edges=network_data$legend_edges)
         network <- network%>%
-          visHierarchicalLayout(enabled = input$layoutNetwork)%>%
-          visIgraphLayout(physics = input$physics,
+          visHierarchicalLayout(enabled = input$layoutNetworkDEG)%>%
+          visIgraphLayout(physics = input$physicsDEG,
                           layout = "layout.fruchterman.reingold",
                           randomSeed = 20)
 
@@ -54,18 +55,24 @@
     data_table <- data_table[data_table$omics%in%c("tf_res",
                                                    "tf_mirna_res",
                                                    "mirna_target_res"),]
+
     if(!deg){
       numNodes <- input$numNodes
       significativityCriteria <- input$significativityCriteriaNetwork
       pval <- input$pvalNetwork
       fdr <- input$fdrNetwork
+      class <- input$classSelectNetwork
     }else{
       numNodes <- input$numNodesDEG
       significativityCriteria <- input$significativityCriteriaNetworkDEG
       pval <- input$pvalNetworkDEG
       fdr <- input$fdrNetworkDEG
-      }
+      class <- input$classSelectNetworkDEG
+    }
       ans <- network_data
+      data_table <- data_table[data_table$class==class,]
+      nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
+      ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
       if(significativityCriteria == "pval"){
         ffrom <- data_table$cov[data_table$pval <= pval]
         tto <- data_table$response[data_table$pval <= pval]
@@ -89,12 +96,14 @@
                  input$pvalNetwork,
                  input$fdrNetwork,
                  input$physics,
+                 input$classSelectNetwork,
                  input$layoutNetworkDEG,
                  input$numNodesDEG,
                  input$significativityCriteriaNetworkDEG,
                  input$pvalNetworkDEG,
                  input$fdrNetworkDEG,
-                 input$physicsDEG)
+                 input$physicsDEG,
+                 input$classSelectNetworkDEG)
 }
 
 ################################################################
@@ -317,6 +326,8 @@
         integrationSelect]]$data$response_var
       data_table <- data_table[data_table$omics == integrationSelect,]
     }
+    df_heatmap <- scale(df_heatmap)
+    df_heatmap <- log1p(df_heatmap)
     df_heatmap_t <- t(as.matrix(df_heatmap))
     if (integrationSelect == "gene_genomic_res"){
      ans <-  .prepare_gen_heatmap(data_table = data_table,
@@ -329,7 +340,7 @@
                                   numTopMET)
     }
     if(integrationSelect == "gene_met_res"){
-      ans <-  .prepare_cnv_heatmap(data_table = data_table,
+      ans <- .prepare_cnv_heatmap(data_table = data_table,
                                    df_heatmap = df_heatmap,
                                    df_heatmap_t = df_heatmap_t,
                                    significativityCriteria,
@@ -580,10 +591,6 @@
     return(ht)
   }
 
-
-
-
-
 ######################################################################
 ######################################################################
 
@@ -668,6 +675,7 @@
 
   reactive({
     df <- data_table
+    df <- mutate_if(df, is.numeric, ~ round(., 3))
     if(type == "genomic"){
       integrationSelect <- input$genomicIntegrationSelectRidge
       classSelect <- input$genomicClassSelectRidge
@@ -829,6 +837,7 @@
                                           type = "genomic",
                                           deg = FALSE){
   reactive({
+    data_table <- mutate_if(data_table, is.numeric, ~ round(., 3))
     if(type == "genomic"){
       integrationSelect <- input$genomicIntegrationSelectHisto
       typeSelect <- input$genomicTypeSelect
@@ -945,31 +954,36 @@
 
 #######################################################################
 ########################################################################
+#' @importFrom gtools mixedsort
 
 .prepare_reactive_table <- function(data_table,
                                     input,
                                     output){
   reactive({
-    chr_order <- gtools::mixedsort(unique(data_table$chr_cov))
+    data_table <- mutate_if(data_table, is.numeric, ~ round(., 3))
+    chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
 
-    filtered_df <- data_table[!is.na(data_table$chr_cov),]
-    filtered_df <- filtered_df[filtered_df$omics == input$integrationSelectTable,]
-    if('class' %in% colnames(filtered_df)){
-      filtered_df <- filtered_df[filtered_df$class == input$classSelectTable,]}
+    data_table <- data_table[!is.na(data_table$chr_cov),]
+    data_table <- data_table[data_table$omics == input$integrationSelectTable,]
+    if('class' %in% colnames(data_table)){
+      data_table <- data_table[data_table$class == input$classSelectTable,]}
 
     if(input$significativityCriteriaTable == 'pval'){
-      filtered_df <- filtered_df[filtered_df$pval >= input$pvalRangeTable[1] &
-                                   filtered_df$pval <= input$pvalRangeTable[2],]
+      data_table <- data_table[data_table$pval >= input$pvalRangeTable[1] &
+                                 data_table$pval <= input$pvalRangeTable[2],]
     }else{
-      filtered_df <- filtered_df[filtered_df$fdr >= input$FDRRangeTable[1] &
-                                   filtered_df$fdr <= input$FDRRangeTable[2],]
+      data_table <- data_table[data_table$fdr >= input$FDRRangeTable[1] &
+                                 data_table$fdr <= input$FDRRangeTable[2],]
     }
     if(input$degSelectTable == 'Only DEGs'){
-      filtered_df <- filtered_df[filtered_df$deg,]}
-    filtered_df <- filtered_df[filtered_df$chr_cov == input$chrSelectTable,]
-    return(filtered_df)
+      data_table <- data_table[data_table$deg,]
+      }
+    if(input$chrSelectTable != "All"){
+      data_table <- data_table[data_table$chr_cov == input$chrSelectTable,]
+    }
+    return(data_table)
   })%>%bindEvent(input$integrationSelectTable,
                  input$classSelectTable,
                  input$chrSelectTable,
@@ -982,6 +996,7 @@
 #######################################################################
 ########################################################################
 #' @importFrom shiny renderText
+#' @importFrom DT dataTableOutput
 
 .background_srv <- function(input,
                             output,
@@ -1046,7 +1061,7 @@
     plot_list <- lapply(seq_along(plots), function(i) {
       list(plotlyOutput(ns(paste0(names(plots)[i], "_plot"))),
            HTML(paste0(rep("<br>", 20), collapse = "")),
-           DT::dataTableOutput(ns(paste0(names(plots)[i], "_table"))),
+           dataTableOutput(ns(paste0(names(plots)[i], "_table"))),
            HTML(paste0(rep("<br>", 20), collapse = "")))
     })
     plot_list <- as.list(unlist(plot_list, recursive = F))
