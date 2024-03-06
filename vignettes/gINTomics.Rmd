@@ -10,7 +10,7 @@ author:
   - &id Biology Department, University of Padova, Italy
   email: chiara.romualdi@unipd.it
 abstract: >
-  gINTomics is an R package for Multi-Omics data integration and visualization. gINTomics is designed to detect the association between the expression of a target and of its regulators, taking into account also their genomics modifications such as Copy Number Variations (CNV) and methylation. For RNA sequencing data, the counts will be fitted using a negative binomial model, while in the case of microarray or other types of data, a linear model will be applied. In some cases the number of regulators for a given target could be very high, in order to handle this eventuality, we provide a penalized linear model that will automatically keep only the most important regulators. All the models are gene-specific, so each gene/miRNA will have its own model with its covariates. The package will automatically download information about TF-target couples (dorothea), miRNA-target couples (multiMiR) and TF-miRNA couples (TransmiR). The couples will be used to define the covariates used in the integration models.
+  gINTomics is an R package for Multi-Omics data integration and visualization. gINTomics is designed to detect the association between the expression of a target and of its regulators, taking into account also their genomics modifications such as Copy Number Variations (CNV) and methylation. For RNA sequencing data, the counts will be fitted using a negative binomial model, while in the case of microarray or other types of data, a linear model will be applied. In some cases the number of regulators for a given target could be very high, in order to handle this eventuality, we provide a random forest selection that will automatically keep only the most important regulators. All the models are gene-specific, so each gene/miRNA will have its own model with its covariates. The package will automatically download information about TF-target couples (OmnipathR), miRNA-target couples (OmnipathR) and TF-miRNA couples (TransmiR). The couples will be used to define the covariates used in the integration models.
 output: 
   html_document:
       toc: true
@@ -46,7 +46,6 @@ The package contains a pre built MultiAssayExperiment, anyway in this section we
 ```{r, message=FALSE}
 # loading packages
 library(gINTomics)
-library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
 
 ```
@@ -71,6 +70,19 @@ new_multiassay <- create_multiassay(methylation = meth_matrix,
 
 
 ```
+
+## Run Genomic integration
+
+In this section we will see how to perform an expression~CNV+met integration. The input data should be provided as matrices or data.frames. Rows represent samples, while each column represents the different response variables/covariates of the models. By default all the integration functions will assume that expression data are obtained through sequencing, you should set the `sequencing_data` argument to FALSE if they are not.  Expression data could be both normalized or not normalized, the function is able to normalize data by setting the `normalize` argument to TRUE (default). If you want you can specify custom interaction through the `interactions` argument otherwise  the function will automatically look for the genes of `expression` in `cnv_data`.
+
+```{r, message=FALSE}
+gene_cnv_integration <- run_cnv_integration(expression = t(gene_exp_matrix),
+                                            cnv_data = t(gene_cnv_matrix))
+
+
+
+```
+
 
 ## Run CNV integration
 
