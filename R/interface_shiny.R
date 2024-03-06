@@ -554,44 +554,48 @@
 .gint_subItem_networkTranscript <- function(data_table){
   tabItem(tabName = "networkTranscript",
           fluidRow(
-            box(title = "Subsection 1",
-                "This is the content of Subsection 1."),
             mainPanel(
               sidebarLayout(
-                sidebarPanel(
-                  sliderInput("numNodes",
-                              label = "Number of Nodes",
-                              min = 10,
-                              max = nrow(data_table),
-                              value = 300),
-                  selectInput("classSelectNetwork",
+                div(
+                  style = "width: 1400px;",
+                  inputPanel(
+                     selectInput("classSelectNetwork",
                               label = "Select the Class:",
                               choices = unique(data_table$class)),
-                  selectInput(inputId = 'significativityCriteriaNetwork',
-                              label = 'Significativity criteria:',
-                              choices = c('pval', 'FDR')),
-                  conditionalPanel(
-                    condition = "input.significativityCriteriaNetwork == 'pval'",
-                    sliderInput("pvalNetwork",
-                                "P-Value:",
-                                min = 0,
-                                max = 1,
-                                value = c(0.05),
-                                step = 0.005)),
-                  conditionalPanel(
-                    condition = "input.significativityCriteriaNetwork == 'FDR'",
-                    sliderInput("fdrNetwork",
-                                "FDR:",
-                                min = 0,
-                                max = 1,
-                                value = c(0.05),
-                                step = 0.005)),
-                  checkboxInput("layoutNetwork",
-                                label = "Switch to tree Layout:",
-                                value = FALSE),
-                  checkboxInput("physics",
-                                label = "Physics",
-                                value = FALSE)),
+                    selectInput(inputId = 'significativityCriteriaNetwork',
+                                label = 'Significativity criteria:',
+                                choices = c('pval', 'FDR'),
+                                width = "50%"),
+                    conditionalPanel(
+                      condition = "input.significativityCriteriaNetwork == 'pval'",
+                      sliderInput("pvalNetwork",
+                                  "P-Value:",
+                                  min = 0,
+                                  max = 1,
+                                  value = c(0.05),
+                                  step = 0.005)),
+                    conditionalPanel(
+                      condition = "input.significativityCriteriaNetwork == 'FDR'",
+                      sliderInput("fdrNetwork",
+                                  "FDR:",
+                                  min = 0,
+                                  max = 1,
+                                  value = c(0.05),
+                                  step = 0.005)),
+                    sliderInput("numInteractions",
+                                label = "Number of Interactions",
+                                min = 10,
+                                max = nrow(data_table),
+                                value = 200,
+                                step = 50),
+                    checkboxInput("layoutNetwork",
+                                  label = "Switch to tree Layout:",
+                                  value = FALSE),
+                    checkboxInput("physics",
+                                  label = "Physics",
+                                  value = FALSE)
+                  )
+                ),
                 mainPanel(
                   visNetworkOutput("networkPlot",
                                    height = 800,
@@ -602,6 +606,7 @@
           )
   )
 }
+
 
 #' @import shiny
 #' @importFrom plotly plotlyOutput
@@ -900,44 +905,45 @@
             mainPanel(
               sidebarLayout(
                 sidebarPanel(
-                  sliderInput("numNodesDEG",
-                              label = "Number of Nodes",
-                              min = 10,
-                              max = nrow(data_table),
-                              value = 300),
-                  selectInput("classSelectNetworkDEG",
+              selectInput("classSelectNetworkDEG",
                               label = "Select the Class:",
                               choices = unique(data_table$class)),
-                  selectInput(inputId = 'significativityCriteriaNetworkDEG',
-                              label = 'Significativity criteria:',
-                              choices = c('pval', 'FDR')),
-                  conditionalPanel(
-                    condition = "input.significativityCriteriaNetworkDEG == 'pval'",
-                    sliderInput("pvalNetworkDEG",
-                                "P-Value:",
-                                min = 0,
-                                max = 1,
-                                value = c(0.05),
-                                step = 0.005)),
-                  conditionalPanel(
-                    condition = "input.significativityCriteriaNetworkDEG == 'FDR'",
-                    sliderInput("fdrNetworkDEG",
-                                "FDR:",
-                                min = 0,
-                                max = 1,
-                                value = c(0.05),
-                                step = 0.005)),
-                  checkboxInput("layoutNetworkDEG",
-                                label = "Switch to tree Layout:",
-                                value = FALSE),
-                  checkboxInput("physicsDEG",
-                                label = "Physics",
-                                value = FALSE)),
-                mainPanel(
-                  visNetworkOutput("networkPlotDEG",
-                                   height = 800,
-                                   width = 1600)
-                )
+              sliderInput("numInteractionsDEG",
+                          label = "Number of Interactions",
+                          min = 10,
+                          max = nrow(data_table),
+                          value = 200,
+                          step = 50),
+              selectInput(inputId = 'significativityCriteriaNetworkDEG',
+                          label = 'Significativity criteria:',
+                          choices = c('pval', 'FDR')),
+              conditionalPanel(
+                condition = "input.significativityCriteriaNetworkDEG == 'pval'",
+                sliderInput("pvalNetworkDEG",
+                            "P-Value:",
+                            min = 0,
+                            max = 1,
+                            value = c(0.05),
+                            step = 0.005)),
+              conditionalPanel(
+                condition = "input.significativityCriteriaNetworkDEG == 'FDR'",
+                sliderInput("fdrNetworkDEG",
+                            "FDR:",
+                            min = 0,
+                            max = 1,
+                            value = c(0.05),
+                            step = 0.005)),
+              checkboxInput("layoutNetworkDEG",
+                            label = "Switch to tree Layout:",
+                            value = FALSE),
+              checkboxInput("physicsDEG",
+                            label = "Physics",
+                            value = FALSE)),
+              mainPanel(
+              visNetworkOutput("networkPlotDEG",
+                               height = 800,
+                               width = 1600)
+              )
               )
             )
           )
@@ -1045,17 +1051,15 @@
 #' @import shiny
 
 .create_ui <- function(data_table){
-  myImgResources <- "imgResources/logo_gINTomics.png"
+  myImgResources <- "imgResources/logo_gINTomics3.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
   dashboardPage(
     dashboardHeader(title = span("gINTomics",
                                  span("Visualizer 1.0",
                                       style = "color: gray; font-size: 16px")),
                     tags$li(a(href="https://github.com/angelovelle96/gINTomics",
-                              img(src = myImgResources,
-                                  height = 80,
-                                  width = 80),
-                              style = "padding-top:1px; padding-bottom:1px;"),
+                              img(src = myImgResources, height=80, width=220),
+                              style = "padding-top:0px; padding-bottom:0px"),
                             class = "dropdown"),
                     tags$li(class = "dropdown",
                             tags$style(".main-header {max-height: 80px}"),
