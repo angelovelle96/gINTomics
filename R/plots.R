@@ -1,467 +1,99 @@
+#########################
+###############################
+plot_network <- function(data_table,
+                         num_interactions=300,
+                         class=NULL,
+                         pval=0.05){
 
-.circos_preprocess <- function(data){
+  if(!is.null(class)) data_table <- data_table[data_table$class==class,]
+  nnet <- .prepare_network(data_table)
+  nnet$edges <- nnet$edges[nnet$edges$pval<=pval,]
+  nnet$edges <- nnet$edges[seq_len(length.out = num_interactions),]
+  nodes_with_edges <- unique(c(nnet$edges$from, nnet$edges$to))
+  nnet$nodes <- nnet$nodes[nnet$nodes$id %in% nodes_with_edges,]
+  .build_network(nodes = nnet$nodes,
+                 edges = nnet$edges,
+                 legend_nodes = nnet$legend_nodes,
+                 legend_edges = nnet$legend_edges)
 
-  library(GenomicRanges)
-  dataframes <- lapply(unique(data$omics), function(x) {
-    single_omic_df <- data[data$omics==x,]
-    if(max(single_omic_df$response_value, na.rm = T)>30){
-      single_omic_df$response_value <- log2(single_omic_df$response_value+1)
-    }
-    return(single_omic_df)
-  })
-  names(dataframes) <- paste0("df_", unique(data$omics))
-  if("df_gene_genomic_res"%in%names(dataframes)){
-    dataframes$df_cnv <- filter(dataframes$df_gene_genomic_res,
-                                cnv_met == 'cnv')
-    dataframes$df_met <- filter(dataframes$df_gene_genomic_res,
-                                cnv_met == 'met')
-    tmp <- lapply(which(names(dataframes)!="df_gene_genomic_res"), function(x){
-      ans <- dataframes[[x]]
-      ans <- ans[ans$cov!="(Intercept)",]
-      ans$cov_value <- ans$cov_value-min(ans$cov_value, na.rm = T)
-      ans$cov_value <- ans$cov_value/max(ans$cov_value, na.rm = T)
-      return(ans)
-    })
-    names(tmp) <- names(dataframes)[
-      which(names(dataframes)!="df_gene_genomic_res")]
-    dataframes <- tmp
+}
+
+#########################
+###############################
+
+
+plot_venn <- function(data_table,
+                      class=NULL){
+  if(is.null(class) & "class"%in%colnames(data_table))
+     stop(str_wrap("Please, specify class"))
+  input <- list()
+  input$classSelectVenn <- class
+  input$fdrRangeVenn <- c(0, 0.05)
+  input$pvalRangeVenn <- c(0,0.05)
+  input$significativityCriteriaVenn <- "pval"
+  reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
+                                                      input = input,
+                                                      output = output,
+                                                      deg = FALSE)
+  tmp <- isolate(reactive_venn())
+  ans <- .build_venn(tmp)
+  ggplotly(ans)
+}
+
+
+#########################
+###############################
+
+
+plot_volcano <- function(data_table,
+                         class=NULL,
+                         omics=NULL){
+  if(is.null(class) & "class"%in%colnames(data_table))
+    stop(str_wrap("Please, specify class"))
+  if(is.null(omics) & length(unique(data_table$omics))>0)
+    stop(str_wrap("Please, specify omics"))
+
+  if(!is.null(class)) data_table <- data_table[data_table$class==class,]
+  if(!is.null(omics)) data_table <- data_table[data_table$omics==omics,]
+  data_table["group"] <- "Not Significant"
+  data_table[data_table$pval <= 0.05, 'group'] <- "Significant"
+  data_table$pval_fdr <- -log10(data_table$fdr)
+  .build_volcano(data_table)
+}
+
+
+#########################
+###############################
+
+
+plot_ridge <- function(data_table,
+                       class=NULL,
+                       omics=NULL,
+                       cnv_met=NULL){
+  if(is.null(class) & "class"%in%colnames(data_table))
+    stop(str_wrap("Please, specify class"))
+  if(is.null(omics) & length(unique(data_table$omics))>0)
+    stop(str_wrap("Please, specify omics"))
+
+  if(!is.null(class)) data_table <- data_table[data_table$class==class,]
+  if(!is.null(omics)) data_table <- data_table[data_table$omics==omics,]
+  data_table$significance <- ifelse(data_table$pval <= 0.05,
+                            "Significant", "Not Significant")
+  if(omics == "gene_genomic_res" & !is.null(cnv_met)){
+    if(!cnv_met%in%c("cnv", "met"))
+      stop(str_wrap("cnv_met should be one of cnv and met"))
+    data_table <- data_table[data_table$cnv_met == cnv_met,]
+    data_table <- data_table[!is.na(data_table$cnv_met), ]
   }
-  gr <- lapply(dataframes, function(x){
-    ans <- makeGRangesFromDataFrame(x,
-                                    seqnames.field = 'chr',
-                                    start.field = 'start',
-                                    end.field = 'end',
-                                    keep.extra.columns = TRUE,
-                                    na.rm = TRUE)
-    return(ans)
-  })
-  return(gr)
-}
-
-############################################################################
-#############################################################################
-.create_single_track <- function(data,
-                                 dataValue=NULL,
-                                 x_axis=NULL,
-                                 xe_axis=NULL,
-                                 y_axis=NULL,
-                                 colorField=NULL,
-                                 colorDomain=NULL,
-                                 colorRange=NULL,
-                                 tooltipField1=NULL,
-                                 tooltipTitle=NULL,
-                                 tooltipAlt1=NULL,
-                                 tooltipField2=NULL,
-                                 tooltipAlt2=NULL,
-                                 tooltipField3=NULL,
-                                 tooltipAlt3=NULL,
-                                 tooltipField4=NULL,
-                                 tooltipAlt4=NULL,
-                                 legend=NULL,
-                                 colorType=NULL,
-                                 title=NULL) {
-  return(
-    add_single_track(
-      data = track_data_gr(data, chromosomeField = 'seqnames', genomicFields = c('start','end'), value = dataValue),
-      mark = 'bar',
-      x = visual_channel_x(field = 'start', type = 'genomic', axis = x_axis),
-      xe = visual_channel_x(field = 'end', type = 'genomic', axis = xe_axis),
-      y = visual_channel_y(field = dataValue, type = 'quantitative', axis = y_axis),
-      color = visual_channel_color(field = colorField, type = colorType, domain = colorDomain, range = colorRange, legend = legend),
-      tooltip = visual_channel_tooltips(
-        visual_channel_tooltip(field = "start", type = "genomic", alt = 'Start Position:'),
-        visual_channel_tooltip(field = "end", type = "genomic", alt = "End Position:"),
-        visual_channel_tooltip(field = tooltipField1, title = tooltipTitle, type = "quantitative", alt = paste(tooltipTitle, "Value:"), format = "0.2"),
-        visual_channel_tooltip(field = tooltipField2, type = 'nominal', alt = tooltipAlt2),
-        visual_channel_tooltip(field = tooltipField3, type = 'nominal', alt = tooltipAlt3),
-        visual_channel_tooltip(field = tooltipField4, type = 'nominal', alt = tooltipAlt4)
-      ),
-      size = list(value = 1)
-    , title=title)
-  )
-}
-
-#######################################################################
-########################################################################
-
-.create_tracks <- function(data, gr){
-
-  tracks <- list()
-  track_cyto <- .create_cyto_track()
-  if ("gene_genomic_res" %in% unique(data$omics)){
-    gr$df_cnv$cnv_met2 <- "cnv/met"
-    track_cnv <- .create_cnv_track(gr$df_cnv)
-    track_met <- .create_met_track(gr$df_met)
-    track_expr <- .create_expr_track(gr$df_cnv, genomic=T)
-    track_coef_cnv <- .create_coef_track(gr$df_cnv)
-    track_coef_met <- .create_coef_track(gr$df_met)
-    tracks <- c(tracks, list(track_cnv=track_cnv,
-                             track_met=track_met,
-                             track_expr=track_expr,
-                             track_coef_cnv=track_coef_cnv,
-                             track_coef_met=track_coef_met))
-  }
-
-  if ("df_gene_cnv_res" %in% unique(names(gr))){
-    gr$df_gene_cnv_res$cnv_met <- "cnv"
-    track_cnv <- .create_cnv_track(gr$df_gene_cnv_res)
-    track_expr <- .create_expr_track(gr$df_gene_cnv_res)
-    track_coef_cnv <- .create_coef_track(gr$df_gene_cnv_res)
-    tracks <- c(tracks,list(track_cnv=track_cnv,
-                            track_expr=track_expr,
-                            track_coef_cnv=track_coef_cnv))
-  }
-
-  if("df_gene_met_res"%in%unique(names(gr))){
-    gr$df_gene_met_res$cnv_met <- "met"
-    track_met <- .create_met_track(gr$df_gene_met_res)
-    track_expr <- .create_expr_track(gr$df_gene_met_res)
-    track_coef_met <- .create_coef_track(gr$df_gene_met_res)
-    tracks <- c(tracks, list(track_met=track_met,
-                             track_expr=track_expr,
-                             track_coef_met=track_coef_met))
-  }
-
-    if ("df_mirna_cnv_res" %in% unique(names(gr))){
-      gr$df_mirna_cnv_res$cnv_met <- "cnv"
-      track_mirna_cnv <- .create_cnv_track(gr$df_mirna_cnv_res)
-      track_mirna_expr <- .create_expr_track(gr$df_mirna_cnv_res)
-      track_mirna_coef_cnv <- .create_coef_track(gr$df_mirna_cnv_res)
-      tracks <- c(tracks,list(track_mirna_cnv=track_mirna_cnv,
-                              track_mirna_expr=track_mirna_expr,
-                              track_mirna_coef_cnv=track_mirna_coef_cnv))
-    }
-  tracks <- c(tracks,list(track_cyto=track_cyto))
-  return(tracks)
-}
-
-#######################################################################
-########################################################################
-
-.create_cnv_track <- function(gr){
-
-    gr$cov_value2 <- as.character(gr$cov_value)
-    ii <- cut(unique(as.numeric(gr$cov_value2)),
-              breaks = seq(min(gr$cov_value, na.rm = T),
-                           max(gr$cov_value, na.rm = T),
-                           len = 50),
-              include.lowest = TRUE)
-    ccol <- colorRampPalette(c("#f2e6e6", "red4"))(49)[ii]
-    track_cnv <- .create_single_track(data=gr,
-                                      dataValue='cov_value',
-                                      x_axis="none",
-                                      xe_axis="none",
-                                      y_axis="none",
-                                      colorField="cov_value2",
-                                      colorDomain=unique(gr$cov_value2),
-                                      colorRange=ccol,
-                                      tooltipField1="cov_value",
-                                      tooltipTitle="cnv",
-                                      tooltipAlt1="CNV Value:",
-                                      tooltipField2="gene",
-                                      tooltipAlt2="Gene Name:",
-                                      tooltipField3="class",
-                                      tooltipAlt3="Class:",
-                                      tooltipField4="cnv_met",
-                                      tooltipAlt4="Integration Type:",
-                                      legend=FALSE,
-                                      colorType="nominal",
-                                      title="CNV")
-    return(track_cnv)
-    }
-
-#######################################################################
-########################################################################
-
-.create_met_track <- function(gr){
-  gr$cov_value2 <- as.character(gr$cov_value)
-  ii <- cut(unique(as.numeric(gr$cov_value2)),
-            breaks = seq(min(gr$cov_value, na.rm = T),
-                         max(gr$cov_value, na.rm = T),
-                         len = 50),
-            include.lowest = TRUE)
-  ccol <- colorRampPalette(c("#d1d1e3", "navyblue"))(49)[ii]
-  track_met <- .create_single_track(data=gr,
-                                    dataValue='cov_value',
-                                    x_axis="none",
-                                    xe_axis="none",
-                                    y_axis="none",
-                                    colorField="cov_value2",
-                                    colorDomain=unique(gr$cov_value2),
-                                    colorRange=ccol,
-                                    tooltipField1="cov_value",
-                                    tooltipTitle="met",
-                                    tooltipAlt1="MET Value:",
-                                    tooltipField2="gene",
-                                    tooltipAlt2="Gene Name:",
-                                    tooltipField3="class",
-                                    tooltipAlt3="Class:",
-                                    tooltipField4="cnv_met",
-                                    tooltipAlt4="Integration Type:",
-                                    legend=FALSE,
-                                    colorType="nominal",
-                                    title="MET")
-  return(track_met)
-
-}
-
-#######################################################################
-########################################################################
-
-.create_expr_track <- function(gr, genomic=F){
- cnv_met <- ifelse(genomic, "cnv_met2", "cnv_met")
-  track_expr <- .create_single_track(data=gr,
-                                     dataValue='response_value',
-                                     x_axis="none",
-                                     xe_axis="none",
-                                     y_axis="none",
-                                     colorField="response_value",
-                                     colorDomain=NULL,
-                                     colorRange=NULL,
-                                     tooltipField1="response_value",
-                                     tooltipTitle="expr",
-                                     tooltipAlt1="Expression Value (log2):",
-                                     tooltipField2="gene",
-                                     tooltipAlt2="Gene Name:",
-                                     tooltipField3="class",
-                                     tooltipAlt3="Class:",
-                                     tooltipField4=cnv_met,
-                                     tooltipAlt4="Integration Type:",
-                                     legend=T,
-                                     colorType="quantitative",
-                                     title="Expression")
-  return(track_expr)
-}
-
-#######################################################################
-########################################################################
-
-.create_coef_track <- function(gr){
-  track_coef <- .create_single_track(data=gr,
-                                    dataValue='coef',
-                                    x_axis="none",
-                                    xe_axis="none",
-                                    y_axis="none",
-                                    colorField="direction_coef",
-                                    colorDomain=c("negative", "positive"),
-                                    colorRange=c("blue", "red"),
-                                    tooltipField1="coef",
-                                    tooltipTitle="coef",
-                                    tooltipAlt1="Coef Value:",
-                                    tooltipField2="gene",
-                                    tooltipAlt2="Gene Name:",
-                                    tooltipField3="class",
-                                    tooltipAlt3="Class:",
-                                    tooltipField4="cnv_met",
-                                    tooltipAlt4="Integration Type:",
-                                    legend=FALSE,
-                                    colorType="nominal",
-                                    title="Coefficients")
-  return(track_coef)
+  lower_quantile <- quantile(data_table$coef, 0.001)
+  upper_quantile <- quantile(data_table$coef, 0.999)
+  quantiles = c(lower_quantile, upper_quantile)
+  .build_ridge(ridge_data=data_table,quantiles=quantiles)
 }
 
 
 
-#######################################################################
-########################################################################
-
-.create_cyto_track <- function(){
-  track_cyto <- add_single_track(
-    id = "track2",
-    data = track_data(
-      url = "https://raw.githubusercontent.com/sehilyi/gemini-datasets/master/data/UCSC.HG38.Human.CytoBandIdeogram.csv",
-      type = "csv",
-      chromosomeField = "Chromosome",
-      genomicFields = c("chromStart",
-                        "chromEnd")
-    ),
-    mark = "rect",
-    x = visual_channel_x(field = "chromStart",
-                         type = "genomic"),
-    xe = visual_channel_x(field = "chromEnd",
-                          type = "genomic"),
-    color = visual_channel_color(
-      field = "Stain",
-      type = "nominal",
-      domain = c(
-        "gneg",
-        "gpos25",
-        "gpos50",
-        "gpos75",
-        "gpos100",
-        "gvar",
-        "acen"           # acen: centromeric region (UCSC band files)
-      ),
-      range = c(
-        "white",
-        "#D9D9D9",
-        "#979797",
-        "#636363",
-        "black",
-        "#F0F0F0",
-        "red"
-      )
-    ),
-    stroke = visual_channel_stroke(
-      value = "lightgray"
-    ),
-    strokeWidth = visual_channel_stroke_width(
-      value = 0.5
-    ),
-  )
-  return(track_cyto)
-}
 
 
-#######################################################################
-########################################################################
-
-.create_composed_view <- function(tracks,width, height) {
-
-  composed_views <- list()
-
-  if(sum(c("track_expr", "track_cnv", "track_met")%in%names(tracks))==3){
-
-    composed_view_circos_genomic <- compose_view(
-      multi = TRUE,
-      tracks = add_multi_tracks(tracks$track_cyto,
-                                tracks$track_expr,
-                                tracks$track_cnv,
-                                tracks$track_coef_cnv,
-                                tracks$track_met,
-                                tracks$track_coef_met),
-      alignment = 'stack',
-      spacing = 0.01,
-      linkingId = "detail",
-      width = width,
-      height = height
-    )
-    composed_views <- c(composed_views, list(circos_genomic=composed_view_circos_genomic))
-  }else{
-
-    if("track_met"%in%names(tracks)){
-
-      composed_view_circos_met_gene <- compose_view(
-        multi = TRUE,
-        tracks = add_multi_tracks(tracks$track_cyto,
-                                  tracks$track_expr,
-                                  tracks$track_met,
-                                  tracks$track_coef_met),
-        alignment = 'stack',
-        spacing = 0.01,
-        linkingId = "detail"
-      )
-      composed_views <- c(composed_views, list(circos_met_gene=composed_view_circos_met_gene))
-    }
-    if("track_cnv"%in%names(tracks)){
-
-      composed_view_circos_cnv_gene <- compose_view(
-        multi = TRUE,
-        tracks = add_multi_tracks(tracks$track_cyto,
-                                  tracks$track_expr,
-                                  tracks$track_cnv,
-                                  tracks$track_coef_cnv),
-        alignment = 'stack',
-        spacing = 0.01,
-        linkingId = "detail"
-      )
-      composed_views <- c(composed_views, list(circos_cnv_gene=composed_view_circos_cnv_gene))
-    }
-
-  }
-  if(sum(c("track_mirna_expr", "track_mirna_cnv")%in%names(tracks))==2){
-
-    composed_view_circos_genomic_mirna <- compose_view(
-      multi = TRUE,
-      tracks = add_multi_tracks(tracks$track_cyto,
-                                tracks$track_mirna_expr,
-                                tracks$track_mirna_cnv,
-                                tracks$track_mirna_coef_cnv),
-      alignment = 'stack',
-      spacing = 0.01,
-      linkingId = "detail",
-      width = width,
-      height = height
-    )
-    composed_views <- c(composed_views,
-                        list(circos_genomic_mirna=composed_view_circos_genomic_mirna))
-  }
-  return(composed_views)
-}
 
 
-####################################################################
-#########################################################################
-
-dot_plotly <- function(enrich_result, showCategory=10, width=800, height=700){
-  df <- fortify(enrich_result, showCategory = showCategory)
-  df$Description <- as.character(df$Description)
-  df <- df[order(df$GeneRatio, decreasing = T),]
-  df$Description <- unlist(lapply(df$Description, function(label) {
-    words <- strsplit(label, " ")[[1]]
-    split_words <- lapply(seq(1, length(words), by = 2), function(i) {
-      paste(words[i:min(i+1, length(words))], collapse = " ")
-    })
-    paste(split_words, collapse = "<br>")
-  }))
-  legend.sizes = seq(min(df$Count),
-                     max(df$Count),
-                     max(c(1,round(((max(df$Count)-min(df$Count))/4)))))
-  lprop <- c(0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55)
-  lprop <- lprop[length(legend.sizes)]
-  ax = list(zeroline = FALSE,
-            showline = FALSE,
-            showticklabels = T,
-            showgrid = FALSE,
-            side="top")
-  mk = list(sizeref=0.1, sizemode="area")
-
-  pplot <- plot_ly(df, width=width, height=height) %>%
-    add_markers(x=~GeneRatio,
-                y=~Description,
-                name = "DotPlot",
-                text = ~paste("Count:", Count,"<br>",
-                              "pValue:", round(pvalue, digits = 4),"<br>",
-                              "qValue:", round(qvalue, digits = 4)),
-                size=~Count,
-                color=~pvalue,
-                marker=mk,
-                type="scatter",
-                mode="markers")%>%
-    layout(yaxis=list(automargin=TRUE,
-                      tickfont = list(size = 7),
-                      categoryorder = "array",
-                      categoryarray = rev(df$Description)),
-           xaxis=list(title="GeneRatio"))
-
-  llegend <- plot_ly() %>%
-    add_markers(x = "Count",
-                y = legend.sizes,
-                size = legend.sizes,
-                showlegend = F,
-                fill = ~'',
-                marker = c(mk, color="black"),
-                text=legend.sizes,
-                hoverinfo = "text") %>%
-    layout(xaxis = ax,
-           yaxis = list(showgrid = FALSE, tickvals = legend.sizes))
-
-  empty_trace <- plot_ly(x = numeric(0),
-                         y = numeric(0),
-                         type = "scatter",
-                         mode = "markers",
-                         showlegend = FALSE) %>%
-    layout(xaxis = list(showgrid = FALSE,
-                        zeroline = FALSE,
-                        showticklabels = FALSE),
-           yaxis = list(showgrid = FALSE,
-                        zeroline = FALSE,
-                        showticklabels = FALSE))
-
-  ans <- subplot(empty_trace,llegend,empty_trace,
-                 heights = c(0.02,lprop, (0.98-lprop)), nrows = 3)
-  ans <- subplot(pplot, ans,
-                 widths = c(0.9, 0.1), titleX = T, shareX = F)
-  return(ans)
-
-}
