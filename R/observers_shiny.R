@@ -70,7 +70,7 @@
       class <- input$classSelectNetworkDEG
     }
       ans <- network_data
-      data_table <- data_table[data_table$class==class,]
+      ans$edges <- ans$edges[ans$edges$class==class,]
       nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
       ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
       if(significativityCriteria == "pval"){
@@ -109,6 +109,7 @@
                                    output,
                                    deg = FALSE){
   reactive_venn <- reactive({
+    data_venn <- NULL
     if(deg==FALSE & "gene_genomic_res"%in%unique(data_table$omics)) {
       classSelect <- input$classSelectVenn
       pvalRange <- input$pvalRangeVenn
@@ -714,33 +715,67 @@
 
 .prepare_reactive_histo_tf <- function(data_table,
                                        input,
-                                       output){
+                                       output,
+                                       deg = FALSE){
   reactive({
+    genes_count_df <- NULL
+    if(deg==FALSE){
+      integrationSelect <- input$transcriptIntegrationSelectHisto
+      classSelect <- input$transcriptClassSelectHisto
+      chrSelect <- input$transcriptChrSelectHisto
+      significativityCriteria <- input$transcriptSignificativityCriteriaHisto
+      pvalRange <- input$transcriptPvalRangeHisto
+      fdrRange <- input$transcriptFdrRangeHisto
+    }
+    if(deg==TRUE){
+      integrationSelect <- input$integrationSelectHistoDEG
+      classSelect <- input$classSelectHistoDEG
+      chrSelect <- input$chrSelectHistoDEG
+      significativityCriteria <- input$significativityCriteriaHistoDEG
+      pvalRange <- input$pvalRangeHistoDEG
+      fdrRange <- input$fdrRangeHistoDEG
+    }
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
+    if(integrationSelect == "tf_res"){
     data_table <- data_table[data_table$omics == 'tf_res', ]
     data_table <- data_table[,
                              colnames(data_table)%in%c("response", "cov",
                                                        "pval","fdr","chr_cov",
                                                        "deg","class")]
-    df_filtered_histo_tf <- data_table
-    if('class' %in% colnames(df_filtered_histo_tf)){
-      df_filtered_histo_tf <- df_filtered_histo_tf[
-        df_filtered_histo_tf$class == input$classSelectHistoTFs, ]
+    if('class' %in% colnames(data_table)){
+      data_table <- data_table[
+        data_table$class == classSelect,]
     }
-    if(input$degSelectHistoTFs == 'Only DEGs'){
-      df_filtered_histo_tf <- df_filtered_histo_tf[df_filtered_histo_tf$deg, ]
+    if(deg==TRUE){
+      data_table <- data_table[data_table$deg,]
     }
-    df_filtered_histo_tf <- df_filtered_histo_tf[df_filtered_histo_tf$pval <= 0.05, ]
-    genes_count <- table(df_filtered_histo_tf$cov, df_filtered_histo_tf$chr_cov)
+    if(significativityCriteria == "pval"){
+      data_table <- data_table[data_table$pval <= pvalRange,]
+    }else{
+      data_table <- data_table[data_table$fdr <= fdrRange,]
+    }
+    genes_count <- table(data_table$cov, data_table$chr_cov)
     genes_count_df <- as.data.frame.table(genes_count)
     genes_count_df <- subset(genes_count_df, Freq != 0)
     colnames(genes_count_df) <- c("TF", "Chromosome", "Count")
-    genes_count_df <- genes_count_df[order(-genes_count_df$Count), ]
+    genes_count_df <- genes_count_df[order(-genes_count_df$Count),]
+    }
     return(genes_count_df)
-  })%>%bindEvent(input$classSelectHistoTFs,
-                 input$degSelectHistoTFs)
+  })%>%bindEvent(input$transcriptIntegrationSelectHisto,
+                 input$transcriptClassSelectHisto,
+                 input$transcriptChrSelectHisto,
+                 input$transcriptSignificativityCriteriaHisto,
+                 input$transcriptPvalRangeHisto,
+                 input$transcriptFdrRangeHisto,
+                 input$integrationSelectHistoDEG,
+                 input$classSelectHistoDEG,
+                 input$chrSelectHistoDEG,
+                 input$significativityCriteriaHistoDEG,
+                 input$pvalRangeHistoDEG,
+                 input$fdrRangeHistoDEG
+                 )
 }
 
 #######################################################################
@@ -822,7 +857,10 @@
     gen_plot()[["plot"]]
   })
   output$gen_enrich_table <- DT::renderDataTable({
-    gen_plot()[["table"]]
+    ans <- gen_plot()[["table"]]
+    if(!gen_enr$is_alive()){
+    ans <- mutate_if(ans, is.numeric, ~ round(., 3))
+    }
   })
 
   tf_enr <- gINTomics:::.run_bg(FFUN = run_tf_enrich,
@@ -852,7 +890,9 @@
     plot_list <- lapply(seq_along(plots), function(i) {
       list(plotlyOutput(ns(paste0(names(plots)[i], "_plot"))),
            HTML(paste0(rep("<br>", 20), collapse = "")),
-           dataTableOutput(ns(paste0(names(plots)[i], "_table"))),
+           tags$div(
+             style = 'overflow-x: auto;',
+           dataTableOutput(ns(paste0(names(plots)[i], "_table")))),
            HTML(paste0(rep("<br>", 20), collapse = "")))
     })
     plot_list <- as.list(unlist(plot_list, recursive = F))
@@ -866,7 +906,10 @@
         plots[[i]][["plot"]]
       })
       output[[paste0(names(plots)[i], "_table")]] <- renderDataTable({
-        plots[[i]][["table"]]
+       ans <- plots[[i]][["table"]]
+        if(!tf_enr$is_alive()){
+          ans <- mutate_if(ans, is.numeric, ~ round(., 3))
+        }
       })
 
     }
