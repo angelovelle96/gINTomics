@@ -95,58 +95,58 @@ plot_ridge <- function(data_table,
 #########################
 ###############################
 
-
 plot_heatmap <- function(data_table,
                          num_interactions=300,
                          omics,
+
                          class=NULL,
                          pval=0.05){
+  if(is.null(class) & "class"%in%colnames(data_table))
+    stop(str_wrap("Please, specify class"))
+  tmp <- c("gene_genomic_res", "gene_cnv_res", "gene_met_res")
+  if(omics & length(unique(data_table$omics))>1)
+    stop(str_wrap("Please, specify omics"))
+
+  if(!is.null(class)) data_table <- data_table[data_table$class==class,]
+  if(!is.null(omics)) data_table <- data_table[data_table$omics==omics,]
 
   if (omics == "gene_genomic_res"){
     ans <- .prepare_gen_heatmap(data_table = data_table,
-                               df_heatmap = df_heatmap,
-                               df_heatmap_t = df_heatmap_t,
-                               significativityCriteria=significativityCriteria,
-                               pvalRange = pvalRange,
-                               fdrRange = fdrRange,
-                               numTopCNV = numTopCNV,
-                               numTopMET = numTopMET)
+                                df_heatmap = df_heatmap,
+                                df_heatmap_t = df_heatmap_t,
+                                significativityCriteria=significativityCriteria,
+                                pvalRange = pvalRange,
+                                fdrRange = fdrRange,
+                                numTopCNV = numTopCNV,
+                                numTopMET = numTopMET)
   }
   if(omics == "gene_cnv_res"){
     ans <- .prepare_cnv_heatmap(data_table = data_table,
-                              df_heatmap = df_heatmap,
-                              df_heatmap_t = df_heatmap_t,
-                              significativityCriteria=significativityCriteria,
-                              pvalRange = pvalRange,
-                              fdrRange = fdrRange,
-                              numTopCNVonly = numTopCNVonly)
+                                df_heatmap = df_heatmap,
+                                df_heatmap_t = df_heatmap_t,
+                                significativityCriteria=significativityCriteria,
+                                pvalRange = pvalRange,
+                                fdrRange = fdrRange,
+                                numTopCNVonly = numTopCNVonly)
   }
   if(omics == "gene_met_res"){
     ans <-  .prepare_met_heatmap(data_table = data_table,
-                               df_heatmap = df_heatmap,
-                               df_heatmap_t = df_heatmap_t,
-                               significativityCriteria=significativityCriteria,
-                               pvalRange = pvalRange,
-                               fdrRange = fdrRange,
-                               numTopMETonly = numTopMETonly)
+                                 df_heatmap = df_heatmap,
+                                 df_heatmap_t = df_heatmap_t,
+                                 significativityCriteria=significativityCriteria,
+                                 pvalRange = pvalRange,
+                                 fdrRange = fdrRange,
+                                 numTopMETonly = numTopMETonly)
   }
   if(omics == "mirna_cnv_res"){
     ans <- .prepare_mirna_heatmap(data_table = data_table,
-                               df_heatmap = df_heatmap,
-                               df_heatmap_t = df_heatmap_t,
-                               significativityCriteria=significativityCriteria,
-                               pvalRange = pvalRange,
-                               fdrRange = fdrRange,
-                               numTopMiCNV = numTopMiCNV)
+                                  df_heatmap = df_heatmap,
+                                  df_heatmap_t = df_heatmap_t,
+                                  significativityCriteria=significativityCriteria,
+                                  pvalRange = pvalRange,
+                                  fdrRange = fdrRange,
+                                  numTopMiCNV = numTopMiCNV)
   }
   return(ht)
 
 }
-
-
-
-
-
-
-
-
