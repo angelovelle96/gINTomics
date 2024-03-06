@@ -1063,12 +1063,15 @@
                             class = "dropdown"),
                     tags$li(class = "dropdown",
                             tags$style(".main-header {max-height: 80px}"),
-                            tags$style(".main-header .logo {height: 80px;}"),
+                            tags$style(".main-header .logo {height: 80px;
+                                       line-height: 80px !important;
+                                       padding: 0 0px;}"),
                             tags$style(".sidebar-toggle {height: 80px;}"))
-                    #tags$style(".navbar {min-height:80px !important}")
     ),
     .gint_dashboardsidebar(),
     dashboardBody(
+      tags$head(tags$style(
+        HTML('.content-wrapper, .right-side {background-color: #ffffff;}'))),
       tabItems(
         .gint_tabitem_home(data_table),
         .gint_subItem_coefDistribGenomic(data_table),
