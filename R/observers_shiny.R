@@ -17,7 +17,7 @@
         network <- network%>%
           visHierarchicalLayout(enabled = input$layoutNetwork)%>%
           visIgraphLayout(physics = input$physics,
-                          layout = "layout.fruchterman.reingold",
+                          layout = "layout_with_fr",
                           randomSeed = 20)
 
         return(network)
@@ -32,7 +32,7 @@
         network <- network%>%
           visHierarchicalLayout(enabled = input$layoutNetwork)%>%
           visIgraphLayout(physics = input$physics,
-                          layout = "layout.fruchterman.reingold",
+                          layout = "layout_with_fr",
                           randomSeed = 20)
 
         return(network)
@@ -55,42 +55,38 @@
                                                    "tf_mirna_res",
                                                    "mirna_target_res"),]
     if(!deg){
-      numNodes <- input$numNodes
+      numInteractions <- input$numInteractions
       significativityCriteria <- input$significativityCriteriaNetwork
       pval <- input$pvalNetwork
       fdr <- input$fdrNetwork
     }else{
-      numNodes <- input$numNodesDEG
+      numInteractions <- input$numInteractionsDEG
       significativityCriteria <- input$significativityCriteriaNetworkDEG
       pval <- input$pvalNetworkDEG
       fdr <- input$fdrNetworkDEG
       }
       ans <- network_data
       if(significativityCriteria == "pval"){
-        ffrom <- data_table$cov[data_table$pval <= pval]
-        tto <- data_table$response[data_table$pval <= pval]
+        ans$edges <- ans$edges[ans$edges$pval<= pval,]
       } else {
-        ffrom <- data_table$cov[data_table$fdr <= fdr]
-        tto <- data_table$response[data_table$fdr <= fdr]
+        ans$edges <- ans$edges[ans$edges$fdr<= fdr,]
       }
       if(deg){
-        tto <- intersect(tto,unique(data_table$response[data_table$deg]))
+        tto <- unique(data_table$response[data_table$deg])
+        ans$edges <- ans$edges[ans$edges$to%in%tto,]
         }
-      ans$edges <- ans$edges[ans$edges$from%in%ffrom,]
-      ans$edges <- ans$edges[ans$edges$to%in%tto,]
-      ssel <- head(intersect(ans$nodes$id, tto), numNodes)
-      ans$edges <- ans$edges[ans$edges$to%in%ssel,]
+      ans$edges <- ans$edges[seq_len(length.out = numInteractions),]
       nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
       ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges,]
       return(ans)
   })%>%bindEvent(input$layoutNetwork,
-                 input$numNodes,
+                 input$numInteractions,
                  input$significativityCriteriaNetwork,
                  input$pvalNetwork,
                  input$fdrNetwork,
                  input$physics,
                  input$layoutNetworkDEG,
-                 input$numNodesDEG,
+                 input$numInteractionsDEG,
                  input$significativityCriteriaNetworkDEG,
                  input$pvalNetworkDEG,
                  input$fdrNetworkDEG,
@@ -230,18 +226,10 @@
     if(significativityCriteria == 'pval'){
       data_table["group"] <- "Not Significant"
       data_table[data_table$pval <= pvalRange, 'group'] <- "Significant"
-      top_peaks <- data_table[with(data_table,
-                                   order(pval, coef)),]
-      data_table <- rbind(top_peaks, data_table[with(data_table,
-                                                     order(-coef, pval)),][1:10,])
       data_table$pval_fdr <- -log10(data_table$pval)
     }else{
       data_table["group"] <- "Not Significant"
       data_table[data_table$fdr <= fdrRange, 'group'] <- "Significant"
-      top_peaks <- data_table[with(data_table,
-                                   order(fdr, coef)),]
-      data_table <- rbind(top_peaks, data_table[with(data_table,
-                                                     order(-coef, fdr)),][1:10,])
       data_table$pval_fdr <- -log10(data_table$fdr)
     }
     return(data_table)
@@ -382,205 +370,6 @@
                  input$FDRRangeHeatmapDEG,
                  input$classSelectHeatmapDEG)
 }
-
-
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
-
-.prepare_gen_heatmap <- function(data_table,
-                                  df_heatmap,
-                                  df_heatmap_t,
-                                  significativityCriteria,
-                                  pvalRange,
-                                  fdrRange,
-                                  numTopCNV,
-                                  numTopMET){
-
-    tmp <- data.frame(cnv = data_table$coef[
-                        data_table$cnv_met == 'cnv'],
-                      pval_cnv = data_table$pval[
-                        data_table$cnv_met == 'cnv'],
-                      fdr_cnv = data_table$fdr[
-                        data_table$cnv_met == 'cnv'],
-                      row.names = data_table$response[
-                        data_table$cnv_met == 'cnv'])
-
-    tmp2 <- data.frame(met = data_table$coef[
-                        data_table$cnv_met == 'met'],
-                       pval_met = data_table$pval[
-                         data_table$cnv_met == 'met'],
-                       fdr_met = data_table$fdr[
-                         data_table$cnv_met == 'met'],
-                       row.names = data_table$response[
-                         data_table$cnv_met == 'met'])
-    tmp3 <- unique(c(rownames(tmp), rownames(tmp2)))
-    data_table <- cbind(cnv = tmp[tmp3,], met = tmp2[tmp3,])
-    colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
-    rownames(data_table) <- tmp3
-    df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
-    if(significativityCriteria == 'pval'){
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv <= pvalRange |
-                                     df_heatmap_t$pval_met <= pvalRange,]
-    }else{
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= fdrRange |
-                                     df_heatmap_t$fdr_met <= fdrRange,]
-    }
-    if (nrow(df_heatmap_t) == 0){
-      return(NULL)
-    }
-    top_met <- df_heatmap_t %>% arrange(desc(abs(met))) %>% head(numTopCNV)
-    top_cnv <- df_heatmap_t %>% arrange(desc(abs(cnv))) %>% head(numTopMET)
-    expr_top <- rbind(top_cnv, top_met[
-      !rownames(top_met)%in%rownames(top_cnv),])
-    expr_top_subset <- expr_top[, -c((ncol(expr_top) - 5):ncol(expr_top))]
-    set.seed(123)
-    row_ha <- rowAnnotation(coef_cnv = expr_top$cnv, coef_met = expr_top$met)
-    ht <- Heatmap(expr_top_subset, right_annotation = row_ha)
-    ht <- draw(ht)
-    return(ht)
-    }
-
-
-######################################################################
-######################################################################
-
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
-
-.prepare_cnv_heatmap <- function(data_table,
-                                 df_heatmap,
-                                 df_heatmap_t,
-                                 significativityCriteria,
-                                 pvalRange,
-                                 fdrRange,
-                                 numTopCNVonly){
-
-    tmp <-  data.frame(cnv=data_table$coef[
-                         data_table$omics == 'cnv'],
-                       pval_cnv=data_table$pval[
-                         data_table$omics == 'cnv'],
-                       fdr_cnv=data_table$fdr[
-                         data_table$omics == 'cnv'],
-                       row.names = data_table$response[
-                         data_table$omics == 'cnv'])
-    tmp2 <- unique(rownames(tmp))
-    data_table <- cbind(cnv=tmp[tmp2,])
-    colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
-    rownames(data_table) <- tmp2
-    df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
-    if (significativityCriteria == 'pval'){
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_cnv <= pvalRange,]
-    }else{
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_cnv <= fdrRange,]
-    }
-    if (nrow(df_heatmap_t) == 0){
-      return(NULL)}
-    top_cnv <- df_heatmap_t %>%
-      arrange(desc(abs(cnv))) %>%
-      head(numTopCNVonly)
-    expr_top <- top_cnv
-    set.seed(123)
-    row_ha <- rowAnnotation(coef_cnv=expr_top$cnv)
-    ht <- Heatmap(as.matrix(expr_top, right_annotation=row_ha))
-    ht = draw(ht)
-    return(ht)
-}
-
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
-
-.prepare_met_heatmap <- function(data_table,
-                                 df_heatmap,
-                                 df_heatmap_t,
-                                 significativityCriteria,
-                                 pvalRange,
-                                 fdrRange,
-                                 numTopMETonly){
-
-    tmp <-  data.frame(met=data_table$coef[
-                         data_table$omics == 'met'],
-                       pval_met=data_table$pval[
-                         data_table$omics == 'met'],
-                       fdr_met=data_table$fdr[
-                         data_table$omics == 'met'],
-                       row.names = data_table$response[
-                         data_table$omics == 'met'])
-    tmp2 <- unique(rownames(tmp))
-    data_table <- cbind(met=tmp[tmp2,])
-    colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
-    rownames(data_table) <- tmp2
-    df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
-    if(significativityCriteria == 'pval'){
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_met <= pvalRange,]
-    }else{
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_met <= fdrRange,]
-    }
-    if (nrow(df_heatmap_t) == 0){
-      return(NULL)}
-    top_met <- df_heatmap_t %>%
-      arrange(desc(abs(met))) %>%
-      head(numTopMETonly)
-    expr_top <- top_met
-    set.seed(123)
-    row_ha <- rowAnnotation(coef_met=expr_top$met)
-    ht <- Heatmap(as.matrix(expr_top, right_annotation=row_ha))
-    ht = draw(ht)
-    return(ht)
-}
-
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
-
-.prepare_mirna_heatmap <- function(data_table,
-                                 df_heatmap,
-                                 df_heatmap_t,
-                                 significativityCriteria,
-                                 pvalRange,
-                                 fdrRange,
-                                 numTopMiCNV){
-
-    tmp <-  data.frame(mirna_cnv=data_table$coef[
-                         data_table$omics == 'mirna_cnv_res'],
-                       pval_mirna_cnv=data_table$pval[
-                         data_table$omics == 'mirna_cnv_res'],
-                       fdr_mirna_cnv=data_table$fdr[
-                         data_table$omics == 'mirna_cnv_res'],
-                       row.names = data_table$response[
-                         data_table$omics == 'mirna_cnv_res'])
-    tmp2 <- unique(rownames(tmp))
-    data_table <- cbind(mirna_cnv=tmp[tmp2,])
-    colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
-    rownames(data_table) <- tmp2
-    df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
-    if(significativityCriteria == 'pval'){
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$pval_mirna_cnv <= pvalRange,]
-    }else{
-      df_heatmap_t <- df_heatmap_t[df_heatmap_t$fdr_mirna_cnv <= fdrRange,]
-    }
-    if (nrow(df_heatmap_t) == 0){
-      return(NULL)}
-    df_heatmap_t <- as.data.frame(df_heatmap_t)
-    top_mirna_cnv <- df_heatmap_t %>%
-      arrange(desc(abs(mirna_cnv)))  %>%
-      head(numTopMiCNV)
-    expr_top <- top_mirna_cnv
-    expr_top_subset <- expr_top[, -c((ncol(expr_top) - 3):ncol(expr_top))]
-    set.seed(123)
-    row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv)
-    ht <- Heatmap(expr_top_subset, right_annotation=row_ha)
-    ht = draw(ht)
-    return(ht)
-  }
-
-
 
 
 
