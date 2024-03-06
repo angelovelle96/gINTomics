@@ -832,7 +832,8 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
                                  pvalRange,
                                  fdrRange,
                                  numTopCNV,
-                                 numTopMET){
+                                 numTopMET,
+                                 scale){
 
   tmp <- data.frame(cnv = data_table$coef[
     data_table$cnv_met == 'cnv'],
@@ -873,7 +874,13 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   expr_top_subset <- expr_top[, -c((ncol(expr_top) - 5):ncol(expr_top))]
   set.seed(123)
   row_ha <- rowAnnotation(coef_cnv = expr_top$cnv, coef_met = expr_top$met)
-  ht <- Heatmap(expr_top_subset, right_annotation = row_ha)
+  expr_top_subset <- as.matrix(expr_top_subset)
+  if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
+  if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
+  if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
+  ht <- Heatmap(expr_top_subset,
+                right_annotation = row_ha,
+                heatmap_legend_param = list(title="log2 expression"))
   ht <- draw(ht)
   return(ht)
 }
@@ -893,7 +900,8 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
                                  significativityCriteria,
                                  pvalRange,
                                  fdrRange,
-                                 numTopCNVonly){
+                                 numTopCNVonly,
+                                 scale){
 
   tmp <-  data.frame(cnv=data_table$coef[
     data_table$omics == 'cnv'],
@@ -921,8 +929,14 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   expr_top <- top_cnv
   set.seed(123)
   row_ha <- rowAnnotation(coef_cnv=expr_top$cnv)
-  ht <- Heatmap(as.matrix(expr_top, right_annotation=row_ha))
-  ht = draw(ht)
+  expr_top_subset <- as.matrix(expr_top)
+  if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
+  if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
+  if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
+  ht <- Heatmap(expr_top_subset,
+                right_annotation = row_ha,
+                heatmap_legend_param = list(title="log2 expression"))
+  ht <- draw(ht)
   return(ht)
 }
 
@@ -937,7 +951,8 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
                                  significativityCriteria,
                                  pvalRange,
                                  fdrRange,
-                                 numTopMETonly){
+                                 numTopMETonly,
+                                 scale){
 
   tmp <-  data.frame(met=data_table$coef[
     data_table$omics == 'met'],
@@ -965,8 +980,14 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   expr_top <- top_met
   set.seed(123)
   row_ha <- rowAnnotation(coef_met=expr_top$met)
-  ht <- Heatmap(as.matrix(expr_top, right_annotation=row_ha))
-  ht = draw(ht)
+  expr_top_subset <- as.matrix(expr_top)
+  if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
+  if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
+  if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
+  ht <- Heatmap(expr_top_subset,
+                right_annotation = row_ha,
+                heatmap_legend_param = list(title="log2 expression"))
+  ht <- draw(ht)
   return(ht)
 }
 
@@ -981,7 +1002,8 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
                                    significativityCriteria,
                                    pvalRange,
                                    fdrRange,
-                                   numTopMiCNV){
+                                   numTopMiCNV,
+                                   scale){
 
   tmp <-  data.frame(mirna_cnv=data_table$coef[
     data_table$omics == 'mirna_cnv_res'],
@@ -1011,88 +1033,16 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   expr_top_subset <- expr_top[, -c((ncol(expr_top) - 3):ncol(expr_top))]
   set.seed(123)
   row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv)
-  ht <- Heatmap(expr_top_subset, right_annotation=row_ha)
-  ht = draw(ht)
+  expr_top_subset <- as.matrix(expr_top)
+  if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
+  if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
+  if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
+  ht <- Heatmap(expr_top_subset,
+                right_annotation = row_ha,
+                heatmap_legend_param = list(title="log2 expression"))
+  ht <- draw(ht)
   return(ht)
 }
-
-
-####################################################################
-#########################################################################
-
-dot_plotly <- function(enrich_result, showCategory=10, width=800, height=700){
-  df <- fortify(enrich_result, showCategory = showCategory)
-  df$Description <- as.character(df$Description)
-  df <- df[order(df$GeneRatio, decreasing = T),]
-  df$Description <- unlist(lapply(df$Description, function(label) {
-    words <- strsplit(label, " ")[[1]]
-    split_words <- lapply(seq(1, length(words), by = 2), function(i) {
-      paste(words[i:min(i+1, length(words))], collapse = " ")
-    })
-    paste(split_words, collapse = "<br>")
-  }))
-  legend.sizes = seq(min(df$Count),
-                     max(df$Count),
-                     max(c(1,round(((max(df$Count)-min(df$Count))/4)))))
-  lprop <- c(0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55)
-  lprop <- lprop[length(legend.sizes)]
-  ax = list(zeroline = FALSE,
-            showline = FALSE,
-            showticklabels = T,
-            showgrid = FALSE,
-            side="top")
-  mk = list(sizeref=0.1, sizemode="area")
-
-  pplot <- plot_ly(df, width=width, height=height) %>%
-    add_markers(x=~GeneRatio,
-                y=~Description,
-                name = "DotPlot",
-                text = ~paste("Count:", Count,"<br>",
-                              "pValue:", round(pvalue, digits = 4),"<br>",
-                              "qValue:", round(qvalue, digits = 4)),
-                size=~Count,
-                color=~pvalue,
-                marker=mk,
-                type="scatter",
-                mode="markers")%>%
-    layout(yaxis=list(automargin=TRUE,
-                      tickfont = list(size = 7),
-                      categoryorder = "array",
-                      categoryarray = rev(df$Description)),
-           xaxis=list(title="GeneRatio"))
-
-  llegend <- plot_ly() %>%
-    add_markers(x = "Count",
-                y = legend.sizes,
-                size = legend.sizes,
-                showlegend = F,
-                fill = ~'',
-                marker = c(mk, color="black"),
-                text=legend.sizes,
-                hoverinfo = "text") %>%
-    layout(xaxis = ax,
-           yaxis = list(showgrid = FALSE, tickvals = legend.sizes))
-
-  empty_trace <- plot_ly(x = numeric(0),
-                         y = numeric(0),
-                         type = "scatter",
-                         mode = "markers",
-                         showlegend = FALSE) %>%
-    layout(xaxis = list(showgrid = FALSE,
-                        zeroline = FALSE,
-                        showticklabels = FALSE),
-           yaxis = list(showgrid = FALSE,
-                        zeroline = FALSE,
-                        showticklabels = FALSE))
-
-  ans <- subplot(empty_trace,llegend,empty_trace,
-                 heights = c(0.02,lprop, (0.98-lprop)), nrows = 3)
-  ans <- subplot(pplot, ans,
-                 widths = c(0.9, 0.1), titleX = T, shareX = F)
-  return(ans)
-
-}
-
 
 
 
@@ -1250,49 +1200,6 @@ run_shiny <- function(multiomics_integration){
 
     output$download_csv_ridge_gen <- download_csv(type = "genomic", deg = FALSE, plotType = "ridge")
 
-    # output$download_csv_ridge_gen <- downloadHandler(
-    #   filename = function(){
-    #     "data_table.csv"
-    #   },
-    #   content = function(file){
-    #     reactive_ridge_table <- gINTomics:::.prepare_reactive_ridge_table(data_table,
-    #                                                                           input,
-    #                                                                           output,
-    #                                                                           type = "genomic",
-    #                                                                           deg = FALSE)
-    #     write.csv(reactive_ridge_table(), file, row.names = FALSE)
-    #   }
-    # )
-    #
-    # output$download_csv_ridge_transcr <- downloadHandler(
-    #   filename = function(){
-    #     "data_table.csv"
-    #   },
-    #   content = function(file){
-    #     reactive_ridge_table <- gINTomics:::.prepare_reactive_ridge_table(data_table,
-    #                                                                       input,
-    #                                                                       output,
-    #                                                                       type = "transcript",
-    #                                                                       deg = FALSE)
-    #     write.csv(reactive_ridge_table(), file, row.names = FALSE)
-    #   }
-    # )
-    #
-    # output$download_csv_ridge_deg <- downloadHandler(
-    #   filename = function(){
-    #     "data_table.csv"
-    #   },
-    #   content = function(file){
-    #     reactive_ridge_table <- gINTomics:::.prepare_reactive_ridge_table(data_table,
-    #                                                                       input,
-    #                                                                       output,
-    #                                                                       type = "all",
-    #                                                                       deg = TRUE)
-    #     write.csv(reactive_ridge_table(), file, row.names = FALSE)
-    #   }
-    # )
-
-
     ## ----------------------- HISTO SERVER --------------------------
     reactive_histo <- gINTomics:::.prepare_reactive_histo(data_table,
                                                           input = input,
@@ -1404,13 +1311,6 @@ run_shiny <- function(multiomics_integration){
                data_tf_enrich=data_tf_enrich)
 
     #### ------------------- CIRCOS SERVER ----------------------------
-    # tmp2 <- .create_tracks(data_table = data$data, gr = tmp)
-    # tmp3 <- .create_composed_view(tracks = tmp2)
-    # tmp4 <- arrange_views(
-    #   title = 'Interactive Circos',
-    #   subtitle = 'subtitle',
-    #   views = tmp3$circos_genomic)
-    #tmp <- .circos_preprocess(data = data$data)
     reactive_circos <- .prepare_reactive_circos(data = data$data,
                                                 input = input,
                                                 output = output)

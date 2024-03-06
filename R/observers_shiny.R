@@ -271,6 +271,7 @@
                                       session,
                                       deg = FALSE){
   observe({
+    ht_opt$message = FALSE
     if(deg == FALSE){
       integrationSelect <- input$integrationSelectHeatmap
       numTopCNV <- input$numTopGenesHeatmapCNV
@@ -282,6 +283,7 @@
       significativityCriteria <- input$significativityCriteriaHeatmap
       pvalRange <- input$pvalRangeHeatmap
       fdrRange <- input$FDRRangeHeatmap
+      scale <- input$scaleHeatmap
     }
     if(deg == TRUE){
       integrationSelect <- input$integrationSelectHeatmapDEG
@@ -294,6 +296,7 @@
       pvalRange <- input$pvalRangeHeatmapDEG
       fdrRange <- input$FDRRangeHeatmapDEG
       classSelect <- input$classSelectHeatmapDEG
+      scale <- input$scaleHeatmapDEG
     }
     if("class"%in%colnames(data_table) & deg == FALSE){
       df_heatmap <- multiomics_integration[[integrationSelect]][[
@@ -314,8 +317,6 @@
         integrationSelect]]$data$response_var
       data_table <- data_table[data_table$omics == integrationSelect,]
     }
-    df_heatmap <- scale(df_heatmap)
-    df_heatmap <- log1p(df_heatmap)
     df_heatmap_t <- t(as.matrix(df_heatmap))
     if (integrationSelect == "gene_genomic_res"){
       ans <- .prepare_gen_heatmap(data_table = data_table,
@@ -325,7 +326,8 @@
                               pvalRange = pvalRange,
                               fdrRange = fdrRange,
                               numTopCNV = numTopCNV,
-                              numTopMET = numTopMET)
+                              numTopMET = numTopMET,
+                              scale = scale)
     }
     if(integrationSelect == "gene_cnv_res"){
       ans <- .prepare_cnv_heatmap(data_table = data_table,
@@ -334,7 +336,8 @@
                               significativityCriteria=significativityCriteria,
                               pvalRange = pvalRange,
                               fdrRange = fdrRange,
-                              numTopCNVonly = numTopCNVonly)
+                              numTopCNVonly = numTopCNVonly,
+                              scale = scale)
     }
     if(integrationSelect == "gene_met_res"){
       ans <- .prepare_met_heatmap(data_table = data_table,
@@ -343,7 +346,8 @@
                                significativityCriteria=significativityCriteria,
                                pvalRange = pvalRange,
                                fdrRange = fdrRange,
-                               numTopMETonly = numTopMETonly)
+                               numTopMETonly = numTopMETonly,
+                               scale = scale)
     }
     if(integrationSelect == "mirna_cnv_res"){
       ans <- .prepare_mirna_heatmap(data_table = data_table,
@@ -352,7 +356,8 @@
                               significativityCriteria=significativityCriteria,
                               pvalRange = pvalRange,
                               fdrRange = fdrRange,
-                              numTopMiCNV = numTopMiCNV)
+                              numTopMiCNV = numTopMiCNV,
+                              scale = scale)
     }
     if(is.null(ans)) return(NULL)
     if(deg == FALSE){
@@ -379,7 +384,9 @@
                  input$significativityCriteriaHeatmapDEG,
                  input$pvalRangeHeatmapDEG,
                  input$FDRRangeHeatmapDEG,
-                 input$classSelectHeatmapDEG)
+                 input$classSelectHeatmapDEG,
+                 input$scaleHeatmap,
+                 input$scaleHeatmapDEG)
 }
 
 ######################################################################
@@ -569,7 +576,6 @@
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
     data_table <- data_table[data_table$omics == integrationSelect,]
     if(integrationSelect == "gene_genomic_res"){
-      data_table <- data_table[data_table$omics == integrationSelect,]
       data_table <- data_table[data_table$cnv_met == typeSelect,]
     }
     if(deg==TRUE){
@@ -660,7 +666,6 @@
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
     data_table <- data_table[data_table$omics == integrationSelect,]
     if(integrationSelect == "gene_genomic_res"){
-      data_table <- data_table[data_table$omics == integrationSelect,]
       data_table <- data_table[data_table$cnv_met == typeSelect,]
     }
     if(deg==TRUE){

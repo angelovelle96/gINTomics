@@ -259,7 +259,10 @@
                                 min = 0.01,
                                 max = 1,
                                 value = 0.05,
-                                step = 0.005))
+                                step = 0.005)),
+                    radioButtons("scaleHeatmap",
+                                "scale by:",
+                                choices = c("row", "col", "none"))
 
                 ),
                 mainPanel(
@@ -816,7 +819,10 @@
                                 min = 0.01,
                                 max = 1,
                                 value = 0.05,
-                                step = 0.005))
+                                step = 0.005)),
+                  radioButtons("scaleHeatmapDEG",
+                               "scale by:",
+                               choices = c("row", "col", "none"))
 
                 ),
                 mainPanel(
