@@ -367,7 +367,9 @@
                 mainPanel(textOutput(ns("gen_enrichment")),
                           plotlyOutput(ns("gen_dotplot")),
                           HTML(paste0(rep("<br>", 20), collapse = "")),
-                          dataTableOutput(ns("gen_enrich_table"))))
+                          tags$div(
+                            style = 'overflow-x: auto;',
+                          dataTableOutput(ns("gen_enrich_table")))))
             )
 
 
@@ -538,6 +540,7 @@
                 ),
                 mainPanel(
                   plotlyOutput('histogramPlotTranscript'),
+                  plotlyOutput("histogramTfTranscript"),
                   tags$div(
                     style = 'overflow-x: auto;',
                     dataTableOutput('histogramTableTranscript'),
@@ -560,7 +563,7 @@
             mainPanel(
               sidebarLayout(
                 div(
-                  style = "width: 1400px;",
+                  style = "width: 1600px;",
                   inputPanel(
                      selectInput("classSelectNetwork",
                               label = "Select the Class:",
@@ -568,7 +571,7 @@
                     selectInput(inputId = 'significativityCriteriaNetwork',
                                 label = 'Significativity criteria:',
                                 choices = c('pval', 'FDR'),
-                                width = "50%"),
+                                ),
                     conditionalPanel(
                       condition = "input.significativityCriteriaNetwork == 'pval'",
                       sliderInput("pvalNetwork",
@@ -887,6 +890,7 @@
                 ),
                 mainPanel(
                   plotlyOutput('histogramPlotDEG'),
+                  plotlyOutput("histogramTfTranscriptDEG"),
                   tags$div(
                     style = 'overflow-x: auto;',
                     dataTableOutput('histogramTableDEG'),
@@ -906,23 +910,23 @@
 .gint_subItem_networkDEGs <- function(data_table){
   tabItem(tabName = "networkDEGs",
           fluidRow(
-            box(title = "Subsection 1",
-                "This is the content of Subsection 1."),
             mainPanel(
               sidebarLayout(
-                sidebarPanel(
+                div(
+                  style = "width: 1600px;",
+                inputPanel(
               selectInput("classSelectNetworkDEG",
                               label = "Select the Class:",
                               choices = unique(data_table$class)),
+              selectInput(inputId = 'significativityCriteriaNetworkDEG',
+                          label = 'Significativity criteria:',
+                          choices = c('pval', 'FDR')),
               sliderInput("numInteractionsDEG",
                           label = "Number of Interactions",
                           min = 10,
                           max = nrow(data_table),
                           value = 200,
                           step = 50),
-              selectInput(inputId = 'significativityCriteriaNetworkDEG',
-                          label = 'Significativity criteria:',
-                          choices = c('pval', 'FDR')),
               conditionalPanel(
                 condition = "input.significativityCriteriaNetworkDEG == 'pval'",
                 sliderInput("pvalNetworkDEG",
@@ -944,7 +948,9 @@
                             value = FALSE),
               checkboxInput("physicsDEG",
                             label = "Physics",
-                            value = FALSE)),
+                            value = FALSE)
+              )
+                ),
               mainPanel(
               visNetworkOutput("networkPlotDEG",
                                height = 800,

@@ -1283,13 +1283,19 @@ run_shiny <- function(multiomics_integration){
       }
     )
     ## ----------------------- HISTO SERVER TF --------------------------
-    reactive_histo_tf <- gINTomics:::.prepare_reactive_histo_tf(data_table,
+    reactive_histo_tf_transcript <- gINTomics:::.prepare_reactive_histo_tf(data_table,
                                                                 input = input,
-                                                                output = output)
-    output$histogramPlotTFs <- gINTomics:::.render_histo_TF(reactive_histo_tf,
-                                                            by_chr = FALSE)
-    output$histogramPlotTFsByChromosome <- gINTomics:::.render_histo_TF(reactive_histo_tf,
-                                                                        by_chr = TRUE)
+                                                                output = output,
+                                                                deg = FALSE)
+    output$histogramTfTranscript <- gINTomics:::.render_histo_TF(reactive_histo_tf_transcript,
+                                                            by_chr = TRUE)
+
+    reactive_histo_tf_deg <- gINTomics:::.prepare_reactive_histo_tf(data_table,
+                                                                input = input,
+                                                                output = output,
+                                                                deg = TRUE)
+    output$histogramTfTranscriptDEG <- gINTomics:::.render_histo_TF(reactive_histo_tf_deg,
+                                                                    by_chr = TRUE)
     #### ------------------- TABLE SERVER ----------------------------
     reactive_table <- gINTomics:::.prepare_reactive_table(data_table,
                                                           input = input,
