@@ -92,6 +92,59 @@ plot_ridge <- function(data_table,
 }
 
 
+#########################
+###############################
+
+
+plot_heatmap <- function(data_table,
+                         num_interactions=300,
+                         omics,
+                         class=NULL,
+                         pval=0.05){
+
+  if (omics == "gene_genomic_res"){
+    ans <- .prepare_gen_heatmap(data_table = data_table,
+                               df_heatmap = df_heatmap,
+                               df_heatmap_t = df_heatmap_t,
+                               significativityCriteria=significativityCriteria,
+                               pvalRange = pvalRange,
+                               fdrRange = fdrRange,
+                               numTopCNV = numTopCNV,
+                               numTopMET = numTopMET)
+  }
+  if(omics == "gene_cnv_res"){
+    ans <- .prepare_cnv_heatmap(data_table = data_table,
+                              df_heatmap = df_heatmap,
+                              df_heatmap_t = df_heatmap_t,
+                              significativityCriteria=significativityCriteria,
+                              pvalRange = pvalRange,
+                              fdrRange = fdrRange,
+                              numTopCNVonly = numTopCNVonly)
+  }
+  if(omics == "gene_met_res"){
+    ans <-  .prepare_met_heatmap(data_table = data_table,
+                               df_heatmap = df_heatmap,
+                               df_heatmap_t = df_heatmap_t,
+                               significativityCriteria=significativityCriteria,
+                               pvalRange = pvalRange,
+                               fdrRange = fdrRange,
+                               numTopMETonly = numTopMETonly)
+  }
+  if(omics == "mirna_cnv_res"){
+    ans <- .prepare_mirna_heatmap(data_table = data_table,
+                               df_heatmap = df_heatmap,
+                               df_heatmap_t = df_heatmap_t,
+                               significativityCriteria=significativityCriteria,
+                               pvalRange = pvalRange,
+                               fdrRange = fdrRange,
+                               numTopMiCNV = numTopMiCNV)
+  }
+  return(ht)
+
+}
+
+
+
 
 
 
