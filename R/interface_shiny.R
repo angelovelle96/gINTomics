@@ -58,7 +58,6 @@
             mainPanel(
               tabsetPanel(type = "tabs",
                           tabPanel("Venn Diagram",
-
                                    sidebarLayout(
                                      sidebarPanel(
                                        selectInput("classSelectVenn",
@@ -88,7 +87,8 @@
                                        plotlyOutput("venn_plot"),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                       dataTableOutput("common_genes_table")
+                                         dataTableOutput("common_genes_table"),
+                                         downloadButton("download_csv_venn_gen", "Download CSV")
                                        )
                                      )
                                    )
@@ -167,7 +167,8 @@
                                        plotOutput("ridgelinePlot"),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                       dataTableOutput('ridgelineTable')
+                                         dataTableOutput('ridgelineTable'),
+                                         downloadButton("download_csv_ridge_gen", "Download CSV")
                                        )
                                      )
                                    ))
@@ -285,51 +286,52 @@
             box(title = "Page containing data table",
                 "This is the content of Page 1."),
             mainPanel(sidebarLayout(
-                                     sidebarPanel(
-                                       selectInput(inputId = 'genomicIntegrationSelectHisto',
-                                                   label = 'Integration Type:',
-                                                   choices = intersect(c("gene_genomic_res", "gene_met_res",
-                                                                         "gene_cnv_res", "mirna_cnv_res"),
-                                                                       unique(data_table$omics))),
-                                       conditionalPanel(
-                                         condition = "input.genomicIntegrationSelectHisto=='gene_genomic_res'",
-                                         selectInput(inputId = "genomicTypeSelect",
-                                                     label = "Type Selection",
-                                                     choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
-                                       selectInput(inputId = 'genomicClassSelectHisto',
-                                                   label = 'Class:',
-                                                   choices = unique(data_table$class)),
-                                       selectInput(inputId = 'genomicChrSelectHisto',
-                                                   label = 'Chr:',
-                                                   choices = chr),
-                                       selectInput(inputId = 'genomicSignificativityCriteriaHisto',
-                                                   label = 'Significativity criteria:',
-                                                   choices = c('pval', 'FDR')),
-                                       conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaHisto == 'pval'",
-                                         sliderInput("genomicPvalRangeHisto",
-                                                     "P-Value Range:",
-                                                     min = 0,
-                                                     max = 1,
-                                                     value = c(0, 0.05),
-                                                     step = 0.005)),
-                                       conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaHisto == 'FDR'",
-                                         sliderInput("genomicFdrRangeHisto",
-                                                     "FDR-Value Range:",
-                                                     min = 0,
-                                                     max = 1,
-                                                     value = c(0, 0.05),
-                                                     step = 0.005))
-                                     ),
-                                     mainPanel(
-                                       plotlyOutput('histogramPlot'),
-                                       tags$div(
-                                         style = 'overflow-x: auto;',
-                                       dataTableOutput('histogramTable')
-                                       )
-                                     )
-                                   )
+              sidebarPanel(
+                selectInput(inputId = 'genomicIntegrationSelectHisto',
+                            label = 'Integration Type:',
+                            choices = intersect(c("gene_genomic_res", "gene_met_res",
+                                                  "gene_cnv_res", "mirna_cnv_res"),
+                                                unique(data_table$omics))),
+                conditionalPanel(
+                  condition = "input.genomicIntegrationSelectHisto=='gene_genomic_res'",
+                  selectInput(inputId = "genomicTypeSelect",
+                              label = "Type Selection",
+                              choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
+                selectInput(inputId = 'genomicClassSelectHisto',
+                            label = 'Class:',
+                            choices = unique(data_table$class)),
+                selectInput(inputId = 'genomicChrSelectHisto',
+                            label = 'Chr:',
+                            choices = chr),
+                selectInput(inputId = 'genomicSignificativityCriteriaHisto',
+                            label = 'Significativity criteria:',
+                            choices = c('pval', 'FDR')),
+                conditionalPanel(
+                  condition = "input.genomicSignificativityCriteriaHisto == 'pval'",
+                  sliderInput("genomicPvalRangeHisto",
+                              "P-Value Range:",
+                              min = 0,
+                              max = 1,
+                              value = c(0, 0.05),
+                              step = 0.005)),
+                conditionalPanel(
+                  condition = "input.genomicSignificativityCriteriaHisto == 'FDR'",
+                  sliderInput("genomicFdrRangeHisto",
+                              "FDR-Value Range:",
+                              min = 0,
+                              max = 1,
+                              value = c(0, 0.05),
+                              step = 0.005))
+              ),
+              mainPanel(
+                plotlyOutput('histogramPlot'),
+                tags$div(
+                  style = 'overflow-x: auto;',
+                  dataTableOutput('histogramTable'),
+                  downloadButton("download_csv_histo_gen", "Download CSV")
+                )
+              )
+            )
             )
           )
   )
@@ -475,7 +477,8 @@
                                        plotOutput("ridgelinePlotTranscript"),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                       dataTableOutput('ridgelineTableTranscript')
+                                         dataTableOutput('ridgelineTableTranscript'),
+                                         downloadButton("download_csv_ridge_transcr", "Download CSV")
                                        )
                                      )
                                    ))
@@ -534,7 +537,8 @@
                   plotlyOutput('histogramPlotTranscript'),
                   tags$div(
                     style = 'overflow-x: auto;',
-                  dataTableOutput('histogramTableTranscript')
+                    dataTableOutput('histogramTableTranscript'),
+                    downloadButton("download_csv_histo_transcr", "Download CSV")
                   )
                 )
               )
@@ -555,6 +559,9 @@
                 div(
                   style = "width: 1400px;",
                   inputPanel(
+                     selectInput("classSelectNetwork",
+                              label = "Select the Class:",
+                              choices = unique(data_table$class)),
                     selectInput(inputId = 'significativityCriteriaNetwork',
                                 label = 'Significativity criteria:',
                                 choices = c('pval', 'FDR'),
@@ -640,7 +647,8 @@
                                      ),
                                      mainPanel(
                                        plotlyOutput("venn_plotDEG"),
-                                       dataTableOutput("venn_tableDEG")
+                                       dataTableOutput("venn_tableDEG"),
+                                       downloadButton("download_csv_venn_deg", "Download CSV")
                                      )
                                    )
                           ),
@@ -718,7 +726,8 @@
                                        plotOutput("ridgelinePlotDEG"),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                       dataTableOutput('ridgelineTableDEG')
+                                         dataTableOutput('ridgelineTableDEG'),
+                                         downloadButton("download_csv_ridge_deg", "Download CSV")
                                        )
                                      )
                                    ))
@@ -874,7 +883,8 @@
                   plotlyOutput('histogramPlotDEG'),
                   tags$div(
                     style = 'overflow-x: auto;',
-                  dataTableOutput('histogramTableDEG')
+                    dataTableOutput('histogramTableDEG'),
+                    downloadButton("download_csv_histo_deg", "Download CSV")
                   )
                 )
               )
@@ -895,6 +905,9 @@
             mainPanel(
               sidebarLayout(
                 sidebarPanel(
+              selectInput("classSelectNetworkDEG",
+                              label = "Select the Class:",
+                              choices = unique(data_table$class)),
               sliderInput("numInteractionsDEG",
                           label = "Number of Interactions",
                           min = 10,
@@ -1021,14 +1034,11 @@
                                 step = 0.005))
                 ),
                 mainPanel(
-
-                    tags$div(
-                      style = 'overflow-x: auto;',
-                      dataTableOutput('res_table')
-                    )
-
-
-
+                  tags$div(
+                    style = 'overflow-x: auto;',
+                    dataTableOutput('res_table'),
+                    downloadButton("download_csv_table", "Download CSV")
+                  )
                 )
               )
             )
@@ -1053,15 +1063,12 @@
                             class = "dropdown"),
                     tags$li(class = "dropdown",
                             tags$style(".main-header {max-height: 80px}"),
-                            tags$style(".main-header .logo {height: 80px;
-                                       line-height: 80px !important;
-                                       padding: 0 0px;}"),
+                            tags$style(".main-header .logo {height: 80px;}"),
                             tags$style(".sidebar-toggle {height: 80px;}"))
+                    #tags$style(".navbar {min-height:80px !important}")
     ),
     .gint_dashboardsidebar(),
     dashboardBody(
-      tags$head(tags$style(
-        HTML('.content-wrapper, .right-side {background-color: #ffffff;}'))),
       tabItems(
         .gint_tabitem_home(data_table),
         .gint_subItem_coefDistribGenomic(data_table),
