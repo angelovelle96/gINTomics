@@ -16,15 +16,14 @@
                menuSubItem("Chromosome Distribution", tabName = "histoTranscript"),
                menuSubItem("Network", tabName = "networkTranscript"),
                menuSubItem("Enrichment", tabName = "enrichTranscript")),
-      menuItem("DEGs", tabName = "degsPage", startExpanded = TRUE,
+      menuItem("Class Comparison", tabName = "degsPage", startExpanded = TRUE,
                menuSubItem("Coefficients Distribution", tabName = "coefDistribDEGs"),
                menuSubItem("Heatmap", tabName = "heatmapDEGs"),
                menuSubItem("Chromosome Distribution", tabName = "histoDEGs"),
                menuSubItem("Network", tabName = "networkDEGs")),
       menuItem("Complete Integration", tabName = "completeIntegrationPage", startExpanded = TRUE,
                menuSubItem("Circos Plots", tabName = "circosIntegration"),
-               menuSubItem("Data Table", tabName = "fullTable")),
-      menuItem("Class Comparison", tabName = "compareClassPage")
+               menuSubItem("Data Table", tabName = "fullTable"))
     )
     ,img(src = myImgResources, height = 100, width = 100, align="center"),
     tags$style(".left-side, .main-sidebar {padding-top: 80px}"))
@@ -274,7 +273,6 @@
           )
   )
 }
-
 ##########################################################
 ###########################################################
 #' @import shiny
@@ -545,7 +543,9 @@
                     dataTableOutput('histogramTableTranscript'),
                     downloadButton("download_csv_histo_transcr", "Download CSV")
                   ),
-                  plotlyOutput("histogramTfTranscript")
+                  plotlyOutput("histogramTfTranscript"),
+                  dataTableOutput('histogramTfTable'),
+                  downloadButton("download_csv_histo_tf", "Download CSV")
                 )
               )
             )
@@ -895,7 +895,10 @@
                     dataTableOutput('histogramTableDEG'),
                     downloadButton("download_csv_histo_deg", "Download CSV")
                   ),
-                  plotlyOutput("histogramTfTranscriptDEG")
+                  plotlyOutput("histogramTfTranscriptDEG"),
+                  dataTableOutput('histogramTfTableDEG'),
+                  downloadButton("download_csv_histo_tf_deg", "Download CSV")
+
                 )
               )
             )
@@ -1006,6 +1009,7 @@
 #' @importFrom DT dataTableOutput
 
 .gint_subItem_tableCompleteInt <- function(data_table){
+  chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
   tabItem(tabName = "fullTable",
           fluidRow(
             box(title = "Page containing data tables.",
@@ -1021,7 +1025,7 @@
                               choices = unique(data_table$class)),
                   selectInput(inputId = 'chrSelectTable',
                               label = 'Chr:',
-                              choices = c("All", mixedsort(unique(data_table$chr_cov)))),
+                              choices = chr),
                   selectInput(inputId = 'degSelectTable',
                               label = 'DEGs:',
                               choices = c('All', 'Only DEGs')),

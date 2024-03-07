@@ -782,6 +782,75 @@
                  )
 }
 
+
+#' @importFrom gtools mixedsort
+
+.prepare_reactive_histoTF_table <- function(data_table,
+                                            input,
+                                            output,
+                                            deg = FALSE){
+  reactive({
+    genes_count_df <- NULL
+    if(deg==FALSE){
+      integrationSelect <- input$transcriptIntegrationSelectHisto
+      classSelect <- input$transcriptClassSelectHisto
+      chrSelect <- input$transcriptChrSelectHisto
+      significativityCriteria <- input$transcriptSignificativityCriteriaHisto
+      pvalRange <- input$transcriptPvalRangeHisto
+      fdrRange <- input$transcriptFdrRangeHisto
+    }
+    if(deg==TRUE){
+      integrationSelect <- input$integrationSelectHistoDEG
+      classSelect <- input$classSelectHistoDEG
+      chrSelect <- input$chrSelectHistoDEG
+      significativityCriteria <- input$significativityCriteriaHistoDEG
+      pvalRange <- input$pvalRangeHistoDEG
+      fdrRange <- input$fdrRangeHistoDEG
+    }
+    chr_order <- mixedsort(unique(data_table$chr_cov))
+    chr_order <- chr_order[!is.na(chr_order)]
+    data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
+    if(integrationSelect %in% c("tf_res", "mirna_target_res", "tf_mirna_res")){
+      data_table <- data_table[data_table$omics == integrationSelect, ]
+      data_table <- data_table[,
+                               colnames(data_table)%in%c("response", "cov",
+                                                         "pval","fdr","chr_cov",
+                                                         "deg","class")]
+      if('class' %in% colnames(data_table)){
+        data_table <- data_table[
+          data_table$class == classSelect,]
+      }
+      if(deg==TRUE){
+        data_table <- data_table[data_table$deg,]
+      }
+      if(significativityCriteria == "pval"){
+        data_table <- data_table[data_table$pval <= pvalRange,]
+      }else{
+        data_table <- data_table[data_table$fdr <= fdrRange,]
+      }
+      genes_count <- table(data_table$cov, data_table$chr_cov)
+      genes_count_df <- as.data.frame.table(genes_count)
+      genes_count_df <- subset(genes_count_df, Freq != 0)
+      colnames(genes_count_df) <- c("TF", "Chromosome", "Count")
+      genes_count_df <- genes_count_df[order(-genes_count_df$Count),]
+    }
+    return(genes_count_df)
+  })%>%bindEvent(input$transcriptIntegrationSelectHisto,
+                 input$transcriptClassSelectHisto,
+                 input$transcriptChrSelectHisto,
+                 input$transcriptSignificativityCriteriaHisto,
+                 input$transcriptPvalRangeHisto,
+                 input$transcriptFdrRangeHisto,
+                 input$integrationSelectHistoDEG,
+                 input$classSelectHistoDEG,
+                 input$chrSelectHistoDEG,
+                 input$significativityCriteriaHistoDEG,
+                 input$pvalRangeHistoDEG,
+                 input$fdrRangeHistoDEG
+  )
+}
+
+
 #######################################################################
 ########################################################################
 #' @importFrom gtools mixedsort
@@ -898,6 +967,7 @@
            tags$div(
              style = 'overflow-x: auto;',
            dataTableOutput(ns(paste0(names(plots)[i], "_table")))),
+           #download
            HTML(paste0(rep("<br>", 20), collapse = "")))
     })
     plot_list <- as.list(unlist(plot_list, recursive = F))
@@ -912,6 +982,7 @@
       })
       output[[paste0(names(plots)[i], "_table")]] <- renderDataTable({
        ans <- plots[[i]][["table"]]
+       #output
         if(!tf_enr$is_alive()){
           ans <- mutate_if(ans, is.numeric, ~ round(., 3))
         }
