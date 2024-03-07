@@ -921,6 +921,12 @@
   })
 
 
+    onStop(function(){
+      cat(sprintf("Session was closed, killing all background processes"))
+        tf_enr$kill_tree()
+        gen_enr$kill_tree()
+    })
+
 }
 
 #######################################################################
