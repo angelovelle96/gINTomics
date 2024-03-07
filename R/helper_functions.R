@@ -698,12 +698,25 @@ fdr <- function(pval_mat){
   colnames(data)[colnames(data) == "start_response"] <- "start"
   colnames(data)[colnames(data) == "end_response"] <-"end"
   colnames(data)[colnames(data) == "chr_response"] <-"chr"
-  data$direction_cov <- ifelse(data$cov_value < 0, 'negative', 'positive')
-  data$direction_coef <- ifelse(data$coef < 0, 'negative', 'positive')
   #data$cov_value <- abs(data$cov_value)
-  data$coef <- abs(data$coef)
   ans <- list(data=data, data_table=data_table)
   return(ans)
 }
+
+##############################################
+.change_int_names <- function(nnames){
+
+  tmp <- gsub("gene_genomic_res", "Gene CNV-Met", nnames)
+  tmp <- gsub("gene_cnv_res", "Gene CNV", tmp)
+  tmp <- gsub("gene_met_res", " Gene Met", tmp)
+  tmp <- gsub("mirna_cnv_res", "miRNA CNV", tmp)
+  tmp <- gsub("tf_res", "Gene's TFs", tmp)
+  tmp <- gsub("tf_mirna_res", "miRNA's TFs", tmp)
+  tmp <- gsub("mirna_target_res", "miRNA's targets", tmp)
+  names(nnames) <- tmp
+  return(nnames)
+
+}
+
 
 
