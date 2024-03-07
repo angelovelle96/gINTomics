@@ -4,7 +4,6 @@
                                          'tf_mirna_res',
                                          'mirna_target_res'),
                 select = tmp)
-
   nodes <- data.frame(gene = c(all$cov, all$response))
   edges <- subset(all, select = tmp)
   nodes <- unique(nodes)
@@ -38,8 +37,6 @@
                                       '#CCE7C9',
                                       '#FFBA01')))
   nodes$width <- 10
-
-  # define edges (TF/mirna and linked genes)
   edges$width <- abs(edges$coef) * 10
   edges$width[edges$width>40] <- 40
   edges$color <- ifelse(edges$coef > 0,
@@ -48,9 +45,13 @@
                                '#ED5564',
                                'black'))
   edges$length <- 500
+  edges$pval <- round(edges$pval, 3)
+  edges$fdr <- round(edges$fdr, 3)
+  edges$coef <- round(edges$coef, 3)
   edges$title <- paste('pval:',
                        edges$pval,
-                       'coef:', edges$coef)
+                       ',coef:', edges$coef,
+                       ',FDR:', edges$fdr)
 
   legend_nodes <- data.frame(label = c('TF',
                                        'Target',
@@ -71,7 +72,7 @@
                              arrows = c('to',
                                         'to',
                                         'to'))
-  edges <- edges[order(abs(edges$coef), decreasing = T),]
+  edges <- edges[order(abs(edges$coef), decreasing = TRUE),]
   return(list(nodes=nodes,
               edges=edges,
               legend_edges=legend_edges,
@@ -298,23 +299,11 @@
 ############################################################################
 #' @importFrom plotly plot_ly
 
-.build_histo_TF <- function(histo_data){
-  plot_ly(histo_data,
-          x = ~Chromosome, y = ~Count, type = 'bar') %>%
-    layout(title = "Distribution of target genes by chromosomes",
-           xaxis = list(title = "Chromosome"),
-           yaxis = list(title = "Number of target genes"))
-}
-
-############################################################################
-############################################################################
-#' @importFrom plotly plot_ly
-
 .build_histo_TFbyChr <- function(histo_data){
   plot_ly(histo_data,
-          x = ~TF, y = ~Count, type = 'bar', color = ~Chromosome) %>%
-    layout(title = "Number of genes targeted by TFs",
-           xaxis = list(title = "TF"),
+          x = ~reorder(TF, -Count), y = ~Count, type = 'bar', color = ~Chromosome) %>%
+    layout(title = "Number of genes targeted by TFs/miRNAs",
+           xaxis = list(title = "TF/miRNAs"),
            yaxis = list(title = "Number of target genes"),
            barmode = 'group')
 }
@@ -322,12 +311,11 @@
 ############################################################################
 ############################################################################
 
-.render_histo_TF <- function(reactive_histo,
-                             by_chr=F){
+.render_histo_TF <- function(reactive_histo){
   renderPlotly({
     histo_data <- reactive_histo()
-    if(by_chr){histo_plot <- .build_histo_TFbyChr(histo_data = histo_data)
-    }else{histo_plot <- .build_histo_TF(histo_data = histo_data)}
+    histo_plot <- .build_histo_TFbyChr(histo_data = histo_data)
+
     return(histo_plot)
   })
 }
@@ -350,7 +338,6 @@
   datatable(table_data,
             options = list(orderClasses = TRUE))
 }
-
 ############################################################################
 ############################################################################
 #' @importFrom DT renderDataTable
@@ -362,12 +349,10 @@
     return(ttable)
   })
 }
-
 ############################################################################
 ############################################################################
 
 download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
-
   if(plotType == "histo"){
     handler <- downloadHandler(
       filename = function(){
@@ -376,9 +361,9 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
       content = function(file){
         reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(type=type,
                                                                           deg=deg,
-                                                                          data_table,
-                                                                          input,
-                                                                          output)
+                                                                          data_table=data_table,
+                                                                          input=input,
+                                                                          output=output)
         write.csv(reactive_histo_table(), file, row.names = FALSE)
       }
     )
@@ -386,14 +371,14 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   if(plotType == "ridge"){
     handler <- downloadHandler(
       filename = function(){
-        "data_table_ridge.csv"
+        "data_ridge.csv"
       },
       content = function(file){
         reactive_ridge_table <- gINTomics:::.prepare_reactive_ridge_table(type=type,
                                                                           deg=deg,
-                                                                          data_table,
-                                                                          input,
-                                                                          output)
+                                                                          data_table=data_table,
+                                                                          input=input,
+                                                                          output=output)
         write.csv(reactive_ridge_table(), file, row.names = FALSE)
       }
     )
@@ -404,11 +389,38 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
         "data_table.csv"
       },
       content = function(file){
-        reactive_table <- gINTomics:::.prepare_reactive_table(deg=deg,
-                                                              data_table,
-                                                              input,
+        reactive_table <- gINTomics:::.prepare_reactive_table(data_table=data_table,
+                                                              input=input,
                                                               output)
         write.csv(reactive_table(), file, row.names = FALSE)
+      }
+    )
+  }
+  if(plotType == "dotPlot"){
+    handler <- downloadHandler(
+      filename = function(){
+        "enrich_table.csv"
+      },
+      content = function(file){
+        reactive_enr <- gINTomics:::.prepare_reactive_table(deg=deg,
+                                                            data_table=data_table,
+                                                            input=input,
+                                                            output=output)
+        write.csv(reactive_enr(), file, row.names = FALSE)
+      }
+    )
+  }
+  if(plotType == "venn"){
+    handler <- downloadHandler(
+      filename = function(){
+        "venn_table.csv"
+      },
+      content = function(file){
+        reactive_venn <- gINTomics:::.prepare_reactive_venn(deg=deg,
+                                                            data_table=data_table,
+                                                            input=input,
+                                                            output=output)
+        write.csv(reactive_venn(), file, row.names = FALSE)
       }
     )
   }
@@ -424,11 +436,8 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
     req(arranged_view_circos())
   })
 }
-
 ##########################################################################
 ##########################################################################
-
-
 .circos_preprocess <- function(data){
 
   library(GenomicRanges)
@@ -467,7 +476,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   })
   return(gr)
 }
-
 ############################################################################
 #############################################################################
 .create_single_track <- function(data,
@@ -510,7 +518,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
       , title=title)
   )
 }
-
 #######################################################################
 ########################################################################
 
@@ -564,7 +571,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   tracks <- c(tracks,list(track_cyto=track_cyto))
   return(tracks)
 }
-
 #######################################################################
 ########################################################################
 
@@ -599,7 +605,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
                                     title="CNV")
   return(track_cnv)
 }
-
 #######################################################################
 ########################################################################
 
@@ -634,7 +639,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   return(track_met)
 
 }
-
 #######################################################################
 ########################################################################
 
@@ -662,7 +666,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
                                      title="Expression")
   return(track_expr)
 }
-
 #######################################################################
 ########################################################################
 
@@ -689,9 +692,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
                                      title="Coefficients")
   return(track_coef)
 }
-
-
-
 #######################################################################
 ########################################################################
 
@@ -741,8 +741,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   )
   return(track_cyto)
 }
-
-
 #######################################################################
 ########################################################################
 
@@ -819,7 +817,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   return(composed_views)
 }
 
-
 #' @importFrom ComplexHeatmap Heatmap
 #' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
 #' @importFrom ComplexHeatmap draw
@@ -884,11 +881,8 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   ht <- draw(ht)
   return(ht)
 }
-
-
 ######################################################################
 ######################################################################
-
 #' @importFrom ComplexHeatmap Heatmap
 #' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
 #' @importFrom ComplexHeatmap draw
@@ -1044,8 +1038,6 @@ download_csv <- function(type = "genomic", deg = FALSE, plotType = "histo"){
   return(ht)
 }
 
-
-
 ############################################################################
 ############################################################################
 
@@ -1093,32 +1085,9 @@ run_shiny <- function(multiomics_integration){
     output$venn_plotDEG<- gINTomics:::.render_venn(reactive_venn_deg)
     output$venn_tableDEG <- gINTomics:::.render_venn_table(reactive_venn_deg)
 
-    output$download_csv_venn <- downloadHandler(
-      filename = function(){
-        "data_table.csv"
-      },
-      content = function(file){
-        reactive_venn_table <- gINTomics:::.prepare_reactive_venn(data_table,
-                                                                  input,
-                                                                  output,
-                                                                  deg = FALSE)
-        write.csv(reactive_venn_table(), file, row.names = FALSE)
-      }
-    )
 
-    output$download_csv_venn_deg <- downloadHandler(
-      filename = function(){
-        "data_table.csv"
-      },
-      content = function(file){
-        reactive_venn_table <- gINTomics:::.prepare_reactive_venn(data_table,
-                                                                  input,
-                                                                  output,
-                                                                  deg = TRUE)
-        write.csv(reactive_venn_table(), file, row.names = FALSE)
-      }
-    )
-
+    output$download_csv_venn <- download_csv(deg = FALSE, plotType = "venn")
+    output$download_csv_venn_deg <- download_csv(deg = TRUE, plotType = "venn")
     ## -------------------------- VOLCANO SERVER ------------------------
     reactive_volcano <- gINTomics:::.prepare_reactive_volcano(data_table,
                                                               input = input,
@@ -1126,22 +1095,18 @@ run_shiny <- function(multiomics_integration){
                                                               type = "genomic",
                                                               deg = FALSE)
     output$volcanoPlot <- gINTomics:::.render_volcano(reactive_volcano)
-
     reactive_volcano_transcript <- gINTomics:::.prepare_reactive_volcano(data_table,
                                                                          input = input,
                                                                          output = output,
                                                                          type = "transcript",
                                                                          deg = FALSE)
     output$transcriptVolcanoPlot <- gINTomics:::.render_volcano(reactive_volcano_transcript)
-
     reactive_volcano_deg <- gINTomics:::.prepare_reactive_volcano(data_table,
                                                                   input = input,
                                                                   output = output,
                                                                   type = "all",
                                                                   deg = TRUE)
     output$volcanoPlotDEG <- gINTomics:::.render_volcano(reactive_volcano_deg)
-
-
     ## -------------------------- HEATMAP SERVER ------------------------
     gINTomics:::.prepare_reactive_heatmap(data_table=data_table,
                                           multiomics_integration = multiomics_integration,
@@ -1199,6 +1164,8 @@ run_shiny <- function(multiomics_integration){
     output$ridgelineTableDEG <- gINTomics:::.render_ridge_table(reactive_ridge_tableDEG)
 
     output$download_csv_ridge_gen <- download_csv(type = "genomic", deg = FALSE, plotType = "ridge")
+    output$download_csv_ridge_transcr <- download_csv(type = "transcript", deg = FALSE, plotType = "ridge")
+    output$download_csv_ridge_deg <- download_csv(type = "all", deg = TRUE, plotType = "ridge")
 
     ## ----------------------- HISTO SERVER --------------------------
     reactive_histo <- gINTomics:::.prepare_reactive_histo(data_table,
@@ -1213,7 +1180,6 @@ run_shiny <- function(multiomics_integration){
                                                                       type = "genomic",
                                                                       deg = FALSE)
     output$histogramTable <- gINTomics:::.render_histo_table(reactive_histo_table)
-
     reactive_histo_transcript <- gINTomics:::.prepare_reactive_histo(data_table,
                                                                      input = input,
                                                                      output = output,
@@ -1226,7 +1192,6 @@ run_shiny <- function(multiomics_integration){
                                                                                  type = "transcript",
                                                                                  deg = FALSE)
     output$histogramTableTranscript <- gINTomics:::.render_histo_table(reactive_histo_table_transcript)
-
     reactive_histo_deg <- gINTomics:::.prepare_reactive_histo(data_table,
                                                               input = input,
                                                               output = output,
@@ -1240,48 +1205,9 @@ run_shiny <- function(multiomics_integration){
                                                                           deg = TRUE)
     output$histogramTableDEG <- gINTomics:::.render_histo_table(reactive_histo_table_deg)
 
-
-    output$download_csv_histo_gen <- downloadHandler(
-      filename = function(){
-        "data_table.csv"
-      },
-      content = function(file){
-        reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                input,
-                                                                output,
-                                                                type = "genomic",
-                                                                deg = FALSE)
-        write.csv(reactive_histo_table(), file, row.names = FALSE)
-      }
-    )
-
-    output$download_csv_histo_transcr <- downloadHandler(
-      filename = function(){
-        "data_table.csv"
-      },
-      content = function(file){
-        reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                          input,
-                                                                          output,
-                                                                          type = "transcript",
-                                                                          deg = FALSE)
-        write.csv(reactive_histo_table(), file, row.names = FALSE)
-      }
-    )
-
-    output$download_csv_histo_deg <- downloadHandler(
-      filename = function(){
-        "data_table.csv"
-      },
-      content = function(file){
-        reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                          input,
-                                                                          output,
-                                                                          type = "all",
-                                                                          deg = TRUE)
-        write.csv(reactive_histo_table(), file, row.names = FALSE)
-      }
-    )
+    output$download_csv_histo_gen <- download_csv(type = "genomic", deg = FALSE, plotType = "histo")
+    output$download_csv_histo_transcr <- download_csv(type = "transcript", deg = FALSE, plotType = "histo")
+    output$download_csv_histo_deg <- download_csv(type = "all", deg = TRUE, plotType = "histo")
     ## ----------------------- HISTO SERVER TF --------------------------
     reactive_histo_tf_transcript <- gINTomics:::.prepare_reactive_histo_tf(data_table,
                                                                 input = input,
@@ -1301,21 +1227,13 @@ run_shiny <- function(multiomics_integration){
                                                           input = input,
                                                           output = output)
     output$res_table <- gINTomics:::.render_table(reactive_table)
-    output$download_csv_table <- downloadHandler(
-      filename = function(){
-        "data_table.csv"
-      },
-      content = function(file){
-        write.csv(data_table, file, row.names = FALSE)
-      }
-    )
+    output$download_csv_table <- download_csv(plotType = "table")
     #### ------------------- ENRICHMENT SERVER ----------------------------
     data_gen_enrich <- data_table[data_table$omics=="gene_genomic_res",]
     data_tf_enrich <- data_table[data_table$omics=="tf_res",]
     callModule(gINTomics:::.background_srv, id = "prova", name="prova",
                data_gen_enrich=data_gen_enrich,
                data_tf_enrich=data_tf_enrich)
-
     #### ------------------- CIRCOS SERVER ----------------------------
     reactive_circos <- .prepare_reactive_circos(data = data$data,
                                                 input = input,

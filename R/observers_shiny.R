@@ -571,7 +571,7 @@
       typeSelect <- input$typeSelectDEG
     }
     data_table <- data_table[!is.na(data_table$chr_cov),]
-    data_table <- data_table[!is.na(data_table$chr_response),]
+    #data_table <- data_table[!is.na(data_table$chr_response),]
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
@@ -624,7 +624,6 @@
                  input$fdrRangeHistoDEG,
                  input$typeSelectDEG)
 }
-
 #######################################################################
 ########################################################################
 #' @importFrom gtools mixedsort
@@ -743,8 +742,8 @@
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
-    if(integrationSelect == "tf_res"){
-    data_table <- data_table[data_table$omics == 'tf_res', ]
+    if(integrationSelect %in% c("tf_res", "mirna_target_res", "tf_mirna_res")){
+    data_table <- data_table[data_table$omics == integrationSelect, ]
     data_table <- data_table[,
                              colnames(data_table)%in%c("response", "cov",
                                                        "pval","fdr","chr_cov",
@@ -791,12 +790,13 @@
                                     input,
                                     output){
   reactive({
+    data_table <- data_table[!is.na(data_table$chr_cov),]
+    data_table <- data_table[!is.na(data_table$response),]
     data_table <- mutate_if(data_table, is.numeric, ~ round(., 3))
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
 
-    data_table <- data_table[!is.na(data_table$chr_cov),]
     data_table <- data_table[data_table$omics == input$integrationSelectTable,]
     if('class' %in% colnames(data_table)){
       data_table <- data_table[data_table$class == input$classSelectTable,]}

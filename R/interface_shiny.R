@@ -540,12 +540,12 @@
                 ),
                 mainPanel(
                   plotlyOutput('histogramPlotTranscript'),
-                  plotlyOutput("histogramTfTranscript"),
                   tags$div(
                     style = 'overflow-x: auto;',
                     dataTableOutput('histogramTableTranscript'),
                     downloadButton("download_csv_histo_transcr", "Download CSV")
-                  )
+                  ),
+                  plotlyOutput("histogramTfTranscript")
                 )
               )
             )
@@ -890,12 +890,12 @@
                 ),
                 mainPanel(
                   plotlyOutput('histogramPlotDEG'),
-                  plotlyOutput("histogramTfTranscriptDEG"),
                   tags$div(
                     style = 'overflow-x: auto;',
                     dataTableOutput('histogramTableDEG'),
                     downloadButton("download_csv_histo_deg", "Download CSV")
-                  )
+                  ),
+                  plotlyOutput("histogramTfTranscriptDEG")
                 )
               )
             )
