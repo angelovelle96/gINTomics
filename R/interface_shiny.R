@@ -97,7 +97,7 @@
                                      sidebarPanel(
                                        selectInput("genomicIntegrationSelectVolcano",
                                                    label = "Gene/miRNA:",
-                                                   choices = intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res"))),
+                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
                                        conditionalPanel(
                                          condition = "input.genomicIntegrationSelectVolcano=='gene_genomic_res'",
                                          selectInput(inputId = 'genomicTypeSelectVolcano',
@@ -135,7 +135,7 @@
                                                    choices = unique(data_table$class)),
                                        selectInput("genomicIntegrationSelectRidge",
                                                    label = "Gene/miRNA:",
-                                                   choices = intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res"))),
+                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
                                        conditionalPanel(
                                          condition = "input.genomicIntegrationSelectRidge=='gene_genomic_res'",
 
@@ -195,9 +195,9 @@
                 sidebarPanel(
                   selectInput(inputId = 'integrationSelectHeatmap',
                               label = 'Integration Type:',
-                              choices = intersect(c("gene_genomic_res", "gene_met_res",
+                              choices = .change_int_names(intersect(c("gene_genomic_res", "gene_met_res",
                                                     "gene_cnv_res", "mirna_cnv_res"),
-                                                  unique(data_table$omics))),
+                                                  unique(data_table$omics)))),
                   conditionalPanel(
                     condition = "input.integrationSelectHeatmap == 'gene_genomic_res'",
                     sliderInput("numTopGenesHeatmapCNV",
@@ -290,9 +290,9 @@
               sidebarPanel(
                 selectInput(inputId = 'genomicIntegrationSelectHisto',
                             label = 'Integration Type:',
-                            choices = intersect(c("gene_genomic_res", "gene_met_res",
+                            choices = .change_int_names(intersect(c("gene_genomic_res", "gene_met_res",
                                                   "gene_cnv_res", "mirna_cnv_res"),
-                                                unique(data_table$omics))),
+                                                unique(data_table$omics)))),
                 conditionalPanel(
                   condition = "input.genomicIntegrationSelectHisto=='gene_genomic_res'",
                   selectInput(inputId = "genomicTypeSelect",
@@ -421,7 +421,7 @@
                                      sidebarPanel(
                                        selectInput("transcriptIntegrationSelectVolcano",
                                                    label = "Gene/miRNA:",
-                                                   choices = intersect(unique(data_table$omics), c("tf_res", "tf_mirna_res", "mirna_target_res"))),
+                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("tf_res", "tf_mirna_res", "mirna_target_res")))),
                                        selectInput(inputId = 'transcriptSignificativityCriteriaVolcano',
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
@@ -451,7 +451,7 @@
                                      sidebarPanel(
                                        selectInput(inputId = 'transcriptIntegrationSelectRidge',
                                                    label = 'Integration Type:',
-                                                   choices = intersect(unique(data_table$omics), c("tf_res", "tf_mirna_res", "mirna_target_res"))),
+                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("tf_res", "tf_mirna_res", "mirna_target_res")))),
                                        selectInput("transcriptClassSelectRidge",
                                                    "Select Class:",
                                                    choices = unique(data_table$class)),
@@ -508,8 +508,8 @@
                 sidebarPanel(
                   selectInput(inputId = 'transcriptIntegrationSelectHisto',
                               label = 'Integration Type:',
-                              choices = intersect(c("tf_res", "tf_mirna_res", "mirna_target_res"),
-                                                  unique(data_table$omics))),
+                              choices = .change_int_names(intersect(c("tf_res", "tf_mirna_res", "mirna_target_res"),
+                                                  unique(data_table$omics)))),
                   selectInput(inputId = 'transcriptClassSelectHisto',
                               label = 'Class:',
                               choices = unique(data_table$class)),
@@ -663,7 +663,7 @@
                                      sidebarPanel(
                                        selectInput("integrationSelectVolcanoDEG",
                                                    label = "Gene/miRNA:",
-                                                   choices = unique(data_table$omics)),
+                                                   choices = .change_int_names(unique(data_table$omics))),
                                        conditionalPanel(
                                          condition = "input.integrationSelectVolcanoDEG=='gene_genomic_res'",
                                          selectInput(inputId = 'typeSelectVolcanoDEG',
@@ -698,7 +698,7 @@
                                      sidebarPanel(
                                        selectInput("integrationSelectRidgeDEG",
                                                    label = "Gene/miRNA:",
-                                                   choices = unique(data_table$omics)),
+                                                   choices = .change_int_names(unique(data_table$omics))),
                                        conditionalPanel(
                                          condition = "input.integrationSelectRidgeDEG=='gene_genomic_res'",
 
@@ -759,9 +759,9 @@
                 sidebarPanel(
                   selectInput(inputId = 'integrationSelectHeatmapDEG',
                               label = 'Integration Type:',
-                              choices = intersect(c("gene_genomic_res", "gene_met_res",
+                              choices = .change_int_names(intersect(c("gene_genomic_res", "gene_met_res",
                                                     "gene_cnv_res", "mirna_cnv_res"),
-                                                  unique(data_table$omics))),
+                                                  unique(data_table$omics)))),
                   conditionalPanel(
                     condition = "input.integrationSelectHeatmapDEG == 'gene_genomic_res'",
                     sliderInput("numTopGenesHeatmapCNVDEG",
@@ -856,7 +856,7 @@
                 sidebarPanel(
                   selectInput(inputId = 'integrationSelectHistoDEG',
                               label = 'Integration Type:',
-                              choices = unique(data_table$omics)),
+                              choices = .change_int_names(unique(data_table$omics))),
                   conditionalPanel(
                     condition = "input.integrationSelectHistoDEG=='gene_genomic_res'",
                     selectInput(inputId = "typeSelectDEG",
@@ -1019,7 +1019,7 @@
                 sidebarPanel(
                   selectInput(inputId = 'integrationSelectTable',
                               label = 'Integration Type:',
-                              choices = unique(data_table$omics)),
+                              choices = .change_int_names(unique(data_table$omics))),
                   selectInput(inputId = 'classSelectTable',
                               label = 'Class:',
                               choices = unique(data_table$class)),

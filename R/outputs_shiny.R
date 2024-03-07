@@ -477,8 +477,10 @@ download_csv <- function(type = "genomic",
     tmp <- lapply(which(names(dataframes)!="df_gene_genomic_res"), function(x){
       ans <- dataframes[[x]]
       ans <- ans[ans$cov!="(Intercept)",]
-      ans$cov_value <- ans$cov_value-min(ans$cov_value, na.rm = T)
-      ans$cov_value <- ans$cov_value/max(ans$cov_value, na.rm = T)
+      ans$cov_value_original <- ans$cov_value
+      ans$cov_value <- abs(ans$cov_value)
+      ans$coef_original <- ans$coef
+      ans$coef <- abs(ans$coef)
       return(ans)
     })
     names(tmp) <- names(dataframes)[
@@ -496,6 +498,36 @@ download_csv <- function(type = "genomic",
   })
   return(gr)
 }
+
+
+############################################################################
+#############################################################################
+#' @importFrom RColorBrewer brewer.pal
+.circos_track_cols <- function(vvalues,
+                               n=50,
+                               colors=NULL){
+
+if(is.null(colors)){
+  colors <- rev(brewer.pal(name = "RdBu", n = 11))
+}
+vvalues <- as.numeric(vvalues)
+if(min(vvalues)<0){
+  breaks <- c(seq(min(vvalues, na.rm = T),0, len=n/2),
+               seq(0.00001, max(vvalues, na.rm = T), len=n/2))
+}else{
+  breaks <- c(seq(min(vvalues, na.rm = T),mean(vvalues, na.rm = T), len=n/2),
+               seq(mean(vvalues, na.rm = T)+0.00001,
+                   max(vvalues, na.rm = T), len=n/2))
+}
+ii <- cut(unique(vvalues),
+          breaks = breaks,
+          include.lowest = TRUE)
+ccol <- colorRampPalette(colors)(n-1)[ii]
+return(ccol)
+
+}
+
+
 ############################################################################
 #############################################################################
 .create_single_track <- function(data,
@@ -515,6 +547,8 @@ download_csv <- function(type = "genomic",
                                  tooltipAlt3=NULL,
                                  tooltipField4=NULL,
                                  tooltipAlt4=NULL,
+                                 tooltipField5=NULL,
+                                 tooltipAlt5=NULL,
                                  legend=NULL,
                                  colorType=NULL,
                                  title=NULL) {
@@ -532,7 +566,8 @@ download_csv <- function(type = "genomic",
         visual_channel_tooltip(field = tooltipField1, title = tooltipTitle, type = "quantitative", alt = paste(tooltipTitle, "Value:"), format = "0.2"),
         visual_channel_tooltip(field = tooltipField2, type = 'nominal', alt = tooltipAlt2),
         visual_channel_tooltip(field = tooltipField3, type = 'nominal', alt = tooltipAlt3),
-        visual_channel_tooltip(field = tooltipField4, type = 'nominal', alt = tooltipAlt4)
+        visual_channel_tooltip(field = tooltipField4, type = 'nominal', alt = tooltipAlt4),
+        visual_channel_tooltip(field = tooltipField5, type = 'nominal', alt = tooltipAlt5)
       ),
       size = list(value = 1)
       , title=title)
@@ -596,13 +631,8 @@ download_csv <- function(type = "genomic",
 
 .create_cnv_track <- function(gr){
 
-  gr$cov_value2 <- as.character(gr$cov_value)
-  ii <- cut(unique(as.numeric(gr$cov_value2)),
-            breaks = seq(min(gr$cov_value, na.rm = T),
-                         max(gr$cov_value, na.rm = T),
-                         len = 50),
-            include.lowest = TRUE)
-  ccol <- colorRampPalette(c("#f2e6e6", "red4"))(49)[ii]
+  gr$cov_value2 <- as.character(gr$cov_value_original)
+  ccol <- .circos_track_cols(vvalues = gr$cov_value2)
   track_cnv <- .create_single_track(data=gr,
                                     dataValue='cov_value',
                                     x_axis="none",
@@ -620,6 +650,8 @@ download_csv <- function(type = "genomic",
                                     tooltipAlt3="Class:",
                                     tooltipField4="cnv_met",
                                     tooltipAlt4="Integration Type:",
+                                    tooltipField5="cov_value_original",
+                                    tooltipAlt5="Original CNV Value:",
                                     legend=FALSE,
                                     colorType="nominal",
                                     title="CNV")
@@ -629,13 +661,8 @@ download_csv <- function(type = "genomic",
 ########################################################################
 
 .create_met_track <- function(gr){
-  gr$cov_value2 <- as.character(gr$cov_value)
-  ii <- cut(unique(as.numeric(gr$cov_value2)),
-            breaks = seq(min(gr$cov_value, na.rm = T),
-                         max(gr$cov_value, na.rm = T),
-                         len = 50),
-            include.lowest = TRUE)
-  ccol <- colorRampPalette(c("#d1d1e3", "navyblue"))(49)[ii]
+  gr$cov_value2 <- as.character(gr$cov_value_original)
+  ccol <- .circos_track_cols(vvalues = gr$cov_value2)
   track_met <- .create_single_track(data=gr,
                                     dataValue='cov_value',
                                     x_axis="none",
@@ -653,6 +680,8 @@ download_csv <- function(type = "genomic",
                                     tooltipAlt3="Class:",
                                     tooltipField4="cnv_met",
                                     tooltipAlt4="Integration Type:",
+                                    tooltipField5="cov_value_original",
+                                    tooltipAlt5="Original MET Value:",
                                     legend=FALSE,
                                     colorType="nominal",
                                     title="MET")
@@ -690,14 +719,16 @@ download_csv <- function(type = "genomic",
 ########################################################################
 
 .create_coef_track <- function(gr){
+  gr$coef2 <- as.character(gr$coef_original)
+  ccol <- .circos_track_cols(vvalues = gr$coef2)
   track_coef <- .create_single_track(data=gr,
                                      dataValue='coef',
                                      x_axis="none",
                                      xe_axis="none",
                                      y_axis="none",
-                                     colorField="direction_coef",
-                                     colorDomain=c("negative", "positive"),
-                                     colorRange=c("blue", "red"),
+                                     colorField="coef2",
+                                     colorDomain=unique(gr$coef2),
+                                     colorRange=ccol,
                                      tooltipField1="coef",
                                      tooltipTitle="coef",
                                      tooltipAlt1="Coef Value:",
@@ -707,6 +738,8 @@ download_csv <- function(type = "genomic",
                                      tooltipAlt3="Class:",
                                      tooltipField4="cnv_met",
                                      tooltipAlt4="Integration Type:",
+                                     tooltipField5="coef_original",
+                                     tooltipAlt5="Original Coef Value:",
                                      legend=FALSE,
                                      colorType="nominal",
                                      title="Coefficients")
