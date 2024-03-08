@@ -526,7 +526,7 @@
                               choices = c('pval', 'FDR')),
                   conditionalPanel(
                     condition = "input.SignificativityCriteria=='pval'",
-                    sliderInput("PvalRange",
+                    sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
                                 min = 0,
                                 max = 1,
@@ -534,7 +534,7 @@
                                 step = 0.005), ns = "histo_trans"),
                   conditionalPanel(
                     condition = "input.SignificativityCriteria=='FDR'",
-                    sliderInput("FdrRange",
+                    sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
                                 min = 0,
                                 max = 1,
