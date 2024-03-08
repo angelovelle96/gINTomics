@@ -295,10 +295,10 @@
                                                   "gene_cnv_res", "mirna_cnv_res"),
                                                 unique(data_table$omics)))),
                 conditionalPanel(
-                  condition = paste0("input.", ns("IntegrationSelect"),"=='gene_genomic_res'"),
+                  condition = "input.IntegrationSelect=='gene_genomic_res'",
                   selectInput(inputId = ns("genomicTypeSelect"),
                               label = "Type Selection",
-                              choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
+                              choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))), ns = "histo_gen"),
                 selectInput(inputId = ns('ClassSelect'),
                             label = 'Class:',
                             choices = unique(data_table$class)),
@@ -309,21 +309,21 @@
                             label = 'Significativity criteria:',
                             choices = c('pval', 'FDR')),
                 conditionalPanel(
-                  condition = paste0("input.", ns("SignificativityCriteria"),"=='pval'"),
+                  condition = "input.SignificativityCriteria=='pval'",
                   sliderInput(ns("PvalRange"),
                               "P-Value Range:",
                               min = 0,
                               max = 1,
                               value = c(0, 0.05),
-                              step = 0.005)),
+                              step = 0.005), ns = "histo_gen"),
                 conditionalPanel(
-                  condition = paste0("input.", ns("SignificativityCriteria"),"=='FDR'"),
+                  condition = "input.SignificativityCriteria=='FDR'",
                   sliderInput(ns("FdrRange"),
                               "FDR-Value Range:",
                               min = 0,
                               max = 1,
                               value = c(0, 0.05),
-                              step = 0.005))
+                              step = 0.005), ns = "histo_gen")
               ),
               mainPanel(
                 plotlyOutput(ns('plotly')),
@@ -525,21 +525,21 @@
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
                   conditionalPanel(
-                    condition = paste0("input.", ns("SignificativityCriteria"),"=='pval'"),
-                    sliderInput(ns("PvalRange"),
+                    condition = "input.SignificativityCriteria=='pval'",
+                    sliderInput("PvalRange",
                                 "P-Value Range:",
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.005)),
+                                step = 0.005), ns = "histo_trans"),
                   conditionalPanel(
-                    condition = paste0("input.", ns("SignificativityCriteria"),"=='FDR'"),
-                    sliderInput(ns("FdrRange"),
+                    condition = "input.SignificativityCriteria=='FDR'",
+                    sliderInput("FdrRange",
                                 "FDR-Value Range:",
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.005))
+                                step = 0.005), ns = "histo_trans")
                 ),
                 mainPanel(
                   plotlyOutput(ns('plotly')),
@@ -864,10 +864,10 @@
                               label = 'Integration Type:',
                               choices = .change_int_names(unique(data_table$omics))),
                   conditionalPanel(
-                    condition = paste0("input.", ns("IntegrationSelect"),"=='gene_genomic_res'"),
+                    condition = "input.IntegrationSelect=='gene_genomic_res'",
                     selectInput(inputId = ns("genomicTypeSelect"),
                                 label = "Type Selection",
-                                choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
+                                choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))), ns = "histo_deg"),
                   selectInput(inputId = ns('ClassSelect'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
@@ -878,21 +878,21 @@
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
                   conditionalPanel(
-                    condition = paste0("input.", ns("SignificativityCriteria"),"=='pval'"),
+                    condition = "input.SignificativityCriteria=='pval'",
                     sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.005)),
+                                step = 0.005), ns = "histo_deg"),
                   conditionalPanel(
-                    condition = paste0("input.", ns("SignificativityCriteria"),"=='FDR'"),
+                    condition = "input.SignificativityCriteria=='FDR'",
                     sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.005))
+                                step = 0.005), ns = "histo_deg")
                 ),
                 mainPanel(
                   plotlyOutput(ns("plotly")),
