@@ -363,6 +363,7 @@
 ############################################################################
 
 download_csv <- function(type = "genomic",
+                         tf=FALSE,
                          deg = FALSE,
                          plotType = "histo",
                          input,
@@ -374,11 +375,18 @@ download_csv <- function(type = "genomic",
         "data_table_histo.csv"
       },
       content = function(file){
-        reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(type=type,
-                                                                          deg=deg,
-                                                                          data_table=data_table,
-                                                                          input=input,
-                                                                          output=output)
+        if(tf){
+        reactive_histo_table <- .prepare_reactive_histoTF_table(deg=deg,
+                                                              data_table=data_table,
+                                                              input=input,
+                                                              output=output)
+        }else{
+          reactive_histo_table <- .prepare_reactive_histo_table(deg=deg,
+                                                                data_table=data_table,
+                                                                input=input,
+                                                                output=output)
+
+        }
         write.csv(reactive_histo_table(), file, row.names = FALSE)
       }
     )
@@ -1232,97 +1240,17 @@ run_shiny <- function(multiomics_integration){
                                                   input=input,
                                                   output=output,
                                                   data_table=data_table)
-    ## ----------------------- HISTO SERVER --------------------------
-    reactive_histo <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                          input = input,
-                                                          output = output,
-                                                          type = "genomic",
-                                                          deg = FALSE)
-    output$histogramPlot <- gINTomics:::.render_histo(reactive_histo)
-    reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                      input=input,
-                                                                      output=output,
-                                                                      type="genomic",
-                                                                      deg=FALSE)
-    output$histogramTable <- gINTomics:::.render_histo_table(reactive_histo_table)
-    reactive_histo_transcript <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                                     input=input,
-                                                                     output=output,
-                                                                     type="transcript",
-                                                                     deg=FALSE)
-    output$histogramPlotTranscript <- gINTomics:::.render_histo(reactive_histo_transcript)
-    reactive_histo_table_transcript <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                                 input=input,
-                                                                                 output=output,
-                                                                                 type="transcript",
-                                                                                 deg=FALSE)
-    output$histogramTableTranscript <- gINTomics:::.render_histo_table(reactive_histo_table_transcript)
-    reactive_histo_deg <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                              input=input,
-                                                              output=output,
-                                                              type="all",
-                                                              deg=TRUE)
-    output$histogramPlotDEG <- gINTomics:::.render_histo(reactive_histo_deg)
-    reactive_histo_table_deg <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                          input=input,
-                                                                          output=output,
-                                                                          type="all",
-                                                                          deg=TRUE)
-    output$histogramTableDEG <- gINTomics:::.render_histo_table(reactive_histo_table_deg)
-    output$download_csv_histo_gen <- download_csv(type="genomic",
-                                                  deg=FALSE,
-                                                  plotType="histo",
-                                                  input=input,
-                                                  output=output,
-                                                  data_table=data_table)
-    output$download_csv_histo_transcr <- download_csv(type="transcript",
-                                                      deg=FALSE,
-                                                      plotType="histo",
-                                                      input=input,
-                                                      output=output,
-                                                      data_table=data_table)
-    output$download_csv_histo_deg <- download_csv(type="all",
-                                                  deg=TRUE,
-                                                  plotType="histo",
-                                                  input=input,
-                                                  output=output,
-                                                  data_table=data_table)
-    ## ----------------------- HISTO SERVER TF --------------------------
-    reactive_histo_tf_transcript <- gINTomics:::.prepare_reactive_histo_tf(data_table,
-                                                                input = input,
-                                                                output = output,
-                                                                deg = FALSE)
-    output$histogramTfTranscript <- gINTomics:::.render_histo_TF(reactive_histo_tf_transcript)
-    reactive_histo_tf_deg <- gINTomics:::.prepare_reactive_histo_tf(data_table,
-                                                                input = input,
-                                                                output = output,
-                                                                deg = TRUE)
-    output$histogramTfTranscriptDEG <- gINTomics:::.render_histo_TF(reactive_histo_tf_deg)
+    ## ----------------------- HISTO SERVERS --------------------------
+    callModule(.server_histo_gen,
+               id = "histo_gen",
+               data_table = data_table)
+    callModule(.server_histo_trans,
+               id = "histo_trans",
+               data_table = data_table)
+    callModule(.server_histo_deg,
+               id = "histo_deg",
+               data_table = data_table)
 
-
-
-
-
-    reactive_tf_table <- gINTomics:::.prepare_reactive_histoTF_table(data_table,
-                                                                      input=input,
-                                                                      output=output,
-                                                                      deg=FALSE)
-    reactive_tf_table_deg <- gINTomics:::.prepare_reactive_histoTF_table(data_table,
-                                                                      input=input,
-                                                                      output=output,
-                                                                      deg=TRUE)
-    output$download_csv_histo_tf <- download_csv(deg=FALSE,
-                                                 plotType="histo",
-                                                 input=input,
-                                                 output=output,
-                                                 data_table=data_table)
-    output$download_csv_histo_tf_deg <- download_csv(deg=TRUE,
-                                                  plotType="histo",
-                                                  input=input,
-                                                  output=output,
-                                                  data_table=data_table)
-    output$histogramTfTable <- gINTomics:::.render_histo_tf_table(reactive_tf_table)
-    output$histogramTfTableDEG <- gINTomics:::.render_histo_tf_table(reactive_tf_table_deg)
     #### ------------------- TABLE SERVER ----------------------------
     reactive_table <- gINTomics:::.prepare_reactive_table(data_table,
                                                           input=input,

@@ -281,6 +281,7 @@
 #' @importFrom DT dataTableOutput
 
 .gint_subItem_chrDistribGenomic <- function(data_table){
+  ns <- NS("histo_gen")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
   tabItem(tabName = "histoGenomic",
           fluidRow(
@@ -288,36 +289,36 @@
                 "This is the content of Page 1."),
             mainPanel(sidebarLayout(
               sidebarPanel(
-                selectInput(inputId = 'genomicIntegrationSelectHisto',
+                selectInput(inputId = ns('IntegrationSelect'),
                             label = 'Integration Type:',
                             choices = .change_int_names(intersect(c("gene_genomic_res", "gene_met_res",
                                                   "gene_cnv_res", "mirna_cnv_res"),
                                                 unique(data_table$omics)))),
                 conditionalPanel(
-                  condition = "input.genomicIntegrationSelectHisto=='gene_genomic_res'",
-                  selectInput(inputId = "genomicTypeSelect",
+                  condition = paste0("input.", ns("IntegrationSelect"),"=='gene_genomic_res'"),
+                  selectInput(inputId = ns("genomicTypeSelect"),
                               label = "Type Selection",
                               choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
-                selectInput(inputId = 'genomicClassSelectHisto',
+                selectInput(inputId = ns('ClassSelect'),
                             label = 'Class:',
                             choices = unique(data_table$class)),
-                selectInput(inputId = 'genomicChrSelectHisto',
+                selectInput(inputId = ns('ChrSelect'),
                             label = 'Chr:',
                             choices = chr),
-                selectInput(inputId = 'genomicSignificativityCriteriaHisto',
+                selectInput(inputId = ns('SignificativityCriteria'),
                             label = 'Significativity criteria:',
                             choices = c('pval', 'FDR')),
                 conditionalPanel(
-                  condition = "input.genomicSignificativityCriteriaHisto == 'pval'",
-                  sliderInput("genomicPvalRangeHisto",
+                  condition = paste0("input.", ns("SignificativityCriteria"),"=='pval'"),
+                  sliderInput(ns("PvalRange"),
                               "P-Value Range:",
                               min = 0,
                               max = 1,
                               value = c(0, 0.05),
                               step = 0.005)),
                 conditionalPanel(
-                  condition = "input.genomicSignificativityCriteriaHisto == 'FDR'",
-                  sliderInput("genomicFdrRangeHisto",
+                  condition = paste0("input.", ns("SignificativityCriteria"),"=='FDR'"),
+                  sliderInput(ns("FdrRange"),
                               "FDR-Value Range:",
                               min = 0,
                               max = 1,
@@ -325,11 +326,11 @@
                               step = 0.005))
               ),
               mainPanel(
-                plotlyOutput('histogramPlot'),
+                plotlyOutput(ns('plotly')),
                 tags$div(
                   style = 'overflow-x: auto;',
-                  dataTableOutput('histogramTable'),
-                  downloadButton("download_csv_histo_gen", "Download CSV")
+                  dataTableOutput(ns('table')),
+                  downloadButton(ns("download_csv"), "Download CSV")
                 )
               )
             )
@@ -498,6 +499,7 @@
 #' @importFrom DT dataTableOutput
 
 .gint_subItem_chrDistribTranscript <- function(data_table){
+  ns <- NS("histo_trans")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
   tabItem(tabName = "histoTranscript",
           fluidRow(
@@ -506,30 +508,33 @@
             mainPanel(
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId = 'transcriptIntegrationSelectHisto',
+                  selectInput(inputId = ns('IntegrationSelect'),
                               label = 'Integration Type:',
-                              choices = .change_int_names(intersect(c("tf_res", "tf_mirna_res", "mirna_target_res"),
-                                                  unique(data_table$omics)))),
-                  selectInput(inputId = 'transcriptClassSelectHisto',
+                              choices = .change_int_names(
+                                intersect(c("tf_res",
+                                            "tf_mirna_res",
+                                            "mirna_target_res"),
+                                          unique(data_table$omics)))),
+                  selectInput(inputId = ns('ClassSelect'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
-                  selectInput(inputId = 'transcriptChrSelectHisto',
+                  selectInput(inputId = ns('ChrSelect'),
                               label = 'Chr:',
                               choices = chr),
-                  selectInput(inputId = 'transcriptSignificativityCriteriaHisto',
+                  selectInput(inputId = ns('SignificativityCriteria'),
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
                   conditionalPanel(
-                    condition = "input.transcriptSignificativityCriteriaHisto == 'pval'",
-                    sliderInput("transcriptPvalRangeHisto",
+                    condition = paste0("input.", ns("SignificativityCriteria"),"=='pval'"),
+                    sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
                                 step = 0.005)),
                   conditionalPanel(
-                    condition = "input.transcriptSignificativityCriteriaHisto == 'FDR'",
-                    sliderInput("transcriptFdrRangeHisto",
+                    condition = paste0("input.", ns("SignificativityCriteria"),"=='FDR'"),
+                    sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
                                 min = 0,
                                 max = 1,
@@ -537,15 +542,15 @@
                                 step = 0.005))
                 ),
                 mainPanel(
-                  plotlyOutput('histogramPlotTranscript'),
+                  plotlyOutput(ns('plotly')),
                   tags$div(
                     style = 'overflow-x: auto;',
-                    dataTableOutput('histogramTableTranscript'),
-                    downloadButton("download_csv_histo_transcr", "Download CSV")
+                    dataTableOutput(ns('table')),
+                    downloadButton(ns("download_csv"), "Download CSV")
                   ),
-                  plotlyOutput("histogramTfTranscript"),
-                  dataTableOutput('histogramTfTable'),
-                  downloadButton("download_csv_histo_tf", "Download CSV")
+                  plotlyOutput(ns("plotly_tf")),
+                  dataTableOutput(ns('table_tf')),
+                  downloadButton(ns("download_csv_tf"), "Download CSV")
                 )
               )
             )
@@ -846,6 +851,7 @@
 #' @importFrom DT dataTableOutput
 
 .gint_subItem_chrDistribDEGs <- function(data_table){
+  ns <- NS("histo_deg")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
   tabItem(tabName = "histoDEGs",
           fluidRow(
@@ -854,34 +860,34 @@
             mainPanel(
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId = 'integrationSelectHistoDEG',
+                  selectInput(inputId = ns('IntegrationSelect'),
                               label = 'Integration Type:',
                               choices = .change_int_names(unique(data_table$omics))),
                   conditionalPanel(
-                    condition = "input.integrationSelectHistoDEG=='gene_genomic_res'",
-                    selectInput(inputId = "typeSelectDEG",
+                    condition = paste0("input.", ns("IntegrationSelect"),"=='gene_genomic_res'"),
+                    selectInput(inputId = ns("genomicTypeSelect"),
                                 label = "Type Selection",
                                 choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
-                  selectInput(inputId = 'classSelectHistoDEG',
+                  selectInput(inputId = ns('ClassSelect'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
-                  selectInput(inputId = 'chrSelectHistoDEG',
+                  selectInput(inputId = ns('ChrSelect'),
                               label = 'Chr:',
                               choices = chr),
-                  selectInput(inputId = 'significativityCriteriaHistoDEG',
+                  selectInput(inputId = ns('SignificativityCriteria'),
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
                   conditionalPanel(
-                    condition = "input.significativityCriteriaHistoDEG == 'pval'",
-                    sliderInput("pvalRangeHistoDEG",
+                    condition = paste0("input.", ns("SignificativityCriteria"),"=='pval'"),
+                    sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
                                 step = 0.005)),
                   conditionalPanel(
-                    condition = "input.significativityCriteriaHistoDEG == 'FDR'",
-                    sliderInput("fdrRangeHistoDEG",
+                    condition = paste0("input.", ns("SignificativityCriteria"),"=='FDR'"),
+                    sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
                                 min = 0,
                                 max = 1,
@@ -889,15 +895,15 @@
                                 step = 0.005))
                 ),
                 mainPanel(
-                  plotlyOutput('histogramPlotDEG'),
+                  plotlyOutput(ns("plotly")),
                   tags$div(
                     style = 'overflow-x: auto;',
-                    dataTableOutput('histogramTableDEG'),
-                    downloadButton("download_csv_histo_deg", "Download CSV")
+                    dataTableOutput(ns("table")),
+                    downloadButton(ns("download_csv"), "Download CSV")
                   ),
-                  plotlyOutput("histogramTfTranscriptDEG"),
-                  dataTableOutput('histogramTfTableDEG'),
-                  downloadButton("download_csv_histo_tf_deg", "Download CSV")
+                  plotlyOutput(ns("plotly_tf")),
+                  dataTableOutput(ns("table_tf")),
+                  downloadButton(ns("download_csv_tf"), "Download CSV")
 
                 )
               )

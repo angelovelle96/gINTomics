@@ -541,35 +541,15 @@
 .prepare_reactive_histo <- function(data_table,
                                     input,
                                     output,
-                                    type = "genomic",
                                     deg = FALSE){
   reactive({
-    if(type == "genomic"){
-      integrationSelect <- input$genomicIntegrationSelectHisto
-      typeSelect <- input$genomicTypeSelect
-      classSelect <- input$genomicClassSelectHisto
-      chrSelect <- input$genomicChrSelectHisto
-      significativityCriteria <- input$genomicSignificativityCriteriaHisto
-      pvalRange <- input$genomicPvalRangeHisto
-      fdrRange <- input$genomicFdrRangeHisto
-    }
-    if(type == "transcript"){
-      integrationSelect <- input$transcriptIntegrationSelectHisto
-      classSelect <- input$transcriptClassSelectHisto
-      chrSelect <- input$transcriptChrSelectHisto
-      significativityCriteria <- input$transcriptSignificativityCriteriaHisto
-      pvalRange <- input$transcriptPvalRangeHisto
-      fdrRange <- input$transcriptFdrRangeHisto
-    }
-    if(type == "all" & deg == TRUE){
-      integrationSelect <- input$integrationSelectHistoDEG
-      classSelect <- input$classSelectHistoDEG
-      chrSelect <- input$chrSelectHistoDEG
-      significativityCriteria <- input$significativityCriteriaHistoDEG
-      pvalRange <- input$pvalRangeHistoDEG
-      fdrRange <- input$fdrRangeHistoDEG
-      typeSelect <- input$typeSelectDEG
-    }
+    integrationSelect <- input$IntegrationSelect
+    typeSelect <- input$genomicTypeSelect
+    classSelect <- input$ClassSelect
+    chrSelect <- input$ChrSelect
+    significativityCriteria <- input$SignificativityCriteria
+    pvalRange <- input$PvalRange
+    fdrRange <- input$FdrRange
     data_table <- data_table[!is.na(data_table$chr_cov),]
     #data_table <- data_table[!is.na(data_table$chr_response),]
     chr_order <- mixedsort(unique(data_table$chr_cov))
@@ -603,26 +583,13 @@
     if (nrow(data_table) == 0){
       return(NULL)}else{
     return(data_table)}
-  })%>%bindEvent(input$genomicIntegrationSelectHisto,
+  })%>%bindEvent(input$IntegrationSelect,
                  input$genomicTypeSelect,
-                 input$genomicClassSelectHisto,
-                 input$genomicChrSelectHisto,
-                 input$genomicSignificativityCriteriaHisto,
-                 input$genomicPvalRangeHisto,
-                 input$genomicFdrRangeHisto,
-                 input$transcriptIntegrationSelectHisto,
-                 input$transcriptClassSelectHisto,
-                 input$transcriptChrSelectHisto,
-                 input$transcriptSignificativityCriteriaHisto,
-                 input$transcriptPvalRangeHisto,
-                 input$transcriptFdrRangeHisto,
-                 input$integrationSelectHistoDEG,
-                 input$classSelectHistoDEG,
-                 input$chrSelectHistoDEG,
-                 input$significativityCriteriaHistoDEG,
-                 input$pvalRangeHistoDEG,
-                 input$fdrRangeHistoDEG,
-                 input$typeSelectDEG)
+                 input$ClassSelect,
+                 input$ChrSelect,
+                 input$SignificativityCriteria,
+                 input$PvalRange,
+                 input$FdrRange)
 }
 #######################################################################
 ########################################################################
@@ -631,36 +598,16 @@
 .prepare_reactive_histo_table <- function(data_table,
                                           input,
                                           output,
-                                          type = "genomic",
                                           deg = FALSE){
   reactive({
     data_table <- mutate_if(data_table, is.numeric, ~ round(., 3))
-    if(type == "genomic"){
-      integrationSelect <- input$genomicIntegrationSelectHisto
-      typeSelect <- input$genomicTypeSelect
-      classSelect <- input$genomicClassSelectHisto
-      chrSelect <- input$genomicChrSelectHisto
-      significativityCriteria <- input$genomicSignificativityCriteriaHisto
-      pvalRange <- input$genomicPvalRangeHisto
-      fdrRange <- input$genomicFdrRangeHisto
-    }
-    if(type == "transcript"){
-      integrationSelect <- input$transcriptIntegrationSelectHisto
-      classSelect <- input$transcriptClassSelectHisto
-      chrSelect <- input$transcriptChrSelectHisto
-      significativityCriteria <- input$transcriptSignificativityCriteriaHisto
-      pvalRange <- input$transcriptPvalRangeHisto
-      fdrRange <- input$transcriptFdrRangeHisto
-    }
-    if(type == "all" & deg == TRUE){
-      integrationSelect <- input$integrationSelectHistoDEG
-      classSelect <- input$classSelectHistoDEG
-      chrSelect <- input$chrSelectHistoDEG
-      significativityCriteria <- input$significativityCriteriaHistoDEG
-      pvalRange <- input$pvalRangeHistoDEG
-      fdrRange <- input$fdrRangeHistoDEG
-      typeSelect <- input$typeSelectDEG
-    }
+    integrationSelect <- input$IntegrationSelect
+    typeSelect <- input$genomicTypeSelect
+    classSelect <- input$ClassSelect
+    chrSelect <- input$ChrSelect
+    significativityCriteria <- input$SignificativityCriteria
+    pvalRange <- input$PvalRange
+    fdrRange <- input$FdrRange
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
@@ -692,26 +639,13 @@
     if (nrow(data_table) == 0){
       return(NULL)}else{
     return(data_table)}
-  })%>%bindEvent(input$genomicIntegrationSelectHisto,
+  })%>%bindEvent(input$IntegrationSelect,
                  input$genomicTypeSelect,
-                 input$genomicClassSelectHisto,
-                 input$genomicChrSelectHisto,
-                 input$genomicSignificativityCriteriaHisto,
-                 input$genomicPvalRangeHisto,
-                 input$genomicFdrRangeHisto,
-                 input$transcriptIntegrationSelectHisto,
-                 input$transcriptClassSelectHisto,
-                 input$transcriptChrSelectHisto,
-                 input$transcriptSignificativityCriteriaHisto,
-                 input$transcriptPvalRangeHisto,
-                 input$transcriptFdrRangeHisto,
-                 input$integrationSelectHistoDEG,
-                 input$classSelectHistoDEG,
-                 input$chrSelectHistoDEG,
-                 input$significativityCriteriaHistoDEG,
-                 input$pvalRangeHistoDEG,
-                 input$fdrRangeHistoDEG,
-                 input$typeSelectDEG)
+                 input$ClassSelect,
+                 input$ChrSelect,
+                 input$SignificativityCriteria,
+                 input$PvalRange,
+                 input$FdrRange)
 }
 #######################################################################
 ########################################################################
@@ -723,22 +657,13 @@
                                        deg = FALSE){
   reactive({
     genes_count_df <- NULL
-    if(deg==FALSE){
-      integrationSelect <- input$transcriptIntegrationSelectHisto
-      classSelect <- input$transcriptClassSelectHisto
-      chrSelect <- input$transcriptChrSelectHisto
-      significativityCriteria <- input$transcriptSignificativityCriteriaHisto
-      pvalRange <- input$transcriptPvalRangeHisto
-      fdrRange <- input$transcriptFdrRangeHisto
-    }
-    if(deg==TRUE){
-      integrationSelect <- input$integrationSelectHistoDEG
-      classSelect <- input$classSelectHistoDEG
-      chrSelect <- input$chrSelectHistoDEG
-      significativityCriteria <- input$significativityCriteriaHistoDEG
-      pvalRange <- input$pvalRangeHistoDEG
-      fdrRange <- input$fdrRangeHistoDEG
-    }
+    integrationSelect <- input$IntegrationSelect
+    typeSelect <- input$genomicTypeSelect
+    classSelect <- input$ClassSelect
+    chrSelect <- input$ChrSelect
+    significativityCriteria <- input$SignificativityCriteria
+    pvalRange <- input$PvalRange
+    fdrRange <- input$FdrRange
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
@@ -767,19 +692,13 @@
     genes_count_df <- genes_count_df[order(-genes_count_df$Count),]
     }
     return(genes_count_df)
-  })%>%bindEvent(input$transcriptIntegrationSelectHisto,
-                 input$transcriptClassSelectHisto,
-                 input$transcriptChrSelectHisto,
-                 input$transcriptSignificativityCriteriaHisto,
-                 input$transcriptPvalRangeHisto,
-                 input$transcriptFdrRangeHisto,
-                 input$integrationSelectHistoDEG,
-                 input$classSelectHistoDEG,
-                 input$chrSelectHistoDEG,
-                 input$significativityCriteriaHistoDEG,
-                 input$pvalRangeHistoDEG,
-                 input$fdrRangeHistoDEG
-                 )
+  })%>%bindEvent(input$IntegrationSelect,
+                 input$genomicTypeSelect,
+                 input$ClassSelect,
+                 input$ChrSelect,
+                 input$SignificativityCriteria,
+                 input$PvalRange,
+                 input$FdrRange)
 }
 
 
@@ -791,22 +710,13 @@
                                             deg = FALSE){
   reactive({
     genes_count_df <- NULL
-    if(deg==FALSE){
-      integrationSelect <- input$transcriptIntegrationSelectHisto
-      classSelect <- input$transcriptClassSelectHisto
-      chrSelect <- input$transcriptChrSelectHisto
-      significativityCriteria <- input$transcriptSignificativityCriteriaHisto
-      pvalRange <- input$transcriptPvalRangeHisto
-      fdrRange <- input$transcriptFdrRangeHisto
-    }
-    if(deg==TRUE){
-      integrationSelect <- input$integrationSelectHistoDEG
-      classSelect <- input$classSelectHistoDEG
-      chrSelect <- input$chrSelectHistoDEG
-      significativityCriteria <- input$significativityCriteriaHistoDEG
-      pvalRange <- input$pvalRangeHistoDEG
-      fdrRange <- input$fdrRangeHistoDEG
-    }
+    integrationSelect <- input$IntegrationSelect
+    typeSelect <- input$genomicTypeSelect
+    classSelect <- input$ClassSelect
+    chrSelect <- input$ChrSelect
+    significativityCriteria <- input$SignificativityCriteria
+    pvalRange <- input$PvalRange
+    fdrRange <- input$FdrRange
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
@@ -835,19 +745,13 @@
       genes_count_df <- genes_count_df[order(-genes_count_df$Count),]
     }
     return(genes_count_df)
-  })%>%bindEvent(input$transcriptIntegrationSelectHisto,
-                 input$transcriptClassSelectHisto,
-                 input$transcriptChrSelectHisto,
-                 input$transcriptSignificativityCriteriaHisto,
-                 input$transcriptPvalRangeHisto,
-                 input$transcriptFdrRangeHisto,
-                 input$integrationSelectHistoDEG,
-                 input$classSelectHistoDEG,
-                 input$chrSelectHistoDEG,
-                 input$significativityCriteriaHistoDEG,
-                 input$pvalRangeHistoDEG,
-                 input$fdrRangeHistoDEG
-  )
+  })%>%bindEvent(input$IntegrationSelect,
+                 input$genomicTypeSelect,
+                 input$ClassSelect,
+                 input$ChrSelect,
+                 input$SignificativityCriteria,
+                 input$PvalRange,
+                 input$FdrRange)
 }
 
 
