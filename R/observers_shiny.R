@@ -233,6 +233,7 @@
     if(integrationSelect == "gene_genomic_res"){
       data_table <- data_table[data_table$cnv_met == typeSelect,]
     }
+    if(nrow(data_table)==0) return(NULL)
     if(significativityCriteria == 'pval'){
       data_table["group"] <- "Not Significant"
       data_table[data_table$pval <= pvalRange, 'group'] <- "Significant"
@@ -318,6 +319,7 @@
         integrationSelect]]$data$response_var
       data_table <- data_table[data_table$omics == integrationSelect,]
     }
+    if(is.null(df_heatmap)) return(NULL)
     df_heatmap_t <- t(as.matrix(df_heatmap))
     if (integrationSelect == "gene_genomic_res"){
       ans <- .prepare_gen_heatmap(data_table = data_table,
@@ -755,6 +757,7 @@
     if(deg==TRUE){
       data_table <- data_table[data_table$deg,]
     }
+    if(nrow(data_table)==0) return(NULL)
     if(significativityCriteria == "pval"){
       data_table <- data_table[data_table$pval <= pvalRange,]
     }else{
@@ -828,13 +831,18 @@
       }else{
         data_table <- data_table[data_table$fdr <= fdrRange,]
       }
-      genes_count <- table(data_table$cov, data_table$chr_cov)
-      genes_count_df <- as.data.frame.table(genes_count)
-      genes_count_df <- subset(genes_count_df, Freq != 0)
-      colnames(genes_count_df) <- c("TF", "Chromosome", "Count")
-      genes_count_df <- genes_count_df[order(-genes_count_df$Count),]
+      if(nrow(data_table)==0) return(NULL)
+      response_count <- aggregate(response~cov+chr_cov, data_table, FUN = length)
+      response_list <- data_table %>%
+        group_by(cov) %>%
+        summarise(response_list = list(unique(response))) %>%
+        ungroup()
+      result_df <- merge(response_count, response_list, by = "cov")
+      colnames(result_df) <- c("TF/miRNA", "Chr_TF/miRNA", "Targets_count", "Targets")
+      result_df <- result_df %>%
+        arrange(desc(Targets_count))
     }
-    return(genes_count_df)
+    return(result_df)
   })%>%bindEvent(input$transcriptIntegrationSelectHisto,
                  input$transcriptClassSelectHisto,
                  input$transcriptChrSelectHisto,
@@ -849,7 +857,6 @@
                  input$fdrRangeHistoDEG
   )
 }
-
 
 #######################################################################
 ########################################################################

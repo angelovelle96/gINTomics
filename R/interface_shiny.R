@@ -97,7 +97,7 @@
                                      sidebarPanel(
                                        selectInput("genomicIntegrationSelectVolcano",
                                                    label = "Gene/miRNA:",
-                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
+                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "gene_cnv_res", "gene_met_res", "mirna_cnv_res")))),
                                        conditionalPanel(
                                          condition = "input.genomicIntegrationSelectVolcano=='gene_genomic_res'",
                                          selectInput(inputId = 'genomicTypeSelectVolcano',
@@ -135,7 +135,7 @@
                                                    choices = unique(data_table$class)),
                                        selectInput("genomicIntegrationSelectRidge",
                                                    label = "Gene/miRNA:",
-                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
+                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "gene_cnv_res", "gene_met_res", "mirna_cnv_res")))),
                                        conditionalPanel(
                                          condition = "input.genomicIntegrationSelectRidge=='gene_genomic_res'",
 
@@ -213,7 +213,7 @@
                                 max = 200,
                                 step = 10)),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmap == 'cnv_gene_res'",
+                    condition = "input.integrationSelectHeatmap == 'gene_cnv_res'",
                     sliderInput("numTopGenesHeatmapCNVonly",
                                 "Number of top genes:",
                                 value = 10,
@@ -221,7 +221,7 @@
                                 max = 200,
                                 step = 10)),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmap == 'met_gene_res'",
+                    condition = "input.integrationSelectHeatmap == 'gene_met_res'",
                     sliderInput("numTopGenesHeatmapMETonly",
                                 "Number of top genes:",
                                 value = 10,
@@ -777,7 +777,7 @@
                                 max = 200,
                                 step = 10)),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmapDEG == 'cnv_gene_res'",
+                    condition = "input.integrationSelectHeatmapDEG == 'gene_cnv_res'",
                     sliderInput("numTopGenesHeatmapCNVonlyDEG",
                                 "Number of top genes:",
                                 value = 10,
@@ -785,7 +785,7 @@
                                 max = 200,
                                 step = 10)),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmapDEG == 'met_gene_res'",
+                    condition = "input.integrationSelectHeatmapDEG == 'gene_met_res'",
                     sliderInput("numTopGenesHeatmapMETonlyDEG",
                                 "Number of top genes:",
                                 value = 10,
