@@ -163,7 +163,7 @@
       met_genes <- unlist(venn_data$met_sign_genes)
 
       if(length(cnv_genes) > 0 & length(met_genes) > 0){
-        common_genes <- base::intersect(cnv_genes, met_genes)
+        common_genes <- intersect(cnv_genes, met_genes)
         data.frame(Genes = common_genes)
       }else if(length(cnv_genes) == 1 & length(met_genes) == 1){
         data.frame(CNV_Genes = cnv_genes, MET_Genes = met_genes, stringsAsFactors = FALSE)
@@ -387,23 +387,33 @@
 ############################################################################
 ############################################################################
 
-download_csv <- function(type = "genomic",
+download_csv <- function(tf=FALSE,
                          deg = FALSE,
+                         bg_enr = NULL,
                          plotType = "histo",
                          input,
                          output,
-                         data_table){
+                         data_table,
+                         i = NULL){
   if(plotType == "histo"){
     handler <- downloadHandler(
       filename = function(){
         "data_table_histo.csv"
       },
       content = function(file){
-        reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(type=type,
-                                                                          deg=deg,
-                                                                          data_table=data_table,
-                                                                          input=input,
-                                                                          output=output)
+        if(tf){
+        reactive_histo_table <- .prepare_reactive_histo_tf(deg=deg,
+                                                          data_table=data_table,
+                                                          input=input,
+                                                          output=output,
+                                                          table=TRUE)
+        }else{
+          reactive_histo_table <- .prepare_reactive_histo(deg=deg,
+                                                          data_table=data_table,
+                                                          input=input,
+                                                          output=output,
+                                                          table=TRUE)
+        }
         write.csv(reactive_histo_table(), file, row.names = FALSE)
       }
     )
@@ -414,11 +424,11 @@ download_csv <- function(type = "genomic",
         "data_ridge.csv"
       },
       content = function(file){
-        reactive_ridge_table <- gINTomics:::.prepare_reactive_ridge_table(type=type,
-                                                                          deg=deg,
-                                                                          data_table=data_table,
-                                                                          input=input,
-                                                                          output=output)
+        reactive_ridge_table <- .prepare_reactive_ridge(deg=deg,
+                                                        data_table=data_table,
+                                                        input=input,
+                                                        output=output,
+                                                        table=TRUE)
         write.csv(reactive_ridge_table(), file, row.names = FALSE)
       }
     )
@@ -429,9 +439,9 @@ download_csv <- function(type = "genomic",
         "data_table.csv"
       },
       content = function(file){
-        reactive_table <- gINTomics:::.prepare_reactive_table(data_table=data_table,
-                                                              input=input,
-                                                              output=output)
+        reactive_table <- .prepare_reactive_table(data_table=data_table,
+                                                  input=input,
+                                                  output=output)
         write.csv(reactive_table(), file, row.names = FALSE)
       }
     )
@@ -442,11 +452,18 @@ download_csv <- function(type = "genomic",
         "enrich_table.csv"
       },
       content = function(file){
-        reactive_enr <- gINTomics:::.prepare_reactive_table(deg=deg,
-                                                            data_table=data_table,
-                                                            input=input,
-                                                            output=output)
-        write.csv(reactive_enr(), file, row.names = FALSE)
+        if(!tf){
+          reactive_enr <- .reactive_gen_enrich(bg_enrich = bg_enr,
+                                               input = input,
+                                               output = output,
+                                               session = session)
+        }else{
+          reactive_enr <- .reactive_tf_enrich(bg_enrich = bg_enr,
+                                             input = input,
+                                             output = output,
+                                             session = session)
+          }
+        write.csv(reactive_enr()[[i]][["table"]], file, row.names = FALSE)
       }
     )
   }
@@ -456,14 +473,14 @@ download_csv <- function(type = "genomic",
         "venn_table.csv"
       },
       content = function(file){
-        reactive_venn <- gINTomics:::.prepare_reactive_venn(deg=deg,
-                                                            data_table=data_table,
-                                                            input=input,
-                                                            output=output)
+        reactive_venn <- .prepare_reactive_venn(deg=deg,
+                                                data_table=data_table,
+                                                input=input,
+                                                output=output)
         venn_data <- reactive_venn()
         cnv_genes <- unlist(venn_data$cnv_sign_genes)
         met_genes <- unlist(venn_data$met_sign_genes)
-        common_genes <- base::intersect(cnv_genes, met_genes)
+        common_genes <- intersect(cnv_genes, met_genes)
         venn_data <- data.frame(Genes = common_genes)
         write.csv(venn_data, file, row.names = FALSE)
       }
@@ -1120,6 +1137,19 @@ return(ccol)
   return(ht)
 }
 
+#######################################################################
+########################################################################
+
+.run_bg <- function(FFUN,
+                    args,
+                    input,
+                    output){
+  ans <- callr::r_bg(func = FFUN,
+                     args = args,
+                     supervise = TRUE)
+  return(ans)
+}
+
 ############################################################################
 ############################################################################
 
@@ -1130,260 +1160,91 @@ run_shiny <- function(multiomics_integration){
   ui <- .create_ui(data_table)
   server <- function(input, output, session) {
 
-    # ---------------------- NETWORK SERVER -----------------------------
-    nnet <- gINTomics:::.prepare_network(data_table)
-    reactive_network <- gINTomics:::.select_network(data_table = data_table,
-                                                        input = input,
-                                                        output = output,
-                                                        network_data = nnet,
-                                                        deg = FALSE)
-    gINTomics:::.render_reactive_network(reactive_network = reactive_network,
-                                         input = input,
-                                         output = output,
-                                         deg = FALSE)
+    # ---------------------- NETWORK SERVERS -----------------------------
+    callModule(.server_network,
+               id = "network_trans",
+               data_table = data_table)
+    callModule(.server_network,
+               id = "network_deg",
+               data_table = data_table,
+               deg = TRUE)
 
-    reactive_network_deg <- gINTomics:::.select_network(data_table = data_table,
-                                                            input = input,
-                                                            output = output,
-                                                            network_data = nnet,
-                                                            deg = TRUE)
-    gINTomics:::.render_reactive_network(reactive_network = reactive_network_deg,
-                                         input = input,
-                                         output = output,
-                                         deg = TRUE)
-    ### ------------------------ VENN SERVER ----------------------
-    reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
-                                                        input = input,
-                                                        output = output,
-                                                        deg = FALSE)
-    output$venn_plot<- gINTomics:::.render_venn(reactive_venn)
-    output$common_genes_table <- gINTomics:::.render_venn_table(reactive_venn)
-    reactive_venn_deg <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
-                                                            input = input,
-                                                            output = output,
-                                                            deg = TRUE)
-    output$venn_plotDEG<- gINTomics:::.render_venn(reactive_venn_deg)
-    output$venn_tableDEG <- gINTomics:::.render_venn_table(reactive_venn_deg)
-    output$download_csv_venn_gen <- download_csv(deg = FALSE,
-                                             plotType = "venn",
-                                             input=input,
-                                             output=output,
-                                             data_table=data_table)
-    output$download_csv_venn_deg <- download_csv(deg = TRUE,
-                                                 plotType = "venn",
-                                                 input=input,
-                                                 output=output,
-                                                 data_table=data_table)
-    ## -------------------------- VOLCANO SERVER ------------------------
-    reactive_volcano <- gINTomics:::.prepare_reactive_volcano(data_table,
-                                                              input = input,
-                                                              output = output,
-                                                              type = "genomic",
-                                                              deg = FALSE)
-    output$volcanoPlot <- gINTomics:::.render_volcano(reactive_volcano)
-    reactive_volcano_transcript <- gINTomics:::.prepare_reactive_volcano(data_table,
-                                                                         input = input,
-                                                                         output = output,
-                                                                         type = "transcript",
-                                                                         deg = FALSE)
-    output$transcriptVolcanoPlot <- gINTomics:::.render_volcano(reactive_volcano_transcript)
-    reactive_volcano_deg <- gINTomics:::.prepare_reactive_volcano(data_table,
-                                                                  input = input,
-                                                                  output = output,
-                                                                  type = "all",
-                                                                  deg = TRUE)
-    output$volcanoPlotDEG <- gINTomics:::.render_volcano(reactive_volcano_deg)
+    ### ------------------------ VENN SERVERS ----------------------
+    callModule(.server_venn,
+               id = "venn_gen",
+               data_table = data_table)
+    callModule(.server_venn,
+               id = "venn_deg",
+               data_table = data_table,
+               deg = TRUE)
+
+    ## -------------------------- VOLCANO SERVERS ------------------------
+    callModule(.server_volcano,
+               id = "volcano_gen",
+               data_table = data_table)
+    callModule(.server_volcano,
+               id = "volcano_trans",
+               data_table = data_table)
+    callModule(.server_volcano,
+               id = "volcano_deg",
+               data_table = data_table,
+               deg = TRUE)
+
     ## -------------------------- HEATMAP SERVER ------------------------
-    gINTomics:::.prepare_reactive_heatmap(data_table=data_table,
-                                          multiomics_integration = multiomics_integration,
-                                          input=input,
-                                          output=output,
-                                          session = session,
-                                          deg = FALSE)
-    gINTomics:::.prepare_reactive_heatmap(data_table=data_table,
-                                          multiomics_integration = multiomics_integration,
-                                          input=input,
-                                          output=output,
-                                          session = session,
-                                          deg = TRUE)
-    ## ---------------------- RIDGE SERVER ------------------------
-    reactive_ridge <- gINTomics:::.prepare_reactive_ridge(data_table,
-                                                          input = input,
-                                                          output = output,
-                                                          type = "genomic",
-                                                          deg = FALSE)
-    output$ridgelinePlot <- gINTomics:::.render_ridge(reactive_ridge)
-    reactive_ridge_table <- gINTomics:::.prepare_reactive_ridge_table(data_table,
-                                                                      input = input,
-                                                                      output = output,
-                                                                      type = "genomic",
-                                                                      deg = FALSE)
-    output$ridgelineTable <- gINTomics:::.render_ridge_table(reactive_ridge_table)
-    reactive_ridge_transcript <- gINTomics:::.prepare_reactive_ridge(data_table,
-                                                                     input = input,
-                                                                     output = output,
-                                                                     type = "transcript",
-                                                                     deg = FALSE)
-    output$ridgelinePlotTranscript <- gINTomics:::.render_ridge(reactive_ridge_transcript)
-    reactive_ridge_tableTranscript <- gINTomics:::.prepare_reactive_ridge_table(data_table,
-                                                                                input = input,
-                                                                                output = output,
-                                                                                type = "transcript",
-                                                                                deg = FALSE)
-    output$ridgelineTableTranscript <- gINTomics:::.render_ridge_table(reactive_ridge_tableTranscript)
-    reactive_ridge_deg <- gINTomics:::.prepare_reactive_ridge(data_table,
-                                                              input = input,
-                                                              output = output,
-                                                              type = "all",
-                                                              deg = TRUE)
-    output$ridgelinePlotDEG <- gINTomics:::.render_ridge(reactive_ridge_deg)
-    reactive_ridge_tableDEG <- gINTomics:::.prepare_reactive_ridge_table(data_table,
-                                                                         input = input,
-                                                                         output = output,
-                                                                         type = "all",
-                                                                         deg = TRUE)
-    output$ridgelineTableDEG <- gINTomics:::.render_ridge_table(reactive_ridge_tableDEG)
-    output$download_csv_ridge_gen <- download_csv(type = "genomic",
-                                                  deg = FALSE,
-                                                  plotType = "ridge",
-                                                  input=input,
-                                                  output=output,
-                                                  data_table=data_table)
-    output$download_csv_ridge_transcr <- download_csv(type = "transcript",
-                                                      deg = FALSE,
-                                                      plotType = "ridge",
-                                                      input=input,
-                                                      output=output,
-                                                      data_table=data_table)
-    output$download_csv_ridge_deg <- download_csv(type = "all",
-                                                  deg = TRUE,
-                                                  plotType = "ridge",
-                                                  input=input,
-                                                  output=output,
-                                                  data_table=data_table)
-    ## ----------------------- HISTO SERVER --------------------------
-    reactive_histo <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                          input = input,
-                                                          output = output,
-                                                          type = "genomic",
-                                                          deg = FALSE)
-    output$histogramPlot <- gINTomics:::.render_histo(reactive_histo)
-    reactive_histo_table <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                      input=input,
-                                                                      output=output,
-                                                                      type="genomic",
-                                                                      deg=FALSE)
-    output$histogramTable <- gINTomics:::.render_histo_table(reactive_histo_table)
-    reactive_histo_transcript <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                                     input=input,
-                                                                     output=output,
-                                                                     type="transcript",
-                                                                     deg=FALSE)
-    output$histogramPlotTranscript <- gINTomics:::.render_histo(reactive_histo_transcript)
-    reactive_histo_table_transcript <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                                 input=input,
-                                                                                 output=output,
-                                                                                 type="transcript",
-                                                                                 deg=FALSE)
-    output$histogramTableTranscript <- gINTomics:::.render_histo_table(reactive_histo_table_transcript)
-    reactive_histo_deg <- gINTomics:::.prepare_reactive_histo(data_table,
-                                                              input=input,
-                                                              output=output,
-                                                              type="all",
-                                                              deg=TRUE)
-    output$histogramPlotDEG <- gINTomics:::.render_histo(reactive_histo_deg)
-    reactive_histo_table_deg <- gINTomics:::.prepare_reactive_histo_table(data_table,
-                                                                          input=input,
-                                                                          output=output,
-                                                                          type="all",
-                                                                          deg=TRUE)
-    output$histogramTableDEG <- gINTomics:::.render_histo_table(reactive_histo_table_deg)
-    output$download_csv_histo_gen <- download_csv(type="genomic",
-                                                  deg=FALSE,
-                                                  plotType="histo",
-                                                  input=input,
-                                                  output=output,
-                                                  data_table=data_table)
-    output$download_csv_histo_transcr <- download_csv(type="transcript",
-                                                      deg=FALSE,
-                                                      plotType="histo",
-                                                      input=input,
-                                                      output=output,
-                                                      data_table=data_table)
-    output$download_csv_histo_deg <- download_csv(type="all",
-                                                  deg=TRUE,
-                                                  plotType="histo",
-                                                  input=input,
-                                                  output=output,
-                                                  data_table=data_table)
-    ## ----------------------- HISTO SERVER TF --------------------------
-    reactive_histo_tf_transcript <- gINTomics:::.prepare_reactive_histo_tf(data_table,
-                                                                input = input,
-                                                                output = output,
-                                                                deg = FALSE)
-    output$histogramTfTranscript <- gINTomics:::.render_histo_TF(reactive_histo_tf_transcript)
-    reactive_histo_tf_deg <- gINTomics:::.prepare_reactive_histo_tf(data_table,
-                                                                input = input,
-                                                                output = output,
-                                                                deg = TRUE)
-    output$histogramTfTranscriptDEG <- gINTomics:::.render_histo_TF(reactive_histo_tf_deg)
+    .prepare_reactive_heatmap(data_table=data_table,
+                              multiomics_integration = multiomics_integration,
+                              input=input,
+                              output=output,
+                              session = session,
+                              deg = FALSE,
+                              ns = NS("heat_gen"))
+    .prepare_reactive_heatmap(data_table=data_table,
+                              multiomics_integration = multiomics_integration,
+                              input=input,
+                              output=output,
+                              session = session,
+                              deg = TRUE,
+                              ns = NS("heat_deg"))
+    ## ---------------------- RIDGE SERVERS ------------------------
+    callModule(.server_ridge,
+               id = "ridge_gen",
+               data_table = data_table)
+    callModule(.server_ridge,
+               id = "ridge_trans",
+               data_table = data_table)
+    callModule(.server_ridge,
+               id = "ridge_deg",
+               data_table = data_table,
+               deg = TRUE)
 
+    ## ----------------------- HISTO SERVERS --------------------------
+    callModule(.server_histo,
+               id = "histo_gen",
+               data_table = data_table)
+    callModule(.server_histo2,
+               id = "histo_trans",
+               data_table = data_table)
+    callModule(.server_histo2,
+               id = "histo_deg",
+               data_table = data_table,
+               deg = TRUE)
 
-
-
-
-    reactive_tf_table <- gINTomics:::.prepare_reactive_histoTF_table(data_table,
-                                                                      input=input,
-                                                                      output=output,
-                                                                      deg=FALSE)
-    reactive_tf_table_deg <- gINTomics:::.prepare_reactive_histoTF_table(data_table,
-                                                                      input=input,
-                                                                      output=output,
-                                                                      deg=TRUE)
-    output$download_csv_histo_tf <- download_csv(deg=FALSE,
-                                                 plotType="histo",
-                                                 input=input,
-                                                 output=output,
-                                                 data_table=data_table)
-    output$download_csv_histo_tf_deg <- download_csv(deg=TRUE,
-                                                  plotType="histo",
-                                                  input=input,
-                                                  output=output,
-                                                  data_table=data_table)
-    output$histogramTfTable <- gINTomics:::.render_histo_tf_table(reactive_tf_table)
-    output$histogramTfTableDEG <- gINTomics:::.render_histo_tf_table(reactive_tf_table_deg)
     #### ------------------- TABLE SERVER ----------------------------
-    reactive_table <- gINTomics:::.prepare_reactive_table(data_table,
-                                                          input=input,
-                                                          output=output)
-    output$res_table <- gINTomics:::.render_table(reactive_table)
-    output$download_csv_table <- download_csv(plotType = "table",
-                                              input=input,
-                                              output=output,
-                                              data_table=data_table)
+    callModule(.server_table,
+               id = "complete_table",
+               data_table = data_table)
+
     #### ------------------- ENRICHMENT SERVER ----------------------------
     data_gen_enrich <- data_table[data_table$omics=="gene_genomic_res",]
     data_tf_enrich <- data_table[data_table$omics=="tf_res",]
-    callModule(gINTomics:::.background_srv, id = "prova", name="prova",
-               data_gen_enrich=data_gen_enrich,
-               data_tf_enrich=data_tf_enrich)
+    callModule(.server_enrich_bg, id = "enrich_gen", name="enrich_gen",
+               extracted_data=data_gen_enrich)
+    callModule(.server_enrich_bg, id = "enrich_tf", name="enrich_tf",
+               extracted_data=data_tf_enrich, tf=TRUE)
     #### ------------------- CIRCOS SERVER ----------------------------
-    reactive_circos <- .prepare_reactive_circos(data = data$data,
-                                                input = input,
-                                                output = output)
-    output$gosling_plot_circos <- renderGosling({
-      gosling(component_id = "component_1",
-              reactive_circos())
-    })
-    observe({
-      export_pdf(component_id = "component_1")
-    })%>%bindEvent(input$circosDownload_pdf)
-    observe({
-      export_png(component_id = "component_1")
-    })%>%bindEvent(input$circosDownload_png)
-
+    callModule(.server_circos,
+               id = "circos",
+               data = data$data)
   }
-
-
   shiny::shinyApp(ui, server)
 }
