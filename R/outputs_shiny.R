@@ -457,13 +457,14 @@ download_csv <- function(tf=FALSE,
                                                input = input,
                                                output = output,
                                                session = session)
+          write.csv(reactive_enr()[["table"]], file, row.names = FALSE)
         }else{
           reactive_enr <- .reactive_tf_enrich(bg_enrich = bg_enr,
                                              input = input,
                                              output = output,
                                              session = session)
+          write.csv(reactive_enr()[[i]][["table"]], file, row.names = FALSE)
           }
-        write.csv(reactive_enr()[[i]][["table"]], file, row.names = FALSE)
       }
     )
   }
