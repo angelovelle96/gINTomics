@@ -50,6 +50,9 @@
 #' @importFrom DT dataTableOutput
 
 .gint_subItem_coefDistribGenomic <- function(data_table){
+  ns <- NS("venn_gen")
+  ns2 <- NS("volcano_gen")
+  ns3 <- NS("ridge_gen")
   tabItem(tabName = "coefDistribGenomic",
           fluidRow(
             box(title = "Page containing coefs distribution plots (Venn, Volcano and RidgeLine plots).",
@@ -59,35 +62,35 @@
                           tabPanel("Venn Diagram",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("classSelectVenn",
+                                       selectInput(ns('ClassSelect'),
                                                    "Select Class:",
                                                    choices = unique(data_table$class)),
-                                       selectInput(inputId = 'significativityCriteriaVenn',
+                                       selectInput(inputId = ns('SignificativityCriteria'),
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.significativityCriteriaVenn == 'pval'",
-                                         sliderInput("pvalRangeVenn",
+                                         condition = "input.SignificativityCriteria=='pval'",
+                                         sliderInput(ns("PvalRange"),
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
-                                                     step = 0.005)),
+                                                     step = 0.005), ns = ns),
                                        conditionalPanel(
-                                         condition = "input.significativityCriteriaVenn == 'FDR'",
-                                         sliderInput("fdrRangeVenn",
+                                         condition = "input.SignificativityCriteria=='FDR'",
+                                         sliderInput(ns("FdrRange"),
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
-                                                     step = 0.005))
+                                                     step = 0.005), ns = ns)
                                      ),
                                      mainPanel(
-                                       plotlyOutput("venn_plot"),
+                                       plotlyOutput(ns("plotly")),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                         dataTableOutput("common_genes_table"),
-                                         downloadButton("download_csv_venn_gen", "Download CSV")
+                                         dataTableOutput(ns("table")),
+                                         downloadButton(ns("download_csv"), "Download CSV")
                                        )
                                      )
                                    )
@@ -95,79 +98,83 @@
                           tabPanel("Volcano Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("genomicIntegrationSelectVolcano",
+                                       selectInput(ns2('IntegrationSelect'),
                                                    label = "Gene/miRNA:",
-                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
+                                                   choices = .change_int_names(
+                                                     intersect(unique(data_table$omics),
+                                                               c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
                                        conditionalPanel(
-                                         condition = "input.genomicIntegrationSelectVolcano=='gene_genomic_res'",
-                                         selectInput(inputId = 'genomicTypeSelectVolcano',
+                                         condition = "input.IntegrationSelect=='gene_genomic_res'",
+                                         selectInput(inputId = ns2("genomicTypeSelect"),
                                                      label = 'Integration Type:',
-                                                     choices = intersect(unique(data_table$cnv_met), c("cnv", "met")))),
-                                       selectInput(inputId = 'genomicSignificativityCriteriaVolcano',
+                                                     choices = intersect(unique(data_table$cnv_met), c("cnv", "met"))), ns = ns2),
+                                       selectInput(inputId = ns2('SignificativityCriteria'),
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaVolcano == 'pval'",
-                                         sliderInput("genomicPvalRangeVolcano",
+                                         condition = "input.SignificativityCriteria=='pval'",
+                                         sliderInput(ns2("PvalRange"),
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0.05),
-                                                     step = 0.005)),
+                                                     step = 0.005), ns = ns2),
                                        conditionalPanel(
                                          condition = "input.genomicSignificativityCriteriaVolcano == 'FDR'",
-                                         sliderInput("genomicFdrRangeVolcano",
+                                         sliderInput(ns2("FdrRange"),
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0.05),
-                                                     step = 0.005))
+                                                     step = 0.005), ns = ns2)
                                      ),
                                      mainPanel(
-                                       plotlyOutput('volcanoPlot')
+                                       plotlyOutput(ns2('plotly'))
                                      )
                                    )),
                           tabPanel("RidgeLine Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("genomicClassSelectRidge",
+                                       selectInput(ns3('ClassSelect'),
                                                    "Select Class:",
                                                    choices = unique(data_table$class)),
-                                       selectInput("genomicIntegrationSelectRidge",
+                                       selectInput(ns3('IntegrationSelect'),
                                                    label = "Gene/miRNA:",
-                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
+                                                   choices = .change_int_names(
+                                                     intersect(unique(data_table$omics),
+                                                               c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
                                        conditionalPanel(
-                                         condition = "input.genomicIntegrationSelectRidge=='gene_genomic_res'",
+                                         condition = "input.IntegrationSelect=='gene_genomic_res'",
 
-                                         selectInput(inputId = 'genomicTypeSelectRidge',
+                                         selectInput(inputId = ns3("genomicTypeSelect"),
                                                      label = 'Genomic Type:',
-                                                     choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
-                                       selectInput(inputId = 'genomicSignificativityCriteriaRidge',
+                                                     choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))), ns = ns3),
+                                       selectInput(inputId = ns3('SignificativityCriteria'),
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaRidge == 'pval'",
-                                         sliderInput("genomicPvalRangeRidge",
+                                         condition = "input.SignificativityCriteria=='pval'",
+                                         sliderInput(ns3("PvalRange"),
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
-                                                     step = 0.005)),
+                                                     step = 0.005), ns = ns3),
                                        conditionalPanel(
-                                         condition = "input.genomicSignificativityCriteriaRidge == 'FDR'",
-                                         sliderInput("genomicFdrRangeRidge",
+                                         condition = "input.SignificativityCriteria=='FDR'",
+                                         sliderInput(ns3("FdrRange"),
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
-                                                     step = 0.005))
+                                                     step = 0.005), ns = ns3)
                                      ),
                                      mainPanel(
-                                       plotOutput("ridgelinePlot"),
+                                       plotOutput(ns3("plotly")),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                         dataTableOutput('ridgelineTable'),
-                                         downloadButton("download_csv_ridge_gen", "Download CSV")
+                                         dataTableOutput(ns3('table')),
+                                         downloadButton(ns3("download_csv"), "Download CSV")
                                        )
                                      )
                                    ))
@@ -184,7 +191,7 @@
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
 
 .gint_subItem_HeatmapGenomic  <- function(data_table){
-
+  ns <- NS("heat_gen")
   tabItem(tabName = "heatmapGenomic",
           fluidRow(
             box(title = "Subsection 1",
@@ -193,79 +200,80 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId = 'integrationSelectHeatmap',
+                  selectInput(inputId = ns('IntegrationSelect'),
                               label = 'Integration Type:',
                               choices = .change_int_names(intersect(c("gene_genomic_res", "gene_met_res",
                                                     "gene_cnv_res", "mirna_cnv_res"),
                                                   unique(data_table$omics)))),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmap == 'gene_genomic_res'",
-                    sliderInput("numTopGenesHeatmapCNV",
+                    condition = "input.IntegrationSelect=='gene_genomic_res'",
+                    sliderInput(ns("numTopGenesHeatmapCNV"),
                                 "Number of top genes (CNV):",
                                 value = 10,
                                 min = 1,
                                 max = 200,
                                 step = 10),
-                    sliderInput("numTopGenesHeatmapMET",
+                    sliderInput(ns("numTopGenesHeatmapMET"),
                                 "Number of top genes (MET):",
                                 value = 10,
                                 min = 1,
                                 max = 200,
-                                step = 10)),
+                                step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmap == 'cnv_gene_res'",
-                    sliderInput("numTopGenesHeatmapCNVonly",
+                    condition = "input.IntegrationSelect=='cnv_gene_res'",
+                    sliderInput(ns("numTopGenesHeatmapCNVonly"),
                                 "Number of top genes:",
                                 value = 10,
                                 min = 1,
                                 max = 200,
-                                step = 10)),
+                                step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmap == 'met_gene_res'",
-                    sliderInput("numTopGenesHeatmapMETonly",
+                    condition = "input.IntegrationSelect=='met_gene_res'",
+                    sliderInput(ns("numTopGenesHeatmapMETonly"),
                                 "Number of top genes:",
                                 value = 10,
                                 min = 1,
                                 max = 200,
-                                step = 10)),
+                                step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmap == 'mirna_cnv_res'",
-                    sliderInput("numTopGenesHeatmapmirna_cnv",
+                    condition = "input.IntegrationSelect=='mirna_cnv_res'",
+                    sliderInput(ns("numTopGenesHeatmapmirna_cnv"),
                                 "Number of top genes:",
                                 value = 10,
                                 min = 1,
                                 max = 200,
-                                step = 10)),
-                  selectInput("classSelectHeatmap",
+                                step = 10), ns = ns),
+                  selectInput(ns('ClassSelect'),
                               "Select the class:",
                               choices = unique(data_table$class),
                               multiple = FALSE),
-                  selectInput(inputId = 'significativityCriteriaHeatmap',
+                  selectInput(inputId = ns('SignificativityCriteria'),
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
                   conditionalPanel(
-                    condition = "input.significativityCriteriaHeatmap == 'pval'",
-                    sliderInput("pvalRangeHeatmap",
+                    condition = "input.SignificativityCriteria=='pval'",
+                    sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
                                 min = 0.01,
                                 max = 1,
                                 value = 0.05,
-                                step = 0.005)),
+                                step = 0.005), ns = ns),
                   conditionalPanel(
-                    condition = "input.significativityCriteriaHeatmap == 'FDR'",
-                    sliderInput("FDRRangeHeatmap",
+                    condition = "input.SignificativityCriteria=='FDR'",
+                    sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
                                 min = 0.01,
                                 max = 1,
                                 value = 0.05,
-                                step = 0.005)),
-                    radioButtons("scaleHeatmap",
+                                step = 0.005), ns = ns),
+                    radioButtons(ns("scaleHeatmap"),
                                 "scale by:",
                                 choices = c("row", "col", "none"))
 
                 ),
                 mainPanel(
-                  InteractiveComplexHeatmapOutput('heatmap')
+                  InteractiveComplexHeatmapOutput(ns('heatmap')),
+                  dataTableOutput(ns("aa"))
                 )
 
               )
@@ -298,7 +306,7 @@
                   condition = "input.IntegrationSelect=='gene_genomic_res'",
                   selectInput(inputId = ns("genomicTypeSelect"),
                               label = "Type Selection",
-                              choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))), ns = "histo_gen"),
+                              choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))), ns = ns),
                 selectInput(inputId = ns('ClassSelect'),
                             label = 'Class:',
                             choices = unique(data_table$class)),
@@ -315,7 +323,7 @@
                               min = 0,
                               max = 1,
                               value = c(0, 0.05),
-                              step = 0.005), ns = "histo_gen"),
+                              step = 0.005), ns = ns),
                 conditionalPanel(
                   condition = "input.SignificativityCriteria=='FDR'",
                   sliderInput(ns("FdrRange"),
@@ -323,7 +331,7 @@
                               min = 0,
                               max = 1,
                               value = c(0, 0.05),
-                              step = 0.005), ns = "histo_gen")
+                              step = 0.005), ns = ns)
               ),
               mainPanel(
                 plotlyOutput(ns('plotly')),
@@ -345,7 +353,7 @@
 #' @importFrom plotly plotlyOutput
 
 .gint_tabitem_enr <- function(data_table){
-  ns <- NS("prova")
+  ns <- NS("enrich_gen")
   tabItem(tabName = "enrichGenomic",
           fluidRow(
             box(title = "Subsection 1",
@@ -353,22 +361,23 @@
             mainPanel(
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId = ns('genomicTypeSelectEnrich'),
+                  selectInput(inputId = ns('genomicTypeSelect'),
                               label = 'Integration Type:',
                               choices = unique(data_table$cnv_met)[!is.na(unique(data_table$cnv_met))]),
-                  selectInput(inputId = ns('genomicClassSelectEnrich'),
+                  selectInput(inputId = ns('ClassSelect'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
-                  selectInput(inputId = ns('genomicDBSelectEnrich'),
+                  selectInput(inputId = ns('DBSelectEnrich'),
                               label = 'Database:',
                               choices = c("go", "kegg"))
                 ),
-                mainPanel(textOutput(ns("gen_enrichment")),
-                          plotlyOutput(ns("gen_dotplot")),
+                mainPanel(textOutput(ns("check")),
+                          plotlyOutput(ns("dotplot")),
                           HTML(paste0(rep("<br>", 20), collapse = "")),
                           tags$div(
                             style = 'overflow-x: auto;',
-                          dataTableOutput(ns("gen_enrich_table")))))
+                          dataTableOutput(ns("table"))),
+                          downloadButton(ns("download_csv"), "Download CSV")))
             )
 
 
@@ -380,7 +389,7 @@
 #' @import shiny
 
 .gint_subItem_enrichTranscript <- function(data_table){
-  ns <- NS("prova")
+  ns <- NS("enrich_tf")
   tabItem(tabName = "enrichTranscript",
           fluidRow(
             box(title = "Subsection 1",
@@ -389,15 +398,15 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId = ns('transcriptionalClassSelectEnrich'),
+                  selectInput(inputId = ns('ClassSelect'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
-                  selectInput(inputId = ns('transcriptionalDBSelectEnrich'),
+                  selectInput(inputId = ns('DBSelectEnrich'),
                               label = 'Database:',
                               choices = c("go", "kegg"))
                 ),
-                mainPanel(textOutput(ns("tf_enrichment")),
-                          uiOutput(ns("tf_dotplot"))))
+                mainPanel(textOutput(ns("check")),
+                          uiOutput(ns("dotplot"))))
             )
 
 
@@ -411,6 +420,8 @@
 #' @importFrom DT dataTableOutput
 
 .gint_subItem_coefDistribTranscript <- function(data_table){
+  ns <- NS("volcano_trans")
+  ns2 <- NS("ridge_trans")
   tabItem(tabName = "coefDistribTranscript",
           fluidRow(
             box(title = "Page containing coefs distribution plots (Venn, Volcano and RidgeLine plots).",
@@ -420,69 +431,69 @@
                           tabPanel("Volcano Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("transcriptIntegrationSelectVolcano",
+                                       selectInput(ns('IntegrationSelect'),
                                                    label = "Gene/miRNA:",
                                                    choices = .change_int_names(intersect(unique(data_table$omics), c("tf_res", "tf_mirna_res", "mirna_target_res")))),
-                                       selectInput(inputId = 'transcriptSignificativityCriteriaVolcano',
+                                       selectInput(inputId = ns('SignificativityCriteria'),
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.transcriptSignificativityCriteriaVolcano == 'pval'",
-                                         sliderInput("transcriptPvalRangeVolcano",
+                                         condition = "input.SignificativityCriteria=='pval'",
+                                         sliderInput(ns("PvalRange"),
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0.05),
-                                                     step = 0.005)),
+                                                     step = 0.005), ns = ns),
                                        conditionalPanel(
-                                         condition = "input.transcriptSignificativityCriteriaVolcano == 'FDR'",
-                                         sliderInput("transcriptFdrRangeVolcano",
+                                         condition = "input.SignificativityCriteria=='FDR'",
+                                         sliderInput(ns("FdrRange"),
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0.05),
-                                                     step = 0.005))
+                                                     step = 0.005), ns = ns)
                                      ),
                                      mainPanel(
-                                       plotlyOutput('transcriptVolcanoPlot')
+                                       plotlyOutput(ns('plotly'))
                                      )
                                    )),
                           tabPanel("RidgeLine Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput(inputId = 'transcriptIntegrationSelectRidge',
+                                       selectInput(inputId = ns2('IntegrationSelect'),
                                                    label = 'Integration Type:',
                                                    choices = .change_int_names(intersect(unique(data_table$omics), c("tf_res", "tf_mirna_res", "mirna_target_res")))),
-                                       selectInput("transcriptClassSelectRidge",
+                                       selectInput(inputId = ns2('ClassSelect'),
                                                    "Select Class:",
                                                    choices = unique(data_table$class)),
 
-                                       selectInput(inputId = 'transcriptSignificativityCriteriaRidge',
+                                       selectInput(inputId = ns2('SignificativityCriteria'),
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.transcriptSignificativityCriteriaRidge == 'pval'",
-                                         sliderInput("transcriptPvalRangeRidge",
+                                         condition = "input.SignificativityCriteria=='pval'",
+                                         sliderInput(ns2("PvalRange"),
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
-                                                     step = 0.005)),
+                                                     step = 0.005), ns = ns2),
                                        conditionalPanel(
-                                         condition = "input.transcriptSignificativityCriteriaRidge == 'FDR'",
-                                         sliderInput("transcriptFdrRangeRidge",
+                                         condition = "input.SignificativityCriteria=='FDR'",
+                                         sliderInput(ns2("FdrRange"),
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
-                                                     step = 0.005))
+                                                     step = 0.005), ns = ns2)
                                      ),
                                      mainPanel(
-                                       plotOutput("ridgelinePlotTranscript"),
+                                       plotOutput(ns2("plotly")),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                         dataTableOutput('ridgelineTableTranscript'),
-                                         downloadButton("download_csv_ridge_transcr", "Download CSV")
+                                         dataTableOutput(ns2('table')),
+                                         downloadButton(ns2("download_csv"), "Download CSV")
                                        )
                                      )
                                    ))
@@ -531,7 +542,7 @@
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.005), ns = "histo_trans"),
+                                step = 0.005), ns = ns),
                   conditionalPanel(
                     condition = "input.SignificativityCriteria=='FDR'",
                     sliderInput(ns("FdrRange"),
@@ -539,7 +550,7 @@
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.005), ns = "histo_trans")
+                                step = 0.005), ns = ns)
                 ),
                 mainPanel(
                   plotlyOutput(ns('plotly')),
@@ -563,6 +574,7 @@
 #' @importFrom visNetwork visNetworkOutput
 
 .gint_subItem_networkTranscript <- function(data_table){
+  ns <- NS("network_trans")
   tabItem(tabName = "networkTranscript",
           fluidRow(
             mainPanel(
@@ -570,45 +582,45 @@
                 div(
                   style = "width: 1600px;",
                   inputPanel(
-                     selectInput("classSelectNetwork",
+                     selectInput(ns('ClassSelect'),
                               label = "Select the Class:",
                               choices = unique(data_table$class)),
-                    selectInput(inputId = 'significativityCriteriaNetwork',
+                    selectInput(inputId = ns('SignificativityCriteria'),
                                 label = 'Significativity criteria:',
                                 choices = c('pval', 'FDR'),
                                 ),
                     conditionalPanel(
-                      condition = "input.significativityCriteriaNetwork == 'pval'",
-                      sliderInput("pvalNetwork",
+                      condition = "input.SignificativityCriteria=='pval'",
+                      sliderInput(ns("PvalRange"),
                                   "P-Value:",
                                   min = 0,
                                   max = 1,
                                   value = c(0.05),
-                                  step = 0.005)),
+                                  step = 0.005), ns = ns),
                     conditionalPanel(
-                      condition = "input.significativityCriteriaNetwork == 'FDR'",
-                      sliderInput("fdrNetwork",
+                      condition = "input.SignificativityCriteria=='FDR'",
+                      sliderInput(ns("FdrRange"),
                                   "FDR:",
                                   min = 0,
                                   max = 1,
                                   value = c(0.05),
                                   step = 0.005)),
-                    sliderInput("numInteractions",
+                    sliderInput(ns("numInteractions"),
                                 label = "Number of Interactions",
                                 min = 10,
                                 max = nrow(data_table),
                                 value = 200,
                                 step = 50),
-                    checkboxInput("layoutNetwork",
+                    checkboxInput(ns("layout"),
                                   label = "Switch to tree Layout:",
                                   value = FALSE),
-                    checkboxInput("physics",
+                    checkboxInput(ns("physics"),
                                   label = "Physics",
                                   value = FALSE)
                   )
                 ),
                 mainPanel(
-                  visNetworkOutput("networkPlot",
+                  visNetworkOutput(ns("networkPlot"),
                                    height = 800,
                                    width = 1600)
                 )
@@ -624,6 +636,9 @@
 #' @importFrom DT dataTableOutput
 
 .gint_subItem_coefDistribDEGs <- function(data_table){
+  ns <- NS("venn_deg")
+  ns2 <- NS("volcano_deg")
+  ns3 <- NS("ridge_deg")
   tabItem(tabName = "coefDistribDEGs",
           fluidRow(
             box(title = "Page containing coefs distribution plots (Venn, Volcano and RidgeLine plots).",
@@ -633,23 +648,23 @@
                           tabPanel("Venn Diagram",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("classSelectVennDEG",
+                                       selectInput(ns('ClassSelect'),
                                                    "Select Class:",
                                                    choices = unique(data_table$class)),
-                                       selectInput(inputId = 'significativityCriteriaVennDEG',
+                                       selectInput(inputId = ns('SignificativityCriteria'),
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.significativityCriteriaVennDEG == 'pval'",
-                                         sliderInput("pvalRangeVennDEG",
+                                         condition = "input.SignificativityCriteria=='pval'",
+                                         sliderInput(ns("PvalRange"),
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
                                                      step = 0.005)),
                                        conditionalPanel(
-                                         condition = "input.significativityCriteriaVennDEG == 'FDR'",
-                                         sliderInput("fdrRangeVennDEG",
+                                         condition = "input.SignificativityCriteria=='FDR'",
+                                         sliderInput(ns("FdrRange"),
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
@@ -657,88 +672,87 @@
                                                      step = 0.005))
                                      ),
                                      mainPanel(
-                                       plotlyOutput("venn_plotDEG"),
-                                       dataTableOutput("venn_tableDEG"),
-                                       downloadButton("download_csv_venn_deg", "Download CSV")
+                                       plotlyOutput(ns("plotly")),
+                                       dataTableOutput(ns("table")),
+                                       downloadButton(ns("download_csv"), "Download CSV")
                                      )
                                    )
                           ),
                           tabPanel("Volcano Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("integrationSelectVolcanoDEG",
+                                       selectInput(ns2('IntegrationSelect'),
                                                    label = "Gene/miRNA:",
                                                    choices = .change_int_names(unique(data_table$omics))),
                                        conditionalPanel(
-                                         condition = "input.integrationSelectVolcanoDEG=='gene_genomic_res'",
-                                         selectInput(inputId = 'typeSelectVolcanoDEG',
+                                         condition = "input.IntegrationSelect=='gene_genomic_res'",
+                                         selectInput(inputId = ns2("genomicTypeSelect"),
                                                      label = 'Integration Type:',
-                                                     choices = intersect(unique(data_table$cnv_met), c("cnv", "met")))),
-                                       selectInput(inputId = 'significativityCriteriaVolcanoDEG',
+                                                     choices = intersect(unique(data_table$cnv_met), c("cnv", "met"))), ns = ns2),
+                                       selectInput(inputId = ns2('SignificativityCriteria'),
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.significativityCriteriaVolcanoDEG == 'pval'",
-                                         sliderInput("pvalRangeVolcanoDEG",
+                                         condition = "input.SignificativityCriteria=='pval'",
+                                         sliderInput(ns2("PvalRange"),
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0.05),
-                                                     step = 0.005)),
+                                                     step = 0.005), ns = ns2),
                                        conditionalPanel(
-                                         condition = "input.significativityCriteriaVolcanoDEG == 'FDR'",
-                                         sliderInput("fdrRangeVolcanoDEG",
+                                         condition = "input.SignificativityCriteria=='FDR'",
+                                         sliderInput(ns2("FdrRange"),
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0.05),
-                                                     step = 0.005))
+                                                     step = 0.005), ns = ns2)
                                      ),
                                      mainPanel(
-                                       plotlyOutput('volcanoPlotDEG')
+                                       plotlyOutput(ns2('plotly'))
                                      )
                                    )),
                           tabPanel("RidgeLine Plot",
                                    sidebarLayout(
                                      sidebarPanel(
-                                       selectInput("integrationSelectRidgeDEG",
+                                       selectInput(ns3('IntegrationSelect'),
                                                    label = "Gene/miRNA:",
                                                    choices = .change_int_names(unique(data_table$omics))),
                                        conditionalPanel(
-                                         condition = "input.integrationSelectRidgeDEG=='gene_genomic_res'",
-
-                                         selectInput(inputId = 'typeSelectRidgeDEG',
+                                         condition = "input.IntegrationSelect=='gene_genomic_res'",
+                                         selectInput(inputId = ns3("genomicTypeSelect"),
                                                      label = 'Genomic Type:',
-                                                     choices = intersect(unique(data_table$cnv_met), c("met", "cnv")))),
-                                       selectInput(inputId = "classSelectRidgeDEG",
+                                                     choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))), ns = ns3),
+                                       selectInput(inputId = ns3('ClassSelect'),
                                                    label = "Class:",
                                                    choices = unique(data_table$class)),
-                                       selectInput(inputId = 'significativityCriteriaRidgeDEG',
+                                       selectInput(inputId = ns3('SignificativityCriteria'),
                                                    label = 'Significativity criteria:',
                                                    choices = c('pval', 'FDR')),
                                        conditionalPanel(
-                                         condition = "input.significativityCriteriaRidgeDEG == 'pval'",
-                                         sliderInput("pvalRangeRidgeDEG",
+                                         condition = "input.SignificativityCriteria=='pval'",
+                                         sliderInput(ns3("PvalRange"),
                                                      "P-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
-                                                     step = 0.005)),
+                                                     step = 0.005), ns = ns3),
                                        conditionalPanel(
-                                         condition = "input.significativityCriteriaRidgeDEG == 'FDR'",
-                                         sliderInput("fdrRangeRidgeDEG",
+                                         condition = "input.SignificativityCriteria=='FDR'",
+                                         sliderInput(ns3("FdrRange"),
                                                      "FDR-Value Range:",
                                                      min = 0,
                                                      max = 1,
                                                      value = c(0, 0.05),
-                                                     step = 0.005))
+                                                     step = 0.005), ns = ns3)
                                      ),
                                      mainPanel(
-                                       plotOutput("ridgelinePlotDEG"),
+                                       plotOutput(ns3("plotly")),
                                        tags$div(
                                          style = 'overflow-x: auto;',
-                                         dataTableOutput('ridgelineTableDEG'),
-                                         downloadButton("download_csv_ridge_deg", "Download CSV")
+                                         dataTableOutput(ns3('table')),
+                                         downloadButton(ns3("download_csv"), "Download CSV")
                                        )
                                      )
                                    ))
@@ -753,6 +767,7 @@
 #' @import shiny
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
 
+ns <- NS("heat_deg")
 .gint_subItem_HeatmapDEGs <- function(data_table){
   tabItem(tabName = "heatmapDEGs",
           fluidRow(
@@ -762,79 +777,79 @@
 
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId = 'integrationSelectHeatmapDEG',
+                  selectInput(inputId = ns('IntegrationSelect'),
                               label = 'Integration Type:',
                               choices = .change_int_names(intersect(c("gene_genomic_res", "gene_met_res",
                                                     "gene_cnv_res", "mirna_cnv_res"),
                                                   unique(data_table$omics)))),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmapDEG == 'gene_genomic_res'",
-                    sliderInput("numTopGenesHeatmapCNVDEG",
+                    condition = "input.IntegrationSelect=='gene_genomic_res'",
+                    sliderInput(ns("numTopGenesHeatmapCNV"),
                                 "Number of top genes (CNV):",
                                 value = 10,
                                 min = 1,
                                 max = 200,
                                 step = 10),
-                    sliderInput("numTopGenesHeatmapMETDEG",
+                    sliderInput(ns("numTopGenesHeatmapMET"),
                                 "Number of top genes (MET):",
                                 value = 10,
                                 min = 1,
                                 max = 200,
-                                step = 10)),
+                                step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmapDEG == 'cnv_gene_res'",
-                    sliderInput("numTopGenesHeatmapCNVonlyDEG",
+                    condition = "input.IntegrationSelect=='cnv_gene_res'",
+                    sliderInput(ns("numTopGenesHeatmapCNVonly"),
                                 "Number of top genes:",
                                 value = 10,
                                 min = 1,
                                 max = 200,
-                                step = 10)),
+                                step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmapDEG == 'met_gene_res'",
-                    sliderInput("numTopGenesHeatmapMETonlyDEG",
+                    condition = "input.IntegrationSelect=='met_gene_res'",
+                    sliderInput(ns("numTopGenesHeatmapMETonly"),
                                 "Number of top genes:",
                                 value = 10,
                                 min = 1,
                                 max = 200,
-                                step = 10)),
+                                step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.integrationSelectHeatmapDEG == 'mirna_cnv_res'",
-                    sliderInput("numTopGenesHeatmapmirna_cnvDEG",
+                    condition = "input.IntegrationSelect=='mirna_cnv_res'",
+                    sliderInput(ns("numTopGenesHeatmapmirna_cnv"),
                                 "Number of top genes:",
                                 value = 10,
                                 min = 1,
                                 max = 200,
-                                step = 10)),
-                  selectInput("classSelectHeatmapDEG",
+                                step = 10), ns = ns),
+                  selectInput(ns('ClassSelect'),
                               "Select the class:",
                               choices = unique(data_table$class),
                               multiple = FALSE),
-                  selectInput(inputId = 'significativityCriteriaHeatmapDEG',
+                  selectInput(inputId = ns('SignificativityCriteria'),
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
                   conditionalPanel(
-                    condition = "input.significativityCriteriaHeatmapDEG == 'pval'",
-                    sliderInput("pvalRangeHeatmapDEG",
+                    condition = "input.SignificativityCriteria=='pval'",
+                    sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
                                 min = 0.01,
                                 max = 1,
                                 value = 0.05,
-                                step = 0.005)),
+                                step = 0.005), ns = ns),
                   conditionalPanel(
-                    condition = "input.significativityCriteriaHeatmapDEG == 'FDR'",
-                    sliderInput("FDRRangeHeatmapDEG",
+                    condition = "input.SignificativityCriteria=='FDR'",
+                    sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
                                 min = 0.01,
                                 max = 1,
                                 value = 0.05,
-                                step = 0.005)),
-                  radioButtons("scaleHeatmapDEG",
+                                step = 0.005), ns = ns),
+                  radioButtons(ns("scaleHeatmap"),
                                "scale by:",
                                choices = c("row", "col", "none"))
 
                 ),
                 mainPanel(
-                  InteractiveComplexHeatmapOutput('heatmapDEG')
+                  InteractiveComplexHeatmapOutput(ns('heatmap'))
                 )
 
               )
@@ -867,7 +882,7 @@
                     condition = "input.IntegrationSelect=='gene_genomic_res'",
                     selectInput(inputId = ns("genomicTypeSelect"),
                                 label = "Type Selection",
-                                choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))), ns = "histo_deg"),
+                                choices = intersect(unique(data_table$cnv_met), c("met", "cnv"))), ns = ns),
                   selectInput(inputId = ns('ClassSelect'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
@@ -884,7 +899,7 @@
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.005), ns = "histo_deg"),
+                                step = 0.005), ns = ns),
                   conditionalPanel(
                     condition = "input.SignificativityCriteria=='FDR'",
                     sliderInput(ns("FdrRange"),
@@ -892,7 +907,7 @@
                                 min = 0,
                                 max = 1,
                                 value = c(0, 0.05),
-                                step = 0.005), ns = "histo_deg")
+                                step = 0.005), ns = ns)
                 ),
                 mainPanel(
                   plotlyOutput(ns("plotly")),
@@ -917,6 +932,7 @@
 #' @importFrom visNetwork visNetworkOutput
 
 .gint_subItem_networkDEGs <- function(data_table){
+  ns <- NS("network_deg")
   tabItem(tabName = "networkDEGs",
           fluidRow(
             mainPanel(
@@ -924,44 +940,44 @@
                 div(
                   style = "width: 1600px;",
                 inputPanel(
-              selectInput("classSelectNetworkDEG",
+              selectInput(ns('ClassSelect'),
                               label = "Select the Class:",
                               choices = unique(data_table$class)),
-              selectInput(inputId = 'significativityCriteriaNetworkDEG',
+              selectInput(inputId = ns('SignificativityCriteria'),
                           label = 'Significativity criteria:',
                           choices = c('pval', 'FDR')),
-              sliderInput("numInteractionsDEG",
+              sliderInput(ns("numInteractions"),
                           label = "Number of Interactions",
                           min = 10,
                           max = nrow(data_table),
                           value = 200,
                           step = 50),
               conditionalPanel(
-                condition = "input.significativityCriteriaNetworkDEG == 'pval'",
-                sliderInput("pvalNetworkDEG",
+                condition = "input.SignificativityCriteria=='pval'",
+                sliderInput(ns("PvalRange"),
                             "P-Value:",
                             min = 0,
                             max = 1,
                             value = c(0.05),
-                            step = 0.005)),
+                            step = 0.005), ns = ns),
               conditionalPanel(
-                condition = "input.significativityCriteriaNetworkDEG == 'FDR'",
-                sliderInput("fdrNetworkDEG",
+                condition = "input.SignificativityCriteria=='FDR'",
+                sliderInput(ns("FdrRange"),
                             "FDR:",
                             min = 0,
                             max = 1,
                             value = c(0.05),
-                            step = 0.005)),
-              checkboxInput("layoutNetworkDEG",
+                            step = 0.005), ns = ns),
+              checkboxInput(ns("layout"),
                             label = "Switch to tree Layout:",
                             value = FALSE),
-              checkboxInput("physicsDEG",
+              checkboxInput(ns("physics"),
                             label = "Physics",
                             value = FALSE)
               )
                 ),
               mainPanel(
-              visNetworkOutput("networkPlotDEG",
+              visNetworkOutput(ns("networkPlot"),
                                height = 800,
                                width = 1600)
               )
@@ -978,32 +994,32 @@
 #' @importFrom shiny.gosling goslingOutput
 
 .gint_subItem_circosCompleteInt <- function(data_table){
-  # tabItem(tabName = "page_circos",
-  #         fluidRow(
-  #           box(title = "Subsection 1",
-  #               "This is the content of Subsection 1."),
-  #           mainPanel(
-  #               do.call("tabsetPanel", lapply(as.list(unique(data_table$omics)), function(x) tabPanel(x, goslingOutput(paste0("circos_",x)))))
-  #       )          ## USARE uiOutput("gosling_plot_circos_ui")
-  #     )
-  # )
+  ns <- NS("circos")
   chr <- unique(data_table$chr_response)
   chr <- c("All", paste0("chr", mixedsort(chr[!is.na(chr)])))
-  tabItem(tabName = "circosIntegration",fluidPage(use_gosling(),
-                                                  sidebarLayout(
-                                                    sidebarPanel(
-                                                      selectInput(inputId = "circosClass",choices = unique(data_table$class), label = "Class"),
-                                                      selectInput(inputId = "circosType",choices = c("Gene", "miRNA"), label = "Gene/miRNA"),
-                                                      selectInput(inputId = "circosChr",choices = chr, label = "Chromosome"),
-                                                      actionButton("circosDownload_png","PNG",icon = icon("cloud-arrow-down")),
-                                                      actionButton("circosDownload_pdf","PDF",icon = icon("cloud-arrow-down")),
-                                                      selectInput(inputId = "circosLayout",choices = c("circular", "linear"), label = "Layout"), width = 3),
-                                                    mainPanel(column(12,goslingOutput('gosling_plot_circos'),
-                                                                     div(style="height: 200px;")))),
-                                                  tags$head(tags$style(
-                                                    HTML('.container-fluid {background-color: #ffffff;}')
-                                                  )
-                                                  )))
+  tabItem(tabName = "circosIntegration",
+          fluidPage(use_gosling(),
+                    sidebarLayout(
+                      sidebarPanel(
+                        selectInput(inputId = ns('ClassSelect'),
+                                    choices = unique(data_table$class),
+                                    label = "Class"),
+                        selectInput(inputId = ns("circosType"),
+                                    choices = c("Gene", "miRNA"),
+                                    label = "Gene/miRNA"),
+                        selectInput(inputId = ns('ChrSelect'),
+                                    choices = chr,
+                                    label = "Chromosome"),
+                        actionButton(ns("Download_png"),"PNG",
+                                     icon = icon("cloud-arrow-down")),
+                        actionButton(ns("Download_pdf"),"PDF",
+                                     icon = icon("cloud-arrow-down")),
+                        selectInput(inputId = ns("layout"),
+                                    choices = c("circular", "linear"),
+                                    label = "Layout"), width = 3),
+                      mainPanel(column(12,goslingOutput(ns('gosling_plot')),
+                                       div(style="height: 200px;"))))
+                    ))
 
 
 
@@ -1015,6 +1031,7 @@
 #' @importFrom DT dataTableOutput
 
 .gint_subItem_tableCompleteInt <- function(data_table){
+  ns <- NS("complete_table")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
   tabItem(tabName = "fullTable",
           fluidRow(
@@ -1023,43 +1040,43 @@
             mainPanel(
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId = 'integrationSelectTable',
+                  selectInput(inputId = ns('IntegrationSelect'),
                               label = 'Integration Type:',
                               choices = .change_int_names(unique(data_table$omics))),
-                  selectInput(inputId = 'classSelectTable',
+                  selectInput(inputId = ns('ClassSelect'),
                               label = 'Class:',
                               choices = unique(data_table$class)),
-                  selectInput(inputId = 'chrSelectTable',
+                  selectInput(inputId = ns('ChrSelect'),
                               label = 'Chr:',
                               choices = chr),
-                  selectInput(inputId = 'degSelectTable',
+                  selectInput(inputId = ns('degSelect'),
                               label = 'DEGs:',
                               choices = c('All', 'Only DEGs')),
-                  selectInput(inputId = 'significativityCriteriaTable',
+                  selectInput(inputId = ns('SignificativityCriteria'),
                               label = 'Significativity criteria:',
                               choices = c('pval', 'FDR')),
                   conditionalPanel(
-                    condition = "input.significativityCriteriaTable == 'pval'",
-                    sliderInput("pvalRangeTable",
+                    condition = "input.SignificativityCriteria=='pval'",
+                    sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
                                 min = 0.001,
                                 max = 1,
                                 value = c(0.001, 0.05),
-                                step = 0.005)),
+                                step = 0.005), ns = ns),
                   conditionalPanel(
-                    condition = "input.significativityCriteriaTable == 'FDR'",
-                    sliderInput("FDRRangeTable",
+                    condition = "input.SignificativityCriteria=='FDR'",
+                    sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
                                 min = 0.001,
                                 max = 1,
                                 value = c(0.001, 0.05),
-                                step = 0.005))
+                                step = 0.005), ns = ns)
                 ),
                 mainPanel(
                   tags$div(
                     style = 'overflow-x: auto;',
-                    dataTableOutput('res_table'),
-                    downloadButton("download_csv_table", "Download CSV")
+                    dataTableOutput(ns('table')),
+                    downloadButton(ns("download_csv"), "Download CSV")
                   )
                 )
               )
