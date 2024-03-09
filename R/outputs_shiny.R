@@ -142,9 +142,12 @@
 .render_venn <- function(reactive_venn){
   renderPlotly({
     venn_data <- reactive_venn()
+    if(!is.null(venn_data)){
     venn_diagram <- .build_venn(venn_data)
     venn_diagram <- ggplotly(venn_diagram)
-    return(venn_diagram)
+    return(venn_diagram)}else{
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+    }
   })
 }
 
@@ -206,9 +209,11 @@
 .render_volcano <- function(reactive_volcano, annotations){
   renderPlotly({
     volcano_data <- reactive_volcano()
+    if(!is.null(volcano_data)){
     volcano_plot <- .build_volcano(volcano_data)
-
-    return(volcano_plot)
+    return(volcano_plot)}else{
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+    }
   })
 }
 
@@ -242,20 +247,22 @@
 ############################################################################
 #' @importFrom shiny renderPlot
 
-.render_ridge <- function(reactive_ridge){
-  if(!is.null(reactive_ridge)){
+.render_ridge <- function(reactive_ridge) {
   renderPlot({
     tmp <- reactive_ridge()
-    ridge_data <- tmp$df
-    quantiles <- tmp$quantiles
-    ridge_plot <- .build_ridge(ridge_data = ridge_data,
-                               quantiles = quantiles)
-    return(ridge_plot)
+    if (!is.null(tmp)) {
+      ridge_data <- tmp$df
+      quantiles <- tmp$quantiles
+      ridge_plot <- .build_ridge(ridge_data = ridge_data,
+                                 quantiles = quantiles)
+      return(ridge_plot)
+    } else {
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+    }
   })
-  }else{
-    textOutput("no")
-  }
 }
+
+
 
 ############################################################################
 ############################################################################
@@ -278,8 +285,11 @@
 .render_histo <- function(reactive_histo){
   renderPlotly({
     histo_data <- reactive_histo()
+    if(!is.null(histo_data)){
     histo_plot <- ggplotly(.build_histo(histo_data = histo_data))
-    return(histo_plot)
+    return(histo_plot)}else{
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+    }
   })
 }
 
@@ -290,8 +300,11 @@
 .render_histo_table <- function(reactive_histo_table){
   renderDataTable({
     table_data <- reactive_histo_table()
+    if(!is.null(table_data)){
     ttable <- .build_table(table_data)
-    return(ttable)
+    return(ttable)}else{
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+    }
   })
 }
 
@@ -300,6 +313,7 @@
 #' @importFrom plotly plot_ly
 
 .build_histo_TFbyChr <- function(histo_data){
+  if(nrow(histo_data)==0) return(NULL)
   plot_ly(histo_data,
           x = ~reorder(TF, -Count), y = ~Count, type = 'bar', color = ~Chromosome) %>%
     layout(title = "Number of genes targeted by TFs/miRNAs",
@@ -314,9 +328,11 @@
 .render_histo_TF <- function(reactive_histo){
   renderPlotly({
     histo_data <- reactive_histo()
+    if(!is.null(histo_data)){
     histo_plot <- .build_histo_TFbyChr(histo_data=histo_data)
-
-    return(histo_plot)
+    return(histo_plot)}else{
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+    }
   })
 }
 
@@ -325,8 +341,11 @@
 .render_histo_tf_table <- function(reactive_histo_tf_table){
   renderDataTable({
     table_data <- reactive_histo_tf_table()
+    if(!is.null(table_data)){
     ttable <- .build_table(table_data)
-    return(ttable)
+    return(ttable)}else{
+      return(NULL)
+    }
   })
 }
 ############################################################################
@@ -336,8 +355,11 @@
 .render_ridge_table <- function(reactive_ridge_table){
   renderDataTable({
     table_data <- reactive_ridge_table()
+    if(!is.null(table_data)){
     ttable <- .build_table(table_data)
-    return(ttable)
+    return(ttable)}else{
+      return(NULL)
+    }
   })
 }
 ############################################################################
@@ -355,8 +377,11 @@
 .render_table <- function(reactive_table){
   renderDataTable({
     table_data <- reactive_table()
+    if(!is.null(table_data)){
     ttable <- .build_table(table_data)
-    return(ttable)
+    return(ttable)}else{
+      return(NULL)
+    }
   })
 }
 ############################################################################
@@ -968,13 +993,13 @@ return(ccol)
                                  scale){
 
   tmp <-  data.frame(cnv=data_table$coef[
-    data_table$omics == 'cnv'],
+    data_table$omics == 'gene_cnv_res'],
     pval_cnv=data_table$pval[
-      data_table$omics == 'cnv'],
+      data_table$omics == 'gene_cnv_res'],
     fdr_cnv=data_table$fdr[
-      data_table$omics == 'cnv'],
+      data_table$omics == 'gene_cnv_res'],
     row.names = data_table$response[
-      data_table$omics == 'cnv'])
+      data_table$omics == 'gene_cnv_res'])
   tmp2 <- unique(rownames(tmp))
   data_table <- cbind(cnv=tmp[tmp2,])
   colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
@@ -987,13 +1012,15 @@ return(ccol)
   }
   if (nrow(df_heatmap_t) == 0){
     return(NULL)}
+  df_heatmap_t <- as.data.frame(df_heatmap_t)
   top_cnv <- df_heatmap_t %>%
     arrange(desc(abs(cnv))) %>%
     head(numTopCNVonly)
   expr_top <- top_cnv
+  expr_top_subset <- expr_top[, -c((ncol(expr_top) - 2):ncol(expr_top))]
   set.seed(123)
   row_ha <- rowAnnotation(coef_cnv=expr_top$cnv)
-  expr_top_subset <- as.matrix(expr_top)
+  expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
   if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
@@ -1019,13 +1046,13 @@ return(ccol)
                                  scale){
 
   tmp <-  data.frame(met=data_table$coef[
-    data_table$omics == 'met'],
+    data_table$omics == 'gene_met_res'],
     pval_met=data_table$pval[
-      data_table$omics == 'met'],
+      data_table$omics == 'gene_met_res'],
     fdr_met=data_table$fdr[
-      data_table$omics == 'met'],
+      data_table$omics == 'gene_met_res'],
     row.names = data_table$response[
-      data_table$omics == 'met'])
+      data_table$omics == 'gene_met_res'])
   tmp2 <- unique(rownames(tmp))
   data_table <- cbind(met=tmp[tmp2,])
   colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
@@ -1038,13 +1065,15 @@ return(ccol)
   }
   if (nrow(df_heatmap_t) == 0){
     return(NULL)}
+  df_heatmap_t <- as.data.frame(df_heatmap_t)
   top_met <- df_heatmap_t %>%
     arrange(desc(abs(met))) %>%
     head(numTopMETonly)
   expr_top <- top_met
+  expr_top_subset <- expr_top[, -c((ncol(expr_top) - 2):ncol(expr_top))]
   set.seed(123)
   row_ha <- rowAnnotation(coef_met=expr_top$met)
-  expr_top_subset <- as.matrix(expr_top)
+  expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
   if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)

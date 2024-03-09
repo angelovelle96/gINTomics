@@ -177,6 +177,7 @@
     if(integrationSelect == "gene_genomic_res"){
       data_table <- data_table[data_table$cnv_met == typeSelect,]
     }
+    if(nrow(data_table)==0) return(NULL)
     if(significativityCriteria == 'pval'){
       data_table["group"] <- "Not Significant"
       data_table[data_table$pval <= pvalRange, 'group'] <- "Significant"
@@ -239,6 +240,7 @@
         integrationSelect]]$data$response_var
       data_table <- data_table[data_table$omics == integrationSelect,]
     }
+    if(is.null(df_heatmap)) return(NULL)
     if(!"class"%in%colnames(data_table) & deg == TRUE) return(NULL)
     df_heatmap_t <- t(as.matrix(df_heatmap))
     if (integrationSelect == "gene_genomic_res"){
@@ -434,6 +436,7 @@
     if('class' %in% colnames(data_table)){
       data_table <- data_table[data_table$class == classSelect,]
     }
+    if(nrow(data_table)==0) return(NULL)
     if(deg) data_table <- data_table[data_table$deg,]
     if(significativityCriteria == "pval"){
       data_table <- data_table[data_table$pval <= pvalRange,]
@@ -455,7 +458,6 @@
                  input$PvalRange,
                  input$FdrRange)
 }
-
 
 #######################################################################
 ########################################################################

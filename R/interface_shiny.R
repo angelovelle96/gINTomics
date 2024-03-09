@@ -100,9 +100,7 @@
                                      sidebarPanel(
                                        selectInput(ns2('IntegrationSelect'),
                                                    label = "Gene/miRNA:",
-                                                   choices = .change_int_names(
-                                                     intersect(unique(data_table$omics),
-                                                               c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
+                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "gene_cnv_res", "gene_met_res", "mirna_cnv_res")))),
                                        conditionalPanel(
                                          condition = "input.IntegrationSelect=='gene_genomic_res'",
                                          selectInput(inputId = ns2("genomicTypeSelect"),
@@ -140,9 +138,7 @@
                                                    choices = unique(data_table$class)),
                                        selectInput(ns3('IntegrationSelect'),
                                                    label = "Gene/miRNA:",
-                                                   choices = .change_int_names(
-                                                     intersect(unique(data_table$omics),
-                                                               c("gene_genomic_res", "cnv_gene_res", "met_gene_res", "mirna_cnv_res")))),
+                                                   choices = .change_int_names(intersect(unique(data_table$omics), c("gene_genomic_res", "gene_cnv_res", "gene_met_res", "mirna_cnv_res")))),
                                        conditionalPanel(
                                          condition = "input.IntegrationSelect=='gene_genomic_res'",
 
@@ -220,7 +216,7 @@
                                 max = 200,
                                 step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.IntegrationSelect=='cnv_gene_res'",
+                    condition = "input.IntegrationSelect=='gene_cnv_res'",
                     sliderInput(ns("numTopGenesHeatmapCNVonly"),
                                 "Number of top genes:",
                                 value = 10,
@@ -228,7 +224,7 @@
                                 max = 200,
                                 step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.IntegrationSelect=='met_gene_res'",
+                    condition = "input.IntegrationSelect=='gene_met_res'",
                     sliderInput(ns("numTopGenesHeatmapMETonly"),
                                 "Number of top genes:",
                                 value = 10,
@@ -797,7 +793,7 @@ ns <- NS("heat_deg")
                                 max = 200,
                                 step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.IntegrationSelect=='cnv_gene_res'",
+                    condition = "input.IntegrationSelect=='gene_cnv_res'",
                     sliderInput(ns("numTopGenesHeatmapCNVonly"),
                                 "Number of top genes:",
                                 value = 10,
@@ -805,7 +801,7 @@ ns <- NS("heat_deg")
                                 max = 200,
                                 step = 10), ns = ns),
                   conditionalPanel(
-                    condition = "input.IntegrationSelect=='met_gene_res'",
+                    condition = "input.IntegrationSelect=='gene_met_res'",
                     sliderInput(ns("numTopGenesHeatmapMETonly"),
                                 "Number of top genes:",
                                 value = 10,
