@@ -1,3 +1,5 @@
+#' Prepare network data for visualization
+#'
 .prepare_network <- function(data_table){
   tmp <- intersect(c('cov', 'response', 'pval', 'fdr', 'coef', 'class', 'omics'), colnames(data_table))
   all <- subset(data_table, omics %in% c('tf_res',
@@ -79,15 +81,10 @@
               legend_nodes=legend_nodes))
 }
 
-#########################################################################
-#########################################################################
-#' @importFrom visNetwork visNetwork
-#' @importFrom visNetwork visGroups
-#' @importFrom visNetwork visLegend
-#' @importFrom visNetwork visEdges
-#' @importFrom visNetwork visOptions
-#' @importFrom visNetwork visLayout
 
+#' Prepare network for visualization
+#' @importFrom visNetwork visNetwork visGroups visLegend visEdges visOptions
+#'   visLayout visExport
 .build_network <- function(nodes,
                            edges,
                            legend_nodes,
@@ -121,11 +118,10 @@
               float = "left", label = "Save network")
 }
 
-#########################################################################
-#########################################################################
+
+#' Build a Venn diagram
 #' @importFrom ggvenn ggvenn
 #' @importFrom RColorBrewer brewer.pal
-
 .build_venn <- function(venn_data){
   cnv_sign_genes <- venn_data$cnv_sign_genes
   met_sign_genes <- venn_data$met_sign_genes
@@ -135,10 +131,10 @@
   venn_diagram <- ggvenn(list_venn, fill_color = ccol)
   return(venn_diagram)
 }
-#########################################################################
-#########################################################################
-#' @importFrom plotly ggplotly
 
+#' Render a Venn diagram
+#' @importFrom plotly ggplotly renderPlotly
+#'
 .render_venn <- function(reactive_venn){
   renderPlotly({
     venn_data <- reactive_venn()
@@ -146,14 +142,15 @@
     venn_diagram <- .build_venn(venn_data)
     venn_diagram <- ggplotly(venn_diagram)
     return(venn_diagram)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
+           main = "No data available")
     }
   })
 }
 
-##########################################################################
-##########################################################################
-
+#' Render Venn diagram as a table
+#' @importFrom DT renderDataTable
+#'
 .render_venn_table <- function(reactive_venn) {
   renderDataTable({
     venn_data <- reactive_venn()
@@ -180,10 +177,9 @@
   })
 }
 
-############################################################################
-############################################################################
+#' Build a volcano plot
 #' @importFrom plotly plot_ly
-
+#'
 .build_volcano <- function(volcano_data){
   plot_ly(volcano_data,
           x = ~coef,
@@ -199,31 +195,30 @@
           textposition = 'top right') %>%
     layout(title = "Volcano Plot") %>%
     layout(width = 1000,
-           height = 700) #%>%
-  #add_text(data = volcano_data, text=~cov)
-
+           height = 700)
 }
-#######################################################################
-#######################################################################
 
+#' Render a volcano plot
+#' @importFrom plotly renderPlotly
+#'
 .render_volcano <- function(reactive_volcano, annotations){
   renderPlotly({
     volcano_data <- reactive_volcano()
     if(!is.null(volcano_data)){
     volcano_plot <- .build_volcano(volcano_data)
     return(volcano_plot)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
+           main = "No data available")
     }
   })
 }
 
-############################################################################
-############################################################################
-#' @importFrom ggplot2 ggplot
-
+#' Build a ridgeline plot
+#' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous
+#' @importFrom ggridges geom_density_ridges theme_ridges
+#'
 .build_ridge <- function(ridge_data,
                          quantiles){
-
   ggplot(ridge_data,
          aes(x = coef,
              y = significance,
@@ -243,10 +238,9 @@
     scale_x_continuous(limits = quantiles)
 }
 
-############################################################################
-############################################################################
+#' Render a ridgeline plot
 #' @importFrom shiny renderPlot
-
+#'
 .render_ridge <- function(reactive_ridge) {
   renderPlot({
     tmp <- reactive_ridge()
@@ -257,17 +251,15 @@
                                  quantiles = quantiles)
       return(ridge_plot)
     } else {
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
+           main = "No data available")
     }
   })
 }
 
-
-
-############################################################################
-############################################################################
-#' @importFrom ggplot2 ggplot
-
+#' Build a histogram
+#' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal
+#'
 .build_histo <- function(histo_data){
   ggplot(histo_data,
          aes(x = factor(chr_cov), fill = significance)) +
@@ -278,40 +270,39 @@
     theme_minimal()
 }
 
-############################################################################
-############################################################################
-#' @importFrom plotly ggplotly
-
+#' Render a histogram
+#' @importFrom plotly ggplotly renderPlotly
+#'
 .render_histo <- function(reactive_histo){
   renderPlotly({
     histo_data <- reactive_histo()
     if(!is.null(histo_data)){
     histo_plot <- ggplotly(.build_histo(histo_data = histo_data))
     return(histo_plot)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
+           main = "No data available")
     }
   })
 }
 
-############################################################################
-############################################################################
+#' Render histogram as a table
 #' @importFrom DT renderDataTable
-
+#'
 .render_histo_table <- function(reactive_histo_table){
   renderDataTable({
     table_data <- reactive_histo_table()
     if(!is.null(table_data)){
     ttable <- .build_table(table_data)
     return(ttable)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
+           main = "No data available")
     }
   })
 }
 
-############################################################################
-############################################################################
-#' @importFrom plotly plot_ly
-
+#' Build histogram for TFs/miRNAs by chromosome
+#' @importFrom plotly plot_ly layout
+#'
 .build_histo_TFbyChr <- function(histo_data){
   if(nrow(histo_data)==0) return(NULL)
   plot_ly(histo_data,
@@ -322,22 +313,24 @@
            barmode = 'group')
 }
 
-############################################################################
-############################################################################
-
+#' Render histogram for TFs/miRNAs
+#' @importFrom plotly renderPlotly
+#'
 .render_histo_TF <- function(reactive_histo){
   renderPlotly({
     histo_data <- reactive_histo()
     if(!is.null(histo_data)){
     histo_plot <- .build_histo_TFbyChr(histo_data=histo_data)
     return(histo_plot)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1), main = "No data available")
+      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
+           main = "No data available")
     }
   })
 }
 
+#' Render histogram for TFs/miRNAs as a table
 #' @importFrom DT renderDataTable
-
+#'
 .render_histo_tf_table <- function(reactive_histo_tf_table){
   renderDataTable({
     table_data <- reactive_histo_tf_table()
@@ -348,10 +341,10 @@
     }
   })
 }
-############################################################################
-############################################################################
-#' @importFrom DT renderDataTable
 
+#' Render a ridgeline plot as a table
+#' @importFrom DT renderDataTable
+#'
 .render_ridge_table <- function(reactive_ridge_table){
   renderDataTable({
     table_data <- reactive_ridge_table()
@@ -362,18 +355,18 @@
     }
   })
 }
-############################################################################
-############################################################################
-#' @importFrom DT datatable
 
+#' Build a table
+#' @importFrom DT datatable
+#'
 .build_table <- function(table_data){
   datatable(table_data,
             options = list(orderClasses = TRUE))
 }
-############################################################################
-############################################################################
-#' @importFrom DT renderDataTable
 
+#' Render a table
+#' @importFrom DT renderDataTable
+#'
 .render_table <- function(reactive_table){
   renderDataTable({
     table_data <- reactive_table()
@@ -384,10 +377,11 @@
     }
   })
 }
-############################################################################
-############################################################################
 
-download_csv <- function(tf=FALSE,
+#' Handle CSV file download
+#' @importFrom shiny downloadHandler
+#'
+.download_csv <- function(tf=FALSE,
                          deg = FALSE,
                          bg_enr = NULL,
                          plotType = "histo",
@@ -405,8 +399,7 @@ download_csv <- function(tf=FALSE,
         reactive_histo_table <- .prepare_reactive_histo_tf(deg=deg,
                                                           data_table=data_table,
                                                           input=input,
-                                                          output=output,
-                                                          table=TRUE)
+                                                          output=output)
         }else{
           reactive_histo_table <- .prepare_reactive_histo(deg=deg,
                                                           data_table=data_table,
@@ -489,18 +482,21 @@ download_csv <- function(tf=FALSE,
   }
   return(handler)
 }
-############################################################################
-############################################################################
-#' @importFrom shiny renderUI
 
+#' Render a Circos plot
+#' @importFrom shiny renderUI req
+#'
 .render_circos <- function(circos_reactive){
 
   renderUI({
     req(arranged_view_circos())
   })
 }
-##########################################################################
-##########################################################################
+
+#' Preprocess data for Circos plot
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
+#' @importFrom RColorBrewer brewer.pal
+#'
 .circos_preprocess <- function(data){
 
   library(GenomicRanges)
@@ -543,9 +539,9 @@ download_csv <- function(tf=FALSE,
 }
 
 
-############################################################################
-#############################################################################
+#' Generate color palette for Circos track
 #' @importFrom RColorBrewer brewer.pal
+#'
 .circos_track_cols <- function(vvalues,
                                n=50,
                                colors=NULL){
@@ -571,8 +567,14 @@ return(ccol)
 }
 
 
-############################################################################
-#############################################################################
+#' Create single track for Circos visualization
+#' @importFrom shiny.gosling add_single_track
+#' @importFrom shiny.gosling visual_channel_x
+#' @importFrom shiny.gosling visual_channel_y
+#' @importFrom shiny.gosling visual_channel_color
+#' @importFrom shiny.gosling visual_channel_tooltips
+#' @importFrom shiny.gosling visual_channel_tooltip
+#' @importFrom shiny.gosling track_data_gr
 .create_single_track <- function(data,
                                  dataValue=NULL,
                                  x_axis=NULL,
@@ -616,9 +618,11 @@ return(ccol)
       , title=title)
   )
 }
-#######################################################################
-########################################################################
 
+
+#' Create tracks for Circos visualization
+#'
+#'
 .create_tracks <- function(data, gr){
 
   tracks <- list()
@@ -669,9 +673,11 @@ return(ccol)
   tracks <- c(tracks,list(track_cyto=track_cyto))
   return(tracks)
 }
-#######################################################################
-########################################################################
 
+
+#' Create CNV track for Circos visualization
+#'
+#'
 .create_cnv_track <- function(gr){
 
   gr$cov_value2 <- as.character(gr$cov_value_original)
@@ -700,9 +706,11 @@ return(ccol)
                                     title="CNV")
   return(track_cnv)
 }
-#######################################################################
-########################################################################
 
+
+#' Create Met track for Circos visualization
+#'
+#'
 .create_met_track <- function(gr){
   gr$cov_value2 <- as.character(gr$cov_value_original)
   ccol <- .circos_track_cols(vvalues = gr$cov_value2)
@@ -731,9 +739,10 @@ return(ccol)
   return(track_met)
 
 }
-#######################################################################
-########################################################################
 
+#' Create Expression track for Circos visualization
+#'
+#'
 .create_expr_track <- function(gr, genomic=F){
   cnv_met <- ifelse(genomic, "cnv_met2", "cnv_met")
   track_expr <- .create_single_track(data=gr,
@@ -758,9 +767,10 @@ return(ccol)
                                      title="Expression")
   return(track_expr)
 }
-#######################################################################
-########################################################################
 
+#' Create Coefficient track for Circos visualization
+#'
+#'
 .create_coef_track <- function(gr){
   gr$coef2 <- as.character(gr$coef_original)
   ccol <- .circos_track_cols(vvalues = gr$coef2)
@@ -788,9 +798,10 @@ return(ccol)
                                      title="Coefficients")
   return(track_coef)
 }
-#######################################################################
-########################################################################
 
+#' Create Cytoband track for Circos visualization
+#'
+#'
 .create_cyto_track <- function(){
   track_cyto <- add_single_track(
     id = "track2",
@@ -837,9 +848,12 @@ return(ccol)
   )
   return(track_cyto)
 }
-#######################################################################
-########################################################################
 
+
+#' Create composed view for Circos visualization
+#' @importFrom shiny.gosling compose_view
+#' @importFrom shiny.gosling add_multi_tracks
+#'
 .create_composed_view <- function(tracks,width, height) {
 
   composed_views <- list()
@@ -913,11 +927,9 @@ return(ccol)
   return(composed_views)
 }
 
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
-
+#' Prepare Genomic Heatmap
+#' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#'
 .prepare_gen_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -977,13 +989,10 @@ return(ccol)
   ht <- draw(ht)
   return(ht)
 }
-######################################################################
-######################################################################
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
 
+#' Prepare CNV Heatmap
+#' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#'
 .prepare_cnv_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -1032,11 +1041,9 @@ return(ccol)
   return(ht)
 }
 
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
-
+#' Prepare Met Heatmap
+#' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#'
 .prepare_met_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -1085,11 +1092,9 @@ return(ccol)
   return(ht)
 }
 
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
-
+#' Prepare miRNA Heatmap
+#' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#'
 .prepare_mirna_heatmap <- function(data_table,
                                    df_heatmap,
                                    df_heatmap_t,
@@ -1138,21 +1143,60 @@ return(ccol)
   return(ht)
 }
 
-#######################################################################
-########################################################################
-
+#' Run function in background
+#' @importFrom callr r_bg
+#'
 .run_bg <- function(FFUN,
                     args,
                     input,
                     output){
-  ans <- callr::r_bg(func = FFUN,
-                     args = args,
-                     supervise = TRUE)
+  ans <- r_bg(func = FFUN,
+             args = args,
+             supervise = TRUE)
   return(ans)
 }
 
-############################################################################
-############################################################################
+
+#' Start a Shiny application for integrated multi-omics data analysis.
+#'
+#' The \code{run_shiny} function launches an interactive Shiny application that
+#' allows users to explore and analyze integrated multi-omics data through
+#' various visualizations and analyses.
+#'
+#' @param multiomics_integration An object representing the integration of
+#' multi-omics data, compatible with the \code{\link{extract_model_res}}
+#' function.
+#'
+#' @details The \code{run_shiny} function extracts model results from
+#' \code{multiomics_integration}, performs preprocessing operations to prepare
+#' the data for the Shiny user interface, creates the user interface and server
+#' for the Shiny application.
+#'
+#' @return No return value. The function starts an interactive Shiny
+#' application.
+#'
+#' @export
+#' @importFrom shiny NS callModule
+#'
+#' @examples
+#' # Example usage:
+#' # run_shiny(multiomics_integration)
+#'
+#' @seealso
+#' \code{\link{extract_model_res}}
+#'
+#' @references
+#' Description of the multi-omics data model and integrated analysis techniques
+#' used.
+#'
+#' @keywords shiny multiomics integration visualization analysis
+#' @family Shiny
+#' @family Data analysis
+#' @family Multi-omics
+#' @family Integration
+#' @family Visualization
+#' @family Interactive
+#' @family Function
 
 run_shiny <- function(multiomics_integration){
   data <- extract_model_res(multiomics_integration)

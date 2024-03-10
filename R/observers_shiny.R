@@ -1,7 +1,9 @@
+#' Render Reactive Network
 #' @importFrom visNetwork renderVisNetwork
 #' @importFrom visNetwork visHierarchicalLayout
-#' @importFrom visNetwork  visIgraphLayout
-
+#' @importFrom visNetwork visIgraphLayout
+#' @importFrom dplyr %>%
+#' @importFrom shiny observe bindEvent
 .render_reactive_network <- function(reactive_network,
                                      input,
                                      output){
@@ -25,9 +27,10 @@
                  input$physics)
 }
 
-################################################################
-#################################################################
-
+#' Select Network Data
+#' @importFrom shiny reactive bindEvent
+#' @importFrom dplyr %>%
+#'
 .select_network <- function(data_table,
                             network_data,
                             input,
@@ -70,8 +73,10 @@
                  input$ClassSelect)
 }
 
-################################################################
-#################################################################
+#' Prepare Reactive Venn
+#' @importFrom dplyr %>%
+#' @importFrom shiny reactive bindEvent
+#'
 .prepare_reactive_venn <- function(data_table,
                                    input,
                                    output,
@@ -158,9 +163,11 @@
                  input$FdrRange,
                  input$SignificativityCriteria)
 }
-#####################################################################
-######################################################################
 
+#' Prepare Reactive Volcano
+#' @importFrom dplyr %>%
+#' @importFrom shiny reactive bindEvent
+#'
 .prepare_reactive_volcano <- function(data_table,
                                       input,
                                       output,
@@ -194,13 +201,12 @@
                  input$PvalRange,
                  input$FdrRange)
 }
-#######################################################################
-#######################################################################
-#' @importFrom ComplexHeatmap Heatmap
-#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
-#' @importFrom ComplexHeatmap draw
-#' @importFrom ComplexHeatmap rowAnnotation
 
+#' Prepare Reactive Heatmap
+#' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
+#' @importFrom shiny observe bindEvent
+#' @importFrom dplyr %>%
+#'
 .prepare_reactive_heatmap <- function(data_table,
                                       multiomics_integration,
                                       input,
@@ -299,9 +305,11 @@
                  input[[ns("scaleHeatmap")]])
 }
 
-######################################################################
-######################################################################
-
+#' Prepare Reactive Ridge Plot
+#' @importFrom dplyr mutate_if
+#' @importFrom shiny reactive bindEvent
+#' @importFrom dplyr %>%
+#'
 .prepare_reactive_ridge <- function(data_table,
                                     input,
                                     output,
@@ -348,10 +356,12 @@
 }
 
 
-#######################################################################
-########################################################################
+#' Prepare Reactive Histogram
+#' @importFrom dplyr mutate_if
 #' @importFrom gtools mixedsort
-
+#' @importFrom shiny reactive bindEvent
+#' @importFrom dplyr %>%
+#'
 .prepare_reactive_histo <- function(data_table,
                                     input,
                                     output,
@@ -406,15 +416,15 @@
                  input$FdrRange)
 }
 
-#######################################################################
-########################################################################
+#' Prepare Reactive Histogram for TF
 #' @importFrom gtools mixedsort
-
+#' @importFrom shiny reactive bindEvent
+#' @importFrom dplyr %>%
+#'
 .prepare_reactive_histo_tf <- function(data_table,
                                        input,
                                        output,
-                                       deg = FALSE,
-                                       table=FALSE){
+                                       deg = FALSE){
   reactive({
     genes_count_df <- NULL
     integrationSelect <- input$IntegrationSelect
@@ -439,9 +449,11 @@
     if(nrow(data_table)==0) return(NULL)
     if(deg) data_table <- data_table[data_table$deg,]
     if(significativityCriteria == "pval"){
-      data_table <- data_table[data_table$pval <= pvalRange,]
+      data_table <- data_table[data_table$pval >= pvalRange[1] &
+                                 data_table$pval <= pvalRange[2],]
     }else{
-      data_table <- data_table[data_table$fdr <= fdrRange,]
+      data_table <- data_table[data_table$fdr >= fdrRange[1] &
+                                 data_table$fdr <= fdrRange[2],]
     }
     genes_count <- table(data_table$cov, data_table$chr_cov)
     genes_count_df <- as.data.frame.table(genes_count)
@@ -459,10 +471,11 @@
                  input$FdrRange)
 }
 
-#######################################################################
-########################################################################
+#' Prepare Reactive Table
 #' @importFrom gtools mixedsort
-
+#' @importFrom shiny reactive bindEvent
+#' @importFrom dplyr %>% mutate_if
+#'
 .prepare_reactive_table <- function(data_table,
                                     input,
                                     output){
@@ -502,9 +515,9 @@
 }
 
 
-#######################################################################
-########################################################################
-
+#' Check Reactive Background Enrichment
+#' @importFrom shiny invalidateLater reactive
+#'
 .check_reactive_bg_enrich <- function(bg_enrich,
                                       input,
                                       output,
@@ -519,10 +532,10 @@
     return(x)
   })
 }
-#######################################################################
-########################################################################
-#' @importFrom clusterProfiler dotplot
 
+#' Reactive Gene Enrichment
+#' @importFrom shiny reactive
+#'
 .reactive_gen_enrich <- function(bg_enrich,
                                  input,
                                  output,
@@ -549,10 +562,10 @@
     }
   })
 }
-#######################################################################
-########################################################################
-#' @importFrom plotly renderPlotly
 
+#' Reactive TF Enrichment
+#' @importFrom shiny reactive
+#'
 .reactive_tf_enrich <- function(bg_enrich,
                                 input,
                                 output,
@@ -579,10 +592,12 @@
     }
   })
 }
-#######################################################################
-########################################################################
-#' @importFrom shiny.gosling arrange_views
 
+#' Prepare Reactive Circos Plot
+#' @importFrom shiny.gosling arrange_views
+#' @importFrom shiny reactive bindEvent
+#' @importFrom dplyr %>%
+#'
 .prepare_reactive_circos <- function(data, input, output) {
   reactive({
     if("class"%in%colnames(data)) data <- data[data$class==input$ClassSelect,]
