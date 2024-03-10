@@ -15,7 +15,7 @@ reactive_histo_table <- .prepare_reactive_histo(data_table,
                                                 deg=FALSE,
                                                 table=TRUE)
 output$table <- .render_histo_table(reactive_histo_table)
-output$download_csv <- download_csv(deg=FALSE,
+output$download_csv <- .download_csv(deg=FALSE,
                                     plotType="histo",
                                     input=input,
                                     output=output,
@@ -41,7 +41,7 @@ output$download_csv <- download_csv(deg=FALSE,
                                                              deg=deg,
                                                              table=TRUE)
   output$table <- .render_histo_table(reactive_histo_table_transcript)
-  output$download_csv <- download_csv(deg=deg,
+  output$download_csv <- .download_csv(deg=deg,
                                       plotType="histo",
                                       input=input,
                                       output=output,
@@ -52,18 +52,13 @@ output$download_csv <- download_csv(deg=FALSE,
                                                              output = output,
                                                              deg = deg)
   output$plotly_tf <- .render_histo_TF(reactive_histo_tf_transcript)
-  reactive_tf_table <- .prepare_reactive_histo_tf(data_table,
-                                                 input=input,
-                                                 output=output,
-                                                 deg=deg,
-                                                 table=TRUE)
-  output$download_csv_tf <- download_csv(deg=deg,
+  output$download_csv_tf <- .download_csv(deg=deg,
                                          tf=TRUE,
                                          plotType="histo",
                                          input=input,
                                          output=output,
                                          data_table=data_table)
-  output$table_tf <- .render_histo_tf_table(reactive_tf_table)
+  output$table_tf <- .render_histo_tf_table(reactive_histo_tf_transcript)
 
 }
 
@@ -96,7 +91,7 @@ output$download_csv <- download_csv(deg=FALSE,
                                           deg = deg)
   output$plotly<- .render_venn(reactive_venn)
   output$table <- .render_venn_table(reactive_venn)
-  output$download_csv <- download_csv(deg = deg,
+  output$download_csv <- .download_csv(deg = deg,
                                      plotType = "venn",
                                      input=input,
                                      output=output,
@@ -135,7 +130,7 @@ output$download_csv <- download_csv(deg=FALSE,
                                                   deg = deg,
                                                   table=TRUE)
   output$table <- .render_ridge_table(reactive_ridge_table)
-  output$download_csv <- download_csv(deg = deg,
+  output$download_csv <- .download_csv(deg = deg,
                                       plotType = "ridge",
                                       input=input,
                                       output=output,
@@ -153,7 +148,7 @@ output$download_csv <- download_csv(deg=FALSE,
                                             input=input,
                                             output=output)
   output$table <- .render_table(reactive_table)
-  output$download_csv <- download_csv(plotType = "table",
+  output$download_csv <- .download_csv(plotType = "table",
                                       input=input,
                                       output=output,
                                       data_table=data_table)
@@ -203,7 +198,7 @@ output$download_csv <- download_csv(deg=FALSE,
           }
         }
       })
-      output$download_csv <- download_csv(plotType = "dotPlot",
+      output$download_csv <- .download_csv(plotType = "dotPlot",
                                           input=input,
                                           output=output,
                                           bg_enr=bg_enr)
@@ -244,7 +239,7 @@ output$download_csv <- download_csv(deg=FALSE,
                 }
             }
           })
-          output[[paste0(names(plots)[i], "_download_csv")]] <- download_csv(
+          output[[paste0(names(plots)[i], "_download_csv")]] <- .download_csv(
              plotType = "dotPlot",
              input=input,
              output=output,
