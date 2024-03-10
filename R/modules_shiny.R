@@ -276,25 +276,3 @@ output$download_csv <- .download_csv(deg=FALSE,
 
 }
 
-#
-#
-# ns('IntegrationSelect')
-# paste0("input.", ns("IntegrationSelect"),"=='gene_genomic_res'")
-# ns("genomicTypeSelect")
-# ns('ClassSelect')
-# ns('ChrSelect')
-# ns('SignificativityCriteria')
-# paste0("input.", ns("SignificativityCriteria"),"=='pval'")
-# ns("PvalRange")
-# paste0("input.", ns("SignificativityCriteria"),"=='FDR'")
-# ns("FdrRange")
-# ns("scaleHeatmap")
-# ns("numTopGenesHeatmapmirna_cnv")
-# ns("numTopGenesHeatmapMETonly")
-# ns("numTopGenesHeatmapCNVonly")
-# ns("numTopGenesHeatmapMET")
-# ns("numTopGenesHeatmapCNV")
-# ns('degSelect')
-# ns("circosType")
-# ns("Download_png")
-# ns("Download_pdf")

@@ -1,5 +1,7 @@
+#' Integration Dashboard Sidebar
 #' @import shiny
-
+#' @import shinydashboard
+#'
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
@@ -29,10 +31,10 @@
     tags$style(".left-side, .main-sidebar {padding-top: 80px}"))
 }
 
-#############################################################
-##############################################################
+#' Home Tab Item for gINTomics
 #' @import shiny
-
+#' @import shinydashboard
+#'
 .gint_tabitem_home <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
@@ -43,12 +45,12 @@
                                          height = 100, width = 100))))
 }
 
-###################################################################
-####################################################################
+#' Coefficients Distribution Subitem for Genomic Integration
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-
+#'
 .gint_subItem_coefDistribGenomic <- function(data_table){
   ns <- NS("venn_gen")
   ns2 <- NS("volcano_gen")
@@ -180,12 +182,13 @@
   )
 }
 
-####################################################
-#####################################################
+#' Heatmap Subitem for Genomic Integration
 #' @import shiny
+#' @import shinydashboard
+#' @importFrom DT dataTableOutput
 #' @importFrom plotly plotlyOutput
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
-
+#'
 .gint_subItem_HeatmapGenomic  <- function(data_table){
   ns <- NS("heat_gen")
   tabItem(tabName = "heatmapGenomic",
@@ -277,13 +280,13 @@
           )
   )
 }
-##########################################################
-###########################################################
+#' Chr Distribution Subitem for Genomic Integration
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-
+#'
 .gint_subItem_chrDistribGenomic <- function(data_table){
   ns <- NS("histo_gen")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -343,11 +346,12 @@
   )
 }
 
-#############################################################
-##############################################################
+#' Enrichment Tab Item for Genomic Integration
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom plotly plotlyOutput
-
+#' @importFrom DT dataTableOutput
+#'
 .gint_tabitem_enr <- function(data_table){
   ns <- NS("enrich_gen")
   tabItem(tabName = "enrichGenomic",
@@ -380,10 +384,10 @@
           ))
 }
 
-##################################################################
-###################################################################
+#' Enrichment Subitem for Transcription Integration
 #' @import shiny
-
+#' @import shinydashboard
+#'
 .gint_subItem_enrichTranscript <- function(data_table){
   ns <- NS("enrich_tf")
   tabItem(tabName = "enrichTranscript",
@@ -409,9 +413,9 @@
           ))
 }
 
-##################################################################
-###################################################################
+#' Coefficients Distribution Subitem for Transcription Integration
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
 
@@ -498,13 +502,14 @@
           )
   )
 }
-################################################################
-#################################################################
+
+#' Chr Distribution Subitem for Transcription Integration
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-
+#'
 .gint_subItem_chrDistribTranscript <- function(data_table){
   ns <- NS("histo_trans")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -564,9 +569,10 @@
           )
   )
 }
-########################################################################
-#########################################################################
+
+#' Network Subitem for Transcription Integration
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom visNetwork visNetworkOutput
 
 .gint_subItem_networkTranscript <- function(data_table){
@@ -626,8 +632,9 @@
   )
 }
 
-
+#' Coefficients Distribution Subitem for Class Comparison
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
 
@@ -758,13 +765,13 @@
   )
 }
 
-##################################################################
-###################################################################
-#' @import shiny
+#' Heatmap Subitem for class comparison
+##' @import shiny
+#' @import shinydashboard
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
-
-ns <- NS("heat_deg")
+#'
 .gint_subItem_HeatmapDEGs <- function(data_table){
+  ns <- NS("heat_deg")
   tabItem(tabName = "heatmapDEGs",
           fluidRow(
             box(title = "Subsection 1",
@@ -854,13 +861,13 @@ ns <- NS("heat_deg")
   )
 }
 
-#############################################################
-##############################################################
+#' Chromosome Distribution Subitem for class comparison
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-
+#'
 .gint_subItem_chrDistribDEGs <- function(data_table){
   ns <- NS("histo_deg")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -922,9 +929,10 @@ ns <- NS("heat_deg")
           )
   )
 }
-#############################################################
-##############################################################
+
+#' Network Subitem for class comparison
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom visNetwork visNetworkOutput
 
 .gint_subItem_networkDEGs <- function(data_table){
@@ -983,12 +991,12 @@ ns <- NS("heat_deg")
   )
 }
 
-#############################################################
-##############################################################
+#' Circos Subitem for Complete Integration
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom gtools mixedsort
 #' @importFrom shiny.gosling goslingOutput
-
+#'
 .gint_subItem_circosCompleteInt <- function(data_table){
   ns <- NS("circos")
   chr <- unique(data_table$chr_response)
@@ -1021,11 +1029,11 @@ ns <- NS("heat_deg")
 
 }
 
-################################################################
-#################################################################
+#' Table Subitem with all integrations
 #' @import shiny
+#' @import shinydashboard
 #' @importFrom DT dataTableOutput
-
+#'
 .gint_subItem_tableCompleteInt <- function(data_table){
   ns <- NS("complete_table")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -1081,10 +1089,10 @@ ns <- NS("heat_deg")
   )
 }
 
-#############################################################
-##############################################################
+#' Cretae user interface
 #' @import shiny
-
+#' @import shinydashboard
+#'
 .create_ui <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics3.png"
   addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")

@@ -4,13 +4,7 @@
 \alias{.prepare_reactive_histo_tf}
 \title{Prepare Reactive Histogram for TF}
 \usage{
-.prepare_reactive_histo_tf(
-  data_table,
-  input,
-  output,
-  deg = FALSE,
-  table = FALSE
-)
+.prepare_reactive_histo_tf(data_table, input, output, deg = FALSE)
 }
 \description{
 Prepare Reactive Histogram for TF
