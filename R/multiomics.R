@@ -80,24 +80,26 @@ run_multiomics <- function(data,
         class=class,
         run_deg=deg_gene,
         BPPARAM=BPPARAM)
-      if(!is.null(class)){
-        tmp <- lapply(gene_genomic_res, function(x)
-          as.data.frame(t(x$residuals)))
-        tmp2 <- rbind.fill(tmp)
-        rownames(tmp2) <- unlist(lapply(tmp, rownames))
-        rresiduals <- t(tmp2)
-      }else{
-        rresiduals <- gene_genomic_res$residuals
+      if(!is.null(gene_genomic_res)){
+          if(!is.null(class)){
+            tmp <- lapply(gene_genomic_res, function(x)
+              as.data.frame(t(x$residuals)))
+            tmp2 <- rbind.fill(tmp)
+            rownames(tmp2) <- unlist(lapply(tmp, rownames))
+            if(!is.null(tmp2)) rresiduals <- t(tmp2)
+          }else{
+            rresiduals <- gene_genomic_res$residuals
+          }
+          data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
+            rownames(rresiduals),]
+          assay(data@ExperimentList$gene_exp) <- as.matrix(rresiduals[,
+            colnames(assay(data@ExperimentList$gene_exp))])
+          RNAseq <- F
+          normalize_gene_expr2 <- F
+          geno <- T
+          deg_gene <- F
+        }
       }
-      data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
-        rownames(rresiduals),]
-      assay(data@ExperimentList$gene_exp) <- as.matrix(rresiduals[,
-        colnames(assay(data@ExperimentList$gene_exp))])
-      RNAseq <- F
-      normalize_gene_expr2 <- F
-      geno <- T
-      deg_gene <- F
-    }
 
 
     gene_cnv_res <- NULL
@@ -114,22 +116,24 @@ run_multiomics <- function(data,
         class=class,
         run_deg=deg_gene,
         BPPARAM=BPPARAM)
-    if(!is.null(class)){
-      tmp <- lapply(gene_cnv_res, function(x)
-        as.data.frame(t(x$residuals)))
-      tmp2 <- rbind.fill(tmp)
-      rownames(tmp2) <- unlist(lapply(tmp, rownames))
-      rresiduals <- t(tmp2)
-    }else{
-      rresiduals <- gene_cnv_res$residuals
-    }
-      data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
-        rownames(rresiduals),]
-      assay(data@ExperimentList$gene_exp) <- as.matrix(rresiduals[,
-        colnames(assay(data@ExperimentList$gene_exp))])
-    RNAseq <- F
-    normalize_gene_expr2 <- F
-    deg_gene <- F
+      if(!is.null(gene_cnv_res)){
+          if(!is.null(class)){
+          tmp <- lapply(gene_cnv_res, function(x)
+            as.data.frame(t(x$residuals)))
+          tmp2 <- rbind.fill(tmp)
+          rownames(tmp2) <- unlist(lapply(tmp, rownames))
+          if(!is.null(tmp2)) rresiduals <- t(tmp2)
+        }else{
+          rresiduals <- gene_cnv_res$residuals
+        }
+          data@ExperimentList$gene_exp <- data@ExperimentList$gene_exp[
+            rownames(rresiduals),]
+          assay(data@ExperimentList$gene_exp) <- as.matrix(rresiduals[,
+            colnames(assay(data@ExperimentList$gene_exp))])
+        RNAseq <- F
+        normalize_gene_expr2 <- F
+        deg_gene <- F
+        }
       }
 
     gene_met_res <- NULL
@@ -146,7 +150,7 @@ run_multiomics <- function(data,
         normalize = normalize_gene_expr2,
         norm_method=norm_method_gene_expr,
         BPPARAM=BPPARAM)
-      deg_gene <- F
+      if(!is.null(gene_met_res)) deg_gene <- F
     }
 
     mirna_cnv_res <- NULL
@@ -162,23 +166,25 @@ run_multiomics <- function(data,
         class=class,
         run_deg=deg_mirna,
         BPPARAM=BPPARAM)
-      if(!is.null(class)){
-        tmp <- lapply(mirna_cnv_res, function(x)
-          as.data.frame(t(x$residuals)))
-        tmp2 <- rbind.fill(tmp)
-        rownames(tmp2) <- unlist(lapply(tmp, rownames))
-        rresiduals <- t(tmp2)
-      }else{
-        rresiduals <- mirna_cnv_res$residuals
+      if(!is.null(mirna_cnv_res)){
+          if(!is.null(class)){
+            tmp <- lapply(mirna_cnv_res, function(x)
+              as.data.frame(t(x$residuals)))
+            tmp2 <- rbind.fill(tmp)
+            rownames(tmp2) <- unlist(lapply(tmp, rownames))
+            if(!is.null(tmp2)) rresiduals <- t(tmp2)
+          }else{
+            rresiduals <- mirna_cnv_res$residuals
+          }
+          data@ExperimentList$miRNA_exp <- data@ExperimentList$miRNA_exp[
+            rownames(rresiduals),]
+          assay(data@ExperimentList$miRNA_exp) <- as.matrix(rresiduals[,
+            colnames(assay(data@ExperimentList$miRNA_exp))])
+          miRNAseq <- F
+          normalize_miRNA_expr2 <- F
+          deg_mirna <- F
+        }
       }
-      data@ExperimentList$miRNA_exp <- data@ExperimentList$miRNA_exp[
-        rownames(rresiduals),]
-      assay(data@ExperimentList$miRNA_exp) <- as.matrix(rresiduals[,
-        colnames(assay(data@ExperimentList$miRNA_exp))])
-      miRNAseq <- F
-      normalize_miRNA_expr2 <- F
-      deg_mirna <- F
-    }
 
 
 
@@ -198,7 +204,7 @@ run_multiomics <- function(data,
         run_deg=deg_gene,
         type="tf",
         BPPARAM=BPPARAM)
-      deg_gene <- F
+      if(!is.null(tf_res)) deg_gene <- F
     }
 
 
@@ -219,7 +225,7 @@ run_multiomics <- function(data,
         run_deg=deg_mirna,
         type="tf_miRNA",
         BPPARAM=BPPARAM)
-      deg_mirna <- F
+      if(!is.null(tf_mirna_res)) deg_mirna <- F
     }
 
 
@@ -240,7 +246,7 @@ run_multiomics <- function(data,
         run_deg=deg_gene,
         type="miRNA_target",
         BPPARAM=BPPARAM)
-      deg_gene <- F
+      if(!is.null(mirna_target_res)) deg_gene <- F
     }
 
   ans <- new("MultiOmics", Filter(Negate(is.null),
@@ -271,7 +277,7 @@ run_multiomics <- function(data,
                                       norm_method = norm_method,
                                       BPPARAM = BPPARAM,
                                       ...)
-    if(normalize){
+    if(normalize & !is.null(cnv_res)){
       cnv_res$data$response_var <- .data_norm(cnv_res$data$response_var,
                                               method = norm_method)
     }
@@ -376,7 +382,7 @@ run_cnv_integration <- function(expression,
                                       norm_method = norm_method,
                                       BPPARAM = BPPARAM,
                                       ...)
-    if(normalize){
+    if(normalize & !is.null(met_res)){
       met_res$data$response_var <- .data_norm(met_res$data$response_var,
                                               method = norm_method)
     }
@@ -518,7 +524,7 @@ run_met_integration <- function( expression,
                                       interactions = interactions,
                                       BPPARAM = BPPARAM,
                                       ...)
-    if(normalize){
+    if(normalize & !is.null(gen_res)){
       gen_res$data$response_var <- .data_norm(gen_res$data$response_var,
                                               method = norm_method)
     }
@@ -532,7 +538,7 @@ run_met_integration <- function( expression,
                                    ...)
   }
 
-  if(scale){
+  if(scale & !is.null(gen_res)){
     tmp <- cbind(original_cnv, original_met[rownames(original_cnv),])
     gen_res$data$covariates <- tmp[rownames(gen_res$data$covariates),
                                    colnames(gen_res$data$covariates)]
@@ -674,7 +680,7 @@ run_genomic_integration <- function(expression,
   if(normalize_cov) tf_expression <- .data_norm(tf_expression,
                                                 method = norm_method_cov)
 
-
+  if(length(interactions)==0) return(NULL)
   if(sequencing_data==T){
     tf_res <- .run_edgeR_integration(response_var = expression,
                                      covariates = tf_expression,
@@ -683,7 +689,7 @@ run_genomic_integration <- function(expression,
                                      norm_method = norm_method,
                                      BPPARAM = BPPARAM,
                                      ...)
-    if(normalize){
+    if(normalize & !is.null(tf_res)){
       tf_res$data$response_var <- .data_norm(tf_res$data$response_var,
                                              method = norm_method)
     }
