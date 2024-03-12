@@ -204,6 +204,7 @@
 
 #' Prepare Reactive Heatmap
 #' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
+#' @importFrom ComplexHeatmap ht_opt
 #' @importFrom shiny observe bindEvent
 #' @importFrom dplyr %>%
 #'
@@ -534,7 +535,7 @@
 }
 
 #' Reactive Gene Enrichment
-#' @importFrom shiny reactive
+#' @importFrom shiny reactive invalidateLater
 #'
 .reactive_gen_enrich <- function(bg_enrich,
                                  input,
@@ -566,7 +567,7 @@
 }
 
 #' Reactive TF Enrichment
-#' @importFrom shiny reactive
+#' @importFrom shiny reactive invalidateLater
 #'
 .reactive_tf_enrich <- function(bg_enrich,
                                 input,
@@ -613,7 +614,7 @@
     }
     composed_view <- .create_composed_view(tracks, height=height, width=width)
     if(input$circosType=="Gene"){
-      ssel <- intersect(c("circos_genomic", "circos_met_gene", "circos_met_gene"),
+      ssel <- intersect(c("circos_genomic", "circos_cnv_gene", "circos_met_gene"),
                         names(composed_view))
     }
     if(input$circosType=="miRNA"){

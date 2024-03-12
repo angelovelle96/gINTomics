@@ -122,6 +122,7 @@
 #' Build a Venn diagram
 #' @importFrom ggvenn ggvenn
 #' @importFrom RColorBrewer brewer.pal
+#'
 .build_venn <- function(venn_data){
   cnv_sign_genes <- venn_data$cnv_sign_genes
   met_sign_genes <- venn_data$met_sign_genes
@@ -182,6 +183,8 @@
 #'
 .build_volcano <- function(volcano_data){
   plot_ly(volcano_data,
+          width = 900,
+          height = 700,
           x = ~coef,
           y = ~pval_fdr,
           mode = 'markers',
@@ -193,9 +196,7 @@
                          "Pval/FDR:", pval_fdr, "<br>",
                          "coef", coef),
           textposition = 'top right') %>%
-    layout(title = "Volcano Plot") %>%
-    layout(width = 1000,
-           height = 700)
+    layout(title = "Volcano Plot")
 }
 
 #' Render a volcano plot
@@ -215,7 +216,7 @@
 
 #' Build a ridgeline plot
 #' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous
-#' @importFrom ggridges geom_density_ridges theme_ridges
+#' @importFrom ggridges geom_density_ridges theme_ridges position_raincloud
 #'
 .build_ridge <- function(ridge_data,
                          quantiles){
@@ -302,6 +303,8 @@
 
 #' Build histogram for TFs/miRNAs by chromosome
 #' @importFrom plotly plot_ly layout
+#' @importFrom stats reorder
+#' @importFrom dplyr %>%
 #'
 .build_histo_TFbyChr <- function(histo_data){
   if(nrow(histo_data)==0) return(NULL)
@@ -380,6 +383,7 @@
 
 #' Handle CSV file download
 #' @importFrom shiny downloadHandler
+#' @importFrom utils write.table write.csv
 #'
 .download_csv <- function(tf=FALSE,
                          deg = FALSE,
@@ -498,8 +502,6 @@
 #' @importFrom RColorBrewer brewer.pal
 #'
 .circos_preprocess <- function(data){
-
-  library(GenomicRanges)
   dataframes <- lapply(unique(data$omics), function(x) {
     single_omic_df <- data[data$omics==x,]
     if(max(single_omic_df$response_value, na.rm = T)>30){
@@ -525,6 +527,19 @@
     names(tmp) <- names(dataframes)[
       which(names(dataframes)!="df_gene_genomic_res")]
     dataframes <- tmp
+  }else{
+    tmp <- lapply(which(names(dataframes)!="df_gene_genomic_res"), function(x){
+      ans <- dataframes[[x]]
+      ans <- ans[ans$cov!="(Intercept)",]
+      ans$cov_value_original <- ans$cov_value
+      ans$cov_value <- abs(ans$cov_value)
+      ans$coef_original <- ans$coef
+      ans$coef <- abs(ans$coef)
+      return(ans)
+    })
+    names(tmp) <- names(dataframes)[
+      which(names(dataframes)!="df_gene_genomic_res")]
+    dataframes <- tmp
   }
   gr <- lapply(dataframes, function(x){
     ans <- makeGRangesFromDataFrame(x,
@@ -538,9 +553,9 @@
   return(gr)
 }
 
-
 #' Generate color palette for Circos track
 #' @importFrom RColorBrewer brewer.pal
+#' @importFrom grDevices colorRamp
 #'
 .circos_track_cols <- function(vvalues,
                                n=50,
@@ -800,7 +815,8 @@ return(ccol)
 }
 
 #' Create Cytoband track for Circos visualization
-#'
+#' @importFrom shiny.gosling visual_channel_stroke_width visual_channel_color
+#' visual_channel_x track_data add_single_track visual_channel_stroke
 #'
 .create_cyto_track <- function(){
   track_cyto <- add_single_track(
@@ -854,7 +870,7 @@ return(ccol)
 #' @importFrom shiny.gosling compose_view
 #' @importFrom shiny.gosling add_multi_tracks
 #'
-.create_composed_view <- function(tracks,width, height) {
+.create_composed_view <- function(tracks, width, height) {
 
   composed_views <- list()
 
@@ -929,6 +945,7 @@ return(ccol)
 
 #' Prepare Genomic Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom dplyr arrange
 #'
 .prepare_gen_heatmap <- function(data_table,
                                  df_heatmap,

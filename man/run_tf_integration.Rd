@@ -9,14 +9,14 @@ run_tf_integration(
   tf_expression = expression,
   interactions = NULL,
   type = "none",
-  sequencing_data = T,
+  sequencing_data = TRUE,
   species = "hsa",
-  normalize = T,
+  normalize = TRUE,
   norm_method = "TMM",
-  normalize_cov = T,
+  normalize_cov = TRUE,
   norm_method_cov = "TMM",
   class = NULL,
-  run_deg = T,
+  run_deg = TRUE,
   BPPARAM = SerialParam(),
   ...
 )

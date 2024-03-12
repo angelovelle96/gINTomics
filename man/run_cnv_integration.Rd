@@ -11,7 +11,7 @@ run_cnv_integration(
   normalize = T,
   norm_method = "TMM",
   class = NULL,
-  run_deg = T,
+  run_deg = TRUE,
   BPPARAM = SerialParam(),
   ...
 )

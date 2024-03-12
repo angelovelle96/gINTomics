@@ -1,7 +1,8 @@
 
-
+#' Enrichment
 #' @importFrom clusterProfiler enrichKEGG enrichGO
 #' @importFrom ReactomePA enrichPathway
+#' @importFrom stats setNames
 #' @import org.Hs.eg.db org.Mm.eg.db
 
 .def_enrich <- function(data,
@@ -10,9 +11,9 @@
                         pAdjustMethod,
                         qvalueCutoff,
                         ont,
-                        run_go=T,
-                        run_kegg=T,
-                        run_reactome=F,
+                        run_go=TRUE,
+                        run_kegg=TRUE,
+                        run_reactome=FALSE,
                         ...){
 
     kegg <- go <- reactome <- NULL
@@ -26,7 +27,7 @@
                      data$entrez_response[data$pval<=0.01])
     if(length(ssel)>500){
       tmp <- data[data$pval<=0.01,]
-      tmp <- tmp[order(abs(tmp$coef), decreasing = T),]
+      tmp <- tmp[order(abs(tmp$coef), decreasing = TRUE),]
       tmp <- tmp$entrez_response[1:500]
       ssel <- ssel[names(ssel)%in%tmp]
     }
@@ -37,7 +38,7 @@
     universe <- universe[!is.na(universe)]
     universe <- universe[!duplicated(universe)]
     if(run_kegg){
-        kegg <- clusterProfiler::enrichKEGG(gene = as.character(names(ssel)),
+        kegg <- enrichKEGG(gene = as.character(names(ssel)),
                            universe = as.character(universe),
                            organism = species,
                            pvalueCutoff = pvalueCutoff,
@@ -47,25 +48,25 @@
         )
     }
     if(run_go){
-        go <- clusterProfiler::enrichGO(gene = as.character(names(ssel)),
+        go <- enrichGO(gene = as.character(names(ssel)),
                        universe = as.character(universe),
                        OrgDb = orgdb,
                        pvalueCutoff = pvalueCutoff,
                        pAdjustMethod=pAdjustMethod,
                        qvalueCutoff=qvalueCutoff,
                        ont = ont,
-                       readable = T,
+                       readable = TRUE,
                        ...
         )
     }
     if(run_reactome){
-      reactome <- ReactomePA::enrichPathway(gene = as.character(names(ssel)),
+      reactome <- enrichPathway(gene = as.character(names(ssel)),
                                universe = as.character(universe),
                                organism = organism,
                                pvalueCutoff = pvalueCutoff,
                                pAdjustMethod=pAdjustMethod,
                                qvalueCutoff=qvalueCutoff,
-                               readable = T,
+                               readable = TRUE,
                                ...
       )
     }
@@ -79,13 +80,15 @@
 }
 
 
-#' Title
-#'
+#' Running genomic enrichment analysis
 #' @param model_results
 #' @param species
 #' @param pvalueCutoff
 #' @param pAdjustMethod
+#' @param qvalueCutoff description
 #' @param ont
+#' @param BPPARAM description
+#' @param extracted_data description
 #' @param ...
 #'
 #' @return
@@ -99,7 +102,7 @@ run_genomic_enrich <- function(model_results,
                        pAdjustMethod="BH",
                        qvalueCutoff=0.1,
                        ont = "all",
-                       BPPARAM = BiocParallel::SerialParam(),
+                       BPPARAM = SerialParam(),
                        extracted_data=NULL,
                        ...
 ){
@@ -170,14 +173,15 @@ return(enrichment)
 }
 
 
-#' Title
-#'
+#' Running TF enrichment analysis
 #' @param model_results
 #' @param species
 #' @param pvalueCutoff
+#' @param qvalueCutoff description
 #' @param pAdjustMethod
 #' @param ont
 #' @param BPPARAM
+#' @param extracted_data description
 #' @param ...
 #'
 #' @return
@@ -245,6 +249,8 @@ run_tf_enrich <- function(model_results,
 
 
 ######################################
+#' Making groups
+#' @importFrom ComplexHeatmap pheatmap
 .make_groups <- function(model_results){
 
   data <- model_results$data$covariates
@@ -269,16 +275,12 @@ run_tf_enrich <- function(model_results,
 gmax <- round(nrow(data1)/5)
 mclust <- Mclust(data1, G = 1:gmax)
 mclust2 <- Mclust(data2, G = 1:gmax)
-
-
 }
 
 
-
-
-
-
 ######################################
+#' Survival
+#' @importFrom survival survfit
 survival <- function(surv_time,
                      surv_event,
                      data){
@@ -286,11 +288,4 @@ survival <- function(surv_time,
 
 
   fit <- survfit(Surv(pfs, status) ~ treatment , data = tmp)
-
-
-
-
 }
-
-
-

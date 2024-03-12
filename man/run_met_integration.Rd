@@ -7,11 +7,11 @@
 run_met_integration(
   expression,
   methylation,
-  sequencing_data = T,
-  normalize = T,
+  sequencing_data = TRUE,
+  normalize = TRUE,
   norm_method = "TMM",
   class = NULL,
-  run_deg = T,
+  run_deg = TRUE,
   BPPARAM = SerialParam(),
   ...
 )
