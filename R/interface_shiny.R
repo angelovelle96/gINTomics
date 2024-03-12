@@ -1,6 +1,6 @@
 #' Integration Dashboard Sidebar
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny addResourcePath reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu
 #'
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
@@ -32,8 +32,8 @@
 }
 
 #' Home Tab Item for gINTomics
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny addResourcePath fluidPage reexports reexports
+#' @importFrom shinydashboard tabItem
 #'
 .gint_tabitem_home <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
@@ -46,8 +46,8 @@
 }
 
 #' Coefficients Distribution Subitem for Genomic Integration
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
 #'
@@ -183,9 +183,8 @@
 }
 
 #' Heatmap Subitem for Genomic Integration
-#' @import shiny
-#' @import shinydashboard
-#' @importFrom DT dataTableOutput
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
 #'
@@ -281,8 +280,8 @@
   )
 }
 #' Chr Distribution Subitem for Genomic Integration
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
@@ -347,8 +346,8 @@
 }
 
 #' Enrichment Tab Item for Genomic Integration
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS HTML reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
 #'
@@ -385,8 +384,8 @@
 }
 
 #' Enrichment Subitem for Transcription Integration
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput tabPanel NS htmlOutput textOutput reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #'
 .gint_subItem_enrichTranscript <- function(data_table){
   ns <- NS("enrich_tf")
@@ -414,8 +413,8 @@
 }
 
 #' Coefficients Distribution Subitem for Transcription Integration
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
 
@@ -504,8 +503,8 @@
 }
 
 #' Chr Distribution Subitem for Transcription Integration
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
@@ -571,8 +570,8 @@
 }
 
 #' Network Subitem for Transcription Integration
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom visNetwork visNetworkOutput
 
 .gint_subItem_networkTranscript <- function(data_table){
@@ -633,8 +632,8 @@
 }
 
 #' Coefficients Distribution Subitem for Class Comparison
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
 
@@ -766,8 +765,8 @@
 }
 
 #' Heatmap Subitem for class comparison
-##' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS radioButtons reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
 #'
 .gint_subItem_HeatmapDEGs <- function(data_table){
@@ -834,7 +833,7 @@
                     condition = "input.SignificativityCriteria=='pval'",
                     sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
-                                min = 0.01,
+                                min = 0,
                                 max = 1,
                                 value = 0.05,
                                 step = 0.005), ns = ns),
@@ -842,7 +841,7 @@
                     condition = "input.SignificativityCriteria=='FDR'",
                     sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
-                                min = 0.01,
+                                min = 0,
                                 max = 1,
                                 value = 0.05,
                                 step = 0.005), ns = ns),
@@ -862,8 +861,8 @@
 }
 
 #' Chromosome Distribution Subitem for class comparison
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
@@ -931,8 +930,8 @@
 }
 
 #' Network Subitem for class comparison
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS checkboxInput reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom visNetwork visNetworkOutput
 
 .gint_subItem_networkDEGs <- function(data_table){
@@ -992,10 +991,10 @@
 }
 
 #' Circos Subitem for Complete Integration
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput tabPanel NS reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
-#' @importFrom shiny.gosling goslingOutput
+#' @importFrom shiny.gosling goslingOutput use_gosling
 #'
 .gint_subItem_circosCompleteInt <- function(data_table){
   ns <- NS("circos")
@@ -1030,9 +1029,10 @@
 }
 
 #' Table Subitem with all integrations
-#' @import shiny
-#' @import shinydashboard
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput tabPanel NS downloadButton reexports
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom DT dataTableOutput
+#' @importFrom gtools mixedsort
 #'
 .gint_subItem_tableCompleteInt <- function(data_table){
   ns <- NS("complete_table")
@@ -1063,17 +1063,17 @@
                     condition = "input.SignificativityCriteria=='pval'",
                     sliderInput(ns("PvalRange"),
                                 "P-Value Range:",
-                                min = 0.001,
+                                min = 0,
                                 max = 1,
-                                value = c(0.001, 0.05),
+                                value = c(0, 0.05),
                                 step = 0.005), ns = ns),
                   conditionalPanel(
                     condition = "input.SignificativityCriteria=='FDR'",
                     sliderInput(ns("FdrRange"),
                                 "FDR-Value Range:",
-                                min = 0.001,
+                                min = 0,
                                 max = 1,
-                                value = c(0.001, 0.05),
+                                value = c(0, 0.05),
                                 step = 0.005), ns = ns)
                 ),
                 mainPanel(
@@ -1089,9 +1089,9 @@
   )
 }
 
-#' Cretae user interface
-#' @import shiny
-#' @import shinydashboard
+#' Create user interface
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput tabPanel NS downloadButton addResourcePath reexports HTML
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem dashboardHeader dashboardBody tabItems dashboardPage
 #'
 .create_ui <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics3.png"
