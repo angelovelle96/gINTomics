@@ -246,7 +246,11 @@ plot_chr_distribution <- function(data_table,
   ####################################################################
   #########################################################################
 
-  dot_plotly <- function(enrich_result, showCategory=10, width=800, height=700){
+  dot_plotly <- function(enrich_result,
+                         title=NULL,
+                         showCategory=10,
+                         width=800,
+                         height=700){
     df <- fortify(enrich_result, showCategory = showCategory)
     df$Description <- as.character(df$Description)
     df <- df[order(df$GeneRatio, decreasing = T),]
@@ -285,7 +289,8 @@ plot_chr_distribution <- function(data_table,
                         tickfont = list(size = 7),
                         categoryorder = "array",
                         categoryarray = rev(df$Description)),
-             xaxis=list(title="GeneRatio"))
+             xaxis=list(title="GeneRatio"),
+             title=title)
 
     llegend <- plot_ly() %>%
       add_markers(x = "Count",

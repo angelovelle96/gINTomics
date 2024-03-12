@@ -699,8 +699,10 @@ fdr <- function(pval_mat){
 .shiny_preprocess <- function(data){
 
   data_table <- data
-  data_table <- filter(data_table, cov != '(Intercept)')   # elimino intercetta
-  rownames(data_table) <- 1:nrow(data_table)
+  data_table <- filter(data_table, cov != '(Intercept)')
+  rownames(data_table) <- seq_along(rownames(data_table))
+  data_table$cnv_met[data_table$omics=="gene_cnv_res"] <- "cnv"
+  data_table$cnv_met[data_table$omics=="gene_met_res"] <- "met"
   data_table <- data_table[, !(colnames(data_table) %in% c('significativity', 'sign'))]
   colnames(data)[colnames(data) == "response"] <- "gene"
   colnames(data)[colnames(data) == "start_response"] <- "start"

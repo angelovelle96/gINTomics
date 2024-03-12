@@ -582,7 +582,7 @@
       ans <- lapply(tf, function(x){
         ans <- data[[class]][[x]][[db]]
         if(!is.null(ans)){
-          ans2 <- dot_plotly(ans)
+          ans2 <- dot_plotly(ans, title=x)
           ans <- list(plot=ans2, table=ans@result)
           return(ans)
         }else{return(NULL)}
