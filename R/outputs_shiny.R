@@ -1297,7 +1297,9 @@ run_shiny <- function(multiomics_integration){
                data_table = data_table)
 
     #### ------------------- ENRICHMENT SERVER ----------------------------
-    data_gen_enrich <- data_table[data_table$omics=="gene_genomic_res",]
+    data_gen_enrich <- data_table[data_table$omics%in%c("gene_genomic_res",
+                                                        "gene_cnv_res",
+                                                        "gene_met_res"),]
     data_tf_enrich <- data_table[data_table$omics=="tf_res",]
     callModule(.server_enrich_bg, id = "enrich_gen", name="enrich_gen",
                extracted_data=data_gen_enrich)

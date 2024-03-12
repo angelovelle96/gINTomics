@@ -4,7 +4,7 @@
 #'
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
-  addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
+  addResourcePath(prefix = "imgResources",system.file(directoryPath = "www/", package = "gINTomics"))
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home", tabName = "home", icon = icon("home")),
@@ -45,7 +45,7 @@
 #'
 .gint_tabitem_home <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
-  addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
+  addResourcePath(prefix = "imgResources", system.file(directoryPath = "www/", package = "gINTomics"))
   tabItem(tabName = "home",
           fluidRow(box(title = "Welcome to gINTomics Interactive Visualizer",
                        "This is the home page content."),
@@ -1134,7 +1134,7 @@
 #'
 .create_ui <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics3.png"
-  addResourcePath(prefix = "imgResources", directoryPath = "inst/www/")
+  addResourcePath(prefix = "imgResources", system.file(directoryPath = "www/", package = "gINTomics"))
   dashboardPage(
     dashboardHeader(title = span("gINTomics",
                                  span("Visualizer 1.0",

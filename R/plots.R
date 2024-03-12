@@ -244,12 +244,15 @@ plot_chr_distribution <- function(data_table,
 
 }
 
-  ####################################################################
-  #########################################################################
+
 #' plotting enrichment
 #' @importFrom ggtree fortify
 #' @importFrom plotly add_markers subplot plot_ly
-  dot_plotly <- function(enrich_result, showCategory=10, width=800, height=700){
+  dot_plotly <- function(enrich_result,
+                         title=NULL,
+                         showCategory=10,
+                         width=800,
+                         height=700){
     df <- fortify(enrich_result, showCategory = showCategory)
     df$Description <- as.character(df$Description)
     df <- df[order(df$GeneRatio, decreasing = TRUE),]
@@ -260,9 +263,15 @@ plot_chr_distribution <- function(data_table,
       })
       paste(split_words, collapse = "<br>")
     }))
-    legend.sizes = seq(min(df$Count),
-                       max(df$Count),
-                       max(c(1,round(((max(df$Count)-min(df$Count))/4)))))
+    if(length(df$Count[!is.na(df$Count)])>0){
+
+        legend.sizes = seq(min(df$Count, na.rm = TRUE),
+                           max(df$Count, na.rm = T),
+                           max(c(1,round(((max(df$Count,na.rm = TRUE) -
+                                           min(df$Count, na.rm = TRUE))/4)))))
+    }else{
+      return(NULL)
+        }
     lprop <- c(0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55)
     lprop <- lprop[length(legend.sizes)]
     ax = list(zeroline = FALSE,
@@ -288,7 +297,8 @@ plot_chr_distribution <- function(data_table,
                         tickfont = list(size = 7),
                         categoryorder = "array",
                         categoryarray = rev(df$Description)),
-             xaxis=list(title="GeneRatio"))
+             xaxis=list(title="GeneRatio"),
+             title=title)
 
     llegend <- plot_ly() %>%
       add_markers(x = "Count",

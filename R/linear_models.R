@@ -18,6 +18,7 @@
   tmp <- .data_check(response_var = response_var,
                       interactions = interactions,
                       covariates = covariates)
+    if(is.null(tmp)) return(NULL)
     response_var <- tmp$response_var
     interactions <- tmp$interactions
     covariates <- tmp$covariates
@@ -30,6 +31,7 @@
                             interactions = interactions,
                             steady_covariates = steady_covariates,
                             linear = TRUE)
+    if(is.null(tmp)) return(NULL)
     covariates <- tmp$covariates
     response_var <- tmp$response_var
     interactions <- tmp$interactions

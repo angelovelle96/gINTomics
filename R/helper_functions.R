@@ -80,9 +80,13 @@
     tmp <- which(tmp!=0)
     interactions <- lapply(tmp, function(x) interactions[[x]])
     tmp <- intersect(names(interactions), colnames(response_var))
-    if(length(tmp)==0) stop(str_wrap("No genes left in common between
-                                      response_var and interactions"))
-    response_var <- response_var[,tmp]
+    if(length(tmp)==0){
+      warning(str_wrap("No genes left in common between
+                        response_var and interactions"))
+      return(NULL)
+      }
+    response_var <- as.matrix(response_var[,tmp])
+    colnames(response_var) <- tmp
     interactions <- lapply(tmp, function(x) interactions[[x]])
     names(interactions) <- tmp
 
@@ -124,7 +128,10 @@
   original_id <- original_id[tmp,]
   interactions <- lapply(interactions, function(x) gsub(bad_str, "_", x))
   colnames(covariates) <- gsub(bad_str, "_", colnames(covariates))
-  covariates <- covariates[, colnames(covariates)%in%unlist(interactions)]
+  tmp <- intersect(colnames(covariates), unlist(interactions))
+  if(length(tmp)==0) return(NULL)
+  covariates <- as.data.frame(covariates[,tmp])
+  colnames(covariates) <- tmp
   if(linear==TRUE){
     colnames(response_var) <- gsub(bad_str, "_", colnames(response_var))
     names(interactions) <- gsub(bad_str, "_", names(interactions))
@@ -697,7 +704,7 @@ fdr <- function(pval_mat){
   return(fdr_data)
 }
 
-##############################################
+
 #' Shiny data preprocessing
 #' @importFrom dplyr filter
 .shiny_preprocess <- function(data){
@@ -705,6 +712,8 @@ fdr <- function(pval_mat){
   data_table <- data
   data_table <- filter(data_table, cov != '(Intercept)')
   rownames(data_table) <- seq_len(nrow(data_table))
+  data_table$cnv_met[data_table$omics=="gene_cnv_res"] <- "cnv"
+  data_table$cnv_met[data_table$omics=="gene_met_res"] <- "met"
   data_table <- data_table[, !(colnames(data_table) %in% c('significativity', 'sign'))]
   colnames(data)[colnames(data) == "response"] <- "gene"
   colnames(data)[colnames(data) == "start_response"] <- "start"
