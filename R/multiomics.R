@@ -29,6 +29,7 @@
 #' @import MultiAssayExperiment SummarizedExperiment
 #' @importFrom methods new
 #' @importFrom plyr rbind.fill
+#' @importFrom BiocParallel SerialParam bplapply bpparam
 #' @export
 run_multiomics <- function(data,
                            interactions_met=NULL,
@@ -308,6 +309,7 @@ run_multiomics <- function(data,
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
 #' @export
+#' @importFrom BiocParallel bpparam SerialParam
 run_cnv_integration <- function(expression,
                                 cnv_data,
                                 sequencing_data=T,
@@ -416,6 +418,7 @@ run_cnv_integration <- function(expression,
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
 #' @export
+#' @importFrom BiocParallel bpparam SerialParam
 
 run_met_integration <- function( expression,
                                  methylation,
@@ -575,6 +578,7 @@ run_met_integration <- function( expression,
 #' of the list should match the covariates. If NULL (default), the interactions
 #' will be automatically defined according to response variable's colnames.
 #' @importFrom plyr rbind.fill
+#' @importFrom BiocParallel bpparam SerialParam
 #' @export
 run_genomic_integration <- function(expression,
                                 cnv_data,
@@ -741,6 +745,7 @@ run_genomic_integration <- function(expression,
 #' @param normalize_cov Same as **normalize** but for covariates.
 #' @param norm_method_cov Same as **norm_method** but for covariates.
 #' @importFrom stats quantile
+#' @importFrom BiocParallel bpparam SerialParam
 #' @export
 
 run_tf_integration <- function( expression,

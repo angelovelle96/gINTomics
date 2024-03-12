@@ -204,6 +204,7 @@
 
 #' Prepare Reactive Heatmap
 #' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
+#' @importFrom ComplexHeatmap ht_opt
 #' @importFrom shiny observe bindEvent
 #' @importFrom dplyr %>%
 #'

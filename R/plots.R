@@ -247,6 +247,8 @@ plot_chr_distribution <- function(data_table,
   ####################################################################
   #########################################################################
 #' plotting enrichment
+#' @importFrom ggtree fortify
+#' @importFrom plotly add_markers subplot plot_ly
   dot_plotly <- function(enrich_result, showCategory=10, width=800, height=700){
     df <- fortify(enrich_result, showCategory = showCategory)
     df$Description <- as.character(df$Description)

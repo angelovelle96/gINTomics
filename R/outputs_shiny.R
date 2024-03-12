@@ -216,7 +216,7 @@
 
 #' Build a ridgeline plot
 #' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous
-#' @importFrom ggridges geom_density_ridges theme_ridges
+#' @importFrom ggridges geom_density_ridges theme_ridges position_raincloud
 #'
 .build_ridge <- function(ridge_data,
                          quantiles){
@@ -815,7 +815,8 @@ return(ccol)
 }
 
 #' Create Cytoband track for Circos visualization
-#'
+#' @importFrom shiny.gosling visual_channel_stroke_width visual_channel_color
+#' visual_channel_x track_data add_single_track visual_channel_stroke
 #'
 .create_cyto_track <- function(){
   track_cyto <- add_single_track(
@@ -944,6 +945,7 @@ return(ccol)
 
 #' Prepare Genomic Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom dplyr arrange
 #'
 .prepare_gen_heatmap <- function(data_table,
                                  df_heatmap,

@@ -1,6 +1,6 @@
 #' Integration Dashboard Sidebar
-#' @importFrom shiny addResourcePath reexports
-#' @importFrom shinydashboard dashboardSidebar sidebarMenu
+#' @importFrom shiny addResourcePath tags img icon
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu menuItem menuSubItem
 #'
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
@@ -8,22 +8,30 @@
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home", tabName = "home", icon = icon("home")),
-      menuItem("Genomic Integration", tabName = "genomicIntegrationPage", startExpanded = TRUE,
-               menuSubItem("Coefficients Distribution", tabName = "coefDistribGenomic"),
+      menuItem("Genomic Integration", tabName = "genomicIntegrationPage",
+               startExpanded = TRUE,
+               menuSubItem("Coefficients Distribution",
+                           tabName = "coefDistribGenomic"),
                menuSubItem("Heatmap", tabName = "heatmapGenomic"),
                menuSubItem("Chromosome Distribution", tabName = "histoGenomic"),
                menuSubItem("Enrichment", tabName = "enrichGenomic")),
-      menuItem("Transcription Integration", tabName = "transcriptionIntegrationPage", startExpanded = TRUE,
-               menuSubItem("Coefficients Distribution", tabName = "coefDistribTranscript"),
-               menuSubItem("Chromosome Distribution", tabName = "histoTranscript"),
+      menuItem("Transcription Integration",
+               tabName = "transcriptionIntegrationPage",
+               startExpanded = TRUE,
+               menuSubItem("Coefficients Distribution",
+                           tabName = "coefDistribTranscript"),
+               menuSubItem("Chromosome Distribution",
+                           tabName = "histoTranscript"),
                menuSubItem("Network", tabName = "networkTranscript"),
                menuSubItem("Enrichment", tabName = "enrichTranscript")),
       menuItem("Class Comparison", tabName = "degsPage", startExpanded = TRUE,
-               menuSubItem("Coefficients Distribution", tabName = "coefDistribDEGs"),
+               menuSubItem("Coefficients Distribution",
+                           tabName = "coefDistribDEGs"),
                menuSubItem("Heatmap", tabName = "heatmapDEGs"),
                menuSubItem("Chromosome Distribution", tabName = "histoDEGs"),
                menuSubItem("Network", tabName = "networkDEGs")),
-      menuItem("Complete Integration", tabName = "completeIntegrationPage", startExpanded = TRUE,
+      menuItem("Complete Integration", tabName = "completeIntegrationPage",
+               startExpanded = TRUE,
                menuSubItem("Circos Plots", tabName = "circosIntegration"),
                menuSubItem("Data Table", tabName = "fullTable"))
     )
@@ -32,8 +40,8 @@
 }
 
 #' Home Tab Item for gINTomics
-#' @importFrom shiny addResourcePath fluidPage reexports reexports
-#' @importFrom shinydashboard tabItem
+#' @importFrom shiny addResourcePath fluidPage tags img fluidRow column
+#' @importFrom shinydashboard tabItem box
 #'
 .gint_tabitem_home <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
@@ -46,7 +54,9 @@
 }
 
 #' Coefficients Distribution Subitem for Genomic Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#'  mainPanel sidebarPanel plotOutput div
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
@@ -183,7 +193,9 @@
 }
 
 #' Heatmap Subitem for Genomic Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#' mainPanel sidebarPanel
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
@@ -280,7 +292,9 @@
   )
 }
 #' Chr Distribution Subitem for Genomic Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#' mainPanel div
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
@@ -346,7 +360,9 @@
 }
 
 #' Enrichment Tab Item for Genomic Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS HTML reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS HTML tags fluidRow
+#' mainPanel div
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
@@ -384,7 +400,9 @@
 }
 
 #' Enrichment Subitem for Transcription Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput tabPanel NS htmlOutput textOutput reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput tabPanel NS htmlOutput textOutput tags fluidRow
+#'  mainPanel uiOutput
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #'
 .gint_subItem_enrichTranscript <- function(data_table){
@@ -413,7 +431,9 @@
 }
 
 #' Coefficients Distribution Subitem for Transcription Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#'  mainPanel sidebarPanel div
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
@@ -503,7 +523,9 @@
 }
 
 #' Chr Distribution Subitem for Transcription Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#' mainPanel div
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
@@ -570,7 +592,9 @@
 }
 
 #' Network Subitem for Transcription Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#' mainPanel sidebarPanel div inputPanel
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom visNetwork visNetworkOutput
 
@@ -632,7 +656,9 @@
 }
 
 #' Coefficients Distribution Subitem for Class Comparison
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#' mainPanel sidebarPanel div
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
@@ -765,7 +791,9 @@
 }
 
 #' Heatmap Subitem for class comparison
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS radioButtons reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS radioButtons tags
+#' fluidRow mainPanel sidebarPanel
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
 #'
@@ -861,7 +889,9 @@
 }
 
 #' Chromosome Distribution Subitem for class comparison
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#'  mainPanel sidebarPanel div
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
@@ -930,7 +960,9 @@
 }
 
 #' Network Subitem for class comparison
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput downloadButton tabPanel NS checkboxInput reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#'  conditionalPanel sliderInput downloadButton tabPanel NS checkboxInput tags
+#'  fluidRow mainPanel sidebarPanel div inputPanel
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom visNetwork visNetworkOutput
 
@@ -991,8 +1023,10 @@
 }
 
 #' Circos Subitem for Complete Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput tabPanel NS reexports
-#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput tabPanel NS tags fluidPage column mainPanel
+#' sidebarPanel div actionButton
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem icon
 #' @importFrom gtools mixedsort
 #' @importFrom shiny.gosling goslingOutput use_gosling
 #'
@@ -1029,7 +1063,9 @@
 }
 
 #' Table Subitem with all integrations
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput tabPanel NS downloadButton reexports
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput tabPanel NS downloadButton tags fluidRow
+#' mainPanel sidebarPanel div
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom DT dataTableOutput
 #' @importFrom gtools mixedsort
@@ -1090,8 +1126,11 @@
 }
 
 #' Create user interface
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput conditionalPanel sliderInput tabPanel NS downloadButton addResourcePath reexports HTML
-#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem dashboardHeader dashboardBody tabItems dashboardPage
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#'  conditionalPanel sliderInput tabPanel NS downloadButton addResourcePath
+#'  tags HTML a img span sidebarPanel
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
+#' dashboardHeader dashboardBody tabItems dashboardPage
 #'
 .create_ui <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics3.png"

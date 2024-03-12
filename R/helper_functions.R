@@ -232,7 +232,7 @@
   }
   pval_matrix <- rbind.fill(tmp)
   rownames(pval_matrix) <- names(model_results)
-  for(i in seq_len(pval_matrix)) {
+  for(i in seq_along(pval_matrix)) {
     tmp <- pval_matrix[, i]
     tmp[sapply(tmp, is.null)] <- NA
     tmp <- unlist(tmp)
@@ -379,7 +379,7 @@ create_multiassay <- function(methylation=NULL,
     ans <- importance(ans)
     ans <- ans[order(ans[,1], decreasing = TRUE),]
     tmp <- as.integer(nrow(data)*0.4)
-    ans <- ans[seqlen(tmp)]
+    ans <- ans[seq_len(tmp)]
     tmp <- paste(names(ans), collapse = "+")
     tmp <- paste(as.character(formula[2]), "~", tmp)
     ans <- as.formula(tmp)

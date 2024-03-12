@@ -1,5 +1,5 @@
 #' Running linear model integration
-#' @import stringr
+#' @importFrom BiocParallel bplapply
 #' @importFrom stats residuals
 .run_lm_integration <- function(response_var,
                                covariates,

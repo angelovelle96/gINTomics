@@ -1,5 +1,5 @@
 #' Running edgeR integration
-#' @importFrom BiocParallel bplapply
+#' @importFrom BiocParallel bplapply bpparam
 #' @importFrom plyr rbind.fill
 #' @importFrom stats residuals
 

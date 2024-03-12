@@ -256,6 +256,7 @@ output$download_csv <- .download_csv(deg=FALSE,
 }
 
 #' Circos server
+#' @importFrom shiny.gosling renderGosling gosling export_png export_pdf
 .server_circos <- function(input,
                           output,
                           session,
