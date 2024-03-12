@@ -129,7 +129,7 @@ run_genomic_enrich <- function(model_results,
     data <- tmp
   }
 
-  if("cnv_met"%in%colnames(data[[1]])){
+  if(length(unique(data[[1]]$cnv_met[!is.na(data[[1]]$cnv_met)]))>0){
     tmp <- lapply(data, function(x) x[x$cnv_met=="cnv",])
     enrichment_cnv <- BiocParallel::bplapply(tmp, gINTomics:::.def_enrich,
                               species=species,

@@ -261,9 +261,15 @@ plot_chr_distribution <- function(data_table,
       })
       paste(split_words, collapse = "<br>")
     }))
-    legend.sizes = seq(min(df$Count),
-                       max(df$Count),
-                       max(c(1,round(((max(df$Count)-min(df$Count))/4)))))
+    if(length(df$Count[!is.na(df$Count)])>0){
+
+        legend.sizes = seq(min(df$Count, na.rm = TRUE),
+                           max(df$Count, na.rm = T),
+                           max(c(1,round(((max(df$Count,na.rm = TRUE) -
+                                           min(df$Count, na.rm = TRUE))/4)))))
+    }else{
+      return(NULL)
+        }
     lprop <- c(0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55)
     lprop <- lprop[length(legend.sizes)]
     ax = list(zeroline = FALSE,

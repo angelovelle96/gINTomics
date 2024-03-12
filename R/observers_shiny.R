@@ -551,10 +551,12 @@
       data <- bg_enrich$get_result()
       if(sum(c("cnv", "met")%in%names(data))==2){
         ans <- data[[type]][[class]][[db]]
+        if(is.null(ans)) return(NULL)
         ans2 <- dot_plotly(ans)
         ans <- list(plot=ans2, table=ans@result)
       }else{
         ans <- data[[class]][[db]]
+        if(is.null(ans)) return(NULL)
         ans2 <- dot_plotly(ans)
         ans <- list(plot=ans2, table=ans@result)
       }
