@@ -1,5 +1,6 @@
-#########################
+##############################
 ###############################
+#' Plotting network
 plot_network <- function(data_table,
                          num_interactions=300,
                          class=NULL,
@@ -21,7 +22,7 @@ plot_network <- function(data_table,
 #########################
 ###############################
 
-
+#' plotting venn
 plot_venn <- function(data_table,
                       class=NULL){
   if(is.null(class) & "class"%in%colnames(data_table))
@@ -44,7 +45,7 @@ plot_venn <- function(data_table,
 #########################
 ###############################
 
-
+#' plotting volcano
 plot_volcano <- function(data_table,
                          class=NULL,
                          omics=NULL,
@@ -72,7 +73,7 @@ plot_volcano <- function(data_table,
 #########################
 ###############################
 
-
+#' plotting ridge
 plot_ridge <- function(data_table,
                        class=NULL,
                        omics=NULL,
@@ -101,7 +102,7 @@ plot_ridge <- function(data_table,
 
 #########################
 ###############################
-
+#' plotting heatmap
 plot_heatmap <- function(multiomics_integration,
                          data_table,
                          omics,
@@ -181,7 +182,7 @@ plot_heatmap <- function(multiomics_integration,
 
 #########################
 ###############################
-
+#' plotting chr distribution
 plot_chr_distribution <- function(data_table,
                                   class=NULL,
                                   omics=NULL,
@@ -215,7 +216,7 @@ plot_chr_distribution <- function(data_table,
 
   #########################
   ###############################
-
+#' plotting tf distribution
   plot_tf_distribution <- function(data_table,
                                     class=NULL,
                                     pval=0.05){
@@ -245,11 +246,11 @@ plot_chr_distribution <- function(data_table,
 
   ####################################################################
   #########################################################################
-
+#' plotting enrichment
   dot_plotly <- function(enrich_result, showCategory=10, width=800, height=700){
     df <- fortify(enrich_result, showCategory = showCategory)
     df$Description <- as.character(df$Description)
-    df <- df[order(df$GeneRatio, decreasing = T),]
+    df <- df[order(df$GeneRatio, decreasing = TRUE),]
     df$Description <- unlist(lapply(df$Description, function(label) {
       words <- strsplit(label, " ")[[1]]
       split_words <- lapply(seq(1, length(words), by = 2), function(i) {
@@ -264,7 +265,7 @@ plot_chr_distribution <- function(data_table,
     lprop <- lprop[length(legend.sizes)]
     ax = list(zeroline = FALSE,
               showline = FALSE,
-              showticklabels = T,
+              showticklabels = TRUE,
               showgrid = FALSE,
               side="top")
     mk = list(sizeref=0.1, sizemode="area")
@@ -291,7 +292,7 @@ plot_chr_distribution <- function(data_table,
       add_markers(x = "Count",
                   y = legend.sizes,
                   size = legend.sizes,
-                  showlegend = F,
+                  showlegend = FALSE,
                   fill = ~'',
                   marker = c(mk, color="black"),
                   text=legend.sizes,
@@ -314,7 +315,7 @@ plot_chr_distribution <- function(data_table,
     ans <- subplot(empty_trace,llegend,empty_trace,
                    heights = c(0.02,lprop, (0.98-lprop)), nrows = 3)
     ans <- subplot(pplot, ans,
-                   widths = c(0.9, 0.1), titleX = T, shareX = F)
+                   widths = c(0.9, 0.1), titleX = TRUE, shareX = FALSE)
     return(ans)
 
   }

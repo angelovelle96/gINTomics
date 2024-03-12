@@ -8,13 +8,13 @@ run_genomic_integration(
   expression,
   cnv_data,
   methylation,
-  sequencing_data = T,
-  normalize = T,
+  sequencing_data = TRUE,
+  normalize = TRUE,
   norm_method = "TMM",
   interactions = NULL,
   class = NULL,
-  scale = T,
-  run_deg = T,
+  scale = TRUE,
+  run_deg = TRUE,
   BPPARAM = SerialParam(),
   ...
 )

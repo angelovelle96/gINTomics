@@ -2,7 +2,7 @@
 % Please edit documentation in R/downstream_analysis.R
 \name{run_genomic_enrich}
 \alias{run_genomic_enrich}
-\title{Title}
+\title{Running genomic enrichment analysis}
 \usage{
 run_genomic_enrich(
   model_results,
@@ -11,14 +11,20 @@ run_genomic_enrich(
   pAdjustMethod = "BH",
   qvalueCutoff = 0.1,
   ont = "all",
-  BPPARAM = BiocParallel::SerialParam(),
+  BPPARAM = SerialParam(),
   extracted_data = NULL,
   ...
 )
 }
 \arguments{
+\item{qvalueCutoff}{description}
+
+\item{BPPARAM}{description}
+
+\item{extracted_data}{description}
+
 \item{...}{}
 }
 \description{
-Title
+Running genomic enrichment analysis
 }

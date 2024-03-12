@@ -2,7 +2,7 @@
 % Please edit documentation in R/downstream_analysis.R
 \name{run_tf_enrich}
 \alias{run_tf_enrich}
-\title{Title}
+\title{Running TF enrichment analysis}
 \usage{
 run_tf_enrich(
   model_results,
@@ -17,8 +17,12 @@ run_tf_enrich(
 )
 }
 \arguments{
+\item{qvalueCutoff}{description}
+
+\item{extracted_data}{description}
+
 \item{...}{}
 }
 \description{
-Title
+Running TF enrichment analysis
 }
