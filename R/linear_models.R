@@ -1,18 +1,19 @@
-#' @import stringr
+#' Running linear model integration
+#' @importFrom BiocParallel bplapply
 #' @importFrom stats residuals
 .run_lm_integration <- function(response_var,
                                covariates,
                                interactions="auto",
                                steady_covariates=NULL,
                                reference=NULL,
-                               normalize=T,
+                               normalize=TRUE,
                                norm_method="TMM",
                                BPPARAM=SerialParam()){
 
     tmp <- unlist(lapply(interactions, length))
-    single_cov=F
+    single_cov=FALSE
     if(sum(tmp==1)==length(tmp)){
-      single_cov=T
+      single_cov=TRUE
     }
   tmp <- .data_check(response_var = response_var,
                       interactions = interactions,
@@ -21,21 +22,21 @@
     interactions <- tmp$interactions
     covariates <- tmp$covariates
 
-    if(normalize==T) response_var <- .data_norm(response_var,
+    if(normalize==TRUE) response_var <- .data_norm(response_var,
                                                method = norm_method,
-                                               RNAseq = F)
+                                               RNAseq = FALSE)
     tmp <- .covariates_check(response_var = response_var,
                             covariates = covariates,
                             interactions = interactions,
                             steady_covariates = steady_covariates,
-                            linear = T)
+                            linear = TRUE)
     covariates <- tmp$covariates
     response_var <- tmp$response_var
     interactions <- tmp$interactions
     steady_covariates <- tmp$steady_covariates
     original_id <- tmp$original_id
     fformula <- .generate_formula(interactions = interactions,
-                                 linear=T)
+                                 linear=TRUE)
     data <- cbind(response_var, covariates)
     lm_results <-  bplapply(fformula, .def_lm,
                             data=data,
@@ -68,6 +69,7 @@
 
 
 ##################################
+#' Def linear model
 #' @importFrom stats lm
 
 .def_lm <- function(formula,

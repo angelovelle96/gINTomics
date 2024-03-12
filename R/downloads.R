@@ -1,5 +1,7 @@
-#'
-#' @import OmnipathR miRBaseConverter
+#' Download miRNAs targets
+#' @importFrom OmnipathR import_mirnatarget_interactions
+#' @importFrom miRBaseConverter getAllMiRNAs
+#' @importFrom stats setNames
 
    .download_mirna_target <- function(miRNAs,
                                      species = 'hsa',
@@ -27,8 +29,10 @@
    }
 
 
-#'
-#' @import OmnipathR miRBaseConverter
+#' Download TF/miRNA interactions
+#' @importFrom OmnipathR import_tf_mirna_interactions
+#' @importFrom miRBaseConverter getAllMiRNAs
+#' @importFrom stats setNames
 
     .download_tf_mirna <- function(miRNAs,
                                       species = 'hsa',
@@ -63,15 +67,12 @@
       names(ans) <- unique(tf_mirna$miRNAs)
       ans <- lapply(ans, unique)
       return(ans)
-
-
     }
 
 
-
-
-#'
-#' @import  OmnipathR
+#' Download TF
+#' @importFrom OmnipathR import_tf_target_interactions
+#' @importFrom stats setNames
 
    .download_tf <- function(genes,
                            species="hsa",
@@ -94,8 +95,8 @@
 
 }
 
-
-#' @import biomaRt
+#' Download gene infos from biomaRt
+#' @importFrom biomaRt useMart getBM
 #' @importFrom stringr str_wrap
 #' @importFrom stats setNames
 #' @importFrom plyr rbind.fill
@@ -196,7 +197,7 @@
      return(ans)
  }
 
-
+   #' Download Organism gene infos
    #' @import Homo.sapiens Mus.musculus TxDb.Hsapiens.UCSC.hg38.knownGene
    #' @import TxDb.Mmusculus.UCSC.mm10.knownGene
    #' @importFrom stringr str_wrap
@@ -205,7 +206,7 @@
    #' @importFrom GenomicFeatures genes
    #' @importFrom dplyr mutate_all
    #' @importFrom BiocGenerics which.max
-   #' @importFrom AnnotationDbi select
+   #' @importFrom AnnotationDbi select columns
 
    .download_gene_info_org <- function(genes,
                                    species = "hsa",
@@ -309,7 +310,7 @@
    }
 
 
-
+#' Download gene info
    .download_gene_info <- function(genes,
                                    species = "hsa",
                                    biomaRt = F,

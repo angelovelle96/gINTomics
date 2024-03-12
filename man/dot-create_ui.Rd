@@ -2,10 +2,10 @@
 % Please edit documentation in R/interface_shiny.R
 \name{.create_ui}
 \alias{.create_ui}
-\title{Cretae user interface}
+\title{Create user interface}
 \usage{
 .create_ui(data_table)
 }
 \description{
-Cretae user interface
+Create user interface
 }
