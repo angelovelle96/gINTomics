@@ -35,10 +35,10 @@ run_multiomics <- function(data,
                            interactions_miRNA_target=NULL,
                            interactions_tf=NULL,
                            interactions_tf_miRNA=NULL,
-                           RNAseq=T,
-                           miRNAseq=T,
-                           normalize_miRNA_expr=T,
-                           normalize_gene_expr=T,
+                           RNAseq=TRUE,
+                           miRNAseq=TRUE,
+                           normalize_miRNA_expr=TRUE,
+                           normalize_gene_expr=TRUE,
                            norm_method_gene_expr="TMM",
                            norm_method_miRNA_expr="TMM",
                            class=NULL,
@@ -62,10 +62,10 @@ run_multiomics <- function(data,
     if(!is.null(data@ExperimentList$miRNA_exp))
       data <- c(data, miRNA_exp_original=data@ExperimentList$miRNA_exp)
 
-    deg_gene <- T
-    deg_mirna <- T
+    deg_gene <- TRUE
+    deg_mirna <- TRUE
     gene_genomic_res <- NULL
-    geno <- F
+    geno <- FALSE
     if(!is.null(data@ExperimentList$cnv_data) &
        !is.null(data@ExperimentList$gene_exp)&
        !is.null(data@ExperimentList$methylation)){
@@ -93,17 +93,17 @@ run_multiomics <- function(data,
         rownames(rresiduals),]
       assay(data@ExperimentList$gene_exp) <- as.matrix(rresiduals[,
         colnames(assay(data@ExperimentList$gene_exp))])
-      RNAseq <- F
-      normalize_gene_expr2 <- F
-      geno <- T
-      deg_gene <- F
+      RNAseq <- FALSE
+      normalize_gene_expr2 <- FALSE
+      geno <- TRUE
+      deg_gene <- FALSE
     }
 
 
     gene_cnv_res <- NULL
     if(!is.null(data@ExperimentList$cnv_data) &
        !is.null(data@ExperimentList$gene_exp) &
-       geno==F){
+       geno==FALSE){
       message("----------------Running gene CNV integration----------------")
       gene_cnv_res <- run_cnv_integration(
         expression = t(assay(data, i = "gene_exp")),
@@ -127,15 +127,15 @@ run_multiomics <- function(data,
         rownames(rresiduals),]
       assay(data@ExperimentList$gene_exp) <- as.matrix(rresiduals[,
         colnames(assay(data@ExperimentList$gene_exp))])
-    RNAseq <- F
-    normalize_gene_expr2 <- F
-    deg_gene <- F
+    RNAseq <- FALSE
+    normalize_gene_expr2 <- FALSE
+    deg_gene <- FALSE
       }
 
     gene_met_res <- NULL
     if(!is.null(data@ExperimentList$methylation) &
        !is.null(data@ExperimentList$gene_exp) &
-       geno==F){
+       geno==FALSE){
       message("------------Running gene methylation integration------------")
       gene_met_res <- run_met_integration(
         expression = t(assay(data, i = "gene_exp")),
@@ -146,7 +146,7 @@ run_multiomics <- function(data,
         normalize = normalize_gene_expr2,
         norm_method=norm_method_gene_expr,
         BPPARAM=BPPARAM)
-      deg_gene <- F
+      deg_gene <- FALSE
     }
 
     mirna_cnv_res <- NULL
@@ -175,9 +175,9 @@ run_multiomics <- function(data,
         rownames(rresiduals),]
       assay(data@ExperimentList$miRNA_exp) <- as.matrix(rresiduals[,
         colnames(assay(data@ExperimentList$miRNA_exp))])
-      miRNAseq <- F
-      normalize_miRNA_expr2 <- F
-      deg_mirna <- F
+      miRNAseq <- FALSE
+      normalize_miRNA_expr2 <- FALSE
+      deg_mirna <- FALSE
     }
 
 
@@ -198,7 +198,7 @@ run_multiomics <- function(data,
         run_deg=deg_gene,
         type="tf",
         BPPARAM=BPPARAM)
-      deg_gene <- F
+      deg_gene <- FALSE
     }
 
 
@@ -219,7 +219,7 @@ run_multiomics <- function(data,
         run_deg=deg_mirna,
         type="tf_miRNA",
         BPPARAM=BPPARAM)
-      deg_mirna <- F
+      deg_mirna <- FALSE
     }
 
 
@@ -240,7 +240,7 @@ run_multiomics <- function(data,
         run_deg=deg_gene,
         type="miRNA_target",
         BPPARAM=BPPARAM)
-      deg_gene <- F
+      deg_gene <- FALSE
     }
 
   ans <- new("MultiOmics", Filter(Negate(is.null),
@@ -256,6 +256,7 @@ run_multiomics <- function(data,
 
 
 ##########################################
+#' cnv integration
 .def_cnv_integration <- function(expression,
                                 cnv_data,
                                 sequencing_data,
@@ -264,7 +265,7 @@ run_multiomics <- function(data,
                                 BPPARAM,
                                 ...){
 
-  if(sequencing_data==T){
+  if(sequencing_data==TRUE){
     cnv_res <- .run_edgeR_integration(response_var = expression,
                                       covariates = cnv_data,
                                       normalize = normalize,
@@ -313,7 +314,7 @@ run_cnv_integration <- function(expression,
                                 normalize=T,
                                 norm_method="TMM",
                                 class=NULL,
-                                run_deg=T,
+                                run_deg=TRUE,
                                 BPPARAM=SerialParam(),
                                 ...){
 
@@ -361,6 +362,7 @@ run_cnv_integration <- function(expression,
 
 
 ##################################
+#' defining met integration
 .def_met_integration <- function( expression,
                                  methylation,
                                  sequencing_data,
@@ -369,7 +371,7 @@ run_cnv_integration <- function(expression,
                                  BPPARAM,
                                  ...){
 
-  if(sequencing_data==T){
+  if(sequencing_data==TRUE){
     met_res <- .run_edgeR_integration(response_var = expression,
                                       covariates = methylation,
                                       normalize = normalize,
@@ -417,11 +419,11 @@ run_cnv_integration <- function(expression,
 
 run_met_integration <- function( expression,
                                  methylation,
-                                 sequencing_data=T,
-                                 normalize=T,
+                                 sequencing_data=TRUE,
+                                 normalize=TRUE,
                                  norm_method="TMM",
                                  class=NULL,
-                                 run_deg=T,
+                                 run_deg=TRUE,
                                  BPPARAM=SerialParam(),
                                  ...){
 
@@ -468,6 +470,7 @@ run_met_integration <- function( expression,
 }
 
 ####################################
+#' def genomic integration
 .def_genomic_integration <- function(expression,
                                     cnv_data,
                                     methylation,
@@ -508,7 +511,7 @@ run_met_integration <- function( expression,
 
 
 
-  if(sequencing_data==T){
+  if(sequencing_data==TRUE){
 
 
     gen_res <- .run_edgeR_integration(response_var = expression,
@@ -576,13 +579,13 @@ run_met_integration <- function( expression,
 run_genomic_integration <- function(expression,
                                 cnv_data,
                                 methylation,
-                                sequencing_data=T,
-                                normalize=T,
+                                sequencing_data=TRUE,
+                                normalize=TRUE,
                                 norm_method="TMM",
                                 interactions=NULL,
                                 class=NULL,
-                                scale=T,
-                                run_deg=T,
+                                scale=TRUE,
+                                run_deg=TRUE,
                                 BPPARAM = SerialParam(),
                                 ...){
 
@@ -636,6 +639,7 @@ run_genomic_integration <- function(expression,
 }
 
 ################################
+#' def tf integration
 .def_tf_integration <- function(expression,
                                 tf_expression,
                                 interactions,
@@ -675,7 +679,7 @@ run_genomic_integration <- function(expression,
                                                 method = norm_method_cov)
 
 
-  if(sequencing_data==T){
+  if(sequencing_data==TRUE){
     tf_res <- .run_edgeR_integration(response_var = expression,
                                      covariates = tf_expression,
                                      interactions = interactions,
@@ -743,14 +747,14 @@ run_tf_integration <- function( expression,
                                 tf_expression=expression,
                                 interactions=NULL,
                                 type="none",
-                                sequencing_data=T,
+                                sequencing_data=TRUE,
                                 species="hsa",
-                                normalize=T,
+                                normalize=TRUE,
                                 norm_method="TMM",
-                                normalize_cov=T,
+                                normalize_cov=TRUE,
                                 norm_method_cov="TMM",
                                 class=NULL,
-                                run_deg=T,
+                                run_deg=TRUE,
                                 BPPARAM=SerialParam(),
                                 ...){
 
