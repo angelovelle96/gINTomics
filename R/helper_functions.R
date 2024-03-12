@@ -1,4 +1,4 @@
-
+#' Data check
 #' @importFrom stats sd
 
 .data_check <- function(response_var,
@@ -45,7 +45,7 @@
       response_var <- response_var[check_sample,]
       covariates <- covariates[check_sample,]
     }
-    check_sd <- apply(response_var, 2, function(x) sd(x, na.rm = T))
+    check_sd <- apply(response_var, 2, function(x) sd(x, na.rm = TRUE))
     check_sd[is.na(check_sd)] <- 0
     if(sum(check_sd==0)>0) {
       message(str_wrap("removing response variables with
@@ -54,7 +54,7 @@
     }
 
     if(is.numeric(covariates[,1])){
-      check_sd <- apply(covariates, 2, function(x) sd(x, na.rm = T))
+      check_sd <- apply(covariates, 2, function(x) sd(x, na.rm = TRUE))
       check_sd[is.na(check_sd)] <- 0
       if(sum(check_sd==0)>0) {
         message(str_wrap("removing covariates with
@@ -92,14 +92,14 @@
     return(rresult)
 }
 
-
+#' Covariates check
 #' @importFrom stats relevel
 
 .covariates_check <- function(response_var,
                              covariates,
                              interactions,
                              steady_covariates=NULL,
-                             linear=F,
+                             linear=FALSE,
                              reference=NULL){
 
   if(length(intersect(colnames(response_var), colnames(covariates)))>0){
@@ -125,7 +125,7 @@
   interactions <- lapply(interactions, function(x) gsub(bad_str, "_", x))
   colnames(covariates) <- gsub(bad_str, "_", colnames(covariates))
   covariates <- covariates[, colnames(covariates)%in%unlist(interactions)]
-  if(linear==T){
+  if(linear==TRUE){
     colnames(response_var) <- gsub(bad_str, "_", colnames(response_var))
     names(interactions) <- gsub(bad_str, "_", names(interactions))
   }
@@ -141,16 +141,16 @@
               steady_covariates=steady_covariates))
 }
 
-
+#' Generating formula for models
 #' @importFrom stats formula
 
 .generate_formula <- function(interactions,
-                             linear=F){
+                             linear=FALSE){
 
   fformula <- lapply(seq_along(interactions), function(x){
     cov <- interactions[[x]]
     ans <- formula(paste0("~", paste0(cov, collapse = "+")))
-    if(linear==T){
+    if(linear==TRUE){
       ans <- formula(paste0(names(interactions)[x],
                             "~", as.character(ans)[2]))
     }
@@ -161,24 +161,25 @@
 }
 
 #####################################################
+#' Building result matrices
 #' @importFrom plyr rbind.fill
 
 .building_result_matrices <- function(model_results,
                                      type,
-                                     single_cov=F){
+                                     single_cov=FALSE){
   ####coef extraction
   if(type=="edgeR"){
     tmp <- lapply(model_results, function(x) as.data.frame( x["coef",],
-                                                            check.names = F))
+                                                            check.names = FALSE))
   }
   if(type=="lm"){
     tmp <- lapply(model_results, function(x){
-      tmp <- data.frame(t(x[["coefficients"]][, "Estimate"]),check.names = F)
+      tmp <- data.frame(t(x[["coefficients"]][, "Estimate"]),check.names = FALSE)
       colnames(tmp) <- rownames(x[["coefficients"]])
       return(tmp)
     })
   }
-  if(single_cov==T){
+  if(single_cov==TRUE){
     tmp <- lapply(tmp, function(x){
       pos <- length(grep("Intercept", names(x)))+1
       if(length(x)>=pos){
@@ -205,16 +206,16 @@
   ######pvalue extraction
   if(type=="edgeR"){
     tmp <- lapply(model_results, function(x) as.data.frame( x["PValue",],
-                                                            check.names = F))
+                                                            check.names = FALSE))
   }
   if(type=="lm"){
     tmp <- lapply(model_results, function(x){
-      tmp <- data.frame(t(x[["coefficients"]][, "Pr(>|t|)"]),check.names = F)
+      tmp <- data.frame(t(x[["coefficients"]][, "Pr(>|t|)"]),check.names = FALSE)
       colnames(tmp) <- rownames(x[["coefficients"]])
       return(tmp)
     })
   }
-  if(single_cov==T){
+  if(single_cov==TRUE){
     tmp <- lapply(tmp, function(x){
       pos <- length(grep("Intercept", names(x)))+1
       if(length(x)>=pos){
@@ -231,7 +232,7 @@
   }
   pval_matrix <- rbind.fill(tmp)
   rownames(pval_matrix) <- names(model_results)
-  for(i in 1:ncol(pval_matrix)) {
+  for(i in seq_len(pval_matrix)) {
     tmp <- pval_matrix[, i]
     tmp[sapply(tmp, is.null)] <- NA
     tmp <- unlist(tmp)
@@ -282,15 +283,16 @@ create_multiassay <- function(methylation=NULL,
 
 
 ######################################################
+#' Data normalization
 #' @importFrom limma normalizeBetweenArrays
 #' @importFrom edgeR DGEList calcNormFactors cpm
     .data_norm <- function(data,
                           method="TMM",
-                          RNAseq=T){
+                          RNAseq=TRUE){
       if(RNAseq){
           data <- DGEList(t(data))
           data <- calcNormFactors(data, method=method)
-          data <- t(cpm(data, log = F))
+          data <- t(cpm(data, log = FALSE))
       }else{
           data <- normalizeBetweenArrays(data)
           }
@@ -298,6 +300,7 @@ create_multiassay <- function(methylation=NULL,
     }
 
 #########################################################
+#' ID conversion
 #' @importFrom stringi stri_replace_all_regex
 
     .id_conversion <- function(dictionary,
@@ -309,61 +312,62 @@ create_multiassay <- function(methylation=NULL,
         rownames(results$residuals),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
 
       colnames(results$coef_data) <- stri_replace_all_regex(
         colnames(results$coef_data),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
 
       rownames(results$coef_data) <- stri_replace_all_regex(
         rownames(results$coef_data),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
 
       colnames(results$pval_data) <- stri_replace_all_regex(
         colnames(results$pval_data),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
 
       rownames(results$pval_data) <- stri_replace_all_regex(
         rownames(results$pval_data),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
 
       colnames(results$fdr_data) <- stri_replace_all_regex(
         colnames(results$fdr_data),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
 
       rownames(results$fdr_data) <- stri_replace_all_regex(
         rownames(results$fdr_data),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
 
       colnames(results$data$response_var) <- stri_replace_all_regex(
         colnames(results$data$response_var),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
 
       colnames(results$data$covariates) <- stri_replace_all_regex(
         colnames(results$data$covariates),
         pattern = dictionary$tranformed,
         replacement = dictionary$original,
-        vectorize_all = F)
+        vectorize_all = FALSE)
        return(results)
     }
 
 
 
 #########################################################
+#' RandomForest selection
 #' @importFrom randomForest randomForest importance
 
 .rf_selection <- function(data,
@@ -373,9 +377,9 @@ create_multiassay <- function(methylation=NULL,
      as.integer(nrow(data)*0.4)){
     ans <- randomForest(formula, data)
     ans <- importance(ans)
-    ans <- ans[order(ans[,1], decreasing = T),]
+    ans <- ans[order(ans[,1], decreasing = TRUE),]
     tmp <- as.integer(nrow(data)*0.4)
-    ans <- ans[1:tmp]
+    ans <- ans[seqlen(tmp)]
     tmp <- paste(names(ans), collapse = "+")
     tmp <- paste(as.character(formula[2]), "~", tmp)
     ans <- as.formula(tmp)
@@ -390,13 +394,14 @@ create_multiassay <- function(methylation=NULL,
 
 
 ####################################################
+#'  Setting method for extracting results
 #' @importFrom reshape2 melt
 #' @importFrom dplyr left_join
 #' @importFrom stats IQR quantile
 
 setMethod("extract_model_res", "list",
           function(model_results,
-                   outliers=T,
+                   outliers=TRUE,
                    species="hsa",
                    filters=c("hgnc_symbol",
                              "ensembl_gene_id",
@@ -506,7 +511,7 @@ setMethod("extract_model_res", "list",
             mmin <- quantile(data$coef, 0.25) - 1.5*IQR(data$coef)
             mmax <- quantile(data$coef, 0.75) + 1.5*IQR(data$coef)
 
-            if(outliers==F){
+            if(outliers==FALSE){
               data <- data[data$coef>mmin,]
               data <- data[data$coef<mmax,]
             }
@@ -519,7 +524,7 @@ setMethod("extract_model_res", "list",
 ###################################################
 setMethod("extract_model_res", "MultiClass",
           function(model_results,
-                   outliers=T,
+                   outliers=TRUE,
                    species="hsa",
                    filters=c("hgnc_symbol",
                              "ensembl_gene_id",
@@ -535,18 +540,19 @@ setMethod("extract_model_res", "MultiClass",
                                 genes_info=genes_info,
                                 filters=filters,
                                 ...)
-      data$deg <- rep(F, nrow(data))
-      data$deg[data$response%in%deg] <- T
+      data$deg <- rep(FALSE, nrow(data))
+      data$deg[data$response%in%deg] <- TRUE
       return(data)
           })
 
 
 ####################################################
+#' Setting method for results extraction
 #' @importFrom plyr rbind.fill
 
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
-                   outliers=T,
+                   outliers=TRUE,
                    species="hsa",
                    filters=c("hgnc_symbol",
                              "ensembl_gene_id",
@@ -558,7 +564,7 @@ setMethod("extract_model_res", "MultiOmics",
             if(is.null(genes_info)){
                   if(names(model_results[[1]])[
                     length(model_results[[1]])]!="data"){
-                    tmp <- unlist(tmp, recursive = F)
+                    tmp <- unlist(tmp, recursive = FALSE)
                     tmp2 <- names(tmp)[-grep("\\.deg$", names(tmp))]
                     tmp <- lapply(tmp2, function(x) tmp[[x]])
                     names(tmp) <- tmp2
@@ -596,7 +602,7 @@ setMethod("extract_model_res", "MultiOmics",
             data <- rbind.fill(data)
             if("deg"%in%colnames(data)){
               deg <- unique(data$response[data$deg])
-              data$deg[data$response%in%deg] <- T
+              data$deg[data$response%in%deg] <- TRUE
             }
             return(data)
           }
@@ -605,6 +611,7 @@ setMethod("extract_model_res", "MultiOmics",
 
 
 ##################################
+#' Search genes
 search_gene <- function(genes,
                         model_res=NULL,
                         data_frame=NULL){
@@ -626,13 +633,17 @@ search_gene <- function(genes,
 }
 
 #########################################
-#' @import edgeR limma
+#' Finding DEGs
+#' @importFrom edgeR DGEList calcNormFactors estimateGLMCommonDisp
+#' estimateGLMTagwiseDisp glmFit glmLRT topTags
+#' @importFrom limma lmFit eBayes topTable
+#' @importFrom stats model.matrix
 
 .find_deg <- function(eexpression,
                       class,
-                      RNAseq=T,
+                      RNAseq=TRUE,
                       norm_method="TMM",
-                      normalize=T){
+                      normalize=TRUE){
 
   tmp <- apply(eexpression, 1, function(x) sum(is.na(x)))
   eexpression <- eexpression[tmp==0,]
@@ -659,7 +670,7 @@ search_gene <- function(genes,
 }
 
 ############################################
-
+#' Setting method for lapply
 #' @importFrom BiocGenerics lapply
 setMethod("lapply", "MultiClass",
           function(X, FUN){
@@ -672,7 +683,7 @@ setMethod("lapply", "MultiClass",
           })
 
 
-#'
+#' FDR calculation
 #' @importFrom stats p.adjust
 
 fdr <- function(pval_mat){
@@ -687,23 +698,24 @@ fdr <- function(pval_mat){
 }
 
 ##############################################
-
+#' Shiny data preprocessing
+#' @importFrom dplyr filter
 .shiny_preprocess <- function(data){
 
   data_table <- data
-  data_table <- filter(data_table, cov != '(Intercept)')   # elimino intercetta
-  rownames(data_table) <- 1:nrow(data_table)
+  data_table <- filter(data_table, cov != '(Intercept)')
+  rownames(data_table) <- seq_len(nrow(data_table))
   data_table <- data_table[, !(colnames(data_table) %in% c('significativity', 'sign'))]
   colnames(data)[colnames(data) == "response"] <- "gene"
   colnames(data)[colnames(data) == "start_response"] <- "start"
   colnames(data)[colnames(data) == "end_response"] <-"end"
   colnames(data)[colnames(data) == "chr_response"] <-"chr"
-  #data$cov_value <- abs(data$cov_value)
   ans <- list(data=data, data_table=data_table)
   return(ans)
 }
 
 ##############################################
+#' Change integration names
 .change_int_names <- function(nnames){
 
   tmp <- gsub("gene_genomic_res", "Gene CNV-Met", nnames)
@@ -715,8 +727,4 @@ fdr <- function(pval_mat){
   tmp <- gsub("mirna_target_res", "miRNA's targets", tmp)
   names(nnames) <- tmp
   return(nnames)
-
 }
-
-
-
