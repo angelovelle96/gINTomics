@@ -1,15 +1,15 @@
-
-#' @import parallel edgeR BiocParallel stringr RUVSeq
+#' Running edgeR integration
+#' @importFrom BiocParallel bplapply
 #' @importFrom plyr rbind.fill
 #' @importFrom stats residuals
 
-.run_edgeR_integration <-  function( response_var,
+.run_edgeR_integration <-  function(response_var,
                                     covariates,
                                     interactions = "auto",
                                     design_mat_allgene = NULL,
                                     offset_allgene = NULL,
                                     offset_singlegene = NULL,
-                                    normalize=T,
+                                    normalize=TRUE,
                                     norm_method = "TMM",
                                     steady_covariates = NULL,
                                     reference = NULL,
@@ -22,12 +22,12 @@
     covariates <- tmp$covariates
     interactions <- tmp$interactions
     tmp <- unlist(lapply(interactions, length))
-    single_cov=F
+    single_cov=FALSE
     if(sum(tmp==1)==length(tmp)){
-      single_cov=T
+      single_cov=TRUE
     }
 
-    if(normalize==F) offset_allgene <- matrix(1, ncol(response_var),
+    if(normalize==FALSE) offset_allgene <- matrix(1, ncol(response_var),
                                               nrow(response_var))
     fit_all <- .allgene_edgeR_model(
         response_var = response_var,
@@ -83,8 +83,9 @@
 
 
 ################################################################
+#' All edgeR gene models
 #' @importFrom stats model.matrix
-#' @import edgeR
+#' @importFrom edgeR glmFit DGEList calcNormFactors estimateGLMCommonDisp estimateGLMTagwiseDisp
 .allgene_edgeR_model <- function(response_var,
                                 design_mat_allgene = NULL,
                                 offset_allgene = NULL,
@@ -115,8 +116,8 @@
   return(fit_all)
 }
 
-
-#' @import parallel edgeR
+#' Single gene edgeR model
+#' @importFrom BiocParallel bplapply
 
 .singlegene_edgeR_model <- function( response_var,
                                     covariates,
@@ -147,8 +148,9 @@
   return(fit_list)
 }
 
-
+#' edger
 #' @importFrom stats model.matrix
+#' @importFrom edgeR glmFit DGEList
 
 .def_edger <- function(formula,
                       response_var,
@@ -191,8 +193,8 @@
 }
 
 
-
-#' @import parallel edgeR
+#' edgeR coefficient test
+#' @importFrom BiocParallel bplapply
 
 .edger_coef_test <- function(fit_list,
                             BPPARAM) {
@@ -202,6 +204,8 @@
 }
 
 #########################################################
+#' coefficient test
+#' @importFrom edgeR glmLRT
 
 .def_coef_test <- function(fit){
 
@@ -219,5 +223,4 @@
   top <- as.data.frame(top)
   return(top)
 }
-
 
