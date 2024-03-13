@@ -7,3 +7,5 @@
 inst/doc
 test.R
 omnipathr-log
+.gosling
+tests/testthat/.gosling
