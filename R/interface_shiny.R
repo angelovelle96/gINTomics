@@ -158,7 +158,8 @@
                                                      step = 0.005), ns = ns2)
                                      ),
                                      mainPanel(
-                                       plotlyOutput(ns2('plotly'))
+                                       plotlyOutput(ns2('plotly')),
+                                       div(style="height: 400px;")
                                      )
                                    )),
                           tabPanel("RidgeLine Plot",
@@ -523,7 +524,8 @@
                                                      step = 0.005), ns = ns)
                                      ),
                                      mainPanel(
-                                       plotlyOutput(ns('plotly'))
+                                       plotlyOutput(ns('plotly')),
+                                       div(style="height: 400px;")
                                      )
                                    )),
                           tabPanel("RidgeLine Plot",
@@ -822,7 +824,8 @@
                                                      step = 0.005), ns = ns2)
                                      ),
                                      mainPanel(
-                                       plotlyOutput(ns2('plotly'))
+                                       plotlyOutput(ns2('plotly')),
+                                       div(style="height: 400px;")
                                      )
                                    )),
                           tabPanel("RidgeLine Plot",
