@@ -1,11 +1,15 @@
 #' Prepare network data for visualization
 #'
 .prepare_network <- function(data_table){
+  tf_list <- c()
+  mirna_list <- c()
+  target_list <- c()
   tmp <- intersect(c('cov', 'response', 'pval', 'fdr', 'coef', 'class', 'omics'), colnames(data_table))
   all <- subset(data_table, omics %in% c('tf_res',
                                          'tf_mirna_res',
                                          'mirna_target_res'),
                 select = tmp)
+  if(nrow(all)==0) return(NULL)
   nodes <- data.frame(gene = c(all$cov, all$response))
   edges <- subset(all, select = tmp)
   nodes <- unique(nodes)
@@ -1121,7 +1125,7 @@ return(ccol)
                                    numTopMiCNV,
                                    scale){
 
-  tmp <-  data.frame(mirna_cnv=data_table$coef[
+  tmp <- data.frame(mirna_cnv=data_table$coef[
     data_table$omics == 'mirna_cnv_res'],
     pval_mirna_cnv=data_table$pval[
       data_table$omics == 'mirna_cnv_res'],
@@ -1143,13 +1147,13 @@ return(ccol)
     return(NULL)}
   df_heatmap_t <- as.data.frame(df_heatmap_t)
   top_mirna_cnv <- df_heatmap_t %>%
-    arrange(desc(abs(mirna_cnv)))  %>%
+    arrange(desc(abs(mirna_cnv))) %>%
     head(numTopMiCNV)
   expr_top <- top_mirna_cnv
-  expr_top_subset <- expr_top[, -c((ncol(expr_top) - 3):ncol(expr_top))]
+  expr_top_subset <- expr_top[, -c((ncol(expr_top) - 2):ncol(expr_top))]
   set.seed(123)
   row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv)
-  expr_top_subset <- as.matrix(expr_top)
+  expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
   if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
