@@ -1031,6 +1031,14 @@
 #' @importFrom shiny.gosling goslingOutput use_gosling
 #'
 .gint_subItem_circosCompleteInt <- function(data_table){
+  tmp <- ifelse(sum(unique(data_table$omics)%in%c("gene_genomic_res",
+                                                  "gene_cnv_res",
+                                                  "gene_met_res"))>0,
+                "Gene", NA)
+  tmp2 <- ifelse(sum(unique(data_table$omics)%in%c("mirna_cnv_res")),
+                 "miRNA", NA)
+  tmp <- c(tmp, tmp2)
+  tmp <- tmp[!is.na(tmp)]
   ns <- NS("circos")
   chr <- unique(data_table$chr_response)
   chr <- c("All", paste0("chr", mixedsort(chr[!is.na(chr)])))
@@ -1042,7 +1050,7 @@
                                     choices = unique(data_table$class),
                                     label = "Class"),
                         selectInput(inputId = ns("circosType"),
-                                    choices = c("Gene", "miRNA"),
+                                    choices = tmp,
                                     label = "Gene/miRNA"),
                         selectInput(inputId = ns('ChrSelect'),
                                     choices = chr,
