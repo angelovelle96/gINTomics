@@ -69,6 +69,7 @@ output$download_csv <- .download_csv(deg=FALSE,
                             data_table,
                             deg=FALSE){
   nnet <- .prepare_network(data_table)
+  if(is.null(nnet)) return(NULL)
   reactive_network <- .select_network(data_table = data_table,
                                     input = input,
                                     output = output,

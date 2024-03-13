@@ -332,12 +332,20 @@
       df <- df[!is.na(df$cnv_met), ]
     }
     df <- df[df$omics == integrationSelect,]
+    if(table){
     if (significativityCriteria == 'pval'){
-      df$significance <- ifelse(df$pval >= pvalRange[1] & df$pval <= pvalRange[2],
-                                "Significant", "Not Significant")
+      df <- df[df$pval>= pvalRange[1] & df$pval <= pvalRange[2],]
     }else{
-      df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
-                                "Significant", "Not Significant")
+      df <- df[df$fdr>= fdrRange[1] & df$fdr <= fdrRange[2],]
+    }
+    }else{
+      if (significativityCriteria == 'pval'){
+        df$significance <- ifelse(df$pval >= pvalRange[1] & df$pval <= pvalRange[2],
+                                  "Significant", "Not Significant")
+      }else{
+        df$significance <- ifelse(df$fdr >= fdrRange[1] & df$fdr <= fdrRange[2],
+                                  "Significant", "Not Significant")
+      }
     }
     if (nrow(df) == 0) return(NULL)
     lower_quantile <- quantile(df$coef, 0.001)
@@ -346,8 +354,8 @@
     if(table){
       return(df)
     }else{
-        return(ans)
-      }
+      return(ans)
+    }
   }) %>% bindEvent(input$IntegrationSelect,
                    input$ClassSelect,
                    input$SignificativityCriteria,
@@ -379,7 +387,7 @@
     fdrRange <- input$FdrRange
     if(!table){
       data_table <- data_table[!is.na(data_table$chr_cov),]
-      }
+    }
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
@@ -394,20 +402,30 @@
     if("class"%in%colnames(data_table)){
       data_table <- data_table[data_table$class == classSelect,]
     }
-    if(significativityCriteria == 'pval'){
-      data_table$significance <- ifelse(data_table$pval >= pvalRange[1] &
-                                          data_table$pval <= pvalRange[2],
-                                        "Significant",
-                                        "Not Significant")
+    if(table){
+      if(significativityCriteria == 'pval'){
+        data_table <- data_table[data_table$pval>= pvalRange[1] &
+                                   data_table$pval <= pvalRange[2],]
+      }else{
+        data_table <- data_table[data_table$fdr>= fdrRange[1] &
+                                   data_table$fdr <= fdrRange[2],]
+      }
     }else{
-      data_table$significance <- ifelse(data_table$fdr >= fdrRange[1] &
-                                          data_table$fdr <= fdrRange[2],
-                                        "Significant",
-                                        "Not Significant")
+      if(significativityCriteria == 'pval'){
+        data_table$significance <- ifelse(data_table$pval >= pvalRange[1] &
+                                            data_table$pval <= pvalRange[2],
+                                          "Significant",
+                                          "Not Significant")
+      }else{
+        data_table$significance <- ifelse(data_table$fdr >= fdrRange[1] &
+                                            data_table$fdr <= fdrRange[2],
+                                          "Significant",
+                                          "Not Significant")
+      }
     }
     if (nrow(data_table) == 0){
       return(NULL)}else{
-    return(data_table)}
+        return(data_table)}
   })%>%bindEvent(input$IntegrationSelect,
                  input$genomicTypeSelect,
                  input$ClassSelect,
