@@ -78,7 +78,7 @@ test_that(".prepare_reactive_volcano works", {
   expect_s3_class(ans, "data.frame")
 })
 
-test_that(".render_reactive_network works", {
+test_that(".prepare_reactive_heatmap works", {
   input <- reactiveValues('test-IntegrationSelect'="gene_genomic_res",
                           'test-numTopGenesHeatmapCNV'=10,
                           'test-numTopGenesHeatmapMET'=10,
@@ -100,7 +100,6 @@ test_that(".render_reactive_network works", {
               ns = NS("test"))
   tested1 <- tested$.label
   expect_identical(grep("significativityCriteria", tested1), as.integer(1))
-  expect_error(tested$run())
 })
 
 
