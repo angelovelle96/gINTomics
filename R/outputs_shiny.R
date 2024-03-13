@@ -1,11 +1,15 @@
 #' Prepare network data for visualization
 #'
 .prepare_network <- function(data_table){
+  tf_list <- c()
+  mirna_list <- c()
+  target_list <- c()
   tmp <- intersect(c('cov', 'response', 'pval', 'fdr', 'coef', 'class', 'omics'), colnames(data_table))
   all <- subset(data_table, omics %in% c('tf_res',
                                          'tf_mirna_res',
                                          'mirna_target_res'),
                 select = tmp)
+  if(nrow(all)==0) return(NULL)
   nodes <- data.frame(gene = c(all$cov, all$response))
   edges <- subset(all, select = tmp)
   nodes <- unique(nodes)
