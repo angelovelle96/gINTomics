@@ -254,6 +254,7 @@ plot_chr_distribution <- function(data_table,
                          width=800,
                          height=700){
     df <- fortify(enrich_result, showCategory = showCategory)
+    if(nrow(df)==0) return(NULL)
     df$Description <- as.character(df$Description)
     df <- df[order(df$GeneRatio, decreasing = TRUE),]
     df$Description <- unlist(lapply(df$Description, function(label) {
