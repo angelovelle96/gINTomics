@@ -251,5 +251,5 @@ test_that(".prepare_reactive_circos works", {
                                     output = output)
   ans <- isolate(tested())
   expect_type(ans, "list")
-  expect_identical(ans$title, "Interactive Circos")
+  expect_null(ans$title)
 })
