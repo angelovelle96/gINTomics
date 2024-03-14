@@ -569,11 +569,13 @@
     if (!bg_enrich$is_alive()) {
       data <- bg_enrich$get_result()
       if(sum(c("cnv", "met")%in%names(data))==2){
+        if(!class%in%names(data[[type]])) class <- 1
         ans <- data[[type]][[class]][[db]]
         if(is.null(ans)) return(NULL)
         ans2 <- dot_plotly(ans)
         ans <- list(plot=ans2, table=ans@result)
       }else{
+        if(!class%in%names(data)) class <- 1
         ans <- data[[class]][[db]]
         if(is.null(ans)) return(NULL)
         ans2 <- dot_plotly(ans)
@@ -599,6 +601,7 @@
     db <- input$DBSelectEnrich
     if (!bg_enrich$is_alive()) {
       data <- bg_enrich$get_result()
+      if(!class%in%names(data)) class <- 1
       tf <- names(data[[class]])
       ans <- lapply(tf, function(x){
         ans <- data[[class]][[x]][[db]]
