@@ -639,9 +639,7 @@
       ssel <- intersect(c("circos_genomic_mirna"), names(composed_view))
     }
     composed_view <- composed_view[[ssel]]
-    arranged_view <- arrange_views(title = 'Interactive Circos',
-                                   subtitle = 'subtitle',
-                                   views = composed_view,
+    arranged_view <- arrange_views(views = composed_view,
                                    layout = input$layout,
                                    xDomain = list(
                                      chromosome = input$ChrSelect

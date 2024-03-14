@@ -1139,22 +1139,22 @@
               sidebarPanel(
                 .gint_circos_box(),
                 HTML('<br> <br> <br> <br>'),
-                selectInput(inputId = ns('ClassSelect'),
-                            choices = unique(data_table$class),
-                            label = "Class"),
                 selectInput(inputId = ns("circosType"),
                             choices = tmp,
                             label = "Gene/miRNA"),
+                selectInput(inputId = ns('ClassSelect'),
+                            choices = unique(data_table$class),
+                            label = "Class"),
                 selectInput(inputId = ns('ChrSelect'),
                             choices = chr,
                             label = "Chromosome"),
+                selectInput(inputId = ns("layout"),
+                            choices = c("circular", "linear"),
+                            label = "Layout"),
                 actionButton(ns("Download_png"),"PNG",
                              icon = icon("cloud-arrow-down")),
                 actionButton(ns("Download_pdf"),"PDF",
-                             icon = icon("cloud-arrow-down")),
-                selectInput(inputId = ns("layout"),
-                            choices = c("circular", "linear"),
-                            label = "Layout")
+                             icon = icon("cloud-arrow-down"))
               ),
               mainPanel(
                 column(12, goslingOutput(ns('gosling_plot')),
@@ -1419,7 +1419,7 @@ website: https://romualdi.bio.unipd.it/
                     FDR, gene name and symbol etc.. Once the user has choosen
                     the genomic region of interest, it is also possible to
                     dowload an instantaneous of the plot.
-      "))
+      "), width="100%")
 }
 
 #' Defining Table box description
