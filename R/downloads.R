@@ -313,7 +313,7 @@
 #' Download gene info
    .download_gene_info <- function(genes,
                                    species = "hsa",
-                                   biomaRt = F,
+                                   biomaRt = FALSE,
                                    ...){
 
      if(biomaRt){

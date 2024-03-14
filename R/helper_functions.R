@@ -203,7 +203,7 @@
   }
   coef_matrix <- rbind.fill(tmp)
   rownames(coef_matrix) <- names(model_results)
-  for(i in 1:ncol(coef_matrix)) {
+  for(i in seq_len(ncol(coef_matrix))) {
     tmp <- coef_matrix[, i]
     tmp[sapply(tmp, is.null)] <- NA
     tmp <- unlist(tmp)
@@ -264,6 +264,12 @@
 #' @param miRNA_exp Matrix or SummarizedExperiment for miRNA expression data
 #' @param miRNA_cnv_data Matrix or SummarizedExperiment for miRNA's Copy
 #' Number Variations data
+#' @param ... Additional arguments to be passed to the function
+#' @return A MultiAssayExperiment object containing the provided assays.
+#' @examples
+#' Example usage:
+#' create_multiassay(methylation_data, cnv_data, gene_exp_data, miRNA_exp_data, miRNA_cnv_data)
+#'
 #' @export
 
 create_multiassay <- function(methylation=NULL,
@@ -401,11 +407,7 @@ create_multiassay <- function(methylation=NULL,
 
 
 ####################################################
-#'  Setting method for extracting results
-#' @importFrom reshape2 melt
-#' @importFrom dplyr left_join
-#' @importFrom stats IQR quantile
-
+#' @rdname extract_model_res
 setMethod("extract_model_res", "list",
           function(model_results,
                    outliers=TRUE,
@@ -529,6 +531,7 @@ setMethod("extract_model_res", "list",
 )
 
 ###################################################
+#' @rdname extract_model_res
 setMethod("extract_model_res", "MultiClass",
           function(model_results,
                    outliers=TRUE,
@@ -554,9 +557,7 @@ setMethod("extract_model_res", "MultiClass",
 
 
 ####################################################
-#' Setting method for results extraction
-#' @importFrom plyr rbind.fill
-
+#' @rdname extract_model_res
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
                    outliers=TRUE,

@@ -50,6 +50,8 @@ Imports:
     ReactomePA,
     clusterProfiler,
     dplyr
+    AnnotationDbi
+    TxDb.Hsapiens.UCSC.hg38.knownGene
 Depends: 
     R (>= 3.5.0)
 LazyData: false
