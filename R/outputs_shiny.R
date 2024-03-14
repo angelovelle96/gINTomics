@@ -139,6 +139,7 @@
 
 #' Render a Venn diagram
 #' @importFrom plotly ggplotly renderPlotly
+#' @importFrom ggplot2 ggplot theme_void labs
 #'
 .render_venn <- function(reactive_venn){
   renderPlotly({
@@ -147,8 +148,10 @@
     venn_diagram <- .build_venn(venn_data)
     venn_diagram <- ggplotly(venn_diagram)
     return(venn_diagram)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
-           main = "No data available")
+      ans <- ggplot() +
+        theme_void() +
+        labs(title = "No data available")
+      return(ggplotly(ans))
     }
   })
 }
@@ -207,6 +210,7 @@
 
 #' Render a volcano plot
 #' @importFrom plotly renderPlotly
+#' @importFrom ggplot2 ggplot theme_void labs
 #'
 .render_volcano <- function(reactive_volcano, annotations){
   renderPlotly({
@@ -214,8 +218,10 @@
     if(!is.null(volcano_data)){
     volcano_plot <- .build_volcano(volcano_data)
     return(volcano_plot)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
-           main = "No data available")
+      ans <- ggplot() +
+        theme_void() +
+        labs(title = "No data available")
+      return(ggplotly(ans))
     }
   })
 }
@@ -279,6 +285,7 @@
 
 #' Render a histogram
 #' @importFrom plotly ggplotly renderPlotly
+#' @importFrom ggplot2 ggplot theme_void labs
 #'
 .render_histo <- function(reactive_histo){
   renderPlotly({
@@ -286,8 +293,10 @@
     if(!is.null(histo_data)){
     histo_plot <- ggplotly(.build_histo(histo_data = histo_data))
     return(histo_plot)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
-           main = "No data available")
+      ans <- ggplot() +
+        theme_void() +
+        labs(title = "No data available")
+      return(ggplotly(ans))
     }
   })
 }

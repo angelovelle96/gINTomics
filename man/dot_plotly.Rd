@@ -4,7 +4,13 @@
 \alias{dot_plotly}
 \title{plotting enrichment}
 \usage{
-dot_plotly(enrich_result, showCategory = 10, width = 800, height = 700)
+dot_plotly(
+  enrich_result,
+  title = NULL,
+  showCategory = 10,
+  width = 800,
+  height = 700
+)
 }
 \description{
 plotting enrichment
