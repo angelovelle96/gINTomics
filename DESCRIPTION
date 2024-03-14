@@ -49,9 +49,22 @@ Imports:
     GenomicFeatures,
     ReactomePA,
     clusterProfiler,
-    dplyr
-    AnnotationDbi
-    TxDb.Hsapiens.UCSC.hg38.knownGene
+    dplyr,
+    AnnotationDbi,
+    TxDb.Hsapiens.UCSC.hg38.knownGene,
+    shiny,
+    shinydashboard,
+    plotly,
+    DT,
+    InteractiveComplexHeatmap,
+    ComplexHeatmap,
+    visNetwork,
+    shiny.gosling,
+    ggvenn,
+    RColorBrewer,
+    utils,
+    grDevices,
+    callr
 Depends: 
     R (>= 3.5.0)
 LazyData: false

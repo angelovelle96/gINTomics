@@ -6,6 +6,25 @@
 \usage{
 plot_volcano(data_table, class = NULL, omics = NULL, cnv_met = NULL)
 }
+\arguments{
+\item{data_table}{The data table containing information for the volcano plot.}
+
+\item{class}{Optional. The class of interactions to include in the volcano
+plot.}
+
+\item{omics}{Optional. The omics type for the volcano plot.}
+
+\item{cnv_met}{Optional. Indicates whether the volcano plot is for CNV or
+MET omics (only applicable if omics is specified).}
+}
+\value{
+A volcano plot.
+}
 \description{
 plotting volcano
+}
+\examples{
+# Example usage:
+# plot_volcano(data_table)
+
 }

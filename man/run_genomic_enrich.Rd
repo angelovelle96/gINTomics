@@ -17,14 +17,40 @@ run_genomic_enrich(
 )
 }
 \arguments{
-\item{qvalueCutoff}{description}
+\item{model_results}{Model integration results, typically a list containing
+different types of genomic results}
 
-\item{BPPARAM}{description}
+\item{species}{Species to select for the enrichment analysis. Default is
+"hsa" (Homo sapiens).}
 
-\item{extracted_data}{description}
+\item{pvalueCutoff}{P-value cutoff for significant enrichment. Default is
+0.1.}
 
-\item{...}{}
+\item{pAdjustMethod}{Method for adjusting p-values. Default is "BH"
+(Benjamini & Hochberg).}
+
+\item{qvalueCutoff}{Q-value cutoff for significant enrichment. Default is
+0.1.}
+
+\item{ont}{Ontology to use for the enrichment analysis. Default is "all".}
+
+\item{BPPARAM}{A BiocParallelParam object specifying parallelization
+options. Default is BiocParallel::SerialParam().}
+
+\item{extracted_data}{Pre-extracted data for enrichment analysis. If NULL,
+function will extract relevant data from model_results.}
+
+\item{...}{Additional arguments to be passed to the internal enrichment
+function.}
+}
+\value{
+A list containing enrichment results. If CNV and methylation data
+are available, it returns a nested list with results for each data type.
 }
 \description{
 Running genomic enrichment analysis
+}
+\examples{
+run_genomic_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
+
 }

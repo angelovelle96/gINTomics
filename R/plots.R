@@ -58,7 +58,7 @@ plot_venn <- function(data_table,
   input$fdrRangeVenn <- c(0, 0.05)
   input$pvalRangeVenn <- c(0,0.05)
   input$significativityCriteriaVenn <- "pval"
-  reactive_venn <- gINTomics:::.prepare_reactive_venn(data_table = data_table,
+  reactive_venn <- .prepare_reactive_venn(data_table = data_table,
                                                       input = input,
                                                       output = output,
                                                       deg = FALSE)

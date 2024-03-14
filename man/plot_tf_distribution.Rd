@@ -2,10 +2,27 @@
 % Please edit documentation in R/plots.R
 \name{plot_tf_distribution}
 \alias{plot_tf_distribution}
-\title{plotting tf distribution}
+\title{plotting TF distribution}
 \usage{
 plot_tf_distribution(data_table, class = NULL, pval = 0.05)
 }
+\arguments{
+\item{data_table}{The data table containing TF information.}
+
+\item{class}{Optional. The class of interactions to include in the
+distribution plot.}
+
+\item{pval}{Optional. The p-value threshold for significance in the
+distribution plot. Default is 0.05.}
+}
+\value{
+A TF distribution plot.
+}
 \description{
-plotting tf distribution
+plotting TF distribution
+}
+\examples{
+# Example usage:
+# plot_tf_distribution(data_table)
+
 }

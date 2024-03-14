@@ -188,8 +188,6 @@ run_multiomics <- function(data,
         }
       }
 
-
-
     tf_res <- NULL
     if(!is.null(data@ExperimentList$gene_exp)){
       message("-------------------Running TF integration-------------------")

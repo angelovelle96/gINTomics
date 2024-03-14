@@ -25,8 +25,18 @@ Variation data}
 
 \item{miRNA_cnv_data}{Matrix or SummarizedExperiment for miRNA's Copy
 Number Variations data}
+
+\item{...}{Additional arguments to be passed to the function}
+}
+\value{
+A MultiAssayExperiment object containing the provided assays.
 }
 \description{
 This function will generate a proper MultiAssayExperiment suitable for the
 \strong{run_multiomics} function.
+}
+\examples{
+Example usage:
+create_multiassay(methylation_data, cnv_data, gene_exp_data, miRNA_exp_data, miRNA_cnv_data)
+
 }
