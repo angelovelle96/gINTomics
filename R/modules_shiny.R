@@ -227,7 +227,7 @@ output$download_csv <- .download_csv(deg=FALSE,
       })
       observe({
         plots <- tf_plot()
-        for (i in seq_len(plots)) {
+        for (i in seq_len(length(plots))) {
           output[[paste0(names(plots)[i], "_plot")]] <- renderPlotly({
             plots[[i]][["plot"]]
           })
