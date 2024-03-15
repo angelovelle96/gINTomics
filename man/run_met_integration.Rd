@@ -41,3 +41,6 @@ expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 This function will perform an integration of expression data and methylation
 data
 }
+\examples{
+# Example usage_multi3:
+}

@@ -59,3 +59,6 @@ expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 This function will perform a complete Multi-Omics integration on a
 MultiAssayExperiment
 }
+\examples{
+# Example usage_multiomics:
+}

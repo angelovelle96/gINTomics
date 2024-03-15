@@ -7,8 +7,8 @@
 run_cnv_integration(
   expression,
   cnv_data,
-  sequencing_data = T,
-  normalize = T,
+  sequencing_data = TRUE,
+  normalize = TRUE,
   norm_method = "TMM",
   class = NULL,
   run_deg = TRUE,
@@ -40,4 +40,7 @@ expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 \description{
 This function will perform an integration of expression data and Copy Number
 Variations data
+}
+\examples{
+# Example usage_multi2:
 }

@@ -55,3 +55,6 @@ will be automatically defined according to response variable's colnames.}
 This function will perform an integration of expression data and Copy Number
 Variations data
 }
+\examples{
+# Example usage_multi4:
+}

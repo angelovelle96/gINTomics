@@ -29,7 +29,9 @@
 #' @import MultiAssayExperiment SummarizedExperiment
 #' @importFrom methods new
 #' @importFrom plyr rbind.fill
-#' @importFrom BiocParallel SerialParam bplapply bpparam
+#' @import BiocParallel
+#' @examples
+#' # Example usage_multiomics:
 #' @export
 run_multiomics <- function(data,
                            interactions_met=NULL,
@@ -261,7 +263,6 @@ run_multiomics <- function(data,
 }
 
 
-##########################################
 #' cnv integration
 .def_cnv_integration <- function(expression,
                                 cnv_data,
@@ -313,12 +314,14 @@ run_multiomics <- function(data,
 #' @param norm_method Normalization method to be used for
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
+#' @examples
+#' # Example usage_multi2:
 #' @export
 #' @importFrom BiocParallel bpparam SerialParam
 run_cnv_integration <- function(expression,
                                 cnv_data,
-                                sequencing_data=T,
-                                normalize=T,
+                                sequencing_data=TRUE,
+                                normalize=TRUE,
                                 norm_method="TMM",
                                 class=NULL,
                                 run_deg=TRUE,
@@ -368,7 +371,6 @@ run_cnv_integration <- function(expression,
 }
 
 
-##################################
 #' defining met integration
 .def_met_integration <- function( expression,
                                  methylation,
@@ -422,6 +424,8 @@ run_cnv_integration <- function(expression,
 #' @param norm_method Normalization method to be used for
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
+#' @examples
+#' # Example usage_multi3:
 #' @export
 #' @importFrom BiocParallel bpparam SerialParam
 
@@ -477,7 +481,6 @@ run_met_integration <- function( expression,
   return(met_res)
 }
 
-####################################
 #' def genomic integration
 .def_genomic_integration <- function(expression,
                                     cnv_data,
@@ -584,6 +587,8 @@ run_met_integration <- function( expression,
 #' will be automatically defined according to response variable's colnames.
 #' @importFrom plyr rbind.fill
 #' @importFrom BiocParallel bpparam SerialParam
+#' @examples
+#' # Example usage_multi4:
 #' @export
 run_genomic_integration <- function(expression,
                                 cnv_data,
@@ -647,7 +652,6 @@ run_genomic_integration <- function(expression,
   return(gen_res)
 }
 
-################################
 #' def tf integration
 .def_tf_integration <- function(expression,
                                 tf_expression,
@@ -752,6 +756,8 @@ run_genomic_integration <- function(expression,
 #' @param norm_method_cov Same as **norm_method** but for covariates.
 #' @importFrom stats quantile
 #' @importFrom BiocParallel bpparam SerialParam
+#' @examples
+#' # Example usage_multi5:
 #' @export
 
 run_tf_integration <- function( expression,
