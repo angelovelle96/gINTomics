@@ -73,7 +73,7 @@ new_multiassay <- create_multiassay(methylation = meth_matrix,
 
 ## Run Genomic integration
 
-In this section we will see how to perform an expression~CNV+met integration. The input data should be provided as matrices or data.frames. Rows represent samples, while each column represents the different response variables/covariates of the models. By default all the integration functions will assume that expression data are obtained through sequencing, you should set the `sequencing_data` argument to FALSE if they are not.  Expression data could be both normalized or not normalized, the function is able to normalize data by setting the `normalize` argument to TRUE (default). If you want you can specify custom interaction through the `interactions` argument otherwise  the function will automatically look for the genes of `expression` in `cnv_data`. 
+In this section we will see how to perform a gene_expression~CNV+met integration. The input data should be provided as matrices or data.frames. Rows represent samples, while each column represents the different response variables/covariates of the models. By default all the integration functions will assume that expression data are obtained through sequencing, you should set the `sequencing_data` argument to FALSE if they are not.  Expression data could be both normalized or not normalized, the function is able to normalize data by setting the `normalize` argument to TRUE (default). If you want you can specify custom interaction through the `interactions` argument otherwise  the function will automatically look for the genes of `expression` in `cnv_data`. 
 NOTE: if you customize genomics interactions, linking more covariates to a single response, the output may
 be not more compatible with the shiny visualization.
 
@@ -150,16 +150,27 @@ tf_miRNA_integration <- run_tf_integration(expression = t(miRNA_exp_matrix),
 
 ## Run complete Multi-Omics integration
 
-Finally we will see how to perform a complete integration using all the available omics. In order to run this function you need to generate a MultiAssayExperiment as showed at the beginning of this vignette. The function will automatically use all the omics contained in the MultiAssayExperiment to perform all the possible integrations showed before. Moreover, if CNV data are available, the first step will be the expression~CNV integration and all the following integrations that contain expression data as response variable will use instead the residuals of the expression~CNV model in order to filter out the effect of CNV.
+Finally we will see how to perform a complete integration using all the available omics. In order to run this function you need to generate a MultiAssayExperiment as showed at the beginning of this vignette. The function will automatically use all the omics contained in the MultiAssayExperiment to perform all the possible integrations showed before. Moreover, if genomic data are available (CNV and/or Methylation), the first step will be the genomic integration and all the following integrations that contain gene expression data as response variable will use instead the residuals of the genomic model in order to filter out the effect of CNV and/or methylation. This framework is used also for miRNA, but in this case only CNV data are supported.
 
 ```{r, message=FALSE}
 multiomics_integration <- run_multiomics(data = new_multiassay)
 
 ```
 
-## Visualization
+# Visualization
 
 Now let's see how you can visualize the results of your integration models.
+
+## Shiny app
+gINTomics provides an interactive environment, based on Shiny, that allows the user to easily visualize output results from integration models and to save them for downstream tasks and reports creation.
+Once multiomics integration has been performed users can provide the results to the `run_shiny` function.
+NOTE: Only the output of the `run_multiomics` function is compatible with `run_shiny`
+```{r, eval=FALSE}
+run_shiny(multiomics_integration)
+```
+
+
+
 
 ### Chromosome distribution plot
 
