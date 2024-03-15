@@ -81,20 +81,32 @@
 
 
 #' Running genomic enrichment analysis
-#' @param model_results
-#' @param species
-#' @param pvalueCutoff
-#' @param pAdjustMethod
-#' @param qvalueCutoff description
-#' @param ont
-#' @param BPPARAM description
-#' @param extracted_data description
-#' @param ...
+#' @param model_results Model integration results, typically a list containing
+#' different types of genomic results
+#' @param species Species to select for the enrichment analysis. Default is
+#' "hsa" (Homo sapiens).
+#' @param pvalueCutoff P-value cutoff for significant enrichment. Default is
+#' 0.1.
+#' @param pAdjustMethod Method for adjusting p-values. Default is "BH"
+#' (Benjamini & Hochberg).
+#' @param qvalueCutoff Q-value cutoff for significant enrichment. Default is
+#' 0.1.
+#' @param ont Ontology to use for the enrichment analysis. Default is "all".
+#' @param BPPARAM A BiocParallelParam object specifying parallelization
+#' options. Default is BiocParallel::SerialParam().
+#' @param extracted_data Pre-extracted data for enrichment analysis. If NULL,
+#' function will extract relevant data from model_results.
+#' @param ... Additional arguments to be passed to the internal enrichment
+#' function.
 #'
-#' @return
-#' @export
+#' @return A list containing enrichment results. If CNV and methylation data
+#' are available, it returns a nested list with results for each data type.
 #'
 #' @examples
+#' run_genomic_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
+#'
+#' @export
+#'
 
 run_genomic_enrich <- function(model_results,
                        species="hsa",
@@ -174,20 +186,31 @@ return(enrichment)
 
 
 #' Running TF enrichment analysis
-#' @param model_results
-#' @param species
-#' @param pvalueCutoff
-#' @param qvalueCutoff description
-#' @param pAdjustMethod
-#' @param ont
-#' @param BPPARAM
-#' @param extracted_data description
-#' @param ...
+#' @param model_results Model integration results, typically a list containing
+#' TF data.
+#' @param species Species to select for the enrichment analysis. Default is
+#' "hsa" (Homo sapiens).
+#' @param pvalueCutoff P-value cutoff for significant enrichment. Default is
+#' 0.1.
+#' @param qvalueCutoff Q-value cutoff for significant enrichment. Default is
+#' 0.1.
+#' @param pAdjustMethod Method for adjusting p-values. Default is "BH"
+#' (Benjamini & Hochberg).
+#' @param ont Ontology to use for the enrichment analysis. Default is "all".
+#' @param BPPARAM A BiocParallelParam object specifying parallelization
+#' options. Default is BiocParallel::SerialParam().
+#' @param extracted_data Pre-extracted data for enrichment analysis. If NULL,
+#' function will extract relevant data from model_results.
+#' @param ... Additional arguments to be passed to the internal enrichment
+#' function.
 #'
-#' @return
-#' @export
+#' @return A list containing TF enrichment results.
 #'
 #' @examples
+#' run_tf_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
+#'
+#' @export
+#'
 
 run_tf_enrich <- function(model_results,
                           species="hsa",
@@ -231,7 +254,7 @@ run_tf_enrich <- function(model_results,
     names(tmp2) <- tmp
     tmp2 <- unlist(tmp2)
     tmp2 <- tmp2[tmp2>12]
-    tmp2 <- sort(tmp2, decreasing = T)
+    tmp2 <- sort(tmp2, decreasing = TRUE)
     if(length(tmp2)>10) tmp2 <- tmp2[1:10]
     tmp <- lapply(names(tmp2), function(y) x[x$cov==y,])
     names(tmp) <- names(tmp2)

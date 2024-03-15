@@ -14,6 +14,31 @@ plot_heatmap(
   pval = 0.05
 )
 }
+\arguments{
+\item{multiomics_integration}{The multiomics integration object.}
+
+\item{data_table}{The data table containing information for the heatmap.}
+
+\item{omics}{The type of omics data for the heatmap.}
+
+\item{scale}{Optional. The scale type for the heatmap. Default is "none".}
+
+\item{genes_number}{Optional. The number of genes to include in the heatmap.
+Default is 50.}
+
+\item{class}{Optional. The class of interactions to include in the heatmap.}
+
+\item{pval}{Optional. The p-value threshold for significance in the heatmap.
+Default is 0.05.}
+}
+\value{
+A heatmap plot.
+}
 \description{
 plotting heatmap
+}
+\examples{
+# Example usage:
+# plot_heatmap(multiomics_integration, data_table, omics)
+
 }

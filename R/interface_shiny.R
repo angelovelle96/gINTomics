@@ -1113,10 +1113,10 @@
 }
 
 #' Circos Subitem for Complete Integration
-#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput icon
 #' conditionalPanel sliderInput tabPanel NS tags fluidPage column mainPanel
 #' sidebarPanel div actionButton
-#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem icon
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
 #' @importFrom shiny.gosling goslingOutput use_gosling
 #'

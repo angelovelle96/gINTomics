@@ -12,6 +12,28 @@ plot_chr_distribution(
   pval = 0.05
 )
 }
+\arguments{
+\item{data_table}{The data table containing information for plotting
+chromosome distribution.}
+
+\item{class}{Optional. The class of interactions to include in the plot.}
+
+\item{omics}{Optional. The type of omics data for the plot.}
+
+\item{cnv_met}{Optional. The type of copy number variation or methylation
+data.}
+
+\item{pval}{Optional. The p-value threshold for significance. Default is
+0.05.}
+}
+\value{
+A histogram plot showing chromosome distribution.
+}
 \description{
 plotting chr distribution
+}
+\examples{
+# Example usage:
+# plot_chr_distribution(data_table, class, omics, cnv_met, pval)
+
 }

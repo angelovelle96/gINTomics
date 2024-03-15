@@ -221,13 +221,13 @@ output$download_csv <- .download_csv(deg=FALSE,
                downloadButton(ns(paste0(names(plots)[i], "_download_csv"))),
                HTML(paste0(rep("<br>", 20), collapse = "")))
         })
-        plot_list <- as.list(unlist(plot_list, recursive = F))
+        plot_list <- as.list(unlist(plot_list, recursive = FALSE))
         do.call(tagList, plot_list)
         return(plot_list)
       })
       observe({
         plots <- tf_plot()
-        for (i in 1:length(plots)) {
+        for (i in seq_len(length(plots))) {
           output[[paste0(names(plots)[i], "_plot")]] <- renderPlotly({
             plots[[i]][["plot"]]
           })

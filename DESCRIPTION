@@ -19,7 +19,6 @@ RoxygenNote: 7.3.1
 Imports: 
     BiocParallel,
     biomaRt,
-    circlize,
     ComplexHeatmap,
     OmnipathR,
     edgeR,
@@ -28,9 +27,7 @@ Imports:
     gtools,
     MultiAssayExperiment,
     miRBaseConverter,
-    parallel,
     plyr,
-    RUVSeq,
     stringi,
     stringr,
     SummarizedExperiment,
@@ -40,8 +37,6 @@ Imports:
     randomForest,
     Homo.sapiens,
     Mus.musculus,
-    VennDetail,
-    cowplot,
     limma,
     org.Hs.eg.db,
     org.Mm.eg.db,
@@ -49,9 +44,29 @@ Imports:
     GenomicFeatures,
     ReactomePA,
     clusterProfiler,
-    dplyr
+    dplyr,
+    AnnotationDbi,
+    TxDb.Hsapiens.UCSC.hg38.knownGene,
+    TxDb.Mmusculus.UCSC.mm10.knownGene,
+    shiny,
+    GenomicRanges,
+    ggtree,
+    survival,
+    shinydashboard,
+    plotly,
+    DT,
+    VennDetail,
+    InteractiveComplexHeatmap,
+    ComplexHeatmap,
+    visNetwork,
+    shiny.gosling,
+    ggvenn,
+    RColorBrewer,
+    utils,
+    grDevices,
+    callr
 Depends: 
-    R (>= 3.5.0)
+    R (>= 4.3.0)
 LazyData: false
 Suggests: 
     knitr,

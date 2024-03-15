@@ -203,7 +203,7 @@
   }
   coef_matrix <- rbind.fill(tmp)
   rownames(coef_matrix) <- names(model_results)
-  for(i in 1:ncol(coef_matrix)) {
+  for(i in seq_len(ncol(coef_matrix))) {
     tmp <- coef_matrix[, i]
     tmp[sapply(tmp, is.null)] <- NA
     tmp <- unlist(tmp)
@@ -264,6 +264,12 @@
 #' @param miRNA_exp Matrix or SummarizedExperiment for miRNA expression data
 #' @param miRNA_cnv_data Matrix or SummarizedExperiment for miRNA's Copy
 #' Number Variations data
+#' @param ... Additional arguments to be passed to the function
+#' @return A MultiAssayExperiment object containing the provided assays.
+#' @examples
+#' Example usage:
+#' create_multiassay(methylation_data, cnv_data, gene_exp_data, miRNA_exp_data, miRNA_cnv_data)
+#'
 #' @export
 
 create_multiassay <- function(methylation=NULL,
@@ -401,11 +407,7 @@ create_multiassay <- function(methylation=NULL,
 
 
 ####################################################
-#'  Setting method for extracting results
-#' @importFrom reshape2 melt
-#' @importFrom dplyr left_join
-#' @importFrom stats IQR quantile
-
+#' @rdname extract_model_res
 setMethod("extract_model_res", "list",
           function(model_results,
                    outliers=TRUE,
@@ -529,6 +531,7 @@ setMethod("extract_model_res", "list",
 )
 
 ###################################################
+#' @rdname extract_model_res
 setMethod("extract_model_res", "MultiClass",
           function(model_results,
                    outliers=TRUE,
@@ -554,9 +557,7 @@ setMethod("extract_model_res", "MultiClass",
 
 
 ####################################################
-#' Setting method for results extraction
-#' @importFrom plyr rbind.fill
-
+#' @rdname extract_model_res
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
                    outliers=TRUE,
@@ -737,3 +738,45 @@ fdr <- function(pval_mat){
   names(nnames) <- tmp
   return(nnames)
 }
+
+
+#' @importClassesFrom edgeR DGEGLM
+#' @importFrom stats poisson
+#' @importFrom MASS negative.binomial
+#' @importFrom stats residuals
+#' @exportS3Method gINTomics::residuals
+residuals.DGEGLM <- function(object, type=c("deviance", "pearson"), ...) {
+  y <- as.matrix(object$counts)
+  mu <- as.matrix(object$fitted.values)
+  theta <- 1/object$dispersion
+  if(is.null(object$weights)) {
+    wts <- rep(1, ncol(object$counts))
+  } else {
+    wts <- as.matrix(object$weights)
+  }
+  type <- match.arg(type)
+  ymut <- cbind(y, mu, theta)
+
+  res <- t(apply(ymut, 1, function(x) {
+    yy <- as.vector(x[seq_len(ncol(y))])
+    mm <- as.vector(x[seq((ncol(y)+1),(ncol(y)+ncol(mu)))])
+    t <- x[length(x)]
+    if(type=="deviance") {
+      if(t==Inf) {
+        d.res <- sqrt(pmax((poisson()$dev.resids)(yy, mm, wts), 0))
+      } else {
+        d.res <- sqrt(pmax((negative.binomial(theta=t)$dev.resids)(yy, pmax(mm, 1e-8), wts), 0))
+      }
+      return(ifelse(yy > mm, d.res, -d.res))
+    } else if(type=="pearson") {
+      if(t==Inf) {
+        return((yy - mm) * sqrt(wts) / pmax(sqrt(poisson()$variance(mm)), 1))
+      } else {
+        return((yy - mm) * sqrt(wts) / pmax(sqrt(negative.binomial(theta=t)$variance(mm)), 1))
+      }
+    }
+  }))
+  return(res)
+}
+
+

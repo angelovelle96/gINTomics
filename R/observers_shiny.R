@@ -307,9 +307,8 @@
 }
 
 #' Prepare Reactive Ridge Plot
-#' @importFrom dplyr mutate_if
+#' @importFrom dplyr mutate_if %>%
 #' @importFrom shiny reactive bindEvent
-#' @importFrom dplyr %>%
 #'
 .prepare_reactive_ridge <- function(data_table,
                                     input,
@@ -366,10 +365,9 @@
 
 
 #' Prepare Reactive Histogram
-#' @importFrom dplyr mutate_if
+#' @importFrom dplyr mutate_if %>%
 #' @importFrom gtools mixedsort
 #' @importFrom shiny reactive bindEvent
-#' @importFrom dplyr %>%
 #'
 .prepare_reactive_histo <- function(data_table,
                                     input,
