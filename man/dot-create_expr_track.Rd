@@ -4,7 +4,7 @@
 \alias{.create_expr_track}
 \title{Create Expression track for Circos visualization}
 \usage{
-.create_expr_track(gr, genomic = F)
+.create_expr_track(gr, genomic = FALSE)
 }
 \description{
 Create Expression track for Circos visualization

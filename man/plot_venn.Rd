@@ -6,6 +6,20 @@
 \usage{
 plot_venn(data_table, class = NULL)
 }
+\arguments{
+\item{data_table}{The data table containing information for the Venn diagram.}
+
+\item{class}{Optional. The class of interactions to include in the Venn
+diagram.}
+}
+\value{
+A Venn diagram plot.
+}
 \description{
 plotting venn
+}
+\examples{
+# Example usage:
+# plot_venn(data_table)
+
 }

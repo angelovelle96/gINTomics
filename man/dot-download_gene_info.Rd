@@ -4,7 +4,7 @@
 \alias{.download_gene_info}
 \title{Download gene info}
 \usage{
-.download_gene_info(genes, species = "hsa", biomaRt = F, ...)
+.download_gene_info(genes, species = "hsa", biomaRt = FALSE, ...)
 }
 \description{
 Download gene info

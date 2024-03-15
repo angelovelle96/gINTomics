@@ -6,6 +6,25 @@
 \usage{
 plot_ridge(data_table, class = NULL, omics = NULL, cnv_met = NULL)
 }
+\arguments{
+\item{data_table}{The data table containing information for the ridge plot.}
+
+\item{class}{Optional. The class of interactions to include in the ridge
+plot.}
+
+\item{omics}{Optional. The omics type for the ridge plot.}
+
+\item{cnv_met}{Optional. Indicates whether the ridge plot is for CNV or MET
+omics (only applicable if omics is specified).}
+}
+\value{
+A ridge plot.
+}
 \description{
 plotting ridge
+}
+\examples{
+# Example usage:
+# plot_ridge(data_table)
+
 }

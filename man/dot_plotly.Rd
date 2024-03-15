@@ -12,6 +12,26 @@ dot_plotly(
   height = 700
 )
 }
+\arguments{
+\item{enrich_result}{Enrichment analysis results.}
+
+\item{title}{Title of the plot.}
+
+\item{showCategory}{Number of categories to display.}
+
+\item{width}{Width of the plot.}
+
+\item{height}{Height of the plot.}
+}
+\value{
+A plotly object containing the dot plot.
+}
 \description{
 plotting enrichment
+}
+\examples{
+# Example usage:
+# dot_plotly(enrichment_result, title = "Enrichment Analysis",
+showCategory = 10)
+
 }

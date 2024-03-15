@@ -400,7 +400,7 @@
 #' @importFrom shiny downloadHandler
 #' @importFrom utils write.table write.csv
 #'
-.download_csv <- function(tf=FALSE,
+.download_csv <- function(tf= FALSE,
                          deg = FALSE,
                          bg_enr = NULL,
                          plotType = "histo",
@@ -519,7 +519,7 @@
 .circos_preprocess <- function(data){
   dataframes <- lapply(unique(data$omics), function(x) {
     single_omic_df <- data[data$omics==x,]
-    if(max(single_omic_df$response_value, na.rm = T)>30){
+    if(max(single_omic_df$response_value, na.rm = TRUE)>30){
       single_omic_df$response_value <- log2(single_omic_df$response_value+1)
     }
     return(single_omic_df)
@@ -581,12 +581,12 @@ if(is.null(colors)){
 }
 vvalues <- as.numeric(vvalues)
 if(min(vvalues)<0){
-  breaks <- c(seq(min(vvalues, na.rm = T),0, len=n/2),
-               seq(0.00001, max(vvalues, na.rm = T), len=n/2))
+  breaks <- c(seq(min(vvalues, na.rm = TRUE),0, len=n/2),
+               seq(0.00001, max(vvalues, na.rm = TRUE), len=n/2))
 }else{
-  breaks <- c(seq(min(vvalues, na.rm = T),mean(vvalues, na.rm = T), len=n/2),
-               seq(mean(vvalues, na.rm = T)+0.00001,
-                   max(vvalues, na.rm = T), len=n/2))
+  breaks <- c(seq(min(vvalues, na.rm = TRUE),mean(vvalues, na.rm = TRUE), len=n/2),
+               seq(mean(vvalues, na.rm = TRUE)+0.00001,
+                   max(vvalues, na.rm = TRUE), len=n/2))
 }
 ii <- cut(unique(vvalues),
           breaks = breaks,
@@ -598,13 +598,9 @@ return(ccol)
 
 
 #' Create single track for Circos visualization
-#' @importFrom shiny.gosling add_single_track
-#' @importFrom shiny.gosling visual_channel_x
-#' @importFrom shiny.gosling visual_channel_y
-#' @importFrom shiny.gosling visual_channel_color
-#' @importFrom shiny.gosling visual_channel_tooltips
-#' @importFrom shiny.gosling visual_channel_tooltip
-#' @importFrom shiny.gosling track_data_gr
+#' @importFrom shiny.gosling add_single_track visual_channel_x visual_channel_y
+#' visual_channel_color visual_channel_tooltips visual_channel_tooltip
+#' track_data_gr
 .create_single_track <- function(data,
                                  dataValue=NULL,
                                  x_axis=NULL,
@@ -661,7 +657,7 @@ return(ccol)
     gr$df_cnv$cnv_met2 <- "cnv/met"
     track_cnv <- .create_cnv_track(gr$df_cnv)
     track_met <- .create_met_track(gr$df_met)
-    track_expr <- .create_expr_track(gr$df_cnv, genomic=T)
+    track_expr <- .create_expr_track(gr$df_cnv, genomic=TRUE)
     track_coef_cnv <- .create_coef_track(gr$df_cnv)
     track_coef_met <- .create_coef_track(gr$df_met)
     tracks <- c(tracks, list(track_cnv=track_cnv,
@@ -740,7 +736,6 @@ return(ccol)
 
 #' Create Met track for Circos visualization
 #'
-#'
 .create_met_track <- function(gr){
   gr$cov_value2 <- as.character(gr$cov_value_original)
   ccol <- .circos_track_cols(vvalues = gr$cov_value2)
@@ -772,8 +767,7 @@ return(ccol)
 
 #' Create Expression track for Circos visualization
 #'
-#'
-.create_expr_track <- function(gr, genomic=F){
+.create_expr_track <- function(gr, genomic=FALSE){
   cnv_met <- ifelse(genomic, "cnv_met2", "cnv_met")
   track_expr <- .create_single_track(data=gr,
                                      dataValue='response_value',
@@ -792,14 +786,13 @@ return(ccol)
                                      tooltipAlt3="Class:",
                                      tooltipField4=cnv_met,
                                      tooltipAlt4="Integration Type:",
-                                     legend=T,
+                                     legend=TRUE,
                                      colorType="quantitative",
                                      title="Expression")
   return(track_expr)
 }
 
 #' Create Coefficient track for Circos visualization
-#'
 #'
 .create_coef_track <- function(gr){
   gr$coef2 <- as.character(gr$coef_original)
@@ -882,8 +875,7 @@ return(ccol)
 
 
 #' Create composed view for Circos visualization
-#' @importFrom shiny.gosling compose_view
-#' @importFrom shiny.gosling add_multi_tracks
+#' @importFrom shiny.gosling compose_view add_multi_tracks
 #'
 .create_composed_view <- function(tracks, width, height) {
 

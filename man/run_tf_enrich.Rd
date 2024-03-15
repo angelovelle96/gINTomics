@@ -17,12 +17,39 @@ run_tf_enrich(
 )
 }
 \arguments{
-\item{qvalueCutoff}{description}
+\item{model_results}{Model integration results, typically a list containing
+TF data.}
 
-\item{extracted_data}{description}
+\item{species}{Species to select for the enrichment analysis. Default is
+"hsa" (Homo sapiens).}
 
-\item{...}{}
+\item{pvalueCutoff}{P-value cutoff for significant enrichment. Default is
+0.1.}
+
+\item{qvalueCutoff}{Q-value cutoff for significant enrichment. Default is
+0.1.}
+
+\item{pAdjustMethod}{Method for adjusting p-values. Default is "BH"
+(Benjamini & Hochberg).}
+
+\item{ont}{Ontology to use for the enrichment analysis. Default is "all".}
+
+\item{BPPARAM}{A BiocParallelParam object specifying parallelization
+options. Default is BiocParallel::SerialParam().}
+
+\item{extracted_data}{Pre-extracted data for enrichment analysis. If NULL,
+function will extract relevant data from model_results.}
+
+\item{...}{Additional arguments to be passed to the internal enrichment
+function.}
+}
+\value{
+A list containing TF enrichment results.
 }
 \description{
 Running TF enrichment analysis
+}
+\examples{
+run_tf_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
+
 }
