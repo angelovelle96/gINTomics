@@ -19,7 +19,10 @@ A Venn diagram plot.
 plotting venn
 }
 \examples{
-# Example usage:
-# plot_venn(data_table)
+# Example usage2:
+data("ov_test_tcga_omics")
+multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+data_table <- extract_model_res(multiomics_integration)
+plot_venn(data_table)
 
 }

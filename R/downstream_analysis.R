@@ -103,6 +103,7 @@
 #' are available, it returns a nested list with results for each data type.
 #'
 #' @examples
+#' # Example usage:
 #' run_genomic_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
 #'
 #' @export
@@ -207,6 +208,7 @@ return(enrichment)
 #' @return A list containing TF enrichment results.
 #'
 #' @examples
+#' # Example usage:
 #' run_tf_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
 #'
 #' @export
@@ -271,7 +273,6 @@ run_tf_enrich <- function(model_results,
 }
 
 
-######################################
 #' Making groups
 #' @importFrom ComplexHeatmap pheatmap
 .make_groups <- function(model_results){

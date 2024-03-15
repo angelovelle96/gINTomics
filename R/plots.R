@@ -1,5 +1,4 @@
-##############################
-###############################
+
 #' Plotting network
 #'
 #' @param data_table The data table containing network information.
@@ -11,8 +10,11 @@
 #' @return A network plot.
 #'
 #' @examples
-#' # Example usage:
-#' # plot_network(data_table)
+#' # Example usage1:
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
+#' plot_network(data_table)
 #'
 #' @export
 plot_network <- function(data_table,
@@ -33,8 +35,6 @@ plot_network <- function(data_table,
 
 }
 
-#########################
-###############################
 
 #' plotting venn
 #'
@@ -45,10 +45,12 @@ plot_network <- function(data_table,
 #' @return A Venn diagram plot.
 #'
 #' @examples
-#' # Example usage:
-#' # plot_venn(data_table)
+#' # Example usage2:
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
+#' plot_venn(data_table)
 #'
-#' @export
 plot_venn <- function(data_table,
                       class=NULL){
   if(is.null(class) & "class"%in%colnames(data_table))
@@ -68,9 +70,6 @@ plot_venn <- function(data_table,
 }
 
 
-#########################
-###############################
-
 #' plotting volcano
 #'
 #' @param data_table The data table containing information for the volcano plot.
@@ -83,10 +82,12 @@ plot_venn <- function(data_table,
 #' @return A volcano plot.
 #'
 #' @examples
-#' # Example usage:
-#' # plot_volcano(data_table)
+#' # Example usage3:
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
+#' plot_volcano(data_table)
 #'
-#' @export
 plot_volcano <- function(data_table,
                          class=NULL,
                          omics=NULL,
@@ -111,9 +112,6 @@ plot_volcano <- function(data_table,
 }
 
 
-#########################
-###############################
-
 #' plotting ridge
 #'
 #' @param data_table The data table containing information for the ridge plot.
@@ -126,10 +124,12 @@ plot_volcano <- function(data_table,
 #' @return A ridge plot.
 #'
 #' @examples
-#' # Example usage:
-#' # plot_ridge(data_table)
+#' # Example usage4:
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
+#' plot_ridge(data_table)
 #'
-#' @export
 plot_ridge <- function(data_table,
                        class=NULL,
                        omics=NULL,
@@ -156,8 +156,6 @@ plot_ridge <- function(data_table,
 }
 
 
-#########################
-###############################
 #' plotting heatmap
 #'
 #' @param multiomics_integration The multiomics integration object.
@@ -173,10 +171,12 @@ plot_ridge <- function(data_table,
 #' @return A heatmap plot.
 #'
 #' @examples
-#' # Example usage:
-#' # plot_heatmap(multiomics_integration, data_table, omics)
+#' # Example usage5:
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
+#' plot_heatmap(data_table)
 #'
-#' @export
 plot_heatmap <- function(multiomics_integration,
                          data_table,
                          omics,
@@ -254,8 +254,6 @@ plot_heatmap <- function(multiomics_integration,
 }
 
 
-#########################
-###############################
 #' plotting chr distribution
 #'
 #' @param data_table The data table containing information for plotting
@@ -270,10 +268,12 @@ plot_heatmap <- function(multiomics_integration,
 #' @return A histogram plot showing chromosome distribution.
 #'
 #' @examples
-#' # Example usage:
-#' # plot_chr_distribution(data_table, class, omics, cnv_met, pval)
+#' # Example usage6:
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
+#' plot_chr_distribution(data_table)
 #'
-#' @export
 plot_chr_distribution <- function(data_table,
                                   class=NULL,
                                   omics=NULL,
@@ -305,8 +305,6 @@ plot_chr_distribution <- function(data_table,
 
 }
 
-###############################
-###############################
 #' plotting TF distribution
 #'
 #' @param data_table The data table containing TF information.
@@ -318,10 +316,12 @@ plot_chr_distribution <- function(data_table,
 #' @return A TF distribution plot.
 #'
 #' @examples
-#' # Example usage:
-#' # plot_tf_distribution(data_table)
+#' # Example usage7:
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
+#' plot_tf_distribution(data_table)
 #'
-#' @export
   plot_tf_distribution <- function(data_table,
                                     class=NULL,
                                     pval=0.05){
@@ -365,8 +365,8 @@ plot_chr_distribution <- function(data_table,
 #' @importFrom plotly add_markers subplot plot_ly
 #'
 #' @examples
-#' # Example usage:
-#' # dot_plotly(enrichment_result, title = "Enrichment Analysis",
+#' # Example usage8:
+#' dot_plotly(enrichment_result, title = "Enrichment Analysis",
 #' showCategory = 10)
 #'
 #' @export
@@ -454,5 +454,3 @@ plot_chr_distribution <- function(data_table,
     return(ans)
 
   }
-
-

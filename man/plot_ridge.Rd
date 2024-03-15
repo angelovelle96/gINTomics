@@ -24,7 +24,10 @@ A ridge plot.
 plotting ridge
 }
 \examples{
-# Example usage:
-# plot_ridge(data_table)
+# Example usage4:
+data("ov_test_tcga_omics")
+multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+data_table <- extract_model_res(multiomics_integration)
+plot_ridge(data_table)
 
 }

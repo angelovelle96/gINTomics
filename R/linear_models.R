@@ -70,7 +70,6 @@
 }
 
 
-##################################
 #' Def linear model
 #' @importFrom stats lm
 

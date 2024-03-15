@@ -137,8 +137,8 @@
     names(interactions) <- gsub(bad_str, "_", names(interactions))
   }
   if(!is.null(reference)){
-    covariates[sapply(covariates, is.factor)] <- lapply(
-      covariates[sapply(covariates, is.factor)],
+    covariates[vapply(covariates, is.factor, FUN.VALUE = TRUE)] <- lapply(
+      covariates[vapply(covariates, is.factor, FUN.VALUE = TRUE)],
       function(x) relevel(x, ref = reference))
   }
   return(list(covariates=covariates,
@@ -167,7 +167,6 @@
   return(fformula)
 }
 
-#####################################################
 #' Building result matrices
 #' @importFrom plyr rbind.fill
 
@@ -205,7 +204,7 @@
   rownames(coef_matrix) <- names(model_results)
   for(i in seq_len(ncol(coef_matrix))) {
     tmp <- coef_matrix[, i]
-    tmp[sapply(tmp, is.null)] <- NA
+    tmp[vapply(tmp, is.null, FUN.VALUE = TRUE)] <- NA
     tmp <- unlist(tmp)
     coef_matrix[, i] <- tmp
   }
@@ -241,7 +240,7 @@
   rownames(pval_matrix) <- names(model_results)
   for(i in seq_along(pval_matrix)) {
     tmp <- pval_matrix[, i]
-    tmp[sapply(tmp, is.null)] <- NA
+    tmp[vapply(tmp, is.null, FUN.VALUE = TRUE)] <- NA
     tmp <- unlist(tmp)
     pval_matrix[, i] <- tmp
   }
@@ -252,7 +251,6 @@
 }
 
 
-################################################
 #' MultiAssayExperiment generation
 #' @description
 #' This function will generate a proper MultiAssayExperiment suitable for the
@@ -267,8 +265,8 @@
 #' @param ... Additional arguments to be passed to the function
 #' @return A MultiAssayExperiment object containing the provided assays.
 #' @examples
-#' Example usage:
-#' create_multiassay(methylation_data, cnv_data, gene_exp_data, miRNA_exp_data, miRNA_cnv_data)
+#' # Example usage:
+#' create_multiassay(methylation, cnv_data, gene_exp, miRNA_exp, miRNA_cnv_data)
 #'
 #' @export
 
@@ -295,7 +293,6 @@ create_multiassay <- function(methylation=NULL,
 }
 
 
-######################################################
 #' Data normalization
 #' @importFrom limma normalizeBetweenArrays
 #' @importFrom edgeR DGEList calcNormFactors cpm
@@ -312,7 +309,6 @@ create_multiassay <- function(methylation=NULL,
       return(data)
     }
 
-#########################################################
 #' ID conversion
 #' @importFrom stringi stri_replace_all_regex
 
@@ -378,8 +374,6 @@ create_multiassay <- function(methylation=NULL,
     }
 
 
-
-#########################################################
 #' RandomForest selection
 #' @importFrom randomForest randomForest importance
 
@@ -405,8 +399,6 @@ create_multiassay <- function(methylation=NULL,
 }
 
 
-
-####################################################
 #' @rdname extract_model_res
 setMethod("extract_model_res", "list",
           function(model_results,
@@ -530,7 +522,6 @@ setMethod("extract_model_res", "list",
           }
 )
 
-###################################################
 #' @rdname extract_model_res
 setMethod("extract_model_res", "MultiClass",
           function(model_results,
@@ -556,7 +547,6 @@ setMethod("extract_model_res", "MultiClass",
           })
 
 
-####################################################
 #' @rdname extract_model_res
 setMethod("extract_model_res", "MultiOmics",
           function(model_results,
@@ -617,8 +607,6 @@ setMethod("extract_model_res", "MultiOmics",
 )
 
 
-
-##################################
 #' Search genes
 search_gene <- function(genes,
                         model_res=NULL,
@@ -640,7 +628,6 @@ search_gene <- function(genes,
 
 }
 
-#########################################
 #' Finding DEGs
 #' @importFrom edgeR DGEList calcNormFactors estimateGLMCommonDisp
 #' estimateGLMTagwiseDisp glmFit glmLRT topTags
@@ -677,7 +664,6 @@ search_gene <- function(genes,
 
 }
 
-############################################
 #' Setting method for lapply
 #' @importFrom BiocGenerics lapply
 setMethod("lapply", "MultiClass",
@@ -724,7 +710,6 @@ fdr <- function(pval_mat){
   return(ans)
 }
 
-##############################################
 #' Change integration names
 .change_int_names <- function(nnames){
 

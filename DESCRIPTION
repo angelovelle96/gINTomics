@@ -2,7 +2,7 @@ Package: gINTomics
 Title: Multi-Omics data integration
 Version: 1.0.0
 Authors@R: c(person("Angelo", "Velle", role = c("cre", "aut"),
-                    email = "angelo.velle@phd.unipd.it",
+                    email = "angelo.velle@unipd.it",
                     comment = c(ORCID = "0000-0002-4010-6390")),
              person("Chiara", "Romualdi", role = "aut", 
                     email = "chiara.romualdi@unipd.it",
@@ -13,6 +13,8 @@ Description: gINTomics is an R package for Multi-Omics data integration and
             into account also their genomics modifications such as Copy Number 
             Variations (CNV) and methylation.
 License: AGPL (>= 3)
+biocViews: MultiOmics, GeneExpression, Integration, RNAseq, MicroArray, 
+    Visualization
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1

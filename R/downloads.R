@@ -159,7 +159,7 @@
        rownames(mirna_hsa) <- mirna_hsa$Approved.symbol
        tmp <- setNames(mirna_hsa$Alias.symbols, mirna_hsa$Approved.symbol)
        tmp <- strsplit(tmp, split = ",")
-       tmp <- sapply(tmp, function(x) x[1])
+       tmp <- vapply(tmp, function(x) x[1], FUN.VALUE = "A")
        tmp <- tmp[!duplicated(tmp)]
        tmp <- tmp[!is.na(tmp)]
        tmp2 <- getBM(attributes = c('hgnc_symbol',
@@ -271,7 +271,7 @@
        rownames(mirna_hsa) <- mirna_hsa$Approved.symbol
        tmp <- setNames(mirna_hsa$Alias.symbols, mirna_hsa$Approved.symbol)
        tmp <- strsplit(tmp, split = ",")
-       tmp <- sapply(tmp, function(x) x[1])
+       tmp <- vapply(tmp, function(x) x[1], FUN.VALUE = "A")
        tmp <- tmp[!duplicated(tmp)]
        tmp <- tmp[!is.na(tmp)]
 
