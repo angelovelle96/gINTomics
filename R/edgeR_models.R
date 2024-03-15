@@ -2,6 +2,7 @@
 #' @importFrom BiocParallel bplapply bpparam
 #' @importFrom plyr rbind.fill
 #' @importFrom stats residuals
+#' @importFrom BiocParallel bpparam SerialParam
 
 .run_edgeR_integration <-  function(response_var,
                                     covariates,
@@ -84,7 +85,6 @@
 }
 
 
-################################################################
 #' All edgeR gene models
 #' @importFrom stats model.matrix
 #' @importFrom edgeR glmFit DGEList calcNormFactors estimateGLMCommonDisp estimateGLMTagwiseDisp
@@ -132,7 +132,7 @@
   fformula <- lapply(seq_along(fformula), function(x){
     list(formula=fformula[[x]], var_name=names(fformula)[x])
   })
-  names(fformula) <- sapply(fformula, function(x) x$var_name)
+  names(fformula) <- vapply(fformula, function(x) x$var_name, FUN.VALUE = "A")
   if(!is.null(offset_singlegene)) {
     if(is.list(offset_singlegene)) {
       if(length(offset_singlegene)!=nrow(response_var)) stop(str_wrap(
@@ -205,10 +205,9 @@
   return(top_list)
 }
 
-#########################################################
 #' coefficient test
 #' @importFrom edgeR glmLRT
-
+#' @importFrom plyr rbind.fill
 .def_coef_test <- function(fit){
 
   coef <- colnames(fit$coefficients)
@@ -216,11 +215,14 @@
     glmLRT(fit, coef = z)
   })
   names(lrt) <- coef
-  top <- as.matrix(sapply(names(lrt),
-                          function(z) topTags(lrt[[z]])$table))
-  coef <- sapply(names(lrt), function(z) {
+  top <- lapply(names(lrt),function(z) topTags(lrt[[z]])$table)
+  top <- rbind.fill(top)
+  rownames(top) <- names(lrt)
+  top <- as.matrix(t(top))
+
+  coef <- vapply(names(lrt), function(z) {
     lrt[[z]]$coefficients[, z]
-  })
+  }, FUN.VALUE = numeric(1))
   top <- rbind(top, coef)
   top <- as.data.frame(top)
   return(top)

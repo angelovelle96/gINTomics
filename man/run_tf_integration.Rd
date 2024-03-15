@@ -66,3 +66,6 @@ will be automatically downloaded by the function as defined by the \strong{type}
 argument. Other types of interactions should be provided through the
 \strong{interactions} argument.
 }
+\examples{
+# Example usage_multi5:
+}
