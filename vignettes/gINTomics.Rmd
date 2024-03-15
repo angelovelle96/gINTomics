@@ -73,11 +73,14 @@ new_multiassay <- create_multiassay(methylation = meth_matrix,
 
 ## Run Genomic integration
 
-In this section we will see how to perform an expression~CNV+met integration. The input data should be provided as matrices or data.frames. Rows represent samples, while each column represents the different response variables/covariates of the models. By default all the integration functions will assume that expression data are obtained through sequencing, you should set the `sequencing_data` argument to FALSE if they are not.  Expression data could be both normalized or not normalized, the function is able to normalize data by setting the `normalize` argument to TRUE (default). If you want you can specify custom interaction through the `interactions` argument otherwise  the function will automatically look for the genes of `expression` in `cnv_data`.
+In this section we will see how to perform an expression~CNV+met integration. The input data should be provided as matrices or data.frames. Rows represent samples, while each column represents the different response variables/covariates of the models. By default all the integration functions will assume that expression data are obtained through sequencing, you should set the `sequencing_data` argument to FALSE if they are not.  Expression data could be both normalized or not normalized, the function is able to normalize data by setting the `normalize` argument to TRUE (default). If you want you can specify custom interaction through the `interactions` argument otherwise  the function will automatically look for the genes of `expression` in `cnv_data`. 
+NOTE: if you customize genomics interactions, linking more covariates to a single response, the output may
+be not more compatible with the shiny visualization.
 
 ```{r, message=FALSE}
-gene_cnv_integration <- run_cnv_integration(expression = t(gene_exp_matrix),
-                                            cnv_data = t(gene_cnv_matrix))
+gene_genomic_integration <- run_genomic_integration(expression = t(gene_exp_matrix),
+                                                    cnv_data = t(gene_cnv_matrix),
+                                                    methylation = t(meth_matrix))
 
 
 
