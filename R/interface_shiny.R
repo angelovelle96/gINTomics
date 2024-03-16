@@ -1,7 +1,6 @@
 #' Integration Dashboard Sidebar
 #' @importFrom shiny addResourcePath tags img icon
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu menuItem menuSubItem
-#'
 .gint_dashboardsidebar <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics.png"
   addResourcePath(prefix = "imgResources",
@@ -44,7 +43,6 @@
 #' Home Tab Item for gINTomics
 #' @importFrom shiny addResourcePath fluidPage tags img fluidRow column
 #' @importFrom shinydashboard tabItem box
-#'
 .gint_tabitem_home <- function(data_table){
   tabItem(tabName = "home",
           .gint_home_box())
@@ -57,7 +55,6 @@
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-#'
 .gint_subItem_coefDistribGenomic <- function(data_table){
   ns <- NS("venn_gen")
   ns2 <- NS("volcano_gen")
@@ -239,7 +236,6 @@
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
-#'
 .gint_subItem_HeatmapGenomic  <- function(data_table){
   ns <- NS("heat_gen")
   tabItem(tabName = "heatmapGenomic",
@@ -339,7 +335,6 @@
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-#'
 .gint_subItem_chrDistribGenomic <- function(data_table){
   ns <- NS("histo_gen")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -407,7 +402,6 @@
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-#'
 .gint_tabitem_enr <- function(data_table){
   ns <- NS("enrich_gen")
   tabItem(tabName = "enrichGenomic",
@@ -445,7 +439,6 @@
 #' conditionalPanel sliderInput tabPanel NS htmlOutput textOutput tags fluidRow
 #'  mainPanel uiOutput
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
-#'
 .gint_subItem_enrichTranscript <- function(data_table){
   ns <- NS("enrich_tf")
   tabItem(tabName = "enrichTranscript",
@@ -596,7 +589,6 @@
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-#'
 .gint_subItem_chrDistribTranscript <- function(data_table){
   ns <- NS("histo_trans")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -887,7 +879,6 @@
 #' fluidRow mainPanel sidebarPanel
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom InteractiveComplexHeatmap InteractiveComplexHeatmapOutput
-#'
 .gint_subItem_HeatmapDEGs <- function(data_table){
   ns <- NS("heat_deg")
   tabItem(tabName = "heatmapDEGs",
@@ -986,7 +977,6 @@
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
-#'
 .gint_subItem_chrDistribDEGs <- function(data_table){
   ns <- NS("histo_deg")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -1119,7 +1109,6 @@
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom gtools mixedsort
 #' @importFrom shiny.gosling goslingOutput use_gosling
-#'
 .gint_subItem_circosCompleteInt <- function(data_table){
   tmp <- ifelse(sum(unique(data_table$omics)%in%c("gene_genomic_res",
                                                   "gene_cnv_res",
@@ -1172,7 +1161,6 @@
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom DT dataTableOutput
 #' @importFrom gtools mixedsort
-#'
 .gint_subItem_tableCompleteInt <- function(data_table){
   ns <- NS("complete_table")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -1233,7 +1221,6 @@
 #'  tags HTML a img span sidebarPanel
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' dashboardHeader dashboardBody tabItems dashboardPage
-#'
 .create_ui <- function(data_table){
   myImgResources <- "imgResources/logo_gINTomics3.png"
   addResourcePath(prefix = "imgResources", system.file(directoryPath = "www/", package = "gINTomics"))
@@ -1392,6 +1379,8 @@ website: https://romualdi.bio.unipd.it/
 #' @importFrom shinydashboard box
 .gint_enrich_box <- function(){
   box(title = "Enrichment Analysis",
+       collapsible = TRUE,
+      collapsed = FALSE,
       footer = HTML("
                     Enrichment subpanel makes use of enrichGO and enrichKEGG
                     (clusterProfiler).

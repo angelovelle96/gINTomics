@@ -137,7 +137,7 @@
                     filters = x,
                     values = genes,
                     ...)
-       tmp <- c(1:100, "X", "Y", "MT")
+       tmp <- c(seq_len(100), "X", "Y", "MT")
        ans <- ans[ans$chromosome_name%in%tmp,]
        ans <- ans[!duplicated(ans[,x]),]
        ans <- ans[ans[,x]!="",]
@@ -173,7 +173,7 @@
                     filters = "hgnc_symbol",
                     values = names(tmp),
                     ...)
-       tmp3 <- c(1:100, "X", "Y", "MT")
+       tmp3 <- c(seq_len(100), "X", "Y", "MT")
        tmp2 <- tmp2[tmp2$chromosome_name%in%tmp3,]
        tmp2 <- tmp2[!duplicated(tmp2$hgnc_symbol),]
        rownames(tmp2) <- tmp2$hgnc_symbol
@@ -227,14 +227,14 @@
        dataset2 <- TxDb.Mmusculus.UCSC.mm10.knownGene
        }
      genes <- unique(genes)
-     all_pos <- suppressMessages(genes(dataset2))
-     all_genes <- suppressMessages(select(x = dataset,
-                                        keys = names(all_pos),
-                                        keytype = "ENTREZID",
-                                        columns = intersect(c("ENSEMBL",
-                                                              "SYMBOL",
-                                                              "MAP"),
-                                                            columns(dataset))))
+     # all_pos <- suppressMessages(genes(dataset2))
+     # all_genes <- suppressMessages(select(x = dataset,
+     #                                    keys = names(all_pos),
+     #                                    keytype = "ENTREZID",
+     #                                    columns = intersect(c("ENSEMBL",
+     #                                                          "SYMBOL",
+     #                                                          "MAP"),
+     #                                                        columns(dataset))))
      all_genes <- all_genes[!duplicated(all_genes$ENTREZID),]
      rownames(all_genes) <- all_genes$ENTREZID
      tmp <- intersect(rownames(all_genes), names(all_pos))

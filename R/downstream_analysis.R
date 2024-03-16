@@ -28,7 +28,7 @@
     if(length(ssel)>500){
       tmp <- data[data$pval<=0.01,]
       tmp <- tmp[order(abs(tmp$coef), decreasing = TRUE),]
-      tmp <- tmp$entrez_response[1:500]
+      tmp <- tmp$entrez_response[seq_len(500)]
       ssel <- ssel[names(ssel)%in%tmp]
     }
     ssel <- ssel[!is.na(names(ssel))]
@@ -98,16 +98,12 @@
 #' function will extract relevant data from model_results.
 #' @param ... Additional arguments to be passed to the internal enrichment
 #' function.
-#'
 #' @return A list containing enrichment results. If CNV and methylation data
 #' are available, it returns a nested list with results for each data type.
-#'
 #' @examples
 #' # Example usage:
 #' run_genomic_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
-#'
 #' @export
-#'
 
 run_genomic_enrich <- function(model_results,
                        species="hsa",
@@ -204,15 +200,11 @@ return(enrichment)
 #' function will extract relevant data from model_results.
 #' @param ... Additional arguments to be passed to the internal enrichment
 #' function.
-#'
 #' @return A list containing TF enrichment results.
-#'
 #' @examples
 #' # Example usage:
 #' run_tf_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
-#'
 #' @export
-#'
 
 run_tf_enrich <- function(model_results,
                           species="hsa",
@@ -257,7 +249,7 @@ run_tf_enrich <- function(model_results,
     tmp2 <- unlist(tmp2)
     tmp2 <- tmp2[tmp2>12]
     tmp2 <- sort(tmp2, decreasing = TRUE)
-    if(length(tmp2)>10) tmp2 <- tmp2[1:10]
+    if(length(tmp2)>10) tmp2 <- tmp2[seq_len(10)]
     tmp <- lapply(names(tmp2), function(y) x[x$cov==y,])
     names(tmp) <- names(tmp2)
     enrichment <- BiocParallel::bplapply(tmp, gINTomics:::.def_enrich,
@@ -297,8 +289,8 @@ run_tf_enrich <- function(model_results,
  pheatmap(data2, scale = "none")
 
 gmax <- round(nrow(data1)/5)
-mclust <- Mclust(data1, G = 1:gmax)
-mclust2 <- Mclust(data2, G = 1:gmax)
+mclust <- Mclust(data1, G = seq_len(gmax))
+mclust2 <- Mclust(data2, G = seq_len(gmax))
 }
 
 

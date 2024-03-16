@@ -11,9 +11,9 @@
                                BPPARAM=SerialParam()){
 
     tmp <- unlist(lapply(interactions, length))
-    single_cov=FALSE
+    single_cov <- FALSE
     if(sum(tmp==1)==length(tmp)){
-      single_cov=TRUE
+      single_cov <- TRUE
     }
   tmp <- .data_check(response_var = response_var,
                       interactions = interactions,

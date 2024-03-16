@@ -38,5 +38,4 @@ This function will generate a proper MultiAssayExperiment suitable for the
 \examples{
 # Example usage:
 create_multiassay(methylation, cnv_data, gene_exp, miRNA_exp, miRNA_cnv_data)
-
 }

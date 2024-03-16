@@ -1,5 +1,4 @@
 #' Prepare network data for visualization
-#'
 .prepare_network <- function(data_table){
   tf_list <- c()
   mirna_list <- c()
@@ -34,7 +33,7 @@
                                       'circle',
                                       'diamond')))
   nodes$title <- nodes$id
-  nodes$shadow = TRUE
+  nodes$shadow <- TRUE
   nodes$color <- ifelse(nodes$id %in% tf_list,
                         '#FFBA01',
                         ifelse(nodes$id %in% mirna_list,
@@ -126,7 +125,6 @@
 #' Build a Venn diagram
 #' @importFrom ggvenn ggvenn
 #' @importFrom RColorBrewer brewer.pal
-#'
 .build_venn <- function(venn_data){
   cnv_sign_genes <- venn_data$cnv_sign_genes
   met_sign_genes <- venn_data$met_sign_genes
@@ -140,7 +138,6 @@
 #' Render a Venn diagram
 #' @importFrom plotly ggplotly renderPlotly
 #' @importFrom ggplot2 ggplot theme_void labs
-#'
 .render_venn <- function(reactive_venn){
   renderPlotly({
     venn_data <- reactive_venn()
@@ -158,7 +155,6 @@
 
 #' Render Venn diagram as a table
 #' @importFrom DT renderDataTable
-#'
 .render_venn_table <- function(reactive_venn) {
   renderDataTable({
     venn_data <- reactive_venn()
@@ -187,7 +183,6 @@
 
 #' Build a volcano plot
 #' @importFrom plotly plot_ly
-#'
 .build_volcano <- function(volcano_data){
   plot_ly(volcano_data,
           width = 900,
@@ -211,7 +206,6 @@
 #' Render a volcano plot
 #' @importFrom plotly renderPlotly
 #' @importFrom ggplot2 ggplot theme_void labs
-#'
 .render_volcano <- function(reactive_volcano, annotations){
   renderPlotly({
     volcano_data <- reactive_volcano()
@@ -229,7 +223,6 @@
 #' Build a ridgeline plot
 #' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous
 #' @importFrom ggridges geom_density_ridges theme_ridges position_raincloud
-#'
 .build_ridge <- function(ridge_data,
                          quantiles){
   ggplot(ridge_data,
@@ -253,7 +246,6 @@
 
 #' Render a ridgeline plot
 #' @importFrom shiny renderPlot
-#'
 .render_ridge <- function(reactive_ridge) {
   renderPlot({
     tmp <- reactive_ridge()
@@ -272,7 +264,6 @@
 
 #' Build a histogram
 #' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal
-#'
 .build_histo <- function(histo_data){
   ggplot(histo_data,
          aes(x = factor(chr_cov), fill = significance)) +
@@ -286,7 +277,6 @@
 #' Render a histogram
 #' @importFrom plotly ggplotly renderPlotly
 #' @importFrom ggplot2 ggplot theme_void labs
-#'
 .render_histo <- function(reactive_histo){
   renderPlotly({
     histo_data <- reactive_histo()
@@ -303,7 +293,6 @@
 
 #' Render histogram as a table
 #' @importFrom DT renderDataTable
-#'
 .render_histo_table <- function(reactive_histo_table){
   renderDataTable({
     table_data <- reactive_histo_table()
@@ -320,7 +309,6 @@
 #' @importFrom plotly plot_ly layout
 #' @importFrom stats reorder
 #' @importFrom dplyr %>%
-#'
 .build_histo_TFbyChr <- function(histo_data){
   if(nrow(histo_data)==0) return(NULL)
   plot_ly(histo_data,
@@ -333,7 +321,6 @@
 
 #' Render histogram for TFs/miRNAs
 #' @importFrom plotly renderPlotly
-#'
 .render_histo_TF <- function(reactive_histo){
   renderPlotly({
     histo_data <- reactive_histo()
@@ -348,7 +335,6 @@
 
 #' Render histogram for TFs/miRNAs as a table
 #' @importFrom DT renderDataTable
-#'
 .render_histo_tf_table <- function(reactive_histo_tf_table){
   renderDataTable({
     table_data <- reactive_histo_tf_table()
@@ -362,7 +348,6 @@
 
 #' Render a ridgeline plot as a table
 #' @importFrom DT renderDataTable
-#'
 .render_ridge_table <- function(reactive_ridge_table){
   renderDataTable({
     table_data <- reactive_ridge_table()
@@ -376,7 +361,6 @@
 
 #' Build a table
 #' @importFrom DT datatable
-#'
 .build_table <- function(table_data){
   datatable(table_data,
             options = list(orderClasses = TRUE))
@@ -384,7 +368,6 @@
 
 #' Render a table
 #' @importFrom DT renderDataTable
-#'
 .render_table <- function(reactive_table){
   renderDataTable({
     table_data <- reactive_table()
@@ -399,7 +382,6 @@
 #' Handle CSV file download
 #' @importFrom shiny downloadHandler
 #' @importFrom utils write.table write.csv
-#'
 .download_csv <- function(tf= FALSE,
                          deg = FALSE,
                          bg_enr = NULL,
@@ -504,7 +486,6 @@
 
 #' Render a Circos plot
 #' @importFrom shiny renderUI req
-#'
 .render_circos <- function(circos_reactive){
 
   renderUI({
@@ -515,7 +496,6 @@
 #' Preprocess data for Circos plot
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @importFrom RColorBrewer brewer.pal
-#'
 .circos_preprocess <- function(data){
   dataframes <- lapply(unique(data$omics), function(x) {
     single_omic_df <- data[data$omics==x,]
@@ -571,7 +551,6 @@
 #' Generate color palette for Circos track
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices colorRamp
-#'
 .circos_track_cols <- function(vvalues,
                                n=50,
                                colors=NULL){
@@ -647,8 +626,6 @@ return(ccol)
 
 
 #' Create tracks for Circos visualization
-#'
-#'
 .create_tracks <- function(data, gr){
 
   tracks <- list()
@@ -702,8 +679,6 @@ return(ccol)
 
 
 #' Create CNV track for Circos visualization
-#'
-#'
 .create_cnv_track <- function(gr){
 
   gr$cov_value2 <- as.character(gr$cov_value_original)
@@ -735,7 +710,6 @@ return(ccol)
 
 
 #' Create Met track for Circos visualization
-#'
 .create_met_track <- function(gr){
   gr$cov_value2 <- as.character(gr$cov_value_original)
   ccol <- .circos_track_cols(vvalues = gr$cov_value2)
@@ -766,7 +740,6 @@ return(ccol)
 }
 
 #' Create Expression track for Circos visualization
-#'
 .create_expr_track <- function(gr, genomic=FALSE){
   cnv_met <- ifelse(genomic, "cnv_met2", "cnv_met")
   track_expr <- .create_single_track(data=gr,
@@ -793,7 +766,6 @@ return(ccol)
 }
 
 #' Create Coefficient track for Circos visualization
-#'
 .create_coef_track <- function(gr){
   gr$coef2 <- as.character(gr$coef_original)
   ccol <- .circos_track_cols(vvalues = gr$coef2)
@@ -825,7 +797,6 @@ return(ccol)
 #' Create Cytoband track for Circos visualization
 #' @importFrom shiny.gosling visual_channel_stroke_width visual_channel_color
 #' visual_channel_x track_data add_single_track visual_channel_stroke
-#'
 .create_cyto_track <- function(){
   track_cyto <- add_single_track(
     id = "track2",
@@ -876,7 +847,6 @@ return(ccol)
 
 #' Create composed view for Circos visualization
 #' @importFrom shiny.gosling compose_view add_multi_tracks
-#'
 .create_composed_view <- function(tracks, width, height) {
 
   composed_views <- list()
@@ -953,7 +923,6 @@ return(ccol)
 #' Prepare Genomic Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
 #' @importFrom dplyr arrange
-#'
 .prepare_gen_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -1016,7 +985,6 @@ return(ccol)
 
 #' Prepare CNV Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
-#'
 .prepare_cnv_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,

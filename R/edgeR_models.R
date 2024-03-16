@@ -24,9 +24,9 @@
     covariates <- tmp$covariates
     interactions <- tmp$interactions
     tmp <- unlist(lapply(interactions, length))
-    single_cov=FALSE
+    single_cov <- FALSE
     if(sum(tmp==1)==length(tmp)){
-      single_cov=TRUE
+      single_cov <- TRUE
     }
 
     if(normalize==FALSE) offset_allgene <- matrix(1, ncol(response_var),

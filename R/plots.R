@@ -1,21 +1,17 @@
 
 #' Plotting network
-#'
 #' @param data_table The data table containing network information.
 #' @param num_interactions The number of interactions to display in the network
 #' (default: 300).
 #' @param class Optional. The class of interactions to include in the plot.
 #' @param pval The p-value threshold for selecting interactions (default: 0.05).
-#'
 #' @return A network plot.
-#'
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_network(data_table)
-#'
 #' @export
 plot_network <- function(data_table,
                          num_interactions=300,
@@ -37,20 +33,16 @@ plot_network <- function(data_table,
 
 
 #' plotting venn
-#'
 #' @param data_table The data table containing information for the Venn diagram.
 #' @param class Optional. The class of interactions to include in the Venn
 #' diagram.
-#'
 #' @return A Venn diagram plot.
-#'
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_venn(data_table)
-#'
 #' @export
 plot_venn <- function(data_table,
                       class=NULL){
@@ -72,23 +64,19 @@ plot_venn <- function(data_table,
 
 
 #' plotting volcano
-#'
 #' @param data_table The data table containing information for the volcano plot.
 #' @param class Optional. The class of interactions to include in the volcano
 #' plot.
 #' @param omics Optional. The omics type for the volcano plot.
 #' @param cnv_met Optional. Indicates whether the volcano plot is for CNV or
 #' MET omics (only applicable if omics is specified).
-#'
 #' @return A volcano plot.
-#'
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_volcano(data_table)
-#'
 #' @export
 plot_volcano <- function(data_table,
                          class=NULL,
@@ -115,23 +103,19 @@ plot_volcano <- function(data_table,
 
 
 #' plotting ridge
-#'
 #' @param data_table The data table containing information for the ridge plot.
 #' @param class Optional. The class of interactions to include in the ridge
 #' plot.
 #' @param omics Optional. The omics type for the ridge plot.
 #' @param cnv_met Optional. Indicates whether the ridge plot is for CNV or MET
 #' omics (only applicable if omics is specified).
-#'
 #' @return A ridge plot.
-#'
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_ridge(data_table)
-#'
 #' @export
 plot_ridge <- function(data_table,
                        class=NULL,
@@ -154,13 +138,12 @@ plot_ridge <- function(data_table,
   }
   lower_quantile <- quantile(data_table$coef, 0.001)
   upper_quantile <- quantile(data_table$coef, 0.999)
-  quantiles = c(lower_quantile, upper_quantile)
+  quantiles <- c(lower_quantile, upper_quantile)
   .build_ridge(ridge_data=data_table,quantiles=quantiles)
 }
 
 
 #' plotting heatmap
-#'
 #' @param multiomics_integration The multiomics integration object.
 #' @param data_table The data table containing information for the heatmap.
 #' @param omics The type of omics data for the heatmap.
@@ -170,16 +153,13 @@ plot_ridge <- function(data_table,
 #' @param class Optional. The class of interactions to include in the heatmap.
 #' @param pval Optional. The p-value threshold for significance in the heatmap.
 #' Default is 0.05.
-#'
 #' @return A heatmap plot.
-#'
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_heatmap(data_table)
-#'
 #' @export
 plot_heatmap <- function(multiomics_integration,
                          data_table,
@@ -195,7 +175,7 @@ plot_heatmap <- function(multiomics_integration,
   tmp <- c("gene_genomic_res", "gene_cnv_res", "gene_met_res", "mirna_cnv_res")
   if(!omics%in%tmp) stop(paste("Omics should be one of",
                                 paste(tmp, collapse = ", ")))
-  if(class(multiomics_integration)!="MultiOmics"){
+  if(!is(multiomics_integration, "MultiOmics")){
     tmp <- list()
     tmp[[omics]] <- multiomics_integration
     multiomics_integration <- tmp
@@ -259,7 +239,6 @@ plot_heatmap <- function(multiomics_integration,
 
 
 #' plotting chr distribution
-#'
 #' @param data_table The data table containing information for plotting
 #' chromosome distribution.
 #' @param class Optional. The class of interactions to include in the plot.
@@ -268,16 +247,13 @@ plot_heatmap <- function(multiomics_integration,
 #' data.
 #' @param pval Optional. The p-value threshold for significance. Default is
 #' 0.05.
-#'
 #' @return A histogram plot showing chromosome distribution.
-#'
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_chr_distribution(data_table)
-#'
 #' @export
 plot_chr_distribution <- function(data_table,
                                   class=NULL,
@@ -311,27 +287,23 @@ plot_chr_distribution <- function(data_table,
 }
 
 #' plotting TF distribution
-#'
 #' @param data_table The data table containing TF information.
 #' @param class Optional. The class of interactions to include in the
 #' distribution plot.
 #' @param pval Optional. The p-value threshold for significance in the
 #' distribution plot. Default is 0.05.
-#'
 #' @return A TF distribution plot.
-#'
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_tf_distribution(data_table)
-#'
 #' @export
   plot_tf_distribution <- function(data_table,
                                     class=NULL,
                                     pval=0.05){
-    omics="tf_res"
+    omics <- "tf_res"
     if(is.null(class) & "class"%in%colnames(data_table))
       stop(str_wrap("Please, specify class"))
     chr_order <- mixedsort(unique(data_table$chr_cov))
@@ -358,23 +330,18 @@ plot_chr_distribution <- function(data_table,
 
 
 #' plotting enrichment
-#'
 #' @param enrich_result Enrichment analysis results.
 #' @param title Title of the plot.
 #' @param showCategory Number of categories to display.
 #' @param width Width of the plot.
 #' @param height Height of the plot.
-#'
 #' @return A plotly object containing the dot plot.
-#'
 #' @importFrom ggtree fortify
 #' @importFrom plotly add_markers subplot plot_ly
-#'
 #' @examples
 #' # Example usage:
 #' dot_plotly(enrichment_result, title = "Enrichment Analysis",
 #' showCategory = 10)
-#'
 #' @export
   dot_plotly <- function(enrich_result,
                          title=NULL,
@@ -394,7 +361,7 @@ plot_chr_distribution <- function(data_table,
     }))
     if(length(df$Count[!is.na(df$Count)])>0){
 
-        legend.sizes = seq(min(df$Count, na.rm = TRUE),
+        legend.sizes <- seq(min(df$Count, na.rm = TRUE),
                            max(df$Count, na.rm = TRUE),
                            max(c(1,round(((max(df$Count,na.rm = TRUE) -
                                            min(df$Count, na.rm = TRUE))/4)))))
@@ -403,12 +370,12 @@ plot_chr_distribution <- function(data_table,
         }
     lprop <- c(0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55)
     lprop <- lprop[length(legend.sizes)]
-    ax = list(zeroline = FALSE,
+    ax <- list(zeroline = FALSE,
               showline = FALSE,
               showticklabels = TRUE,
               showgrid = FALSE,
               side="top")
-    mk = list(sizeref=0.1, sizemode="area")
+    mk <- list(sizeref=0.1, sizemode="area")
 
     pplot <- plot_ly(df, width=width, height=height) %>%
       add_markers(x=~GeneRatio,

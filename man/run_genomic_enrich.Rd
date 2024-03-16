@@ -53,5 +53,4 @@ Running genomic enrichment analysis
 \examples{
 # Example usage:
 run_genomic_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
-
 }
