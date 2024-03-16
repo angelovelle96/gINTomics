@@ -52,5 +52,4 @@ Running TF enrichment analysis
 \examples{
 # Example usage:
 run_tf_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
-
 }

@@ -1,11 +1,9 @@
-require(methods)
-
 # S4 classes
 
 setClass("MultiOmics",
-         representation("list")
+    representation("list")
 )
 
 setClass("MultiClass",
-         representation("list")
+    representation("list")
 )

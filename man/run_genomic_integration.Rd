@@ -56,5 +56,7 @@ This function will perform an integration of expression data and Copy Number
 Variations data
 }
 \examples{
-# Example usage_multi4:
+# Example usage_multi:
+genomic_integration <- run_genomic_integration(expression=expression,
+cnv_data=cnv_data, methylation=methylation, class=class)
 }

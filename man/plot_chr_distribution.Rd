@@ -33,10 +33,9 @@ A histogram plot showing chromosome distribution.
 plotting chr distribution
 }
 \examples{
-# Example usage6:
+# Example usage:
 data("ov_test_tcga_omics")
 multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 data_table <- extract_model_res(multiomics_integration)
 plot_chr_distribution(data_table)
-
 }

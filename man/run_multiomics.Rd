@@ -61,4 +61,5 @@ MultiAssayExperiment
 }
 \examples{
 # Example usage_multiomics:
+multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 }

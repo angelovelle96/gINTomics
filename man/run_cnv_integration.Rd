@@ -42,5 +42,7 @@ This function will perform an integration of expression data and Copy Number
 Variations data
 }
 \examples{
-# Example usage_multi2:
+# Example usage_multi:
+cnv_integration <- run_cnv_integration(expression=expression,
+ cnv_data=cnv_data, class=class)
 }

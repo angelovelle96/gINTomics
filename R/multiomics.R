@@ -32,6 +32,7 @@
 #' @import BiocParallel
 #' @examples
 #' # Example usage_multiomics:
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' @export
 run_multiomics <- function(data,
                            interactions_met=NULL,
@@ -49,7 +50,7 @@ run_multiomics <- function(data,
 
 
 
-    if(class(data)!="MultiAssayExperiment"){
+    if(!is(data, "MultiAssayExperiment")){
       stop(str_wrap("You need to provide a MultiassayExperiment as input
                     data. The names of the experiments included in the
                     MultiAssay should follow the rule provided in the
@@ -315,7 +316,9 @@ run_multiomics <- function(data,
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
 #' @examples
-#' # Example usage_multi2:
+#' # Example usage_multi:
+#' cnv_integration <- run_cnv_integration(expression=expression,
+#'  cnv_data=cnv_data, class=class)
 #' @export
 #' @importFrom BiocParallel bpparam SerialParam
 run_cnv_integration <- function(expression,
@@ -425,11 +428,13 @@ run_cnv_integration <- function(expression,
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
 #' @examples
-#' # Example usage_multi3:
+#' # Example usage_multi:
+#' met_integration <- run_met_integration(expression=expression,
+#' methylation=methylation, class=class)
 #' @export
 #' @importFrom BiocParallel bpparam SerialParam
 
-run_met_integration <- function( expression,
+run_met_integration <- function(expression,
                                  methylation,
                                  sequencing_data=TRUE,
                                  normalize=TRUE,
@@ -588,7 +593,9 @@ run_met_integration <- function( expression,
 #' @importFrom plyr rbind.fill
 #' @importFrom BiocParallel bpparam SerialParam
 #' @examples
-#' # Example usage_multi4:
+#' # Example usage_multi:
+#' genomic_integration <- run_genomic_integration(expression=expression,
+#' cnv_data=cnv_data, methylation=methylation, class=class)
 #' @export
 run_genomic_integration <- function(expression,
                                 cnv_data,
@@ -757,10 +764,12 @@ run_genomic_integration <- function(expression,
 #' @importFrom stats quantile
 #' @importFrom BiocParallel bpparam SerialParam
 #' @examples
-#' # Example usage_multi5:
+#' # Example usage_multi:
+#' tf_integration <- run_tf_integration(expression=expression,
+#' class=class)
 #' @export
 
-run_tf_integration <- function( expression,
+run_tf_integration <- function(expression,
                                 tf_expression=expression,
                                 interactions=NULL,
                                 type="none",
