@@ -51,7 +51,7 @@ are available, it returns a nested list with results for each data type.
 Running genomic enrichment analysis
 }
 \examples{
-# Example usage_downstream:
+# Example usage:
 run_genomic_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
 
 }
