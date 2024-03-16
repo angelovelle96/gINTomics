@@ -67,5 +67,7 @@ argument. Other types of interactions should be provided through the
 \strong{interactions} argument.
 }
 \examples{
-# Example usage_multi5:
+# Example usage_multi:
+tf_integration <- run_tf_integration(expression=expression,
+class=class)
 }

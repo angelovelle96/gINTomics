@@ -30,8 +30,7 @@ A plotly object containing the dot plot.
 plotting enrichment
 }
 \examples{
-# Example usage8:
+# Example usage:
 dot_plotly(enrichment_result, title = "Enrichment Analysis",
 showCategory = 10)
-
 }

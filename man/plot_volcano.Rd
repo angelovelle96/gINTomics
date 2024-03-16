@@ -24,10 +24,9 @@ A volcano plot.
 plotting volcano
 }
 \examples{
-# Example usage3:
+# Example usage:
 data("ov_test_tcga_omics")
 multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 data_table <- extract_model_res(multiomics_integration)
 plot_volcano(data_table)
-
 }

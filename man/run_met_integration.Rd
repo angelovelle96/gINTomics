@@ -42,5 +42,7 @@ This function will perform an integration of expression data and methylation
 data
 }
 \examples{
-# Example usage_multi3:
+# Example usage_multi:
+met_integration <- run_met_integration(expression=expression,
+methylation=methylation, class=class)
 }

@@ -267,7 +267,6 @@
 #' @examples
 #' # Example usage:
 #' create_multiassay(methylation, cnv_data, gene_exp, miRNA_exp, miRNA_cnv_data)
-#'
 #' @export
 
 create_multiassay <- function(methylation=NULL,
@@ -454,7 +453,7 @@ setMethod("extract_model_res", "list",
             data$fdr <- fdr[rownames(data), "value"]
             data$significativity <- tmp[rownames(data)]
             data$sign <- rep("negative", nrow(data))
-            data$sign[data$value>0]="positive"
+            data$sign[data$value>0] <- "positive"
             data$cov <- as.character(data$cov)
             data$cov <- gsub("_cov", "", data$cov)
             data$significativity[data$significativity=="significant" &
