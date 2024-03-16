@@ -249,3 +249,11 @@ dot_plotly(gen_enr$cnv[[1]]$go)
 
 ```
 
+# Session info
+Here is the output of sessionInfo() on the system on which this document was compiled.
+
+```{r}
+sessionInfo()
+```
+
+
