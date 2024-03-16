@@ -202,7 +202,7 @@
           text =  ~paste("Group:", group, "<br>",
                          "Class:", class,"<br>",
                          "Name:", cov, "<br>",
-                         "Pval/FDR:", pval_fdr, "<br>",
+                         "Pval/FDR(-log10):", pval_fdr, "<br>",
                          "coef", coef),
           textposition = 'top right') %>%
     layout(title = "Volcano Plot")

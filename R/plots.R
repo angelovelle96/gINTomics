@@ -10,7 +10,7 @@
 #' @return A network plot.
 #'
 #' @examples
-#' # Example usage1:
+#' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
@@ -45,12 +45,13 @@ plot_network <- function(data_table,
 #' @return A Venn diagram plot.
 #'
 #' @examples
-#' # Example usage2:
+#' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_venn(data_table)
 #'
+#' @export
 plot_venn <- function(data_table,
                       class=NULL){
   if(is.null(class) & "class"%in%colnames(data_table))
@@ -82,12 +83,13 @@ plot_venn <- function(data_table,
 #' @return A volcano plot.
 #'
 #' @examples
-#' # Example usage3:
+#' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_volcano(data_table)
 #'
+#' @export
 plot_volcano <- function(data_table,
                          class=NULL,
                          omics=NULL,
@@ -124,12 +126,13 @@ plot_volcano <- function(data_table,
 #' @return A ridge plot.
 #'
 #' @examples
-#' # Example usage4:
+#' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_ridge(data_table)
 #'
+#' @export
 plot_ridge <- function(data_table,
                        class=NULL,
                        omics=NULL,
@@ -171,12 +174,13 @@ plot_ridge <- function(data_table,
 #' @return A heatmap plot.
 #'
 #' @examples
-#' # Example usage5:
+#' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_heatmap(data_table)
 #'
+#' @export
 plot_heatmap <- function(multiomics_integration,
                          data_table,
                          omics,
@@ -268,12 +272,13 @@ plot_heatmap <- function(multiomics_integration,
 #' @return A histogram plot showing chromosome distribution.
 #'
 #' @examples
-#' # Example usage6:
+#' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_chr_distribution(data_table)
 #'
+#' @export
 plot_chr_distribution <- function(data_table,
                                   class=NULL,
                                   omics=NULL,
@@ -316,12 +321,13 @@ plot_chr_distribution <- function(data_table,
 #' @return A TF distribution plot.
 #'
 #' @examples
-#' # Example usage7:
+#' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
 #' plot_tf_distribution(data_table)
 #'
+#' @export
   plot_tf_distribution <- function(data_table,
                                     class=NULL,
                                     pval=0.05){
@@ -365,7 +371,7 @@ plot_chr_distribution <- function(data_table,
 #' @importFrom plotly add_markers subplot plot_ly
 #'
 #' @examples
-#' # Example usage8:
+#' # Example usage:
 #' dot_plotly(enrichment_result, title = "Enrichment Analysis",
 #' showCategory = 10)
 #'

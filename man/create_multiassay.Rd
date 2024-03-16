@@ -36,7 +36,7 @@ This function will generate a proper MultiAssayExperiment suitable for the
 \strong{run_multiomics} function.
 }
 \examples{
-# Example usage_helper1:
+# Example usage:
 create_multiassay(methylation, cnv_data, gene_exp, miRNA_exp, miRNA_cnv_data)
 
 }
