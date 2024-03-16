@@ -251,7 +251,7 @@ output$download_csv <- .download_csv(deg=FALSE,
       })
   }
   onStop(function(){
-    #cat(sprintf("Session was closed, killing background process...  "))
+    message("Session was closed, killing background process...")
     bg_enr$kill_tree()
   })
 }
