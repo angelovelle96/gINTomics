@@ -921,6 +921,7 @@ return(ccol)
 
 #' Prepare Genomic Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom circlize colorRamp2
 #' @importFrom dplyr arrange
 .prepare_gen_heatmap <- function(data_table,
                                  df_heatmap,
@@ -969,8 +970,15 @@ return(ccol)
   expr_top <- rbind(top_cnv, top_met[
     !rownames(top_met)%in%rownames(top_cnv),])
   expr_top_subset <- expr_top[, -c((ncol(expr_top) - 5):ncol(expr_top))]
-  set.seed(123)
-  row_ha <- rowAnnotation(coef_cnv = expr_top$cnv, coef_met = expr_top$met)
+  my_colors <- colorRamp2(c(min(expr_top$cnv, na.rm = TRUE),
+                            0,max(expr_top$cnv, na.rm = TRUE)),
+                          c("purple", "white", "green4"))
+  my_colors2 <- colorRamp2(c(min(expr_top$met, na.rm = TRUE),
+                            0,max(expr_top$met, na.rm = TRUE)),
+                           c("purple", "white", "green4"))
+  row_ha <- rowAnnotation(coef_cnv = expr_top$cnv, coef_met = expr_top$met,
+                          col = list(coef_cnv = my_colors,
+                                     coef_met = my_colors2))
   expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
@@ -984,6 +992,7 @@ return(ccol)
 
 #' Prepare CNV Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom circlize colorRamp2
 .prepare_cnv_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -1019,8 +1028,11 @@ return(ccol)
     head(numTopCNVonly)
   expr_top <- top_cnv
   expr_top_subset <- expr_top[, -c((ncol(expr_top) - 2):ncol(expr_top))]
-  set.seed(123)
-  row_ha <- rowAnnotation(coef_cnv=expr_top$cnv)
+  my_colors <- colorRamp2(c(min(expr_top$cnv, na.rm = TRUE),
+                            0,max(expr_top$cnv, na.rm = TRUE)),
+                          c("purple", "white", "green4"))
+  row_ha <- rowAnnotation(coef_cnv=expr_top$cnv,
+                          col=list(coef_cnv=my_colors))
   expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
@@ -1034,6 +1046,7 @@ return(ccol)
 
 #' Prepare Met Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom circlize colorRamp2
 #'
 .prepare_met_heatmap <- function(data_table,
                                  df_heatmap,
@@ -1070,8 +1083,11 @@ return(ccol)
     head(numTopMETonly)
   expr_top <- top_met
   expr_top_subset <- expr_top[, -c((ncol(expr_top) - 2):ncol(expr_top))]
-  set.seed(123)
-  row_ha <- rowAnnotation(coef_met=expr_top$met)
+  my_colors <- colorRamp2(c(min(expr_top$met, na.rm = TRUE),
+                            0,max(expr_top$met, na.rm = TRUE)),
+                          c("purple", "white", "green4"))
+  row_ha <- rowAnnotation(coef_met=expr_top$met,
+                          col=list(coef_met=my_colors))
   expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
@@ -1085,6 +1101,7 @@ return(ccol)
 
 #' Prepare miRNA Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom circlize colorRamp2
 #'
 .prepare_mirna_heatmap <- function(data_table,
                                    df_heatmap,
@@ -1121,8 +1138,11 @@ return(ccol)
     head(numTopMiCNV)
   expr_top <- top_mirna_cnv
   expr_top_subset <- expr_top[, -c((ncol(expr_top) - 2):ncol(expr_top))]
-  set.seed(123)
-  row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv)
+  my_colors <- colorRamp2(c(min(expr_top$mirna_cnv, na.rm = TRUE),
+                            0,max(expr_top$mirna_cnv, na.rm = TRUE)),
+                          c("purple", "white", "green4"))
+  row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv,
+                          col=list(coef_mirna=my_colors))
   expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
