@@ -824,22 +824,20 @@ return(ccol)
 
 #' Create Cytoband track for Circos visualization
 #' @importFrom shiny.gosling visual_channel_stroke_width visual_channel_color
-#' visual_channel_x track_data add_single_track visual_channel_stroke
+#' visual_channel_x track_data_gr add_single_track visual_channel_stroke
 #'
 .create_cyto_track <- function(){
   track_cyto <- add_single_track(
     id = "track2",
-    data = track_data(
-      url = "https://raw.githubusercontent.com/sehilyi/gemini-datasets/master/data/UCSC.HG38.Human.CytoBandIdeogram.csv",
-      type = "csv",
-      chromosomeField = "Chromosome",
-      genomicFields = c("chromStart",
-                        "chromEnd")
+    data = track_data_gr(
+      granges = cyto_hs,
+      chromosomeField = 'seqnames',
+      genomicFields = c('start','end')
     ),
     mark = "rect",
-    x = visual_channel_x(field = "chromStart",
+    x = visual_channel_x(field = "start",
                          type = "genomic"),
-    xe = visual_channel_x(field = "chromEnd",
+    xe = visual_channel_x(field = "end",
                           type = "genomic"),
     color = visual_channel_color(
       field = "Stain",
