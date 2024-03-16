@@ -67,7 +67,8 @@ Imports:
     RColorBrewer,
     utils,
     grDevices,
-    callr
+    callr,
+    circlize
 Depends: 
     R (>= 4.3.0)
 LazyData: false
