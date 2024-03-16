@@ -56,14 +56,14 @@ plot_venn <- function(data_table,
   if(is.null(class) & "class"%in%colnames(data_table))
      stop(str_wrap("Please, specify class"))
   input <- list()
-  input$classSelectVenn <- class
-  input$fdrRangeVenn <- c(0, 0.05)
-  input$pvalRangeVenn <- c(0,0.05)
-  input$significativityCriteriaVenn <- "pval"
+  input$ClassSelect <- class
+  input$FdrRange <- c(0, 0.05)
+  input$PvalRange <- c(0,0.05)
+  input$SignificativityCriteria <- "pval"
   reactive_venn <- .prepare_reactive_venn(data_table = data_table,
-                                                      input = input,
-                                                      output = output,
-                                                      deg = FALSE)
+                                          input = input,
+                                          output = output,
+                                          deg = FALSE)
   tmp <- isolate(reactive_venn())
   ans <- .build_venn(tmp)
   ggplotly(ans)
@@ -108,6 +108,7 @@ plot_volcano <- function(data_table,
   data_table["group"] <- "Not Significant"
   data_table[data_table$pval <= 0.05, 'group'] <- "Significant"
   data_table$pval_fdr <- -log10(data_table$pval)
+  if(!"class"%in%colnames(data_table)) data_table$class <- data_table$omics
   .build_volcano(data_table)
 }
 
@@ -191,7 +192,7 @@ plot_heatmap <- function(multiomics_integration,
   tmp <- c("gene_genomic_res", "gene_cnv_res", "gene_met_res", "mirna_cnv_res")
   if(!omics%in%tmp) stop(paste("Omics should be one of",
                                 paste(tmp, collapse = ", ")))
-  if(class(multiomics_integration)!="MultiOmics"){
+  if(!is(multiomics_integration, "MultiOmics")){
     tmp <- list()
     tmp[[omics]] <- multiomics_integration
     multiomics_integration <- tmp
@@ -289,8 +290,12 @@ plot_chr_distribution <- function(data_table,
   chr_order <- chr_order[!is.na(chr_order)]
   data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
 
-  if(!is.null(class)) data_table <- data_table[data_table$class==class,]
-  if(!is.null(omics)) data_table <- data_table[data_table$omics==omics,]
+  if(!is.null(class) & "class"%in%colnames(data_table)){
+    data_table <- data_table[data_table$class==class,]
+    }
+  if(!is.null(omics) & length(unique(data_table$omics))>0){
+    data_table <- data_table[data_table$omics==omics,]
+    }
   if(omics == "gene_genomic_res" & !is.null(cnv_met)){
     if(!cnv_met%in%c("cnv", "met"))
       stop(str_wrap("cnv_met should be one of cnv and met"))
@@ -337,7 +342,9 @@ plot_chr_distribution <- function(data_table,
                              colnames(data_table)%in%c("response", "cov",
                                                        "pval","fdr","chr_cov",
                                                        "deg","class")]
-    if(!is.null(class)) data_table <- data_table[data_table$class==class,]
+    if(!is.null(class) & "class"%in%colnames(data_table)){
+      data_table <- data_table[data_table$class==class,]
+    }
     df_filtered_histo_tf <- data_table
     df_filtered_histo_tf <- df_filtered_histo_tf[
       df_filtered_histo_tf$pval <= pval,]
