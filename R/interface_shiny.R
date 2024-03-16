@@ -1311,17 +1311,23 @@ website: https://romualdi.bio.unipd.it/
                              Plot, and RidgeLine Plot. <br>
                              They were designed to
                              represent the integration coefficients
-                             distribution; In particular, the first represents,
-                             if they are both present in the analysis, the
-                             intersection between significative cnv and met
-                             coefficients. <br>
-                             The Volcano Plot shows the
-                             distribution of integration coefficients for every
-                             integration type associated with a genomic class
-                             (cnv, met, cnv-mirna). <br>
-                             Finally, the latter plot shows the distribution of
-                             integration coefficients and the associated
-                             frequencies.
+                             distribution; In particular, The Venn Diagram is
+                             designed for the genomic integration. It can help
+                             to identify genes which are significantly
+                             regulated by both CNV and methylation. <br>
+                             The Volcano Plot shows the distribution of
+                             integration coefficients for every integration
+                             type. For each integration coefficient, on the y
+                             axis you have the -log10 of Pvalue/FDR and on the
+                             x axis the value of the coefficient. <br>
+                             Finally, the ridgeline plot is designed to
+                             compare different distributions, it has been
+                             integrated in the package with the aim to compare
+                             the distribution of significant and non
+                             significant coefficients returned by our
+                             integration models. For each distribution, on the
+                             y axis you have the frequencies and on the x axis
+                             the values of the coefficients.
       "))
 }
 
@@ -1354,7 +1360,9 @@ website: https://romualdi.bio.unipd.it/
                     visualize the distribution of integration coefficients
                     along the different chromosomes and to focus on specific
                     chromosomes and genes trough an interactive and
-                    downloadable data table.
+                    downloadable data table. This kind of visualization will
+                    identify chromosomes in which the type of regulation under
+                    analysis is particularly active.
       "))
 }
 
@@ -1366,11 +1374,11 @@ website: https://romualdi.bio.unipd.it/
       collapsible = TRUE,
       collapsed = TRUE,
       footer = HTML("
-                    Network subpanel shows the interaction between nodes
-                    (targets, TFs and miRNAs, if present) and their interactions
-                    (integration coefficients values). Nodes and edges are
-                    visualized ordering them by the most high coefficient values
-                    (absolute value).
+                    Network subpanel shows the significant interactions between
+                    transcriptional regulators (TFs and miRNAs, if present)
+                    and their targets genes/miRNA. Nodes and edges are selected
+                    ordering them by the most high coefficient values (absolute
+                    value) and by default the top 200 interactions are showed.
       "))
 }
 
@@ -1382,8 +1390,14 @@ website: https://romualdi.bio.unipd.it/
        collapsible = TRUE,
       collapsed = FALSE,
       footer = HTML("
-                    Enrichment subpanel makes use of enrichGO and enrichKEGG
-                    (clusterProfiler).
+                    Enrichment subpanel shows the enrichment results obtained
+                    with enrichGO and enrichKEGG (clusterProfiler). The genomic
+                    enrichment is performed providing the list of genes
+                    significantly regulated by methylation or CNV, while the
+                    transcriptional one with the list of genes significantly
+                    regulated by each transcription factor (we run an
+                    enrichment for each TF that significantly regulates at
+                    least 12 targets).
       "))
 }
 
@@ -1397,14 +1411,14 @@ website: https://romualdi.bio.unipd.it/
       footer = HTML("
                     Circos plots subpanel lodges Circos plots for genomic
                     integration (it requires the presence of both cnv and met
-                    data or only one of them) and for the mirna integration.
+                    data or only one of them).
                     The strenght of this type of visualization lies in the
-                    possibility given to the user of zooming the plot and
-                    focusing the attention to only specific chromosome of
-                    interest or particular genomic regions. What is more, the
-                    plot can be linearized and by
-                    passing the mosue on genes it is possible to visualize a
-                    tooltip are with interesting informations like the pval,
+                    possibility to visulize different omics together, moreover
+                    the user of zoom in the plot focusing the attention to only
+                    specific chromosome of interest or particular genomic
+                    regions. What is more, the plot can be linearized and by
+                    passing the pointer on genes it is possible to visualize a
+                    tooltip with interesting informations like the pval,
                     FDR, gene name and symbol etc.. Once the user has choosen
                     the genomic region of interest, it is also possible to
                     dowload an instantaneous of the plot.

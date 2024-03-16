@@ -4,7 +4,11 @@ author:
 - name: Angelo Velle
   affiliation: 
   - &id Biology Department, University of Padova, Italy
-  email: angelo.velle@phd.unipd.it
+  email: angelo.velle@unipd.it
+- name: Francesco Patanè
+  affiliation: 
+  - &id Biology Department, University of Padova, Italy
+  email: francesco.patane@unipd.it
 - name: Chiara Romualdi
   affiliation: 
   - &id Biology Department, University of Padova, Italy
@@ -12,7 +16,7 @@ author:
 abstract: >
   gINTomics is an R package for Multi-Omics data integration and visualization. gINTomics is designed to detect the association between the expression of a target and of its regulators, taking into account also their genomics modifications such as Copy Number Variations (CNV) and methylation. For RNA sequencing data, the counts will be fitted using a negative binomial model, while in the case of microarray or other types of data, a linear model will be applied. In some cases the number of regulators for a given target could be very high, in order to handle this eventuality, we provide a random forest selection that will automatically keep only the most important regulators. All the models are gene-specific, so each gene/miRNA will have its own model with its covariates. The package will automatically download information about TF-target couples (OmnipathR), miRNA-target couples (OmnipathR) and TF-miRNA couples (TransmiR). The couples will be used to define the covariates used in the integration models.
 output: 
-  html_document:
+  BiocStyle::html_document:
       toc: true
       toc_float:
           collapsed: true
@@ -22,10 +26,21 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, echo=FALSE, out.width = "100%"}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.wide=TRUE)
+```
+```{r, echo=FALSE, out.width = "20%"}
 knitr::include_graphics("figures/logo_gINTomics.png")
 # <img src=./figures/logo_gINTomics.png class="center" />
 ```
+
+# Introduction
+The rapid advancement of new technologies for omics data acquisition has resulted in the production of massive amounts of data that combine different omics types, such as gene expression, methylation and copy number variation data.
+These technologies enable the generation of large-scale, high-resolution and multidimensional data that can reveal the molecular mechanisms and interactions underlying biological phenomena.
+For instance, The Cancer Genome Atlas (TCGA), a landmark cancer genomics program, molecularly characterized over 20,000 primary cancers and matched normal samples spanning 33 cancer types. These data offer a rich source of information, but they are still underutilized because the new techniques and statistical models for data analysis have not kept up with the pace of data acquisition technologies. Indeed, most of the conventional approaches for omics data modeling depend on the comparison of only one data type across different groups of samples. Moreover, the analysis and integration of omics data pose significant challenges in terms of data interpretation. Therefore, new technologies for omics data acquisition require the development of novel methods and models for data processing and mining that can cope with the volume, variety and complexity of omics data.
+
+In this work, we present gINTomics, our new Multi Omics integration R package, approaching Multi-Omics integration from a new perspective, with the goal to assess the impact of different omics on the final outcome of regulatory networks, that is gene expression. Therefore, for each gene/miRNA, we try to determine the association between its expression and that of its regulators, taking into account also genomic modifications such as copy number variations (CNV) and methylation.
+
 
 # Installation
 To install this package:
@@ -37,17 +52,22 @@ devtools::install_github("angelovelle96/gINTomics")
 ```
 
 # How to use gINTomics
-
-In the following section, we use an example MultiAssayExperiment of ovarian cancer to show how to use `gINTomics` with a standard workflow. The object contains all the available input data types: Gene expression data, miRNA expression data, gene methylation data, gene Copy Number Variations and miRNA Copy Number Variations.
+## Structure of the package
+gINTomics is designed to perform both two-Omics and Multi Omics integrations. There are four different functions for the two-omics integration. The `run_cnv_integration` function can be used to integrate Gene or miRNA Expression data with Copy Number Variation data. The `run_met_integration` is designed for the integration between Gene Expression data with methylation data. When both gene CNV and methylation data are available, the `run_genomic_integration` function can be used to integrate them together with gene expression. Finally, the `run_tf_integration` function can be used for the integration between the Expression of a target gene or miRNA and every kind of regulator, such as Transcription Factors or miRNAs expression.
+The package also gives the possibility to perform Multi Omics integration. The `run_multiomics` function takes as input a MultiAssayExperiment, that can be generated with the help of the `create_multiassay` function, and will perform all the possible integration available for the omics provided by the user.
+All the integration functions exploit different statistical models depending on the input data type, the available models are negative binomial and linear regression. When the number of covariates is too high, a random forest model will select only the most importants which will be included in the integration models.
+In order to make the results more interpretable, gINTomics provides a comprehensive and interactive *shiny app* for the graphical representation of the results, the shiny app can be called with the `run_shiny` function, which takes as input the output of the `run_multiomics` function. Moreover additional functions are available to build single plots to visualize the results of the integration outside of the shiny app.
+In the following sections, we use an example MultiAssayExperiment of ovarian cancer to show how to use `gINTomics` with the different available integrations. The object contains all the available input data types: Gene expression data, miRNA expression data, gene methylation data, gene Copy Number Variations and miRNA Copy Number Variations.
 
 ## Generate a MultiAssayExperiment
-
 The package contains a pre built MultiAssayExperiment, anyway in this section we will divide it in signle omics matrices and see how to build a proper MultiAssayExperiment from zero.
 ```{r, message=FALSE}
 # loading packages
 library(gINTomics)
+library(MultiAssayExperiment)
+library(shiny)
 data("ov_test_tcga_omics")
-
+mmultiassay_ov
 ```
 
 Here we will extract the single omics from the MultiAssayExperiment
@@ -67,8 +87,7 @@ new_multiassay <- create_multiassay(methylation = meth_matrix,
                                     miRNA_exp = miRNA_exp_matrix,
                                     miRNA_cnv_data = miRNA_cnv_matrix)
 
-
-
+new_multiassay
 ```
 
 ## Run Genomic integration
@@ -81,9 +100,7 @@ be not more compatible with the shiny visualization.
 gene_genomic_integration <- run_genomic_integration(expression = t(gene_exp_matrix),
                                                     cnv_data = t(gene_cnv_matrix),
                                                     methylation = t(meth_matrix))
-
-
-
+summary(gene_genomic_integration)
 ```
 
 
@@ -94,9 +111,7 @@ In this section we will see how to perform an expression~CNV integration. The in
 ```{r, message=FALSE}
 gene_cnv_integration <- run_cnv_integration(expression = t(gene_exp_matrix),
                                             cnv_data = t(gene_cnv_matrix))
-
-
-
+summary(gene_cnv_integration)
 ```
 
 ## Run methylation integration
@@ -106,9 +121,7 @@ In this section we will see how to perform an expression~methylation integration
 ```{r, message=FALSE}
 gene_met_integration <- run_met_integration(expression = t(gene_exp_matrix),
                                             methylation = t(meth_matrix))
-
-
-
+summary(gene_met_integration)
 ```
 
 ## Run TF-target integration
@@ -118,8 +131,7 @@ In this section we will see how to perform an expression~TF integration. In this
 ```{r, message=FALSE}
 tf_target_integration <- run_tf_integration(expression = t(gene_exp_matrix),
                                             type = "tf")
-
-
+summary(tf_target_integration)
 ```
 
 
@@ -131,8 +143,7 @@ In this section we will see how to perform an expression~miRNA integration. Gene
 miRNA_target_integration <- run_tf_integration(expression = t(gene_exp_matrix),
                                                tf_expression = t(miRNA_exp_matrix),
                                                type = "miRNA_target")
-
-
+summary(miRNA_target_integration)
 ```
 
 
@@ -144,7 +155,7 @@ In this section we will see how to perform an miRNA~TF integration. miRNA expres
 tf_miRNA_integration <- run_tf_integration(expression = t(miRNA_exp_matrix),
                                                tf_expression = t(gene_exp_matrix),
                                                type = "tf_miRNA")
-
+summary(tf_miRNA_integration)
 ```
 
 
@@ -154,7 +165,7 @@ Finally we will see how to perform a complete integration using all the availabl
 
 ```{r, message=FALSE}
 multiomics_integration <- run_multiomics(data = new_multiassay)
-
+summary(multiomics_integration)
 ```
 
 # Visualization
@@ -171,30 +182,70 @@ run_shiny(multiomics_integration)
 
 
 
-
-### Chromosome distribution plot
-
-This barplot highlights the distribution of significant and non significant covariates among chromosomes. This kind of visualization will identify chromosomes in which the type of regulation under analysis is particularly active. You can pass to the function both the MultiOmics object returned by the `run_multiomics` function or the result of one of the integration functions.
-
-```{r, message=FALSE}
-chr_distribution_plot(multiomics_integration)
+## plots
+### network plot
+Network plot shows the significant interactions between transcriptional regulators (TFs and miRNAs, if present) and their targets genes/miRNA. Nodes and edges are selected ordering them by the most high coefficient values (absolute value) and by default the top 200 interactions are showed. You can change the number of interactions with the `num_interactions` argument.
+Here you can see the code to generate a network from a multiomics integration
+```{r}
+data_table <- extract_model_res(multiomics_integration)
+data_table <- data_table[data_table$cov!="(Intercept)",]
+plot_network(data_table, num_interactions = 200)
 
 ```
+
+### Venn Diagram
+The Venn Diagram is designed for the genomic integration. It can help to identify genes which are significantly regulated by both CNV and methylation.
+Here you can see the code to generate a Venn Diagram from a multiomics integration
+```{r}
+gINTomics:::plot_venn(data_table)
+
+```
+
+
+### Volcano plot
+The Volcano Plot shows the distribution of integration coefficients for every integration type associated with a genomic class (cnv, met, cnv-mirna). For each integration coefficient, on the y axis you have the -log10 of Pvalue/FDR and on the x axis the value of the coefficient.
+Here you can see the code to generate a Volcano plot for CNV and one for methylation from a multiomics integration
+```{r}
+gINTomics:::plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
+gINTomics:::plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "met")
+
+```
+
 
 ### Ridgeline plot
+The ridgeline plot is designed to compare different distributions, it has been integrated in the package with the aim to compare the distribution of significant and non significant coefficients returned by our integration models.
+For each distribution, on the y axis you have the frequencies and on the x axis the values of the coefficients.
+Here you can see the code to generate a Ridgeline plot for CNV and one for methylation from a multiomics integration
+```{r}
+gINTomics:::plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
+gINTomics:::plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "met")
 
-The ridgeline plot is designed to compare different distributions, it has been integrated in the package with the aim to compare the distribution of significant and non significant coefficients returned by our integration models. . Also in this case, you can pass to the function both the MultiOmics object returned by the `run_multiomics` function or the result of one of the integration functions.
+```
 
-```{r, message=FALSE}
-ridgeline_plot(multiomics_integration)
+
+### Chromosome distribution plot
+This barplot highlights the distribution of significant and non significant covariates among chromosomes. This kind of visualization will identify chromosomes in which the type of regulation under analysis is particularly active.
+Here you can see the code to generate a chromosome distribution plot specif for the genomic integration, starting from the results of the multiomics integration.
+```{r}
+gINTomics:::plot_chr_distribution(data_table = data_table,
+                     omics = "gene_genomic_res")
 
 ```
 
-### Circos plot
-
-Circos plots are an incredible resource in terms of data visualization and summarization, they allow to visualize different omics on a genomic scale and to compare them across different layers. In this example we have the average Copy Number Variation across all samples in the external layer, the average gene expression in the middle and the significant coefficients of the Expression~CNV integration model in the internal layer. The blue bars represent negative values, while red represents positive values. You can pass to the function one of the results contained by the MultiOmics object returned by `run_multiomics` or the result of one of the integration functions. At the moment the complete MultiOmics object is not supported as input.
-
-```{r, message=FALSE}
-circos_plot(multiomics_integration$gene_cnv_res)
+### TF distribution plot
+This barplot highlights the number of significant tragets for each TFs.
+Here you can see the code to generate a TF distribution plot starting from the results of the multiomics integration.
+```{r}
+gINTomics:::plot_tf_distribution(data_table = data_table)
 
 ```
+
+### Enrichment plot
+The enrichment plot shows the enrichment results obtained with enrichGO and enrichKEGG (clusterProfiler). The genomic enrichment is performed providing the list of genes significantly regulated by methylation or CNV, while the transcriptional one with the list of genes significantly regulated by each transcription factor (we run an enrichment for each TF that significantly regulates at least 12 targets)
+Here you can see the code to run a genomic enrichment starting from the results of the multiomics integration and to visualize the top results with a DotPlot
+```{r}
+gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
+dot_plotly(gen_enr$cnv[[1]]$go)
+
+```
+
