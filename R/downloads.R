@@ -227,14 +227,14 @@
        dataset2 <- TxDb.Mmusculus.UCSC.mm10.knownGene
        }
      genes <- unique(genes)
-     # all_pos <- suppressMessages(genes(dataset2))
-     # all_genes <- suppressMessages(select(x = dataset,
-     #                                    keys = names(all_pos),
-     #                                    keytype = "ENTREZID",
-     #                                    columns = intersect(c("ENSEMBL",
-     #                                                          "SYMBOL",
-     #                                                          "MAP"),
-     #                                                        columns(dataset))))
+     all_pos <- suppressMessages(genes(dataset2))
+     all_genes <- suppressMessages(select(x = dataset,
+                                        keys = names(all_pos),
+                                        keytype = "ENTREZID",
+                                        columns = intersect(c("ENSEMBL",
+                                                              "SYMBOL",
+                                                              "MAP"),
+                                                            columns(dataset))))
      all_genes <- all_genes[!duplicated(all_genes$ENTREZID),]
      rownames(all_genes) <- all_genes$ENTREZID
      tmp <- intersect(rownames(all_genes), names(all_pos))
