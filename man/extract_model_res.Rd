@@ -41,6 +41,17 @@ extract_model_res(model_results, ...)
 
 \item{...}{Additional arguments to be passed to specific methods.}
 }
+\value{
+A dataframe containing the results of all the integration models
+provided
+}
 \description{
 Setting method for extracting results
+}
+\examples{
+# example code
+data("ov_test_tcga_omics")
+multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+data_table <- extract_model_res(multiomics_integration)
+head(data_table)
 }

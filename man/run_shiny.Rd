@@ -28,7 +28,9 @@ for the Shiny application.
 }
 \examples{
 # Example usage:
-# run_shiny(multiomics_integration)
+data("ov_test_tcga_omics")
+multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+run_shiny(multiomics_integration)
 
 }
 \references{

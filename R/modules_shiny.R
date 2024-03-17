@@ -1,4 +1,4 @@
-#' Server Genomic integration chr distribution
+# Server Genomic integration chr distribution
 .server_histo <- function(input,
                           output,
                           session,
@@ -23,7 +23,7 @@ output$download_csv <- .download_csv(deg=FALSE,
 
 }
 
-#' Server transcriptional and deg integration
+# Server transcriptional and deg integration
 .server_histo2 <- function(input,
                            output,
                            session,
@@ -62,7 +62,7 @@ output$download_csv <- .download_csv(deg=FALSE,
 
 }
 
-#' Server network
+# Server network
 .server_network <- function(input,
                             output,
                             session,
@@ -80,7 +80,7 @@ output$download_csv <- .download_csv(deg=FALSE,
                          output = output)
 }
 
-#' Server genomic venn
+# Server genomic venn
 .server_venn <- function(input,
                          output,
                          session,
@@ -100,7 +100,7 @@ output$download_csv <- .download_csv(deg=FALSE,
 }
 
 
-#' Server volcano
+# Server volcano
 .server_volcano <- function(input,
                             output,
                             session,
@@ -114,7 +114,7 @@ output$download_csv <- .download_csv(deg=FALSE,
 }
 
 
-#' Server ridge
+# Server ridge
 .server_ridge <- function(input,
                           output,
                           session,
@@ -139,7 +139,7 @@ output$download_csv <- .download_csv(deg=FALSE,
 }
 
 
-#' Server table
+# Server table
 .server_table <- function(input,
                           output,
                           session,
@@ -157,7 +157,7 @@ output$download_csv <- .download_csv(deg=FALSE,
 }
 
 
-#' Enrichment server
+# Enrichment server
 #' @importFrom shiny renderText
 #' @importFrom DT dataTableOutput
 
@@ -256,7 +256,7 @@ output$download_csv <- .download_csv(deg=FALSE,
   })
 }
 
-#' Circos server
+# Circos server
 #' @importFrom shiny.gosling renderGosling gosling export_png export_pdf
 .server_circos <- function(input,
                           output,

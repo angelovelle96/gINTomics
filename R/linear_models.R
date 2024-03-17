@@ -1,4 +1,4 @@
-#' Running linear model integration
+# Running linear model integration
 #' @importFrom BiocParallel bplapply
 #' @importFrom stats residuals
 .run_lm_integration <- function(response_var,
@@ -70,7 +70,7 @@
 }
 
 
-#' Def linear model
+# Def linear model
 #' @importFrom stats lm
 
 .def_lm <- function(formula,

@@ -34,8 +34,9 @@ the model will look for the same gene in \strong{cnv_data}}
 values for the models. Rows represent samples, while columns represent
 the different covariates. If \strong{interactions} are not provided, they will be
 automatically generated and for each gene contained in \strong{expression}
-the model will look for the same gene in \strong{methylation}
-#' @param sequencing_data logical. Are expression data obtained from RNA
+the model will look for the same gene in \strong{methylation}}
+
+\item{sequencing_data}{logical. Are expression data obtained from RNA
 sequencing ? Default is set to TRUE}
 
 \item{normalize}{logical.Should expression data be
@@ -50,6 +51,10 @@ between response variable and covariates. The names of the list should
 match the response variables while the character contained in each element
 of the list should match the covariates. If NULL (default), the interactions
 will be automatically defined according to response variable's colnames.}
+}
+\value{
+A list or a \linkS4class{MultiClass} object if \strong{class} is provided
+containing the results of the Genomic integration
 }
 \description{
 This function will perform an integration of expression data and Copy Number

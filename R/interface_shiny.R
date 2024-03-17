@@ -1,4 +1,4 @@
-#' Integration Dashboard Sidebar
+# Integration Dashboard Sidebar
 #' @importFrom shiny addResourcePath tags img icon
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu menuItem menuSubItem
 .gint_dashboardsidebar <- function(data_table){
@@ -40,7 +40,7 @@
     tags$style(".left-side, .main-sidebar {padding-top: 80px}"))
 }
 
-#' Home Tab Item for gINTomics
+# Home Tab Item for gINTomics
 #' @importFrom shiny addResourcePath fluidPage tags img fluidRow column
 #' @importFrom shinydashboard tabItem box
 .gint_tabitem_home <- function(data_table){
@@ -78,7 +78,7 @@
 
 }
 
-#' Coefficients Distribution Subitem for Genomic Integration
+# Coefficients Distribution Subitem for Genomic Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #'  mainPanel sidebarPanel plotOutput div
@@ -259,7 +259,7 @@
   )
 }
 
-#' Heatmap Subitem for Genomic Integration
+# Heatmap Subitem for Genomic Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #' mainPanel sidebarPanel
@@ -357,7 +357,7 @@
           )
   )
 }
-#' Chr Distribution Subitem for Genomic Integration
+# Chr Distribution Subitem for Genomic Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #' mainPanel div
@@ -425,7 +425,7 @@
   )
 }
 
-#' Enrichment Tab Item for Genomic Integration
+# Enrichment Tab Item for Genomic Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS HTML tags fluidRow
 #' mainPanel div
@@ -464,7 +464,7 @@
           ))
 }
 
-#' Enrichment Subitem for Transcription Integration
+# Enrichment Subitem for Transcription Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput tabPanel NS htmlOutput textOutput tags fluidRow
 #'  mainPanel uiOutput
@@ -493,7 +493,7 @@
           ))
 }
 
-#' Coefficients Distribution Subitem for Transcription Integration
+# Coefficients Distribution Subitem for Transcription Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #'  mainPanel sidebarPanel div
@@ -611,7 +611,7 @@
   )
 }
 
-#' Chr Distribution Subitem for Transcription Integration
+# Chr Distribution Subitem for Transcription Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #' mainPanel div
@@ -678,7 +678,7 @@
   )
 }
 
-#' Network Subitem for Transcription Integration
+# Network Subitem for Transcription Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #' mainPanel sidebarPanel div inputPanel
@@ -743,7 +743,7 @@
   )
 }
 
-#' Coefficients Distribution Subitem for Class Comparison
+# Coefficients Distribution Subitem for Class Comparison
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #' mainPanel sidebarPanel div
@@ -903,7 +903,7 @@
   )
 }
 
-#' Heatmap Subitem for class comparison
+# Heatmap Subitem for class comparison
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS radioButtons tags
 #' fluidRow mainPanel sidebarPanel
@@ -999,7 +999,7 @@
   )
 }
 
-#' Chromosome Distribution Subitem for class comparison
+# Chromosome Distribution Subitem for class comparison
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #'  mainPanel sidebarPanel div
@@ -1068,7 +1068,7 @@
   )
 }
 
-#' Network Subitem for class comparison
+# Network Subitem for class comparison
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #'  conditionalPanel sliderInput downloadButton tabPanel NS checkboxInput tags
 #'  fluidRow mainPanel sidebarPanel div inputPanel
@@ -1132,7 +1132,7 @@
   )
 }
 
-#' Circos Subitem for Complete Integration
+# Circos Subitem for Complete Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput icon
 #' conditionalPanel sliderInput tabPanel NS tags fluidPage column mainPanel
 #' sidebarPanel div actionButton
@@ -1184,7 +1184,7 @@
   )
 }
 
-#' Table Subitem with all integrations
+# Table Subitem with all integrations
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput tabPanel NS downloadButton tags fluidRow
 #' mainPanel sidebarPanel div
@@ -1245,7 +1245,7 @@
   )
 }
 
-#' Create user interface
+# Create user interface
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #'  conditionalPanel sliderInput tabPanel NS downloadButton addResourcePath
 #'  tags HTML a img span sidebarPanel
@@ -1294,7 +1294,7 @@
     ,skin = "purple")
 }
 
-#' Defining home box description
+# Defining home box description
 #' @importFrom shiny addResourcePath fluidPage tags img fluidRow column
 #' @importFrom shinydashboard tabItem box
 .gint_home_box <- function(){
@@ -1314,7 +1314,7 @@ website: https://romualdi.bio.unipd.it/
       ")))
 }
 
-#' Defining coefficients distribution box description
+# Defining coefficients distribution box description
 #' @importFrom shiny fluidPage tags
 #' @importFrom shinydashboard box
 .gint_coefDistrib_box <- function(){
@@ -1347,7 +1347,7 @@ website: https://romualdi.bio.unipd.it/
       "))
 }
 
-#' Defining Heatmap box description
+# Defining Heatmap box description
 #' @importFrom shiny fluidPage tags
 #' @importFrom shinydashboard box
 .gint_heatmap_box <- function(){
@@ -1364,7 +1364,7 @@ website: https://romualdi.bio.unipd.it/
       "))
 }
 
-#' Defining Chromosome distribution box description
+# Defining Chromosome distribution box description
 #' @importFrom shiny fluidPage tags
 #' @importFrom shinydashboard box
 .gint_chrDistrib_box <- function(){
@@ -1382,7 +1382,7 @@ website: https://romualdi.bio.unipd.it/
       "))
 }
 
-#' Defining Network box description
+# Defining Network box description
 #' @importFrom shiny fluidPage tags
 #' @importFrom shinydashboard box
 .gint_network_box <- function(){
@@ -1398,7 +1398,7 @@ website: https://romualdi.bio.unipd.it/
       "))
 }
 
-#' Defining Enrichment box description
+# Defining Enrichment box description
 #' @importFrom shiny fluidPage tags
 #' @importFrom shinydashboard box
 .gint_enrich_box <- function(){
@@ -1417,7 +1417,7 @@ website: https://romualdi.bio.unipd.it/
       "))
 }
 
-#' Defining Circos box description
+# Defining Circos box description
 #' @importFrom shiny fluidPage tags
 #' @importFrom shinydashboard box
 .gint_circos_box <- function(){
@@ -1441,7 +1441,7 @@ website: https://romualdi.bio.unipd.it/
       "), width="100%")
 }
 
-#' Defining Table box description
+# Defining Table box description
 #' @importFrom shiny fluidPage tags
 #' @importFrom shinydashboard box
 .gint_table_box <- function(){

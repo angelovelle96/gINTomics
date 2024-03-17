@@ -55,6 +55,10 @@ expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 "none".}
 }
+\value{
+A \linkS4class{MultiOmics} object containing the results of all the
+possible integration models
+}
 \description{
 This function will perform a complete Multi-Omics integration on a
 MultiAssayExperiment

@@ -1,4 +1,4 @@
-#' Prepare network data for visualization
+# Prepare network data for visualization
 .prepare_network <- function(data_table){
   tf_list <- c()
   mirna_list <- c()
@@ -85,7 +85,7 @@
 }
 
 
-#' Prepare network for visualization
+# Prepare network for visualization
 #' @importFrom visNetwork visNetwork visGroups visLegend visEdges visOptions
 #'   visLayout visExport
 .build_network <- function(nodes,
@@ -122,7 +122,7 @@
 }
 
 
-#' Build a Venn diagram
+# Build a Venn diagram
 #' @importFrom ggvenn ggvenn
 #' @importFrom RColorBrewer brewer.pal
 .build_venn <- function(venn_data){
@@ -135,7 +135,7 @@
   return(venn_diagram)
 }
 
-#' Render a Venn diagram
+# Render a Venn diagram
 #' @importFrom plotly ggplotly renderPlotly
 #' @importFrom ggplot2 ggplot theme_void labs
 .render_venn <- function(reactive_venn){
@@ -153,7 +153,7 @@
   })
 }
 
-#' Render Venn diagram as a table
+# Render Venn diagram as a table
 #' @importFrom DT renderDataTable
 .render_venn_table <- function(reactive_venn) {
   renderDataTable({
@@ -181,7 +181,7 @@
   })
 }
 
-#' Build a volcano plot
+# Build a volcano plot
 #' @importFrom plotly plot_ly
 .build_volcano <- function(volcano_data){
   plot_ly(volcano_data,
@@ -203,7 +203,7 @@
     layout(title = "Volcano Plot")
 }
 
-#' Render a volcano plot
+# Render a volcano plot
 #' @importFrom plotly renderPlotly
 #' @importFrom ggplot2 ggplot theme_void labs
 .render_volcano <- function(reactive_volcano, annotations){
@@ -220,7 +220,7 @@
   })
 }
 
-#' Build a ridgeline plot
+# Build a ridgeline plot
 #' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous
 #' @importFrom ggridges geom_density_ridges theme_ridges position_raincloud
 .build_ridge <- function(ridge_data,
@@ -244,7 +244,7 @@
     scale_x_continuous(limits = quantiles)
 }
 
-#' Render a ridgeline plot
+# Render a ridgeline plot
 #' @importFrom shiny renderPlot
 .render_ridge <- function(reactive_ridge) {
   renderPlot({
@@ -262,7 +262,7 @@
   })
 }
 
-#' Build a histogram
+# Build a histogram
 #' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal
 .build_histo <- function(histo_data){
   ggplot(histo_data,
@@ -274,7 +274,7 @@
     theme_minimal()
 }
 
-#' Render a histogram
+# Render a histogram
 #' @importFrom plotly ggplotly renderPlotly
 #' @importFrom ggplot2 ggplot theme_void labs
 .render_histo <- function(reactive_histo){
@@ -291,7 +291,7 @@
   })
 }
 
-#' Render histogram as a table
+# Render histogram as a table
 #' @importFrom DT renderDataTable
 .render_histo_table <- function(reactive_histo_table){
   renderDataTable({
@@ -305,7 +305,7 @@
   })
 }
 
-#' Build histogram for TFs/miRNAs by chromosome
+# Build histogram for TFs/miRNAs by chromosome
 #' @importFrom plotly plot_ly layout
 #' @importFrom stats reorder
 #' @importFrom dplyr %>%
@@ -319,7 +319,7 @@
            barmode = 'group')
 }
 
-#' Render histogram for TFs/miRNAs
+# Render histogram for TFs/miRNAs
 #' @importFrom plotly renderPlotly
 .render_histo_TF <- function(reactive_histo){
   renderPlotly({
@@ -333,7 +333,7 @@
   })
 }
 
-#' Render histogram for TFs/miRNAs as a table
+# Render histogram for TFs/miRNAs as a table
 #' @importFrom DT renderDataTable
 .render_histo_tf_table <- function(reactive_histo_tf_table){
   renderDataTable({
@@ -346,7 +346,7 @@
   })
 }
 
-#' Render a ridgeline plot as a table
+# Render a ridgeline plot as a table
 #' @importFrom DT renderDataTable
 .render_ridge_table <- function(reactive_ridge_table){
   renderDataTable({
@@ -359,14 +359,14 @@
   })
 }
 
-#' Build a table
+# Build a table
 #' @importFrom DT datatable
 .build_table <- function(table_data){
   datatable(table_data,
             options = list(orderClasses = TRUE))
 }
 
-#' Render a table
+# Render a table
 #' @importFrom DT renderDataTable
 .render_table <- function(reactive_table){
   renderDataTable({
@@ -379,7 +379,7 @@
   })
 }
 
-#' Handle CSV file download
+# Handle CSV file download
 #' @importFrom shiny downloadHandler
 #' @importFrom utils write.table write.csv
 .download_csv <- function(tf= FALSE,
@@ -484,7 +484,7 @@
   return(handler)
 }
 
-#' Render a Circos plot
+# Render a Circos plot
 #' @importFrom shiny renderUI req
 .render_circos <- function(circos_reactive){
 
@@ -493,7 +493,7 @@
   })
 }
 
-#' Preprocess data for Circos plot
+# Preprocess data for Circos plot
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @importFrom RColorBrewer brewer.pal
 .circos_preprocess <- function(data){
@@ -548,7 +548,7 @@
   return(gr)
 }
 
-#' Generate color palette for Circos track
+# Generate color palette for Circos track
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices colorRamp
 .circos_track_cols <- function(vvalues,
@@ -576,7 +576,7 @@ return(ccol)
 }
 
 
-#' Create single track for Circos visualization
+# Create single track for Circos visualization
 #' @importFrom shiny.gosling add_single_track visual_channel_x visual_channel_y
 #' visual_channel_color visual_channel_tooltips visual_channel_tooltip
 #' track_data_gr
@@ -625,7 +625,7 @@ return(ccol)
 }
 
 
-#' Create tracks for Circos visualization
+# Create tracks for Circos visualization
 .create_tracks <- function(data, gr){
 
   tracks <- list()
@@ -678,7 +678,7 @@ return(ccol)
 }
 
 
-#' Create CNV track for Circos visualization
+# Create CNV track for Circos visualization
 .create_cnv_track <- function(gr){
 
   gr$cov_value2 <- as.character(gr$cov_value_original)
@@ -709,7 +709,7 @@ return(ccol)
 }
 
 
-#' Create Met track for Circos visualization
+# Create Met track for Circos visualization
 .create_met_track <- function(gr){
   gr$cov_value2 <- as.character(gr$cov_value_original)
   ccol <- .circos_track_cols(vvalues = gr$cov_value2)
@@ -739,7 +739,7 @@ return(ccol)
 
 }
 
-#' Create Expression track for Circos visualization
+# Create Expression track for Circos visualization
 .create_expr_track <- function(gr, genomic=FALSE){
   cnv_met <- ifelse(genomic, "cnv_met2", "cnv_met")
   track_expr <- .create_single_track(data=gr,
@@ -765,7 +765,7 @@ return(ccol)
   return(track_expr)
 }
 
-#' Create Coefficient track for Circos visualization
+# Create Coefficient track for Circos visualization
 .create_coef_track <- function(gr){
   gr$coef2 <- as.character(gr$coef_original)
   ccol <- .circos_track_cols(vvalues = gr$coef2)
@@ -794,7 +794,7 @@ return(ccol)
   return(track_coef)
 }
 
-#' Create Cytoband track for Circos visualization
+# Create Cytoband track for Circos visualization
 #' @importFrom shiny.gosling visual_channel_stroke_width visual_channel_color
 #' visual_channel_x track_data_gr add_single_track visual_channel_stroke
 #'
@@ -844,7 +844,7 @@ return(ccol)
 }
 
 
-#' Create composed view for Circos visualization
+# Create composed view for Circos visualization
 #' @importFrom shiny.gosling compose_view add_multi_tracks
 .create_composed_view <- function(tracks, width, height) {
 
@@ -919,7 +919,7 @@ return(ccol)
   return(composed_views)
 }
 
-#' Prepare Genomic Heatmap
+# Prepare Genomic Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
 #' @importFrom circlize colorRamp2
 #' @importFrom dplyr arrange
@@ -990,7 +990,7 @@ return(ccol)
   return(ht)
 }
 
-#' Prepare CNV Heatmap
+# Prepare CNV Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
 #' @importFrom circlize colorRamp2
 .prepare_cnv_heatmap <- function(data_table,
@@ -1044,7 +1044,7 @@ return(ccol)
   return(ht)
 }
 
-#' Prepare Met Heatmap
+# Prepare Met Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
 #' @importFrom circlize colorRamp2
 #'
@@ -1099,7 +1099,7 @@ return(ccol)
   return(ht)
 }
 
-#' Prepare miRNA Heatmap
+# Prepare miRNA Heatmap
 #' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
 #' @importFrom circlize colorRamp2
 #'
@@ -1154,7 +1154,7 @@ return(ccol)
   return(ht)
 }
 
-#' Run function in background
+# Run function in background
 #' @importFrom callr r_bg
 #'
 .run_bg <- function(FFUN,
@@ -1191,7 +1191,9 @@ return(ccol)
 #'
 #' @examples
 #' # Example usage:
-#' # run_shiny(multiomics_integration)
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' run_shiny(multiomics_integration)
 #'
 #' @seealso
 #' \code{\link{extract_model_res}}

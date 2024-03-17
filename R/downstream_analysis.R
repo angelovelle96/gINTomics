@@ -1,5 +1,5 @@
 
-#' Enrichment
+# Enrichment
 #' @importFrom clusterProfiler enrichKEGG enrichGO
 #' @importFrom ReactomePA enrichPathway
 #' @importFrom stats setNames
@@ -264,44 +264,3 @@ run_tf_enrich <- function(model_results,
   return(enrichment)
 }
 
-
-#' Making groups
-#' @importFrom ComplexHeatmap pheatmap
-.make_groups <- function(model_results){
-
-  data <- model_results$data$covariates
-  tmp <- extract_model_res(model_results)
-  if("cnv_met"%in%colnames(tmp)){
-    tmp <- tmp[tmp$cov!="(Intercept)",]
-    tmp <- paste(tmp$cov[tmp$pval<=0.05],
-                 tmp$cnv_met[tmp$pval<=0.05], sep = "_")
-  }else{
-    tmp <- tmp[tmp$cov!="(Intercept)",]
-    tmp <- tmp$cov[tmp$pval<=0.05]
-  }
-
- data1 <- data[, tmp]
- data1 <- scale(data1)
- tmp <- unique(gsub("_.*$", "", tmp))
- data2 <- log2(model_results$data$response_var[, tmp]+1)
-
- pheatmap(data1, scale = "none")
- pheatmap(data2, scale = "none")
-
-gmax <- round(nrow(data1)/5)
-mclust <- Mclust(data1, G = seq_len(gmax))
-mclust2 <- Mclust(data2, G = seq_len(gmax))
-}
-
-
-######################################
-#' Survival
-#' @importFrom survival survfit
-survival <- function(surv_time,
-                     surv_event,
-                     data){
-
-
-
-  fit <- survfit(Surv(pfs, status) ~ treatment , data = tmp)
-}

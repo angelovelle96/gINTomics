@@ -1,4 +1,4 @@
-#' Data check
+# Data check
 #' @importFrom stats sd
 
 .data_check <- function(response_var,
@@ -96,7 +96,7 @@
     return(rresult)
 }
 
-#' Covariates check
+# Covariates check
 #' @importFrom stats relevel
 
 .covariates_check <- function(response_var,
@@ -148,7 +148,7 @@
               steady_covariates=steady_covariates))
 }
 
-#' Generating formula for models
+# Generating formula for models
 #' @importFrom stats formula
 
 .generate_formula <- function(interactions,
@@ -167,7 +167,7 @@
   return(fformula)
 }
 
-#' Building result matrices
+# Building result matrices
 #' @importFrom plyr rbind.fill
 
 .building_result_matrices <- function(model_results,
@@ -292,7 +292,7 @@ create_multiassay <- function(methylation=NULL,
 }
 
 
-#' Data normalization
+# Data normalization
 #' @importFrom limma normalizeBetweenArrays
 #' @importFrom edgeR DGEList calcNormFactors cpm
     .data_norm <- function(data,
@@ -308,7 +308,7 @@ create_multiassay <- function(methylation=NULL,
       return(data)
     }
 
-#' ID conversion
+# ID conversion
 #' @importFrom stringi stri_replace_all_regex
 
     .id_conversion <- function(dictionary,
@@ -373,7 +373,7 @@ create_multiassay <- function(methylation=NULL,
     }
 
 
-#' RandomForest selection
+# RandomForest selection
 #' @importFrom randomForest randomForest importance
 
 .rf_selection <- function(data,
@@ -606,7 +606,7 @@ setMethod("extract_model_res", "MultiOmics",
 )
 
 
-#' Search genes
+# Search genes
 search_gene <- function(genes,
                         model_res=NULL,
                         data_frame=NULL){
@@ -627,7 +627,7 @@ search_gene <- function(genes,
 
 }
 
-#' Finding DEGs
+# Finding DEGs
 #' @importFrom edgeR DGEList calcNormFactors estimateGLMCommonDisp
 #' estimateGLMTagwiseDisp glmFit glmLRT topTags
 #' @importFrom limma lmFit eBayes topTable
@@ -663,7 +663,7 @@ search_gene <- function(genes,
 
 }
 
-#' Setting method for lapply
+# Setting method for lapply
 #' @importFrom BiocGenerics lapply
 setMethod("lapply", "MultiClass",
           function(X, FUN){
@@ -676,7 +676,7 @@ setMethod("lapply", "MultiClass",
           })
 
 
-#' FDR calculation
+# FDR calculation
 #' @importFrom stats p.adjust
 
 fdr <- function(pval_mat){
@@ -691,7 +691,7 @@ fdr <- function(pval_mat){
 }
 
 
-#' Shiny data preprocessing
+# Shiny data preprocessing
 #' @importFrom dplyr filter
 .shiny_preprocess <- function(data){
 
@@ -709,7 +709,7 @@ fdr <- function(pval_mat){
   return(ans)
 }
 
-#' Change integration names
+# Change integration names
 .change_int_names <- function(nnames){
 
   tmp <- gsub("gene_genomic_res", "Gene CNV-Met", nnames)

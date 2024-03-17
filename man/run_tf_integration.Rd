@@ -57,6 +57,10 @@ expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 
 \item{norm_method_cov}{Same as \strong{norm_method} but for covariates.}
 }
+\value{
+A list or a \linkS4class{MultiClass} object if \strong{class} is provided
+containing the results of the transcriptional integration
+}
 \description{
 This function will perform an integration of gene/miRNA expression data
 and Transcription Factors expression. Moreover, every type of regulator can

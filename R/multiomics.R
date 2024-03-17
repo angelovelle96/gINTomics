@@ -30,6 +30,8 @@
 #' @importFrom methods new
 #' @importFrom plyr rbind.fill
 #' @import BiocParallel
+#' @return A \linkS4class{MultiOmics} object containing the results of all the
+#' possible integration models
 #' @examples
 #' # Example usage_multiomics:
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
@@ -264,7 +266,7 @@ run_multiomics <- function(data,
 }
 
 
-#' cnv integration
+# cnv integration
 .def_cnv_integration <- function(expression,
                                 cnv_data,
                                 sequencing_data,
@@ -315,6 +317,8 @@ run_multiomics <- function(data,
 #' @param norm_method Normalization method to be used for
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
+#' @return A list or a \linkS4class{MultiClass} object if **class** is provided
+#' containing the results of the CNV integration
 #' @examples
 #' # Example usage_multi:
 #' cnv_integration <- run_cnv_integration(expression=expression,
@@ -374,7 +378,7 @@ run_cnv_integration <- function(expression,
 }
 
 
-#' defining met integration
+# defining met integration
 .def_met_integration <- function( expression,
                                  methylation,
                                  sequencing_data,
@@ -427,6 +431,8 @@ run_cnv_integration <- function(expression,
 #' @param norm_method Normalization method to be used for
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
+#' @return A list or a \linkS4class{MultiClass} object if **class** is provided
+#' containing the results of the Methylation integration
 #' @examples
 #' # Example usage_multi:
 #' met_integration <- run_met_integration(expression=expression,
@@ -486,7 +492,7 @@ run_met_integration <- function(expression,
   return(met_res)
 }
 
-#' def genomic integration
+# def genomic integration
 .def_genomic_integration <- function(expression,
                                     cnv_data,
                                     methylation,
@@ -578,7 +584,7 @@ run_met_integration <- function(expression,
 #' the different covariates. If **interactions** are not provided, they will be
 #' automatically generated and for each gene contained in **expression**
 #' the model will look for the same gene in **methylation**
-#' #' @param sequencing_data logical. Are expression data obtained from RNA
+#' @param sequencing_data logical. Are expression data obtained from RNA
 #' sequencing ? Default is set to TRUE
 #' @param normalize logical.Should expression data be
 #' normalized ? Default is set to TRUE
@@ -592,6 +598,8 @@ run_met_integration <- function(expression,
 #' will be automatically defined according to response variable's colnames.
 #' @importFrom plyr rbind.fill
 #' @importFrom BiocParallel bpparam SerialParam
+#' @return A list or a \linkS4class{MultiClass} object if **class** is provided
+#' containing the results of the Genomic integration
 #' @examples
 #' # Example usage_multi:
 #' genomic_integration <- run_genomic_integration(expression=expression,
@@ -659,7 +667,7 @@ run_genomic_integration <- function(expression,
   return(gen_res)
 }
 
-#' def tf integration
+# def tf integration
 .def_tf_integration <- function(expression,
                                 tf_expression,
                                 interactions,
@@ -763,6 +771,8 @@ run_genomic_integration <- function(expression,
 #' @param norm_method_cov Same as **norm_method** but for covariates.
 #' @importFrom stats quantile
 #' @importFrom BiocParallel bpparam SerialParam
+#' @return A list or a \linkS4class{MultiClass} object if **class** is provided
+#' containing the results of the transcriptional integration
 #' @examples
 #' # Example usage_multi:
 #' tf_integration <- run_tf_integration(expression=expression,

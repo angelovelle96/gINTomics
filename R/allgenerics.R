@@ -5,6 +5,14 @@
 #' @importFrom plyr rbind.fill
 #' @param model_results The model results object from which to extract results.
 #' @param ... Additional arguments to be passed to specific methods.
+#' @return A dataframe containing the results of all the integration models
+#' provided
+#' @examples
+#' # example code
+#' data("ov_test_tcga_omics")
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
+#' head(data_table)
 #' @rdname extract_model_res
 #' @export
 setGeneric("extract_model_res", function(model_results, ...)

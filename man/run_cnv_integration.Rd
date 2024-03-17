@@ -37,6 +37,10 @@ normalized ? Default is set to TRUE}
 expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 "none".}
 }
+\value{
+A list or a \linkS4class{MultiClass} object if \strong{class} is provided
+containing the results of the CNV integration
+}
 \description{
 This function will perform an integration of expression data and Copy Number
 Variations data

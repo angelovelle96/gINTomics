@@ -1,4 +1,4 @@
-#' Running edgeR integration
+# Running edgeR integration
 #' @importFrom BiocParallel bplapply bpparam
 #' @importFrom plyr rbind.fill
 #' @importFrom stats residuals
@@ -85,7 +85,7 @@
 }
 
 
-#' All edgeR gene models
+# All edgeR gene models
 #' @importFrom stats model.matrix
 #' @importFrom edgeR glmFit DGEList calcNormFactors estimateGLMCommonDisp estimateGLMTagwiseDisp
 .allgene_edgeR_model <- function(response_var,
@@ -118,7 +118,7 @@
   return(fit_all)
 }
 
-#' Single gene edgeR model
+# Single gene edgeR model
 #' @importFrom BiocParallel bplapply
 
 .singlegene_edgeR_model <- function( response_var,
@@ -150,7 +150,7 @@
   return(fit_list)
 }
 
-#' edger
+# edger
 #' @importFrom stats model.matrix
 #' @importFrom edgeR glmFit DGEList
 
@@ -195,7 +195,7 @@
 }
 
 
-#' edgeR coefficient test
+# edgeR coefficient test
 #' @importFrom BiocParallel bplapply
 
 .edger_coef_test <- function(fit_list,
@@ -205,7 +205,7 @@
   return(top_list)
 }
 
-#' coefficient test
+# coefficient test
 #' @importFrom edgeR glmLRT
 #' @importFrom plyr rbind.fill
 .def_coef_test <- function(fit){
