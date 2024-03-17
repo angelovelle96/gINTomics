@@ -13,7 +13,7 @@ Description: gINTomics is an R package for Multi-Omics data integration and
             into account also their genomics modifications such as Copy Number 
             Variations (CNV) and methylation. What is more, gINTomics allows
             integration results visualizations via a Shiny-based interactive app
-License: AGPL (>= 3)
+License: AGPL-3
 biocViews: GeneExpression, RNASeq, Microarray, 
     Visualization, CopyNumberVariation, GeneTarget
 Encoding: UTF-8
@@ -54,7 +54,6 @@ Imports:
     shiny,
     GenomicRanges,
     ggtree,
-    survival,
     shinydashboard,
     plotly,
     DT,
