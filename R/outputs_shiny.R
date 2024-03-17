@@ -299,9 +299,8 @@
     if(!is.null(table_data)){
     ttable <- .build_table(table_data)
     return(ttable)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
-           main = "No data available")
-    }
+      return(NULL)
+      }
   })
 }
 
@@ -327,8 +326,10 @@
     if(!is.null(histo_data)){
     histo_plot <- .build_histo_TFbyChr(histo_data=histo_data)
     return(histo_plot)}else{
-      plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 1), ylim = c(0, 1),
-           main = "No data available")
+      ans <- ggplot() +
+        theme_void() +
+        labs(title = "No data available")
+      return(ggplotly(ans))
     }
   })
 }
@@ -484,14 +485,6 @@
   return(handler)
 }
 
-# Render a Circos plot
-#' @importFrom shiny renderUI req
-.render_circos <- function(circos_reactive){
-
-  renderUI({
-    req(arranged_view_circos())
-  })
-}
 
 # Preprocess data for Circos plot
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
