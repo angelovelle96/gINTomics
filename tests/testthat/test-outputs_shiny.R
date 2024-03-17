@@ -1,4 +1,6 @@
-test_that("Test .prepare_network function", {
+library(shiny)
+library(shiny.gosling)
+test_that(".prepare_network works", {
   data_table <- data_shiny_tests$data_table
   network <- .prepare_network(data_table)
   expect_type(network, "list")
@@ -25,344 +27,580 @@ test_that("Test .prepare_network function", {
   expect_true("arrows" %in% colnames(network$legend_edges))
 })
 
-test_that("Test .build_network function", {
-  nodes <- data.frame(id = c("TF1", "TF2", "Target1", "miRNA1"),
-                      label = c("TF1", "TF2", "Target1", "miRNA1"),
-                      shape = c("diamond", "diamond", "circle", "triangle"),
-                      title = c("TF1", "TF2", "Target1", "miRNA1"),
-                      shadow = c(TRUE, TRUE, TRUE, TRUE),
-                      color = c("#FFBA01", "#FFBA01", "#CCE7C9", "#9969C7"),
-                      width = c(10, 10, 10, 10),
-                      stringsAsFactors = FALSE)
-  edges <- data.frame(from = c("TF1", "TF2", "miRNA1"),
-                      to = c("Target1", "Target1", "miRNA1"),
-                      width = c(4, 6, 8),
-                      color = c("#4169E1", "#4169E1", "#ED5564"),
-                      length = c(500, 500, 500),
-                      title = c("pval: 0.01, coef: 0.5, FDR: 0.02",
-                                "pval: 0.05, coef: -0.7, FDR: 0.07",
-                                "pval: 0.02, coef: 0.3, FDR: 0.03"),
-                      stringsAsFactors = FALSE)
-  legend_nodes <- data.frame(label = c("TF", "Target", "miRNA"),
-                             shape = c("diamond", "circle", "triangle"),
-                             color = c("#FFBA01", "#CCE7C9", "#9969C7"),
-                             stringsAsFactors = FALSE)
-  legend_edges <- data.frame(color = c("#4169E1", "#ED5564", "black"),
-                             label = c("UPregulate", "DOWNregulate", "no-effect"),
-                             arrows = c("to", "to", "to"),
-                             stringsAsFactors = FALSE)
-  network <- .build_network(nodes, edges, legend_nodes, legend_edges)
+test_that(".build_network works", {
+  input <- reactiveValues(layout=FALSE,
+                          physics=FALSE,
+                          numInteractions=200,
+                          SignificativityCriteria="pval",
+                          PvalRange=0.5,
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
+  nnet <- .prepare_network(data_shiny_tests$data_table)
+  reactive_network <- .select_network(data_table = data_shiny_tests$data_table,
+                                      input = input,
+                                      output = output,
+                                      network_data = nnet,
+                                      deg = FALSE)
+  tmp <- isolate(reactive_network())
+  network <- .build_network(nodes = tmp$nodes,
+                            edges = tmp$edges,
+                            legend_nodes = tmp$legend_nodes,
+                            legend_edges = tmp$legend_edges)
+  tmp$edges <- tmp$edges[!is.na(tmp$edges$from),]
   expect_type(network, "list")
-  expect_equal(length(network$x$data$nodes$id), nrow(nodes))
-  expect_equal(length(network$x$data$edges$from), nrow(edges))
-  expect_equal(length(network$x$data$legend$groups$groupname), nrow(legend_nodes))
-  expect_equal(length(network$x$data$legend$edges$color), nrow(legend_edges))
+  expect_equal(length(network$x$nodes$id), nrow(tmp$nodes))
+  expect_equal(length(network$x$edges$from), nrow(tmp$edges))
 })
 
-test_that("Test .build_venn function", {
+test_that(".build_venn works", {
+  input <- reactiveValues(SignificativityCriteria="pval",
+                          PvalRange=0.5,
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
   data_table <- data_shiny_tests$data_table
-  venn_data <- .prepare_reactive_venn(data_table)
+  venn_data <- .prepare_reactive_venn(data_table,
+                                      input = input,
+                                      output = output)
+  venn_data <- isolate(venn_data())
   venn <- .build_venn(venn_data)
-  expect_type(venn, "ggplot")
-  expect_equal(length(unique(venn_data$cnv_sign_genes$cov)), length(venn_data$cnv_sign_genes$cov))
-  expect_equal(length(unique(venn_data$met_sign_genes$cov)), length(venn_data$met_sign_genes$cov))
+  expect_type(venn, "list")
+  expect_s3_class(venn, "gg")
+  expect_equal(names(venn)[1], "data")
 })
 
-test_that(".render_venn function renders plotly plot", {
-  # Dati di esempio
-  venn_data <- list(
-    cnv_sign_genes = data.frame(cov = c("Gene1", "Gene2", "Gene3", "Gene4")),
-    met_sign_genes = data.frame(cov = c("Gene2", "Gene3", "Gene5", "Gene6"))
-  )
-  reactive_venn <- function() {
-    return(venn_data)
+test_that(".render_venn works", {
+  input <- reactiveValues(SignificativityCriteria="pval",
+                          PvalRange=0.5,
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
+  data_table <- data_shiny_tests$data_table
+  venn_data <- .prepare_reactive_venn(data_table,
+                                      input = input,
+                                      output = output)
+  venn_data <- isolate(venn_data())
+  tested <- .render_venn(venn_data)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".render_venn_table works", {
+  input <- reactiveValues(SignificativityCriteria="pval",
+                          PvalRange=0.5,
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
+  data_table <- data_shiny_tests$data_table
+  venn_data <- .prepare_reactive_venn(data_table,
+                                      input = input,
+                                      output = output)
+  venn_data <- isolate(venn_data())
+  tested <- .render_venn_table(venn_data)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+
+test_that(".build_volcano works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=0.5,
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
+  reactive_volcano <- .prepare_reactive_volcano(data_shiny_tests$data_table,
+                                                input = input,
+                                                output = output,
+                                                deg = FALSE)
+  tmp <- isolate(reactive_volcano())
+  tested <- .build_volcano(tmp)
+  expect_type(tested, "list")
+  expect_s3_class(tested, "plotly")
+  expect_equal(names(tested)[1], "x")
+})
+
+test_that(".render_volcano works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=0.5,
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
+  reactive_volcano <- .prepare_reactive_volcano(data_shiny_tests$data_table,
+                                                input = input,
+                                                output = output,
+                                                deg = FALSE)
+  tmp <- isolate(reactive_volcano())
+  tested <- .render_volcano(tmp)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".build_ridge works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,0.5),
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
+  reactive_ridge <- .prepare_reactive_ridge(data_shiny_tests$data_table,
+                                            input = input,
+                                            output = output,
+                                            deg = FALSE)
+  tmp <- isolate(reactive_ridge())
+  tested <- .build_ridge(ridge_data = tmp$df, quantiles = tmp$quantiles)
+  expect_type(tested, "list")
+  expect_s3_class(tested, "ggplot")
+  expect_equal(names(tested)[1], "data")
+})
+
+test_that(".render_ridge works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,0.5),
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
+  reactive_ridge <- .prepare_reactive_ridge(data_shiny_tests$data_table,
+                                            input = input,
+                                            output = output,
+                                            deg = FALSE)
+  tmp <- isolate(reactive_ridge())
+  tested <- .render_ridge(tmp)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".build_histo works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,0.5),
+                          FdrRange=0.05,
+                          ClassSelect="A",
+                          ChrSelect="All")
+  output <- reactiveValues()
+  reactive_histo <- .prepare_reactive_histo(data_shiny_tests$data_table,
+                                            input = input,
+                                            output = output,
+                                            deg = FALSE)
+  tmp <- isolate(reactive_histo())
+  tested <- .build_histo(tmp)
+  expect_type(tested, "list")
+  expect_s3_class(tested, "ggplot")
+  expect_equal(names(tested)[1], "data")
+})
+
+test_that(".render_histo works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,0.5),
+                          FdrRange=0.05,
+                          ClassSelect="A",
+                          ChrSelect="All")
+  output <- reactiveValues()
+  reactive_histo <- .prepare_reactive_histo(data_shiny_tests$data_table,
+                                            input = input,
+                                            output = output,
+                                            deg = FALSE)
+  tmp <- isolate(reactive_histo())
+  tested <- .render_histo(tmp)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".render_histo_table works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,0.5),
+                          FdrRange=0.05,
+                          ClassSelect="A",
+                          ChrSelect="All")
+  output <- reactiveValues()
+  reactive_histo <- .prepare_reactive_histo(data_shiny_tests$data_table,
+                                            input = input,
+                                            output = output,
+                                            deg = FALSE,
+                                            table = TRUE)
+  tmp <- isolate(reactive_histo())
+  tested <- .render_histo_table(tmp)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".build_histo_TFbyChr works", {
+  input <- reactiveValues(IntegrationSelect="tf_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,1),
+                          FdrRange=0.05,
+                          ClassSelect="A",
+                          ChrSelect="All")
+  output <- reactiveValues
+  reactive_histo_tf_transcript <- .prepare_reactive_histo_tf(data_shiny_tests$data_table,
+                                                             input = input,
+                                                             output = output,
+                                                             deg = FALSE)
+  tmp <- isolate(reactive_histo_tf_transcript())
+  tested <- .build_histo_TFbyChr(tmp)
+  expect_type(tested, "list")
+  expect_s3_class(tested, "plotly")
+  expect_equal(names(tested)[1], "x")
+})
+
+test_that(".render_histo_TF works", {
+  input <- reactiveValues(IntegrationSelect="tf_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,1),
+                          FdrRange=0.05,
+                          ClassSelect="A",
+                          ChrSelect="All")
+  output <- reactiveValues
+  reactive_histo_tf_transcript <- .prepare_reactive_histo_tf(data_shiny_tests$data_table,
+                                                             input = input,
+                                                             output = output,
+                                                             deg = FALSE)
+  tmp <- isolate(reactive_histo_tf_transcript())
+  tested <- .render_histo_TF(tmp)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".render_histo_tf_table works", {
+  input <- reactiveValues(IntegrationSelect="tf_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,1),
+                          FdrRange=0.05,
+                          ClassSelect="A",
+                          ChrSelect="All")
+  output <- reactiveValues
+  reactive_histo_tf_transcript <- .prepare_reactive_histo_tf(data_shiny_tests$data_table,
+                                                             input = input,
+                                                             output = output,
+                                                             deg = FALSE)
+  tmp <- isolate(reactive_histo_tf_transcript())
+  tested <- .render_histo_tf_table(tmp)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".render_ridge_table works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,0.5),
+                          FdrRange=0.05,
+                          ClassSelect="A")
+  output <- reactiveValues()
+  reactive_ridge <- .prepare_reactive_ridge(data_shiny_tests$data_table,
+                                            input = input,
+                                            output = output,
+                                            deg = FALSE,
+                                            table = TRUE)
+  tmp <- isolate(reactive_ridge())
+  tested <- .render_ridge_table(tmp)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".build_table works", {
+  tested <- .build_table(data_shiny_tests$data_table)
+  expect_s3_class(tested, "datatables")
+  expect_s3_class(tested$x$data, "data.frame")
+})
+
+test_that(".render_table works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,1),
+                          FdrRange=0.05,
+                          ClassSelect="A",
+                          ChrSelect="All",
+                          degSelect="All")
+  output <- reactiveValues()
+  reactive_table <- .prepare_reactive_table(data_shiny_tests$data_table,
+                                            input=input,
+                                            output=output)
+  tmp <- isolate(reactive_table())
+  tested <- .render_table(tmp)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".download_csv works", {
+  input <- reactiveValues(IntegrationSelect="gene_genomic_res",
+                          genomicTypeSelect="cnv",
+                          SignificativityCriteria="pval",
+                          PvalRange=c(0,1),
+                          FdrRange=0.05,
+                          ClassSelect="A",
+                          ChrSelect="All",
+                          degSelect="All")
+  output <- reactiveValues()
+  tested <- .download_csv(plotType = "table",
+                         input=input,
+                         output=output,
+                         data_table=data_shiny_tests$data_table)
+  expect_s3_class(tested, "shiny.render.function")
+  tested <- .download_csv(plotType = "histo",
+                          input=input,
+                          output=output,
+                          data_table=data_shiny_tests$data_table)
+  expect_s3_class(tested, "shiny.render.function")
+  tested <- .download_csv(plotType = "venn",
+                          input=input,
+                          output=output,
+                          data_table=data_shiny_tests$data_table)
+  expect_s3_class(tested, "shiny.render.function")
+})
+
+test_that(".circos_preprocess works", {
+  tested <- .circos_preprocess(data_shiny_tests$data)
+  expect_s4_class(tested[[1]], "GenomicRanges")
+  expect_s4_class(tested[[2]], "GenomicRanges")
+  expect_s4_class(tested[[2]]@seqnames, "Rle")
+})
+
+test_that(".circos_track_cols works", {
+  tested <- .circos_track_cols(seq_len(100))
+  expect_length(tested, 100)
+})
+
+test_that(".create_single_track works", {
+  use_gosling()
+  tmp <- .circos_preprocess(data_shiny_tests$data)
+  gr <- tmp$df_cnv
+  gr$cov_value2 <- as.character(gr$cov_value_original)
+  ccol <- .circos_track_cols(vvalues = gr$cov_value2)
+  tested <- .create_single_track(data=gr,
+                                    dataValue='cov_value',
+                                    x_axis="none",
+                                    xe_axis="none",
+                                    y_axis="none",
+                                    colorField="cov_value2",
+                                    colorDomain=unique(gr$cov_value2),
+                                    colorRange=ccol,
+                                    tooltipField1="cov_value",
+                                    tooltipTitle="cnv",
+                                    tooltipAlt1="CNV Value:",
+                                    tooltipField2="gene",
+                                    tooltipAlt2="Gene Name:",
+                                    tooltipField3="class",
+                                    tooltipAlt3="Class:",
+                                    tooltipField4="cnv_met",
+                                    tooltipAlt4="Integration Type:",
+                                    tooltipField5="cov_value_original",
+                                    tooltipAlt5="Original CNV Value:",
+                                    legend=FALSE,
+                                    colorType="nominal",
+                                    title="CNV")
+  expect_type(tested, "list")
+  expect_identical(names(tested)[1], "data")
+})
+
+test_that(".create_tracks works", {
+  use_gosling()
+  gr <- .circos_preprocess(data_shiny_tests$data)
+  tested <- .create_tracks(data = data_shiny_tests$data, gr = gr)
+  expect_type(tested, "list")
+  expect_identical(names(tested)[1], "track_cnv")
+  expect_length(tested, 9)
+})
+
+test_that(".create_cnv_track works", {
+  use_gosling()
+  gr <- .circos_preprocess(data_shiny_tests$data)
+  tested <- .create_cnv_track(gr = gr$df_cnv)
+  expect_type(tested, "list")
+  expect_identical(names(tested)[1], "data")
+})
+
+test_that(".create_met_track works", {
+  use_gosling()
+  gr <- .circos_preprocess(data_shiny_tests$data)
+  tested <- .create_met_track(gr = gr$df_met)
+  expect_type(tested, "list")
+  expect_identical(names(tested)[1], "data")
+})
+
+test_that(".create_expr_track works", {
+  use_gosling()
+  gr <- .circos_preprocess(data_shiny_tests$data)
+  tested <- .create_expr_track(gr = gr$df_cnv)
+  expect_type(tested, "list")
+  expect_identical(names(tested)[1], "data")
+})
+
+test_that(".create_coef_track works", {
+  use_gosling()
+  gr <- .circos_preprocess(data_shiny_tests$data)
+  tested <- .create_coef_track(gr = gr$df_met)
+  expect_type(tested, "list")
+  expect_identical(names(tested)[1], "data")
+})
+
+test_that(".create_cyto_track works", {
+  use_gosling()
+  tested <- .create_cyto_track()
+  expect_type(tested, "list")
+  expect_identical(names(tested)[1], "id")
+})
+
+test_that(".create_composed_view works", {
+  use_gosling()
+  gr <- .circos_preprocess(data_shiny_tests$data)
+  tracks <- .create_tracks(data = data_shiny_tests$data, gr = gr)
+  tested <- .create_composed_view(tracks = tracks, width = 100, height = 100)
+  expect_type(tested, "list")
+  expect_type(tested[[1]], "list")
+  expect_identical(names(tested)[1], "circos_genomic")
+})
+
+test_that(".prepare_gen_heatmap works", {
+  ht_opt$message <- FALSE
+  integrationSelect <- "gene_genomic_res"
+  numTopCNV <- 20
+  numTopMET <- 20
+  numTopCNVonly <- 20
+  numTopMETonly <- 20
+  numTopMiCNV <- 20
+  classSelect <- "A"
+  significativityCriteria <- "pval"
+  pvalRange <- 0.1
+  fdrRange <- 0.1
+  scale <- "row"
+  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
+    classSelect]]$data$response_var
+  data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
+  data_table <- data_table[data_table$class == classSelect,]
+  df_heatmap_t <- t(as.matrix(df_heatmap))
+  tested <- .prepare_gen_heatmap(data_table = data_table,
+                              df_heatmap = df_heatmap,
+                              df_heatmap_t = df_heatmap_t,
+                              significativityCriteria=significativityCriteria,
+                              pvalRange = pvalRange,
+                              fdrRange = fdrRange,
+                              numTopCNV = numTopCNV,
+                              numTopMET = numTopMET,
+                              scale = scale)
+  expect_s4_class(tested, "HeatmapList")
+  expect_true(tested@heatmap_legend_param$show)
+})
+
+test_that(".prepare_cnv_heatmap works", {
+  ht_opt$message <- FALSE
+  integrationSelect <- "gene_genomic_res"
+  numTopCNV <- 20
+  numTopMET <- 20
+  numTopCNVonly <- 20
+  numTopMETonly <- 20
+  numTopMiCNV <- 20
+  classSelect <- "A"
+  significativityCriteria <- "pval"
+  pvalRange <- 0.1
+  fdrRange <- 0.1
+  scale <- "row"
+  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
+    classSelect]]$data$response_var
+  data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
+  data_table <- data_table[data_table$class == classSelect,]
+  df_heatmap_t <- t(as.matrix(df_heatmap))
+  data_table <- data_table[data_table$cnv_met=="cnv",]
+  data_table$omics <- "gene_cnv_res"
+  tested <- .prepare_cnv_heatmap(data_table = data_table,
+                                 df_heatmap = df_heatmap,
+                                 df_heatmap_t = df_heatmap_t,
+                                 significativityCriteria=significativityCriteria,
+                                 pvalRange = pvalRange,
+                                 fdrRange = fdrRange,
+                                 numTopCNVonly = numTopCNVonly,
+                                 scale = scale)
+  expect_s4_class(tested, "HeatmapList")
+  expect_true(tested@heatmap_legend_param$show)
+})
+
+test_that(".prepare_met_heatmap works", {
+  ht_opt$message <- FALSE
+  integrationSelect <- "gene_genomic_res"
+  numTopCNV <- 20
+  numTopMET <- 20
+  numTopCNVonly <- 20
+  numTopMETonly <- 20
+  numTopMiCNV <- 20
+  classSelect <- "A"
+  significativityCriteria <- "pval"
+  pvalRange <- 0.1
+  fdrRange <- 0.1
+  scale <- "row"
+  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
+    classSelect]]$data$response_var
+  data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
+  data_table <- data_table[data_table$class == classSelect,]
+  df_heatmap_t <- t(as.matrix(df_heatmap))
+  data_table <- data_table[data_table$cnv_met=="met",]
+  data_table$omics <- "gene_met_res"
+  tested <- .prepare_met_heatmap(data_table = data_table,
+                                 df_heatmap = df_heatmap,
+                                 df_heatmap_t = df_heatmap_t,
+                                 significativityCriteria=significativityCriteria,
+                                 pvalRange = pvalRange,
+                                 fdrRange = fdrRange,
+                                 numTopMETonly = numTopMETonly,
+                                 scale = scale)
+  expect_s4_class(tested, "HeatmapList")
+  expect_true(tested@heatmap_legend_param$show)
+})
+
+test_that(".prepare_gen_heatmap works", {
+  ht_opt$message <- FALSE
+  integrationSelect <- "mirna_cnv_res"
+  numTopCNV <- 20
+  numTopMET <- 20
+  numTopCNVonly <- 20
+  numTopMETonly <- 20
+  numTopMiCNV <- 20
+  classSelect <- "A"
+  significativityCriteria <- "pval"
+  pvalRange <- 0.1
+  fdrRange <- 0.1
+  scale <- "row"
+  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
+    classSelect]]$data$response_var
+  data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
+  data_table <- data_table[data_table$class == classSelect,]
+  df_heatmap_t <- t(as.matrix(df_heatmap))
+  tested <- .prepare_mirna_heatmap(data_table = data_table,
+                                   df_heatmap = df_heatmap,
+                                   df_heatmap_t = df_heatmap_t,
+                                   significativityCriteria=significativityCriteria,
+                                   pvalRange = pvalRange,
+                                   fdrRange = fdrRange,
+                                   numTopMiCNV = numTopMiCNV,
+                                   scale = scale)
+  expect_s4_class(tested, "HeatmapList")
+  expect_true(tested@heatmap_legend_param$show)
+})
+
+test_that(".run_bg works", {
+  tested <- .run_bg(FFUN = paste0,
+                    args = list("test"),
+                    input = list(),
+                    output = list())
+  expect_true(tested$is_alive())
+  i=0
+  while(tested$is_alive()){
+    i=i+1
   }
+  expect_identical(tested$get_result(), "test")
 
-  # Chiamata alla funzione
-  plot <- .render_venn(reactive_venn)
-
-  # Verifica che l'output sia di tipo plotly
-  expect_is(plot, "plotly::plotly")
-
-  # Verifica che il diagramma sia stato costruito correttamente
-  expect_true(!is.null(plot$x$data))
 })
 
-test_that(".render_venn function handles null data correctly", {
-  # Funzione reattiva che restituisce dati nulli
-  reactive_venn_null <- function() {
-    return(NULL)
-  }
-
-  # Chiamata alla funzione con dati nulli
-  plot_null <- .render_venn(reactive_venn_null)
-
-  # Verifica che il plot restituito sia vuoto
-  expect_true(is.null(plot_null$x$data))
+test_that("run_shiny works", {
+  tested <- run_shiny(data_shiny_tests$multiomics_integration)
+  expect_s3_class(tested, "shiny.appobj")
+  expect_identical(names(tested)[1], "httpHandler")
 })
 
-test_that(".render_venn_table function renders data table", {
-  # Dati di esempio
-  venn_data <- list(
-    cnv_sign_genes = data.frame(cov = c("Gene1", "Gene2", "Gene3", "Gene4")),
-    met_sign_genes = data.frame(cov = c("Gene2", "Gene3", "Gene5", "Gene6"))
-  )
-  reactive_venn <- function() {
-    return(venn_data)
-  }
-
-  # Chiamata alla funzione
-  datatable <- .render_venn_table(reactive_venn)
-
-  # Verifica che l'output sia di tipo DataTable
-  expect_is(datatable, "data.frame")
-
-  # Verifica che la tabella sia stata costruita correttamente
-  expect_equal(nrow(datatable), 2) # Numero di righe atteso
-  expect_equal(ncol(datatable), 1) # Numero di colonne atteso
-  expect_equal(names(datatable), "Genes") # Nome della colonna atteso
-  expect_equal(datatable$Genes, c("Gene2", "Gene3")) # Contenuto atteso
-})
-
-test_that(".render_venn_table function handles null data correctly", {
-  # Funzione reattiva che restituisce dati nulli
-  reactive_venn_null <- function() {
-    return(NULL)
-  }
-
-  # Chiamata alla funzione con dati nulli
-  datatable_null <- .render_venn_table(reactive_venn_null)
-
-  # Verifica che la tabella restituita sia vuota
-  expect_equal(nrow(datatable_null), 0)
-  expect_equal(ncol(datatable_null), 0)
-})
-
-test_that(".build_volcano function generates volcano plot", {
-  # Dati di esempio
-  volcano_data <- data.frame(
-    cov = c("Gene1", "Gene2", "Gene3", "Gene4"),
-    coef = c(1.5, -2.3, 0.8, -1.9),
-    pval_fdr = c(0.001, 0.0001, 0.01, 0.05),
-    group = c("Group1", "Group2", "Group1", "Group2"),
-    class = c("Class1", "Class2", "Class1", "Class2")
-  )
-
-  # Chiamata alla funzione
-  plot <- .build_volcano(volcano_data)
-
-  # Verifica che l'output sia di tipo Plotly
-  expect_is(plot, "list")
-  expect_is(plot$x$data[[1]], "list")
-
-  # Verifica che il titolo del grafico sia corretto
-  expect_equal(plot$x$layout$title$text, "Volcano Plot")
-
-  # Verifica che i dati siano stati correttamente trasferiti al plot
-  expect_equal(plot$x$data[[1]]$x, c(1.5, -2.3, 0.8, -1.9))
-  expect_equal(plot$x$data[[1]]$y, c(-log10(0.001), -log10(0.0001), -log10(0.01), -log10(0.05)))
-  expect_equal(plot$x$data[[1]]$marker$color, c("Group1", "Group2", "Group1", "Group2"))
-  expect_equal(plot$x$data[[1]]$marker$symbol, c("Class1", "Class2", "Class1", "Class2"))
-  expect_equal(plot$x$data[[1]]$text, c("Group: Group1 <br> Class: Class1 <br> Name: Gene1 <br> Pval/FDR(-log10): 3.0 <br> coef 1.5",
-                                         "Group: Group2 <br> Class: Class2 <br> Name: Gene2 <br> Pval/FDR(-log10): 4.0 <br> coef -2.3",
-                                         "Group: Group1 <br> Class: Class1 <br> Name: Gene3 <br> Pval/FDR(-log10): 2.0 <br> coef 0.8",
-                                         "Group: Group2 <br> Class: Class2 <br> Name: Gene4 <br> Pval/FDR(-log10): 1.301 <br> coef -1.9"))
-})
-
-test_that(".render_volcano function renders volcano plot", {
-  # Dati di esempio
-  volcano_data <- data.frame(
-    cov = c("Gene1", "Gene2", "Gene3", "Gene4"),
-    coef = c(1.5, -2.3, 0.8, -1.9),
-    pval_fdr = c(0.001, 0.0001, 0.01, 0.05),
-    group = c("Group1", "Group2", "Group1", "Group2"),
-    class = c("Class1", "Class2", "Class1", "Class2")
-  )
-
-  # Funzione reattiva di esempio
-  reactive_volcano <- function() {
-    return(volcano_data)
-  }
-
-  # Chiamata alla funzione
-  plot <- .render_volcano(reactive_volcano)
-
-  # Verifica che l'output sia di tipo Plotly
-  expect_is(plot, "htmlwidget")
-  expect_true(any(grepl("plotly", class(plot))))
-
-  # Verifica che il grafico sia stato correttamente generato
-  plotly_output <- plotly:::plotly_build(plot)
-  expect_equal(plotly_output$data[[1]]$x, c(1.5, -2.3, 0.8, -1.9))
-  expect_equal(plotly_output$data[[1]]$y, c(-log10(0.001), -log10(0.0001), -log10(0.01), -log10(0.05)))
-  expect_equal(plotly_output$data[[1]]$marker$color, c("Group1", "Group2", "Group1", "Group2"))
-  expect_equal(plotly_output$data[[1]]$marker$symbol, c("Class1", "Class2", "Class1", "Class2"))
-  expect_equal(plotly_output$data[[1]]$text, c("Group: Group1 <br> Class: Class1 <br> Name: Gene1 <br> Pval/FDR(-log10): 3.0 <br> coef 1.5",
-                                                "Group: Group2 <br> Class: Class2 <br> Name: Gene2 <br> Pval/FDR(-log10): 4.0 <br> coef -2.3",
-                                                "Group: Group1 <br> Class: Class1 <br> Name: Gene3 <br> Pval/FDR(-log10): 2.0 <br> coef 0.8",
-                                                "Group: Group2 <br> Class: Class2 <br> Name: Gene4 <br> Pval/FDR(-log10): 1.301 <br> coef -1.9"))
-})
-
-test_that(".build_ridge function generates ridgeline plot", {
-  # Dati di esempio
-  ridge_data <- data.frame(
-    coef = rnorm(100),
-    significance = runif(100)
-  )
-  quantiles <- c(-2, 2)  # Limiti dell'asse x
-
-  # Chiamata alla funzione
-  plot <- .build_ridge(ridge_data, quantiles)
-
-  # Verifica che l'output sia di tipo ggplot
-  expect_is(plot, "ggplot")
-
-  # Verifica che il grafico abbia i titoli corretti
-  expect_equal(ggplot2::ggtitle(plot), "Ridgeline Plot")
-  expect_equal(names(ggplot2::xlab(plot)), "label")
-  expect_equal(names(ggplot2::ylab(plot)), "label")
-  expect_equal(ggplot2::xlab(plot)$label, "Value")
-  expect_equal(ggplot2::ylab(plot)$label, "Significativity")
-
-  # Verifica che i limiti dell'asse x siano stati impostati correttamente
-  expect_equal(attr(ggplot2::layer_scales(plot)$x, "limits"), quantiles)
-
-  # Verifica che il grafico includa una densità delle righe
-  expect_true(any(grepl("geom_density_ridges", ggplot2::ggplot_build(plot)$layout$name)))
-
-  # Verifica che il grafico abbia la giusta scala di colori
-  expect_true(any(grepl("scale_fill_manual", ggplot2::ggplot_build(plot)$layout$name)))
-})
-
-test_that(".render_ridge function renders ridgeline plot", {
-  # Dati di esempio
-  ridge_data <- data.frame(
-    coef = rnorm(100),
-    significance = runif(100)
-  )
-  quantiles <- c(-2, 2)  # Limiti dell'asse x
-  reactive_ridge <- function() {
-    list(df = ridge_data, quantiles = quantiles)
-  }
-
-  # Chiamata alla funzione
-  plot <- .render_ridge(reactive_ridge)
-
-  # Verifica che l'output sia di tipo ggplot
-  expect_is(plot, "ggplot")
-
-  # Verifica che il grafico abbia i titoli corretti
-  expect_equal(ggplot2::ggtitle(plot), "Ridgeline Plot")
-  expect_equal(names(ggplot2::xlab(plot)), "label")
-  expect_equal(names(ggplot2::ylab(plot)), "label")
-  expect_equal(ggplot2::xlab(plot)$label, "Value")
-  expect_equal(ggplot2::ylab(plot)$label, "Significativity")
-
-  # Verifica che i limiti dell'asse x siano stati impostati correttamente
-  expect_equal(attr(ggplot2::layer_scales(plot)$x, "limits"), quantiles)
-
-  # Verifica che il grafico includa una densità delle righe
-  expect_true(any(grepl("geom_density_ridges", ggplot2::ggplot_build(plot)$layout$name)))
-})
-
-test_that(".render_histo function renders histogram plot", {
-  # Dati di esempio
-  histo_data <- data.frame(
-    chr_cov = sample(1:22, 100, replace = TRUE),
-    significance = sample(c("significant", "not significant"), 100, replace = TRUE)
-  )
-
-  reactive_histo <- function() {
-    histo_data
-  }
-
-  # Chiamata alla funzione
-  plot <- .render_histo(reactive_histo)
-
-  # Verifica che l'output sia di tipo ggplot
-  expect_is(plot, "ggplot")
-
-  # Verifica che il grafico abbia i titoli corretti
-  expect_equal(ggplot2::ggtitle(plot), "Number of Genes with Significant Coefficients by Chromosome")
-  expect_equal(names(ggplot2::xlab(plot)), "label")
-  expect_equal(names(ggplot2::ylab(plot)), "label")
-  expect_equal(ggplot2::xlab(plot)$label, "Chromosome")
-  expect_equal(ggplot2::ylab(plot)$label, "Count")
-
-  # Verifica che il grafico includa un layer di barre
-  expect_true(any(grepl("geom_bar", ggplot2::ggplot_build(plot)$layout$name)))
-})
-
-test_that(".render_histo function renders histogram plot", {
-  # Dati di esempio
-  histo_data <- data.frame(
-    chr_cov = sample(1:22, 100, replace = TRUE),
-    significance = sample(c("significant", "not significant"), 100, replace = TRUE)
-  )
-
-  reactive_histo <- function() {
-    histo_data
-  }
-
-  # Chiamata alla funzione
-  plot <- .render_histo(reactive_histo)
-
-  # Verifica che l'output sia di tipo plotly
-  expect_is(plot, "plotly")
-
-  # Verifica che il grafico abbia il titolo corretto
-  expect_equal(plot$x$title$text, "Chromosome")
-  expect_equal(plot$y$title$text, "Count")
-
-  # Verifica che il grafico includa un layer di barre
-  expect_true("type" %in% plot$x$data[[1]] && plot$x$data[[1]]$type == "bar")
-})
-
-test_that(".render_histo_table function renders data table", {
-  # Dati di esempio
-  table_data <- data.frame(
-    chr_cov = sample(1:22, 100, replace = TRUE),
-    significance = sample(c("significant", "not significant"), 100, replace = TRUE)
-  )
-
-  reactive_histo_table <- function() {
-    table_data
-  }
-
-  # Chiamata alla funzione
-  table <- .render_histo_table(reactive_histo_table)
-
-  # Verifica che l'output sia di tipo DataTable
-  expect_is(table, "dataTable")
-
-  # Verifica che la tabella contenga i dati corretti
-  expect_equal(nrow(table), nrow(table_data))
-  expect_equal(ncol(table), ncol(table_data))
-  expect_equal(colnames(table), colnames(table_data))
-  expect_equal(rownames(table), rownames(table_data))
-})
-
-test_that(".build_histo_TFbyChr function creates correct plot", {
-  # Dati di esempio
-  histo_data <- data.frame(
-    TF = c("TF1", "TF2", "TF3", "TF1", "TF2", "TF3"),
-    Chromosome = c("chr1", "chr2", "chr1", "chr2", "chr1", "chr2"),
-    Count = c(10, 15, 20, 25, 30, 35)
-  )
-
-  # Chiamata alla funzione
-  plot <- .build_histo_TFbyChr(histo_data)
-
-  # Verifica che l'output sia un oggetto plotly
-  expect_is(plot, "list")
-  expect_is(plot$x$data[[1]]$x, "formula")
-  expect_is(plot$x$data[[1]]$y, "formula")
-  expect_is(plot$x$data[[1]]$type, "bar")
-
-  # Verifica che il layout sia stato impostato correttamente
-  expect_equal(plot$x$layout$title$text, "Number of genes targeted by TFs/miRNAs")
-  expect_equal(plot$x$layout$xaxis$title$text, "TF/miRNAs")
-  expect_equal(plot$x$layout$yaxis$title$text, "Number of targets")
-  expect_equal(plot$x$layout$barmode, "group")
-})
+#file.remove("tests/testthat/Rplots.pdf")
 
