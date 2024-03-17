@@ -44,8 +44,38 @@
 #' @importFrom shiny addResourcePath fluidPage tags img fluidRow column
 #' @importFrom shinydashboard tabItem box
 .gint_tabitem_home <- function(data_table){
+  myImgResources <- "imgResources/home.png"
+  addResourcePath(prefix = "imgResources",
+                  system.file(directoryPath = "www/",
+                              package = "gINTomics"))
   tabItem(tabName = "home",
-          .gint_home_box())
+          fluidRow(
+            column(
+              width = 12,
+              box(
+                title = "gINTomics Visualizer 1.0",
+                footer = HTML("
+                Welcome to gINTomics Visualizer 1.0. <br> <br>
+                This interactive environment, based on Shiny, allows the
+                user to easily visualize output results from gINTomics
+                package and to save them for downstream tasks and reports
+                creation."),
+                width = 12
+              )
+            )
+          ),
+          fluidRow(
+            column(
+              width = 12,
+              div(
+                img(src = myImgResources, height = 300*3, width = 400*3),
+                class = "text-center"  # Aggiungi la classe text-center per centrare l'immagine
+              )
+            )
+          ),
+          .gint_home_box()
+  )
+
 }
 
 #' Coefficients Distribution Subitem for Genomic Integration
@@ -1268,20 +1298,8 @@
 #' @importFrom shiny addResourcePath fluidPage tags img fluidRow column
 #' @importFrom shinydashboard tabItem box
 .gint_home_box <- function(){
-  myImgResources <- "imgResources/logo_gINTomics.png"
-  addResourcePath(prefix = "imgResources",
-                  system.file(directoryPath = "www/",
-                              package = "gINTomics"))
-  fluidRow(box(title = "gINTomics Visualizer 1.0",
+  fluidRow(box(title = "Contacts and links",
       footer = HTML("
-                    Welcome to gINTomics Visualizer 1.0. <br> <br>
-                    This interactive environment, based on Shiny, allows the
-                    user to easily visualize output results from gINTomics
-                    package and to save them for downstream tasks and reports
-                    creation. <br> <br>
-
-Contacts and links: <br> <br>
-
 - Angelo Velle <br>
 e-mail: angelo.velle@unipd.it <br>
 github: https://github.com/angelovelle96 <br> <br>
@@ -1293,9 +1311,7 @@ github: https://github.com/francescopatane96 <br> <br>
 - Chiara Romualdi <br>
 e-mail: chiara.romualdi@unipd.it <br>
 website: https://romualdi.bio.unipd.it/
-      ")),
-      column(width = 1, img(src = myImgResources,
-                            height = 100, width = 100)))
+      ")))
 }
 
 #' Defining coefficients distribution box description
