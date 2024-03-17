@@ -1252,7 +1252,7 @@
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' dashboardHeader dashboardBody tabItems dashboardPage
 .create_ui <- function(data_table){
-  myImgResources <- "imgResources/logo_gINTomics3.png"
+  myImgResources <- "imgResources/logo_gINTomics2.png"
   addResourcePath(prefix = "imgResources", system.file(directoryPath = "www/", package = "gINTomics"))
   dashboardPage(
     dashboardHeader(title = span("gINTomics",
