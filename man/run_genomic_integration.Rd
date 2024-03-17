@@ -51,6 +51,19 @@ between response variable and covariates. The names of the list should
 match the response variables while the character contained in each element
 of the list should match the covariates. If NULL (default), the interactions
 will be automatically defined according to response variable's colnames.}
+
+\item{class}{Character vector specifying the classes for differential
+expression analysis.}
+
+\item{scale}{Logical. Should the data be scaled? Default is set to TRUE.}
+
+\item{run_deg}{Logical. Should differential expression analysis be performed?
+Default is set to TRUE.}
+
+\item{BPPARAM}{A BiocParallelParam object specifying the parallel backend to
+be used.}
+
+\item{...}{Additional arguments to be passed to internal functions.}
 }
 \value{
 A list or a \linkS4class{MultiClass} object if \strong{class} is provided
@@ -62,6 +75,12 @@ Variations data
 }
 \examples{
 # Example usage_multi:
-genomic_integration <- run_genomic_integration(expression=expression,
-cnv_data=cnv_data, methylation=methylation, class=class)
+data("ov_test_tcga_omics")
+meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
+gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
+class <- rep(c('A', 'B'), each = 10)
+names(class) <- colnames(mmultiassay_ov[[1]])
+genomic_integration <- run_genomic_integration(expression=gene_exp_matrix,
+cnv_data=gene_cnv_matrix, methylation=meth_matrix, class=class)
 }

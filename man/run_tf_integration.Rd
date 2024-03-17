@@ -56,6 +56,17 @@ expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 \item{normalize_cov}{Same as \strong{normalize} but for covariates.}
 
 \item{norm_method_cov}{Same as \strong{norm_method} but for covariates.}
+
+\item{class}{Character vector specifying the classes for differential
+expression analysis.}
+
+\item{run_deg}{Logical. Should differential expression analysis be performed?
+Default is set to TRUE.}
+
+\item{BPPARAM}{A BiocParallelParam object specifying the parallel backend to
+be used.}
+
+\item{...}{Additional arguments to be passed to internal functions.}
 }
 \value{
 A list or a \linkS4class{MultiClass} object if \strong{class} is provided
@@ -72,6 +83,10 @@ argument. Other types of interactions should be provided through the
 }
 \examples{
 # Example usage_multi:
-tf_integration <- run_tf_integration(expression=expression,
+data("ov_test_tcga_omics")
+gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+class <- rep(c('A', 'B'), each = 10)
+names(class) <- colnames(mmultiassay_ov[[1]])
+tf_integration <- run_tf_integration(expression=gene_exp_matrix,
 class=class)
 }

@@ -37,5 +37,16 @@ This function will generate a proper MultiAssayExperiment suitable for the
 }
 \examples{
 # Example usage:
-create_multiassay(methylation, cnv_data, gene_exp, miRNA_exp, miRNA_cnv_data)
+data("ov_test_tcga_omics")
+class <- rep(c('A', 'B'), each = 10)
+names(class) <- colnames(mmultiassay_ov[[1]])
+multiomics_integration <-run_multiomics(data = mmultiassay_ov, class = class)
+gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+miRNA_exp_matrix <- as.matrix(assay(mmultiassay_ov[["miRNA_exp"]]))
+meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
+gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
+miRNA_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["miRNA_cnv_data"]]))
+create_multiassay(methylation=meth_matrix, cnv_data=gene_cnv_matrix,
+ gene_exp=gene_exp_matrix, miRNA_exp=miRNA_exp_matrix,
+ miRNA_cnv_data=miRNA_cnv_matrix)
 }
