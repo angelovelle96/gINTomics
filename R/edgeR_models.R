@@ -121,7 +121,7 @@
 # Single gene edgeR model
 #' @importFrom BiocParallel bplapply
 
-.singlegene_edgeR_model <- function( response_var,
+.singlegene_edgeR_model <- function(response_var,
                                     covariates,
                                     offset_singlegene = NULL,
                                     fformula,

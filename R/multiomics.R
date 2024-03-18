@@ -398,7 +398,7 @@ run_cnv_integration <- function(expression,
 
 
 # defining met integration
-.def_met_integration <- function( expression,
+.def_met_integration <- function(expression,
                                  methylation,
                                  sequencing_data,
                                  normalize,
