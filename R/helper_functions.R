@@ -618,7 +618,7 @@ setMethod("extract_model_res", "MultiOmics",
 
 
 # Search genes
-search_gene <- function(genes,
+.search_gene <- function(genes,
                         model_res=NULL,
                         data_frame=NULL){
   if(sum(is.null(model_res), is.null(data_frame))>1){
