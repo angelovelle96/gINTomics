@@ -54,6 +54,12 @@ expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 \item{norm_method_miRNA_expr}{Normalization method to be used for miRNA
 expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 "none".}
+
+\item{class}{Character vector specifying the classes for differential
+expression analysis.}
+
+\item{BPPARAM}{A BiocParallelParam object specifying the parallel backend to
+be used.}
 }
 \value{
 A \linkS4class{MultiOmics} object containing the results of all the
@@ -65,5 +71,8 @@ MultiAssayExperiment
 }
 \examples{
 # Example usage_multiomics:
-multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+data("ov_test_tcga_omics")
+class <- rep(c('A', 'B'), each = 10)
+names(class) <- colnames(mmultiassay_ov[[1]])
+multiomics_integration <-run_multiomics(data = mmultiassay_ov, class = class)
 }

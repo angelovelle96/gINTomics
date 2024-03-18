@@ -26,6 +26,10 @@
 #' @param norm_method_miRNA_expr Normalization method to be used for miRNA
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
+#' @param class Character vector specifying the classes for differential
+#' expression analysis.
+#' @param BPPARAM A BiocParallelParam object specifying the parallel backend to
+#' be used.
 #' @import MultiAssayExperiment SummarizedExperiment
 #' @importFrom methods new
 #' @importFrom plyr rbind.fill
@@ -34,7 +38,10 @@
 #' possible integration models
 #' @examples
 #' # Example usage_multiomics:
-#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data("ov_test_tcga_omics")
+#' class <- rep(c('A', 'B'), each = 10)
+#' names(class) <- colnames(mmultiassay_ov[[1]])
+#' multiomics_integration <-run_multiomics(data = mmultiassay_ov, class = class)
 #' @export
 run_multiomics <- function(data,
                            interactions_met=NULL,
@@ -317,12 +324,24 @@ run_multiomics <- function(data,
 #' @param norm_method Normalization method to be used for
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
+#' @param class Character vector specifying the classes for differential
+#' expression analysis.
+#' @param run_deg Logical. Should differential expression analysis be performed?
+#'  Default is set to TRUE.
+#' @param BPPARAM A BiocParallelParam object specifying the parallel backend to
+#' be used.
+#' @param ... Additional arguments to be passed to internal functions.
 #' @return A list or a \linkS4class{MultiClass} object if **class** is provided
 #' containing the results of the CNV integration
 #' @examples
 #' # Example usage_multi:
-#' cnv_integration <- run_cnv_integration(expression=expression,
-#'  cnv_data=cnv_data, class=class)
+#' data("ov_test_tcga_omics")
+#' gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
+#' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+#' class <- rep(c('A', 'B'), each = 10)
+#' names(class) <- colnames(mmultiassay_ov[[1]])
+#' cnv_integration <- run_cnv_integration(expression=gene_exp_matrix,
+#'  cnv_data=gene_cnv_matrix, class=class)
 #' @export
 #' @importFrom BiocParallel bpparam SerialParam
 run_cnv_integration <- function(expression,
@@ -379,7 +398,7 @@ run_cnv_integration <- function(expression,
 
 
 # defining met integration
-.def_met_integration <- function( expression,
+.def_met_integration <- function(expression,
                                  methylation,
                                  sequencing_data,
                                  normalize,
@@ -431,12 +450,24 @@ run_cnv_integration <- function(expression,
 #' @param norm_method Normalization method to be used for
 #' expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 #' "none".
+#' @param class Character vector specifying the classes for differential
+#' expression analysis.
+#' @param run_deg Logical. Should differential expression analysis be performed?
+#'  Default is set to TRUE.
+#' @param BPPARAM A BiocParallelParam object specifying the parallel backend to
+#'  be used.
+#' @param ... Additional arguments to be passed to internal functions.
 #' @return A list or a \linkS4class{MultiClass} object if **class** is provided
 #' containing the results of the Methylation integration
 #' @examples
 #' # Example usage_multi:
-#' met_integration <- run_met_integration(expression=expression,
-#' methylation=methylation, class=class)
+#' data("ov_test_tcga_omics")
+#' meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
+#' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+#' class <- rep(c('A', 'B'), each = 10)
+#' names(class) <- colnames(mmultiassay_ov[[1]])
+#' met_integration <- run_met_integration(expression=gene_exp_matrix,
+#' methylation=meth_matrix, class=class)
 #' @export
 #' @importFrom BiocParallel bpparam SerialParam
 
@@ -596,14 +627,28 @@ run_met_integration <- function(expression,
 #' match the response variables while the character contained in each element
 #' of the list should match the covariates. If NULL (default), the interactions
 #' will be automatically defined according to response variable's colnames.
+#' @param class Character vector specifying the classes for differential
+#' expression analysis.
+#' @param scale Logical. Should the data be scaled? Default is set to TRUE.
+#' @param run_deg Logical. Should differential expression analysis be performed?
+#'  Default is set to TRUE.
+#' @param BPPARAM A BiocParallelParam object specifying the parallel backend to
+#'  be used.
+#' @param ... Additional arguments to be passed to internal functions.
 #' @importFrom plyr rbind.fill
 #' @importFrom BiocParallel bpparam SerialParam
 #' @return A list or a \linkS4class{MultiClass} object if **class** is provided
 #' containing the results of the Genomic integration
 #' @examples
 #' # Example usage_multi:
-#' genomic_integration <- run_genomic_integration(expression=expression,
-#' cnv_data=cnv_data, methylation=methylation, class=class)
+#' data("ov_test_tcga_omics")
+#' meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
+#' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+#' gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
+#' class <- rep(c('A', 'B'), each = 10)
+#' names(class) <- colnames(mmultiassay_ov[[1]])
+#' genomic_integration <- run_genomic_integration(expression=gene_exp_matrix,
+#' cnv_data=gene_cnv_matrix, methylation=meth_matrix, class=class)
 #' @export
 run_genomic_integration <- function(expression,
                                 cnv_data,
@@ -769,13 +814,24 @@ run_genomic_integration <- function(expression,
 #' "none".
 #' @param normalize_cov Same as **normalize** but for covariates.
 #' @param norm_method_cov Same as **norm_method** but for covariates.
+#' @param class Character vector specifying the classes for differential
+#' expression analysis.
+#' @param run_deg Logical. Should differential expression analysis be performed?
+#'  Default is set to TRUE.
+#' @param BPPARAM A BiocParallelParam object specifying the parallel backend to
+#'  be used.
+#' @param ... Additional arguments to be passed to internal functions.
 #' @importFrom stats quantile
 #' @importFrom BiocParallel bpparam SerialParam
 #' @return A list or a \linkS4class{MultiClass} object if **class** is provided
 #' containing the results of the transcriptional integration
 #' @examples
 #' # Example usage_multi:
-#' tf_integration <- run_tf_integration(expression=expression,
+#' data("ov_test_tcga_omics")
+#' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+#' class <- rep(c('A', 'B'), each = 10)
+#' names(class) <- colnames(mmultiassay_ov[[1]])
+#' tf_integration <- run_tf_integration(expression=gene_exp_matrix,
 #' class=class)
 #' @export
 

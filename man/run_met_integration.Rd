@@ -36,6 +36,17 @@ normalized ? Default is set to TRUE}
 \item{norm_method}{Normalization method to be used for
 expression data. One of "TMM" (default), "TMMwsp", "RLE", "upperquartile",
 "none".}
+
+\item{class}{Character vector specifying the classes for differential
+expression analysis.}
+
+\item{run_deg}{Logical. Should differential expression analysis be performed?
+Default is set to TRUE.}
+
+\item{BPPARAM}{A BiocParallelParam object specifying the parallel backend to
+be used.}
+
+\item{...}{Additional arguments to be passed to internal functions.}
 }
 \value{
 A list or a \linkS4class{MultiClass} object if \strong{class} is provided
@@ -47,6 +58,11 @@ data
 }
 \examples{
 # Example usage_multi:
-met_integration <- run_met_integration(expression=expression,
-methylation=methylation, class=class)
+data("ov_test_tcga_omics")
+meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
+gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+class <- rep(c('A', 'B'), each = 10)
+names(class) <- colnames(mmultiassay_ov[[1]])
+met_integration <- run_met_integration(expression=gene_exp_matrix,
+methylation=meth_matrix, class=class)
 }
