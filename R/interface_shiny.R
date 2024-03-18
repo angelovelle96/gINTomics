@@ -69,7 +69,7 @@
               width = 12,
               div(
                 img(src = myImgResources, height = 300*3, width = 400*3),
-                class = "text-center"  # Aggiungi la classe text-center per centrare l'immagine
+                class = "text-center"
               )
             )
           ),
@@ -252,6 +252,7 @@
                                                         "Download CSV")
                                        )
                                      )
+
                                    ))
               )
             )
