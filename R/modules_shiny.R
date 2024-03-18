@@ -158,8 +158,9 @@ output$download_csv <- .download_csv(deg=FALSE,
 
 
 # Enrichment server
-#' @importFrom shiny renderText
-#' @importFrom DT dataTableOutput
+#' @importFrom shiny renderText downloadButton HTML tags
+#' @importFrom DT dataTableOutput renderDataTable
+#' @importFrom plotly renderPlotly plotlyOutput
 
 .server_enrich_bg <- function(input,
                               output,
@@ -191,7 +192,7 @@ output$download_csv <- .download_csv(deg=FALSE,
       output$dotplot <- renderPlotly({
         gen_plot()[["plot"]]
       })
-      output$table <- DT::renderDataTable({
+      output$table <- renderDataTable({
         ans <- gen_plot()[["table"]]
         if(!bg_enr$is_alive()){
           if(!is.null(ans)){
@@ -213,42 +214,54 @@ output$download_csv <- .download_csv(deg=FALSE,
       output$dotplot <- renderUI({
         plots <- tf_plot()
         plot_list <- lapply(seq_along(plots), function(i) {
-          list(plotlyOutput(ns(paste0(names(plots)[i], "_plot"))),
-               HTML(paste0(rep("<br>", 20), collapse = "")),
-               tags$div(
-                 style = 'overflow-x: auto;',
-                 dataTableOutput(ns(paste0(names(plots)[i], "_table")))),
-               downloadButton(ns(paste0(names(plots)[i], "_download_csv"))),
-               HTML(paste0(rep("<br>", 20), collapse = "")))
+          list(
+            plotlyOutput(ns(paste0("plot_", i))),
+            HTML(paste0(rep("<br>", 20), collapse = "")),
+            tags$div(
+              style = 'overflow-x: auto;',
+            dataTableOutput(ns(paste0("table_", i)))),
+            downloadButton(ns(paste0("download_csv_", i))),
+            HTML(paste0(rep("<br>", 20), collapse = "")))
         })
         plot_list <- as.list(unlist(plot_list, recursive = FALSE))
         do.call(tagList, plot_list)
-        return(plot_list)
       })
+
       observe({
         plots <- tf_plot()
-        for (i in seq_len(length(plots))) {
-          output[[paste0(names(plots)[i], "_plot")]] <- renderPlotly({
+        outplot_list <- lapply(seq_along(plots), function(i) {
+          renderPlotly({
             plots[[i]][["plot"]]
           })
-          output[[paste0(names(plots)[i], "_table")]] <- renderDataTable({
+        })
+        outtable_list <- lapply(seq_along(plots), function(i) {
+        renderDataTable({
             ans <- plots[[i]][["table"]]
-            #output
-            if(!bg_enr$is_alive()){
-              if(!is.null(ans)){
-                ans <- mutate_if(ans, is.numeric, ~ round(., 3))
-                }
+            if (!is.null(ans)) {
+              ans <- mutate_if(ans, is.numeric, ~ round(., 3))
             }
+            ans
           })
-          output[[paste0(names(plots)[i], "_download_csv")]] <- .download_csv(
-             plotType = "dotPlot",
-             input=input,
-             output=output,
-             bg_enr=bg_enr,
-             tf = TRUE,
-             i=i)
+        })
+        outdown_list <- lapply(seq_along(plots), function(i){
+          .download_csv(
+            plotType = "dotPlot",
+            input = input,
+            output = output,
+            bg_enr = bg_enr,
+            tf = TRUE,
+            i = i)
+         })
+      if (!bg_enr$is_alive()) {
+        for(i in seq_along(outplot_list)){
+        output[[paste0("plot_", i)]] <- outplot_list[[i]]
+        output[[paste0("table_", i)]] <- outtable_list[[i]]
+        output[[paste0("download_csv_", i)]] <- outdown_list[[i]]
         }
-      })
+          }
+        })
+
+
   }
   onStop(function(){
     message("Session was closed, killing background process...")
