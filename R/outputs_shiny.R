@@ -913,7 +913,7 @@ return(ccol)
 }
 
 # Prepare Genomic Heatmap
-#' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
 #' @importFrom dplyr arrange
 .prepare_gen_heatmap <- function(data_table,
@@ -979,12 +979,11 @@ return(ccol)
   ht <- Heatmap(expr_top_subset,
                 right_annotation = row_ha,
                 heatmap_legend_param = list(title="log2 expression"))
-  ht <- draw(ht)
   return(ht)
 }
 
 # Prepare CNV Heatmap
-#' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
 .prepare_cnv_heatmap <- function(data_table,
                                  df_heatmap,
@@ -1033,12 +1032,11 @@ return(ccol)
   ht <- Heatmap(expr_top_subset,
                 right_annotation = row_ha,
                 heatmap_legend_param = list(title="log2 expression"))
-  ht <- draw(ht)
   return(ht)
 }
 
 # Prepare Met Heatmap
-#' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
 #'
 .prepare_met_heatmap <- function(data_table,
@@ -1088,12 +1086,11 @@ return(ccol)
   ht <- Heatmap(expr_top_subset,
                 right_annotation = row_ha,
                 heatmap_legend_param = list(title="log2 expression"))
-  ht <- draw(ht)
   return(ht)
 }
 
 # Prepare miRNA Heatmap
-#' @importFrom ComplexHeatmap Heatmap draw rowAnnotation
+#' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
 #'
 .prepare_mirna_heatmap <- function(data_table,
@@ -1143,7 +1140,6 @@ return(ccol)
   ht <- Heatmap(expr_top_subset,
                 right_annotation = row_ha,
                 heatmap_legend_param = list(title="log2 expression"))
-  ht <- draw(ht)
   return(ht)
 }
 
