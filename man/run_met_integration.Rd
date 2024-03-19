@@ -61,6 +61,8 @@ data
 data("ov_test_tcga_omics")
 meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
 gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
-met_integration <- run_met_integration(expression=gene_exp_matrix,
-methylation=meth_matrix)
+met_integration <- run_met_integration(
+    expression = gene_exp_matrix,
+    methylation = meth_matrix
+)
 }
