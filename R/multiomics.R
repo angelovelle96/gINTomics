@@ -33,6 +33,7 @@
 #' @import MultiAssayExperiment SummarizedExperiment
 #' @importFrom methods new
 #' @importFrom plyr rbind.fill
+#' @importFrom methods is
 #' @import BiocParallel
 #' @return A \linkS4class{MultiOmics} object containing the results of all the
 #' possible integration models

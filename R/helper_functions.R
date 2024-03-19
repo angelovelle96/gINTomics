@@ -386,6 +386,7 @@ create_multiassay <- function(methylation=NULL,
 
 # RandomForest selection
 #' @importFrom randomForest randomForest importance
+#' @importFrom stats as.formula terms
 
 .rf_selection <- function(data,
                           formula){

@@ -244,7 +244,7 @@
                                                      step = 0.005), ns = ns3)
                                      ),
                                      mainPanel(
-                                       plotOutput(ns3("plotly")),
+                                       plotOutput(ns3("plotly"), width = 1000),
                                        tags$div(
                                          style = 'overflow-x: auto;',
                                          dataTableOutput(ns3('table')),
@@ -320,6 +320,12 @@
                                 min = 1,
                                 max = 200,
                                 step = 10), ns = ns),
+                  sliderInput(ns("numSamples"),
+                              "Number of Samples:",
+                              value = 50,
+                              min = 1,
+                              max = 1000,
+                              step = 10),
                   selectInput(ns('ClassSelect'),
                               "Select the class:",
                               choices = unique(data_table$class),
@@ -366,6 +372,7 @@
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
+#' @importFrom stats na.omit
 .gint_subItem_chrDistribGenomic <- function(data_table){
   ns <- NS("histo_gen")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -597,7 +604,7 @@
                                                      step = 0.005), ns = ns2)
                                      ),
                                      mainPanel(
-                                       plotOutput(ns2("plotly")),
+                                       plotOutput(ns2("plotly"), width = 1000),
                                        tags$div(
                                          style = 'overflow-x: auto;',
                                          dataTableOutput(ns2('table')),
@@ -620,6 +627,7 @@
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
+#' @importFrom stats na.omit
 .gint_subItem_chrDistribTranscript <- function(data_table){
   ns <- NS("histo_trans")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -890,7 +898,7 @@
                                                      step = 0.005), ns = ns3)
                                      ),
                                      mainPanel(
-                                       plotOutput(ns3("plotly")),
+                                       plotOutput(ns3("plotly"), width = 1000),
                                        tags$div(
                                          style = 'overflow-x: auto;',
                                          dataTableOutput(ns3('table')),
@@ -916,7 +924,6 @@
           fluidRow(
             .gint_heatmap_box(),
             mainPanel(
-
               sidebarLayout(
                 sidebarPanel(
                   selectInput(inputId = ns('IntegrationSelect'),
@@ -962,6 +969,12 @@
                                 min = 1,
                                 max = 200,
                                 step = 10), ns = ns),
+                  sliderInput(ns("numSamples"),
+                              "Number of Samples:",
+                              value = 50,
+                              min = 1,
+                              max = 1000,
+                              step = 10),
                   selectInput(ns('ClassSelect'),
                               "Select the class:",
                               choices = unique(data_table$class),
@@ -1008,6 +1021,7 @@
 #' @importFrom gtools mixedsort
 #' @importFrom plotly plotlyOutput
 #' @importFrom DT dataTableOutput
+#' @importFrom stats na.omit
 .gint_subItem_chrDistribDEGs <- function(data_table){
   ns <- NS("histo_deg")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -1192,6 +1206,7 @@
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom DT dataTableOutput
 #' @importFrom gtools mixedsort
+#' @importFrom stats na.omit
 .gint_subItem_tableCompleteInt <- function(data_table){
   ns <- NS("complete_table")
   chr <- c("All", mixedsort(unique(na.omit(data_table$chr_cov))))
@@ -1305,7 +1320,7 @@
 e-mail: angelo.velle@unipd.it <br>
 github: https://github.com/angelovelle96 <br> <br>
 
-- Francesco Patanè <br>
+- Francesco Patane' <br>
 e-mail: francesco.patane@unipd.it <br>
 github: https://github.com/francescopatane96 <br> <br>
 

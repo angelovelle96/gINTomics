@@ -153,6 +153,7 @@
 # edger
 #' @importFrom stats model.matrix
 #' @importFrom edgeR glmFit DGEList
+#' @importFrom stats as.formula terms
 
 .def_edger <- function(formula,
                       response_var,

@@ -219,6 +219,7 @@
     numTopCNVonly <- input[[ns("numTopGenesHeatmapCNVonly")]]
     numTopMETonly <- input[[ns("numTopGenesHeatmapMETonly")]]
     numTopMiCNV <- input[[ns("numTopGenesHeatmapmirna_cnv")]]
+    numSamples <- input[[ns("numSamples")]]
     classSelect <- input[[ns("ClassSelect")]]
     significativityCriteria <- input[[ns("SignificativityCriteria")]]
     pvalRange <- input[[ns("PvalRange")]]

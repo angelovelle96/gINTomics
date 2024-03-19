@@ -37,6 +37,7 @@ plot_network <- function(data_table,
 #' @param class Optional. The class of interactions to include in the Venn
 #' diagram.
 #' @return A Venn diagram plot.
+#' @importFrom shiny isolate
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
@@ -155,6 +156,7 @@ plot_ridge <- function(data_table,
 #' @param pval Optional. The p-value threshold for significance in the heatmap.
 #' Default is 0.05.
 #' @return A heatmap plot.
+#' @importFrom methods is
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")

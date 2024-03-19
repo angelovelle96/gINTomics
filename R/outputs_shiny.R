@@ -221,14 +221,14 @@
 }
 
 # Build a ridgeline plot
-#' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous
+#' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous theme
 #' @importFrom ggridges geom_density_ridges theme_ridges position_raincloud
 .build_ridge <- function(ridge_data,
                          quantiles){
   ggplot(ridge_data,
          aes(x = coef,
              y = significance,
-             fill = factor(significance))) +
+             fill = significance)) +
     geom_density_ridges(jittered_points = TRUE,
                         quantile_lines = TRUE,
                         vline_width = 1,
@@ -241,7 +241,8 @@
          y = "Significativity") +
     theme_minimal() +
     theme_ridges() +
-    scale_x_continuous(limits = quantiles)
+    scale_x_continuous(limits = quantiles) +
+    theme(legend.position = "bottom")
 }
 
 # Render a ridgeline plot
@@ -544,6 +545,7 @@
 # Generate color palette for Circos track
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices colorRamp
+#' @importFrom grDevices colorRampPalette
 .circos_track_cols <- function(vvalues,
                                n=50,
                                colors=NULL){
@@ -915,7 +917,8 @@ return(ccol)
 # Prepare Genomic Heatmap
 #' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
-#' @importFrom dplyr arrange
+#' @importFrom dplyr arrange desc
+#' @importFrom utils head
 .prepare_gen_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -985,6 +988,8 @@ return(ccol)
 # Prepare CNV Heatmap
 #' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
+#' @importFrom plyr desc
+#' @importFrom utils head
 .prepare_cnv_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -1038,7 +1043,8 @@ return(ccol)
 # Prepare Met Heatmap
 #' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
-#'
+#' @importFrom plyr desc
+#' @importFrom utils head
 .prepare_met_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -1092,7 +1098,8 @@ return(ccol)
 # Prepare miRNA Heatmap
 #' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
-#'
+#' @importFrom plyr desc
+#' @importFrom utils head
 .prepare_mirna_heatmap <- function(data_table,
                                    df_heatmap,
                                    df_heatmap_t,
