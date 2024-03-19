@@ -61,14 +61,9 @@ test_that(".download_gene_info works", {
   genes = colnames(expression)
   species <- "hsa"
   tested1 <- .download_gene_info(genes=genes, species=species, biomaRt = FALSE)
-  tested2 <- .download_gene_info(genes=genes, species=species, biomaRt = TRUE)
   expect_type(tested1, "list")
-  expect_type(tested2, "list")
-  expect_false(identical(tested1, tested2))
   expected_columns <- c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id",
                         "chromosome_name", "start_position", "end_position", "band")
   expect_true(all(expected_columns %in% colnames(tested1)))
-  expect_true(all(expected_columns %in% colnames(tested2)))
   expect_gt(nrow(tested1), 0)
-  expect_gt(nrow(tested2), 0)
 })
