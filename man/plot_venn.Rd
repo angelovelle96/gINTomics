@@ -23,5 +23,5 @@ plotting venn
 data("ov_test_tcga_omics")
 multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 data_table <- extract_model_res(multiomics_integration)
-plot_venn(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
+plot_venn(data_table)
 }
