@@ -410,6 +410,10 @@ create_multiassay <- function(methylation=NULL,
 
 
 #' @rdname extract_model_res
+#' @param outliers if TRUE (by default), it removes outliers
+#' @param species species for the analysis
+#' @param filters Specific filters to apply
+#' @param genes_info genes info
 setMethod("extract_model_res", "list",
           function(model_results,
                    outliers=TRUE,

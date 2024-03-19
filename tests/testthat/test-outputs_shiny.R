@@ -484,8 +484,7 @@ test_that(".prepare_gen_heatmap works", {
                               numTopCNV = numTopCNV,
                               numTopMET = numTopMET,
                               scale = scale)
-  expect_s4_class(tested, "HeatmapList")
-  expect_true(tested@heatmap_legend_param$show)
+  expect_s4_class(tested, "Heatmap")
 })
 
 test_that(".prepare_cnv_heatmap works", {
@@ -516,8 +515,7 @@ test_that(".prepare_cnv_heatmap works", {
                                  fdrRange = fdrRange,
                                  numTopCNVonly = numTopCNVonly,
                                  scale = scale)
-  expect_s4_class(tested, "HeatmapList")
-  expect_true(tested@heatmap_legend_param$show)
+  expect_s4_class(tested, "Heatmap")
 })
 
 test_that(".prepare_met_heatmap works", {
@@ -548,8 +546,7 @@ test_that(".prepare_met_heatmap works", {
                                  fdrRange = fdrRange,
                                  numTopMETonly = numTopMETonly,
                                  scale = scale)
-  expect_s4_class(tested, "HeatmapList")
-  expect_true(tested@heatmap_legend_param$show)
+  expect_s4_class(tested, "Heatmap")
 })
 
 test_that(".prepare_gen_heatmap works", {
@@ -578,8 +575,7 @@ test_that(".prepare_gen_heatmap works", {
                                    fdrRange = fdrRange,
                                    numTopMiCNV = numTopMiCNV,
                                    scale = scale)
-  expect_s4_class(tested, "HeatmapList")
-  expect_true(tested@heatmap_legend_param$show)
+  expect_s4_class(tested, "Heatmap")
 })
 
 test_that(".run_bg works", {

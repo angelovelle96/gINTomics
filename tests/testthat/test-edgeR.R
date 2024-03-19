@@ -20,6 +20,8 @@ test_that(".run_edgeR_integration works", {
                                    reference = NULL,
                                    BPPARAM = SerialParam())
   expect_type(tested, "list")
+  expect_named(tested[1], "coef_data")
+  expect_named(tested[2], "pval_data")
 })
 
 test_that(".allgene_edgeR_model works", {
@@ -29,6 +31,8 @@ test_that(".allgene_edgeR_model works", {
                                  offset_allgene = NULL,
                                  norm_method = "TMM")
   expect_type(tested, "list")
+  expect_true(class(tested) == "DGEGLM")
+  expect_false(is.null(tested$samples))
 })
 
 test_that(".singlegene_edgeR_model works", {
@@ -47,6 +51,8 @@ test_that(".singlegene_edgeR_model works", {
   offset_allgene <- NULL
   reference <- NULL
   steady_covariates <- NULL
+  normalize <- TRUE
+  norm_method <- "TMM"
 
   tmp <- .data_check(response_var = response_var,
                      covariates = covariates,
@@ -88,6 +94,7 @@ test_that(".singlegene_edgeR_model works", {
                                     fit_all = fit_all,
                                     SerialParam())
   expect_type(tested, "list")
+  expect_true(length(tested) > 0)
 })
 
 test_that(".def_edger works", {
@@ -157,6 +164,8 @@ test_that(".def_edger works", {
                        fit_all=fit_all,
                        offset_singlegene=offset_singlegene,
                        BPPARAM = SerialParam())
+  expect_type(tested, "list")
+  expect_true(length(tested) > 0)
 })
 
 
@@ -223,9 +232,10 @@ test_that(".edger_coef_test works", {
   tested <- .edger_coef_test(fit_list=fit_gene,
                              SerialParam())
   expect_type(tested, "list")
+  expect_true(length(tested) > 0)
 })
 
-test_that(".def_coef_test works", {  ##########
+test_that(".def_coef_test works", {
   response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
   covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
   tmp <- grep("_met$", colnames(covariates))
@@ -289,4 +299,5 @@ test_that(".def_coef_test works", {  ##########
   tested <- bplapply(fit_gene, .def_coef_test,
                        BPPARAM = SerialParam())
   expect_type(tested, "list")
+  expect_true(length(tested) > 0)
 })

@@ -38,7 +38,7 @@ test_that("run_cnv_integration function works", {
   gene_exp_matrix <- as.matrix(assay(data[["gene_exp"]]))
   gene_cnv_matrix <- as.matrix(assay(data[["cnv_data"]]))
   class <- rep(c('A', 'B'), each = 10)
-  names(class) <- colnames(mmultiassay_ov[[1]])
+  names(class) <- colnames(data[[1]])
   expect_no_error({
     cnv_res <- run_cnv_integration(expression = gene_exp_matrix,
                                     cnv_data = gene_cnv_matrix,
@@ -91,7 +91,7 @@ test_that("run_met_integration function works", {
   gene_exp_matrix <- as.matrix(assay(data[["gene_exp"]]))
   gene_met_matrix <- as.matrix(assay(data[["methylation"]]))
   class <- rep(c('A', 'B'), each = 10)
-names(class) <- colnames(mmultiassay_ov[[1]])
+names(class) <- colnames(data[[1]])
   expect_no_error({
     met_res <- run_met_integration(expression = gene_exp_matrix,
                                    methylation = gene_met_matrix,
@@ -121,7 +121,7 @@ test_that(".def_genomic_integration works", {
   gene_met_matrix <- as.matrix(assay(data[["methylation"]]))
   gene_cnv_matrix <- as.matrix(assay(data[["cnv_data"]]))
   class <- rep(c('A', 'B'), each = 10)
-  names(class) <- colnames(mmultiassay_ov[[1]])
+  names(class) <- colnames(data[[1]])
   gen_res <- .def_genomic_integration(expression = gene_exp_matrix,
                                       cnv_data = gene_cnv_matrix,
                                       methylation = gene_met_matrix,
@@ -139,7 +139,7 @@ test_that("run_genomic_integration works", {
   gene_exp_matrix <- as.matrix(assay(data[["gene_exp"]]))
   gene_met_matrix <- as.matrix(assay(data[["methylation"]]))
   gene_cnv_matrix <- as.matrix(assay(data[["cnv_data"]]))
-  gen_res <- run_genomic_integration(expression = gene_exp_matrix,
+  tested <- run_genomic_integration(expression = gene_exp_matrix,
                                      cnv_data = gene_cnv_matrix,
                                      methylation = gene_met_matrix,
                                      sequencing_data = TRUE,
@@ -149,14 +149,14 @@ test_that("run_genomic_integration works", {
                                      scale = TRUE,
                                      run_deg = TRUE,
                                      BPPARAM = SerialParam())
-  expect_type(gen_res, "list")
+  expect_type(tested, "list")
 })
 
 
 test_that(".def_tf_integration works", {
   data <- data_shiny_tests$multiassay
-  gene_exp_matrix <- as.matrix(assay(data[["gene_exp"]]))
-  res <- .def_tf_integration(expression=gene_exp_matrix,
+  gene_exp_matrix <- as.matrix(t(assay(data[["gene_exp"]])))
+  tested <- .def_tf_integration(expression=gene_exp_matrix,
                              tf_expression=gene_exp_matrix,
                              interactions=NULL,
                              type="tf",
@@ -167,8 +167,8 @@ test_that(".def_tf_integration works", {
                              normalize_cov=TRUE,
                              norm_method_cov="TMM",
                              BPPARAM=SerialParam())
-  expect_type(res, "list")
-  res <- .def_tf_integration(expression=gene_exp_matrix,
+  expect_type(tested, "list")
+  tested <- .def_tf_integration(expression=gene_exp_matrix,
                              tf_expression=gene_exp_matrix,
                              interactions=NULL,
                              type="tf",
@@ -179,18 +179,17 @@ test_that(".def_tf_integration works", {
                              normalize_cov=TRUE,
                              norm_method_cov="TMM",
                              BPPARAM=SerialParam())
-  expect_type(res, "list")
-  expect_named(res$data, c("response_var", "covariates"))
-  expect_length(res$data$response_var, ncol(expression))
+  expect_type(tested, "list")
+  expect_named(tested$coef_data, c("(Intercept)", "cov"))
 })
 
 
 test_that("run_tf_integration works", {
   data <- data_shiny_tests$multiassay
-  gene_exp_matrix <- as.matrix(assay(data[["gene_exp"]]))
+  gene_exp_matrix <- as.matrix(t(assay(data[["gene_exp"]])))
   class <- rep(c('A', 'B'), each = 10)
-  names(class) <- colnames(mmultiassay_ov[[1]])
-  res <- run_tf_integration(expression = gene_exp_matrix,
+  names(class) <- colnames(data[[1]])
+  tested <- run_tf_integration(expression = gene_exp_matrix,
                             tf_expression = gene_exp_matrix,
                             interactions = NULL,
                             type = "tf",
@@ -203,8 +202,8 @@ test_that("run_tf_integration works", {
                             class = NULL,
                             run_deg = TRUE,
                             BPPARAM = SerialParam())
-  expect_named(res$data, c("response_var", "covariates"))
-  res <- run_tf_integration(expression = gene_exp_matrix,
+ expect_named(tested$coef_data, c("(Intercept)", "cov"))
+  tested <- run_tf_integration(expression = gene_exp_matrix,
                             tf_expression = gene_exp_matrix,
                             interactions = NULL,
                             type = "tf",
@@ -217,6 +216,6 @@ test_that("run_tf_integration works", {
                             class = class,
                             run_deg = TRUE,
                             BPPARAM = SerialParam())
-  expect_named(res$data, c("response_var", "covariates"))
-  expect_named(res, "MultiClass")
+  expect_type(tested, "list")
+  expect_true("deg" %in% names(tested))
 })
