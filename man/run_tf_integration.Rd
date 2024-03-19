@@ -85,8 +85,5 @@ argument. Other types of interactions should be provided through the
 # Example usage_multi:
 data("ov_test_tcga_omics")
 gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
-class <- rep(c('A', 'B'), each = 10)
-names(class) <- colnames(mmultiassay_ov[[1]])
-tf_integration <- run_tf_integration(expression=gene_exp_matrix,
-class=class)
+tf_integration <- run_tf_integration(expression=gene_exp_matrix)
 }

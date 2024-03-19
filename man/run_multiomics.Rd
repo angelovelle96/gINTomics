@@ -72,7 +72,5 @@ MultiAssayExperiment
 \examples{
 # Example usage_multiomics:
 data("ov_test_tcga_omics")
-class <- rep(c('A', 'B'), each = 10)
-names(class) <- colnames(mmultiassay_ov[[1]])
-multiomics_integration <-run_multiomics(data = mmultiassay_ov, class = class)
+multiomics_integration <-run_multiomics(data = mmultiassay_ov)
 }

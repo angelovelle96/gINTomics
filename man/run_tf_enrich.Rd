@@ -51,5 +51,7 @@ Running TF enrichment analysis
 }
 \examples{
 # Example usage:
-run_tf_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
+data(ov_test_tcga_omics)
+#multiomics_integration <- run_multiomics(mmultiassay_ov)
+#run_tf_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
 }

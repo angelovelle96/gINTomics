@@ -52,5 +52,7 @@ Running genomic enrichment analysis
 }
 \examples{
 # Example usage:
-run_genomic_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
+data(ov_test_tcga_omics)
+#multiomics_integration <- run_multiomics(mmultiassay_ov)
+#gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
 }
