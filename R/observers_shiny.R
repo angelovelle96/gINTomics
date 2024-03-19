@@ -92,25 +92,25 @@
       }
       if(significativityCriteria == 'pval'){
         cnv_sign_genes <- subset(data_table,
-                                 cnv_met == 'cnv' & pval >= pvalRange[1] &
-                                   pval <= pvalRange[2],
+                                 `cnv_met` == 'cnv' & `pval` >= pvalRange[1] &
+                                   `pval` <= pvalRange[2],
                                  select = c('cov'))
         met_sign_genes <- subset(data_table,
-                                 cnv_met == 'met' & pval >= pvalRange[1] &
-                                   pval <= pvalRange[2],
+                                 `cnv_met` == 'met' & `pval` >= pvalRange[1] &
+                                   `pval` <= pvalRange[2],
                                  select = c('cov'))
       }else{
         cnv_sign_genes <- subset(data_table,
-                                 cnv_met == 'cnv' & fdr >= fdrRange[1] &
-                                   fdr <= fdrRange[2],
+                                 `cnv_met` == 'cnv' & `fdr` >= fdrRange[1] &
+                                   `fdr` <= fdrRange[2],
                                  select = c('cov'))
         met_sign_genes <- subset(data_table,
-                                 cnv_met == 'met' & fdr >= fdrRange[1] &
-                                   fdr <= fdrRange[2],
+                                 `cnv_met` == 'met' & `fdr` >= fdrRange[1] &
+                                   `fdr` <= fdrRange[2],
                                  select = c('cov'))
       }
-      data_venn <- list(cnv_sign_genes = cnv_sign_genes,
-                        met_sign_genes = met_sign_genes)
+      data_venn <- list(`cnv_sign_genes` = cnv_sign_genes,
+                        `met_sign_genes` = met_sign_genes)
     }
     if(deg==FALSE & !"gene_genomic_res"%in%unique(data_table$omics)) {
       if("gene_cnv_res"%in%unique(data_table$omics)){
@@ -219,6 +219,7 @@
     numTopCNVonly <- input[[ns("numTopGenesHeatmapCNVonly")]]
     numTopMETonly <- input[[ns("numTopGenesHeatmapMETonly")]]
     numTopMiCNV <- input[[ns("numTopGenesHeatmapmirna_cnv")]]
+    numSamples <- input[[ns("numSamples")]]
     classSelect <- input[[ns("ClassSelect")]]
     significativityCriteria <- input[[ns("SignificativityCriteria")]]
     pvalRange <- input[[ns("PvalRange")]]
@@ -255,7 +256,8 @@
                               fdrRange = fdrRange,
                               numTopCNV = numTopCNV,
                               numTopMET = numTopMET,
-                              scale = scale)
+                              scale = scale,
+                              numSamples = numSamples)
     }
     if(integrationSelect == "gene_cnv_res"){
       ans <- .prepare_cnv_heatmap(data_table = data_table,
@@ -265,7 +267,8 @@
                               pvalRange = pvalRange,
                               fdrRange = fdrRange,
                               numTopCNVonly = numTopCNVonly,
-                              scale = scale)
+                              scale = scale,
+                              numSamples = numSamples)
     }
     if(integrationSelect == "gene_met_res"){
       ans <- .prepare_met_heatmap(data_table = data_table,
@@ -275,7 +278,8 @@
                                pvalRange = pvalRange,
                                fdrRange = fdrRange,
                                numTopMETonly = numTopMETonly,
-                               scale = scale)
+                               scale = scale,
+                               numSamples = numSamples)
     }
     if(integrationSelect == "mirna_cnv_res"){
       ans <- .prepare_mirna_heatmap(data_table = data_table,
@@ -285,7 +289,8 @@
                               pvalRange = pvalRange,
                               fdrRange = fdrRange,
                               numTopMiCNV = numTopMiCNV,
-                              scale = scale)
+                              scale = scale,
+                              numSamples = numSamples)
     }
     if(is.null(ans)) return(NULL)
     ht <- makeInteractiveComplexHeatmap(input,output,session,ans,ns('heatmap'))
@@ -299,7 +304,8 @@
                  input[[ns("SignificativityCriteria")]],
                  input[[ns("PvalRange")]],
                  input[[ns("FdrRange")]],
-                 input[[ns("scaleHeatmap")]])
+                 input[[ns("scaleHeatmap")]],
+                 input[[ns("numSamples")]])
 }
 
 # Prepare Reactive Ridge Plot
@@ -467,7 +473,7 @@
     }
     genes_count <- table(data_table$cov, data_table$chr_cov)
     genes_count_df <- as.data.frame.table(genes_count)
-    genes_count_df <- subset(genes_count_df, Freq != 0)
+    genes_count_df <- subset(genes_count_df, `Freq` != 0)
     colnames(genes_count_df) <- c("TF", "Chromosome", "Count")
     genes_count_df <- genes_count_df[order(-genes_count_df$Count),]
     }

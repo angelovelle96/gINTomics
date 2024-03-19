@@ -158,7 +158,7 @@ output$download_csv <- .download_csv(deg=FALSE,
 
 
 # Enrichment server
-#' @importFrom shiny renderText downloadButton HTML tags
+#' @importFrom shiny renderText downloadButton HTML tags renderUI tagList onStop
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom plotly renderPlotly plotlyOutput
 

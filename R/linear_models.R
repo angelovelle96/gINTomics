@@ -71,7 +71,7 @@
 
 
 # Def linear model
-#' @importFrom stats lm
+#' @importFrom stats lm as.formula terms
 
 .def_lm <- function(formula,
                     data){

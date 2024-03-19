@@ -197,7 +197,7 @@ plot_network(data_table, num_interactions = 200)
 The Venn Diagram is designed for the genomic integration. It can help to identify genes which are significantly regulated by both CNV and methylation.
 Here you can see the code to generate a Venn Diagram from a multiomics integration
 ```{r}
-gINTomics:::plot_venn(data_table)
+plot_venn(data_table)
 
 ```
 
@@ -217,8 +217,8 @@ The ridgeline plot is designed to compare different distributions, it has been i
 For each distribution, on the y axis you have the frequencies and on the x axis the values of the coefficients.
 Here you can see the code to generate a Ridgeline plot for CNV and one for methylation from a multiomics integration
 ```{r}
-gINTomics:::plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
-gINTomics:::plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "met")
+plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
+plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "met")
 
 ```
 

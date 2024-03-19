@@ -4,7 +4,7 @@
   mirna_list <- c()
   target_list <- c()
   tmp <- intersect(c('cov', 'response', 'pval', 'fdr', 'coef', 'class', 'omics'), colnames(data_table))
-  all <- subset(data_table, omics %in% c('tf_res',
+  all <- subset(data_table, `omics` %in% c('tf_res',
                                          'tf_mirna_res',
                                          'mirna_target_res'),
                 select = tmp)
@@ -221,14 +221,14 @@
 }
 
 # Build a ridgeline plot
-#' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous
+#' @importFrom ggplot2 ggplot labs theme_minimal scale_x_continuous theme
 #' @importFrom ggridges geom_density_ridges theme_ridges position_raincloud
 .build_ridge <- function(ridge_data,
                          quantiles){
   ggplot(ridge_data,
-         aes(x = coef,
-             y = significance,
-             fill = factor(significance))) +
+         aes(x = `coef`,
+             y = `significance`,
+             fill = significance)) +
     geom_density_ridges(jittered_points = TRUE,
                         quantile_lines = TRUE,
                         vline_width = 1,
@@ -241,7 +241,8 @@
          y = "Significativity") +
     theme_minimal() +
     theme_ridges() +
-    scale_x_continuous(limits = quantiles)
+    scale_x_continuous(limits = quantiles) +
+    theme(legend.position = "bottom")
 }
 
 # Render a ridgeline plot
@@ -266,7 +267,7 @@
 #' @importFrom ggplot2 ggplot aes geom_bar labs theme_minimal
 .build_histo <- function(histo_data){
   ggplot(histo_data,
-         aes(x = factor(chr_cov), fill = significance)) +
+         aes(x = factor(`chr_cov`), fill = `significance`)) +
     geom_bar() +
     labs(title = "Number of Genes with Significant Coefficients by Chromosome",
          x = "Chromosome",
@@ -390,7 +391,8 @@
                          input,
                          output,
                          data_table,
-                         i = NULL){
+                         i = NULL,
+                         session=NULL){
   if(plotType == "histo"){
     handler <- downloadHandler(
       filename = function(){
@@ -500,9 +502,9 @@
   names(dataframes) <- paste0("df_", unique(data$omics))
   if("df_gene_genomic_res"%in%names(dataframes)){
     dataframes$df_cnv <- filter(dataframes$df_gene_genomic_res,
-                                cnv_met == 'cnv')
+                                `cnv_met` == 'cnv')
     dataframes$df_met <- filter(dataframes$df_gene_genomic_res,
-                                cnv_met == 'met')
+                                `cnv_met` == 'met')
     tmp <- lapply(which(names(dataframes)!="df_gene_genomic_res"), function(x){
       ans <- dataframes[[x]]
       ans <- ans[ans$cov!="(Intercept)",]
@@ -544,6 +546,7 @@
 # Generate color palette for Circos track
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices colorRamp
+#' @importFrom grDevices colorRampPalette
 .circos_track_cols <- function(vvalues,
                                n=50,
                                colors=NULL){
@@ -915,7 +918,8 @@ return(ccol)
 # Prepare Genomic Heatmap
 #' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
-#' @importFrom dplyr arrange
+#' @importFrom dplyr arrange desc
+#' @importFrom utils head
 .prepare_gen_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -924,27 +928,28 @@ return(ccol)
                                  fdrRange,
                                  numTopCNV,
                                  numTopMET,
-                                 scale){
+                                 scale,
+                                 numSamples){
 
-  tmp <- data.frame(cnv = data_table$coef[
+  tmp <- data.frame(`cnv` = data_table$coef[
     data_table$cnv_met == 'cnv'],
-    pval_cnv = data_table$pval[
+    `pval_cnv` = data_table$pval[
       data_table$cnv_met == 'cnv'],
-    fdr_cnv = data_table$fdr[
+    `fdr_cnv` = data_table$fdr[
       data_table$cnv_met == 'cnv'],
     row.names = data_table$response[
       data_table$cnv_met == 'cnv'])
 
-  tmp2 <- data.frame(met = data_table$coef[
+  tmp2 <- data.frame(`met` = data_table$coef[
     data_table$cnv_met == 'met'],
-    pval_met = data_table$pval[
+    `pval_met` = data_table$pval[
       data_table$cnv_met == 'met'],
-    fdr_met = data_table$fdr[
+    `fdr_met` = data_table$fdr[
       data_table$cnv_met == 'met'],
     row.names = data_table$response[
       data_table$cnv_met == 'met'])
   tmp3 <- unique(c(rownames(tmp), rownames(tmp2)))
-  data_table <- cbind(cnv = tmp[tmp3,], met = tmp2[tmp3,])
+  data_table <- cbind(`cnv` = tmp[tmp3,], `met` = tmp2[tmp3,])
   colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
   rownames(data_table) <- tmp3
   df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
@@ -969,13 +974,20 @@ return(ccol)
   my_colors2 <- colorRamp2(c(min(expr_top$met, na.rm = TRUE),
                             0,max(expr_top$met, na.rm = TRUE)),
                            c("purple", "white", "green4"))
-  row_ha <- rowAnnotation(coef_cnv = expr_top$cnv, coef_met = expr_top$met,
-                          col = list(coef_cnv = my_colors,
-                                     coef_met = my_colors2))
+  row_ha <- rowAnnotation(`coef_cnv` = expr_top$cnv, `coef_met` = expr_top$met,
+                          col = list(`coef_cnv` = my_colors,
+                                     `coef_met` = my_colors2))
   expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
   if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
+  if(numSamples<ncol(expr_top_subset)){
+    tmp <- apply(expr_top_subset, 2, sd)
+    names(tmp) <- colnames(expr_top_subset)
+    sort(tmp, decreasing = TRUE)
+    ans <- names(tmp)[seq_len(numSamples)]
+    expr_top_subset <- expr_top_subset[, ans]
+  }
   ht <- Heatmap(expr_top_subset,
                 right_annotation = row_ha,
                 heatmap_legend_param = list(title="log2 expression"))
@@ -985,6 +997,8 @@ return(ccol)
 # Prepare CNV Heatmap
 #' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
+#' @importFrom dplyr desc
+#' @importFrom utils head
 .prepare_cnv_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -992,18 +1006,19 @@ return(ccol)
                                  pvalRange,
                                  fdrRange,
                                  numTopCNVonly,
-                                 scale){
+                                 scale,
+                                 numSamples){
 
-  tmp <-  data.frame(cnv=data_table$coef[
+  tmp <-  data.frame(`cnv`=data_table$coef[
     data_table$omics == 'gene_cnv_res'],
-    pval_cnv=data_table$pval[
+    `pval_cnv`=data_table$pval[
       data_table$omics == 'gene_cnv_res'],
-    fdr_cnv=data_table$fdr[
+    `fdr_cnv`=data_table$fdr[
       data_table$omics == 'gene_cnv_res'],
     row.names = data_table$response[
       data_table$omics == 'gene_cnv_res'])
   tmp2 <- unique(rownames(tmp))
-  data_table <- cbind(cnv=tmp[tmp2,])
+  data_table <- cbind(`cnv`=tmp[tmp2,])
   colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
   rownames(data_table) <- tmp2
   df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
@@ -1023,12 +1038,19 @@ return(ccol)
   my_colors <- colorRamp2(c(min(expr_top$cnv, na.rm = TRUE),
                             0,max(expr_top$cnv, na.rm = TRUE)),
                           c("purple", "white", "green4"))
-  row_ha <- rowAnnotation(coef_cnv=expr_top$cnv,
-                          col=list(coef_cnv=my_colors))
+  row_ha <- rowAnnotation(`coef_cnv`=expr_top$cnv,
+                          col=list(`coef_cnv`=my_colors))
   expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
   if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
+  if(numSamples<ncol(expr_top_subset)){
+    tmp <- apply(expr_top_subset, 2, sd)
+    names(tmp) <- colnames(expr_top_subset)
+    sort(tmp, decreasing = TRUE)
+    ans <- names(tmp)[seq_len(numSamples)]
+    expr_top_subset <- expr_top_subset[, ans]
+  }
   ht <- Heatmap(expr_top_subset,
                 right_annotation = row_ha,
                 heatmap_legend_param = list(title="log2 expression"))
@@ -1038,7 +1060,8 @@ return(ccol)
 # Prepare Met Heatmap
 #' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
-#'
+#' @importFrom dplyr desc
+#' @importFrom utils head
 .prepare_met_heatmap <- function(data_table,
                                  df_heatmap,
                                  df_heatmap_t,
@@ -1046,18 +1069,19 @@ return(ccol)
                                  pvalRange,
                                  fdrRange,
                                  numTopMETonly,
-                                 scale){
+                                 scale,
+                                 numSamples){
 
-  tmp <-  data.frame(met=data_table$coef[
+  tmp <-  data.frame(`met`=data_table$coef[
     data_table$omics == 'gene_met_res'],
-    pval_met=data_table$pval[
+    `pval_met`=data_table$pval[
       data_table$omics == 'gene_met_res'],
-    fdr_met=data_table$fdr[
+    `fdr_met`=data_table$fdr[
       data_table$omics == 'gene_met_res'],
     row.names = data_table$response[
       data_table$omics == 'gene_met_res'])
   tmp2 <- unique(rownames(tmp))
-  data_table <- cbind(met=tmp[tmp2,])
+  data_table <- cbind(`met`=tmp[tmp2,])
   colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
   rownames(data_table) <- tmp2
   df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
@@ -1077,12 +1101,19 @@ return(ccol)
   my_colors <- colorRamp2(c(min(expr_top$met, na.rm = TRUE),
                             0,max(expr_top$met, na.rm = TRUE)),
                           c("purple", "white", "green4"))
-  row_ha <- rowAnnotation(coef_met=expr_top$met,
-                          col=list(coef_met=my_colors))
+  row_ha <- rowAnnotation(`coef_met`=expr_top$met,
+                          col=list(`coef_met`=my_colors))
   expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
   if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
+  if(numSamples<ncol(expr_top_subset)){
+    tmp <- apply(expr_top_subset, 2, sd)
+    names(tmp) <- colnames(expr_top_subset)
+    sort(tmp, decreasing = TRUE)
+    ans <- names(tmp)[seq_len(numSamples)]
+    expr_top_subset <- expr_top_subset[, ans]
+  }
   ht <- Heatmap(expr_top_subset,
                 right_annotation = row_ha,
                 heatmap_legend_param = list(title="log2 expression"))
@@ -1092,7 +1123,8 @@ return(ccol)
 # Prepare miRNA Heatmap
 #' @importFrom ComplexHeatmap Heatmap rowAnnotation
 #' @importFrom circlize colorRamp2
-#'
+#' @importFrom dplyr desc
+#' @importFrom utils head
 .prepare_mirna_heatmap <- function(data_table,
                                    df_heatmap,
                                    df_heatmap_t,
@@ -1100,18 +1132,19 @@ return(ccol)
                                    pvalRange,
                                    fdrRange,
                                    numTopMiCNV,
-                                   scale){
+                                   scale,
+                                   numSamples){
 
-  tmp <- data.frame(mirna_cnv=data_table$coef[
+  tmp <- data.frame(`mirna_cnv`=data_table$coef[
     data_table$omics == 'mirna_cnv_res'],
-    pval_mirna_cnv=data_table$pval[
+    `pval_mirna_cnv`=data_table$pval[
       data_table$omics == 'mirna_cnv_res'],
-    fdr_mirna_cnv=data_table$fdr[
+    `fdr_mirna_cnv`=data_table$fdr[
       data_table$omics == 'mirna_cnv_res'],
     row.names = data_table$response[
       data_table$omics == 'mirna_cnv_res'])
   tmp2 <- unique(rownames(tmp))
-  data_table <- cbind(mirna_cnv=tmp[tmp2,])
+  data_table <- cbind(`mirna_cnv`=tmp[tmp2,])
   colnames(data_table) <- gsub("^.*\\.", "", colnames(data_table))
   rownames(data_table) <- tmp2
   df_heatmap_t <- cbind(df_heatmap_t, data_table[rownames(df_heatmap_t),])
@@ -1131,12 +1164,19 @@ return(ccol)
   my_colors <- colorRamp2(c(min(expr_top$mirna_cnv, na.rm = TRUE),
                             0,max(expr_top$mirna_cnv, na.rm = TRUE)),
                           c("purple", "white", "green4"))
-  row_ha <- rowAnnotation(coef_mirna=expr_top$mirna_cnv,
-                          col=list(coef_mirna=my_colors))
+  row_ha <- rowAnnotation(`coef_mirna`=expr_top$mirna_cnv,
+                          col=list(`coef_mirna`=my_colors))
   expr_top_subset <- as.matrix(expr_top_subset)
   if(scale=="row") expr_top_subset <- t(scale(t(log2(expr_top_subset+1))))
   if(scale=="col") expr_top_subset <- scale(log2(expr_top_subset+1))
   if(scale=="none") expr_top_subset <- log2(expr_top_subset+1)
+  if(numSamples<ncol(expr_top_subset)){
+    tmp <- apply(expr_top_subset, 2, sd)
+    names(tmp) <- colnames(expr_top_subset)
+    sort(tmp, decreasing = TRUE)
+    ans <- names(tmp)[seq_len(numSamples)]
+    expr_top_subset <- expr_top_subset[, ans]
+  }
   ht <- Heatmap(expr_top_subset,
                 right_annotation = row_ha,
                 heatmap_legend_param = list(title="log2 expression"))

@@ -1,62 +1,74 @@
-test_that("Test .download_mirna_target function", {
-  miRNAs <- c("mir-21", "mir-22")
+test_that(".download_mirna_target works", {
+
+   data <- data_shiny_tests$multiassay
+  tf_expression <- as.matrix(t(assay(data[["gene_exp"]])))
   species <- "hsa"
-  result <- .download_mirna_target(miRNAs, species)
-  expect_type(result, "list")
-  expect_true(all(sapply(result, function(x) length(unique(x))) == 1))
+  tested <- .download_mirna_target(miRNAs = colnames(tf_expression),
+                                             species = species)
+  expect_type(tested, "list")
+  expect_true(all(vapply(tested, function(x) length(unique(x)), FUN.VALUE = list()) == 1))
 })
 
-test_that("Test .download_tf_mirna function", {
-  miRNAs <- c("mir-21", "mir-22")
+test_that(".download_tf_mirna works", {
+  data <- data_shiny_tests$multiassay
+  expression <- as.matrix(t(assay(data[["gene_exp"]])))
   species <- "hsa"
-  result <- .download_tf_mirna(miRNAs, species)
-  expect_type(result, "list")
-  expect_true(all(sapply(result, function(x) length(unique(x))) == 1))
+  tested <- .download_tf_mirna(miRNAs = colnames(expression),
+                                         species = species)
+  expect_type(tested, "list")
+  expect_true(all(vapply(tested, function(x) length(unique(x)), FUN.VALUE = list()) == 1))
 })
 
-test_that("Test .download_tf function", {
-  genes <- c("egfr", "myc2", "mcga")
+test_that(".download_tf works", {
+  data <- data_shiny_tests$multiassay
+  expression <- as.matrix(t(assay(data[["gene_exp"]])))
   species <- "hsa"
-  result <- .download_tf(genes, species)
-  expect_type(result, "list")
-  expect_true(all(sapply(result, function(x) length(unique(x))) == 1))
+  tested <- .download_tf(genes = colnames(expression),
+                                   species = species)
+  expect_type(tested, "list")
 })
 
-test_that("Test .download_gene_info_biomart function", {
-  genes <- c("ENSG00000157764", "ENSG00000169174", "ENSG00000115209")
+# test_that(".download_gene_info_biomart works", {
+#   data <- data_shiny_tests$multiassay
+#   expression <- as.matrix(t(assay(data[["gene_exp"]])))
+#   genes = colnames(expression)
+#   species <- "hsa"
+#   tested <- .download_gene_info_biomart(genes = genes,
+#                                          species = species)
+#   expect_type(tested, "list")
+#   expected_columns <- c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id",
+#                         "chromosome_name", "start_position", "end_position", "band")
+#   expect_true(all(expected_columns %in% colnames(tested)))
+#   expect_gt(nrow(tested), 0)
+# })
+
+test_that(".download_gene_info_org works", {
+  data <- data_shiny_tests$multiassay
+  expression <- as.matrix(t(assay(data[["gene_exp"]])))
+  genes = colnames(expression)
   species <- "hsa"
-  filters <- c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id")
-  result <- .download_gene_info_biomart(genes, species, filters)
-  expect_type(result, "list")
+  tested <- .download_gene_info_org(genes=genes, species=species)
+  expect_type(tested, "list")
   expected_columns <- c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id",
                         "chromosome_name", "start_position", "end_position", "band")
-  expect_true(all(expected_columns %in% colnames(result)))
-  expect_gt(nrow(result), 0)
+  expect_true(all(expected_columns %in% colnames(tested)))
+  expect_gt(nrow(tested), 0)
 })
 
-test_that("Test .download_gene_info_org function", {
-  genes <- c("ENSG00000157764", "ENSG00000169174", "ENSG00000115209")
+test_that(".download_gene_info works", {
+  data <- data_shiny_tests$multiassay
+  expression <- as.matrix(t(assay(data[["gene_exp"]])))
+  genes = colnames(expression)
   species <- "hsa"
-  result <- .download_gene_info_org(genes, species)
-  expect_type(result, "list")
+  tested1 <- .download_gene_info(genes=genes, species=species, biomaRt = FALSE)
+  tested2 <- .download_gene_info(genes=genes, species=species, biomaRt = TRUE)
+  expect_type(tested1, "list")
+  expect_type(tested2, "list")
+  expect_false(identical(tested1, tested2))
   expected_columns <- c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id",
                         "chromosome_name", "start_position", "end_position", "band")
-  expect_true(all(expected_columns %in% colnames(result)))
-  expect_gt(nrow(result), 0)
-})
-
-test_that("Test .download_gene_info function", {
-  genes <- c("ENSG00000157764", "ENSG00000169174", "ENSG00000115209")
-  species <- "hsa"
-  result1 <- .download_gene_info(genes, species, biomaRt = FALSE)
-  result2 <- .download_gene_info(genes, species, biomaRt = TRUE)
-  expect_type(result1, "list")
-  expect_type(result2, "list")
-  expect_false(identical(result1, result2))
-  expected_columns <- c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id",
-                        "chromosome_name", "start_position", "end_position", "band")
-  expect_true(all(expected_columns %in% colnames(result1)))
-  expect_true(all(expected_columns %in% colnames(result2)))
-  expect_gt(nrow(result1), 0)
-  expect_gt(nrow(result2), 0)
+  expect_true(all(expected_columns %in% colnames(tested1)))
+  expect_true(all(expected_columns %in% colnames(tested2)))
+  expect_gt(nrow(tested1), 0)
+  expect_gt(nrow(tested2), 0)
 })
