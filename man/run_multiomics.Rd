@@ -72,5 +72,5 @@ MultiAssayExperiment
 \examples{
 # Example usage_multiomics:
 data("ov_test_tcga_omics")
-multiomics_integration <-run_multiomics(data = mmultiassay_ov)
+multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 }

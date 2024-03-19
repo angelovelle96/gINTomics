@@ -61,6 +61,8 @@ Variations data
 data("ov_test_tcga_omics")
 gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
 gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
-cnv_integration <- run_cnv_integration(expression=gene_exp_matrix,
- cnv_data=gene_cnv_matrix)
+cnv_integration <- run_cnv_integration(
+    expression = gene_exp_matrix,
+    cnv_data = gene_cnv_matrix
+)
 }
