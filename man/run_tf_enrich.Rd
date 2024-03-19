@@ -21,7 +21,7 @@ run_tf_enrich(
 TF data.}
 
 \item{species}{Species to select for the enrichment analysis. Default is
-"hsa" (Homo sapiens).}
+'hsa' (Homo sapiens).}
 
 \item{pvalueCutoff}{P-value cutoff for significant enrichment. Default is
 0.1.}
@@ -29,10 +29,10 @@ TF data.}
 \item{qvalueCutoff}{Q-value cutoff for significant enrichment. Default is
 0.1.}
 
-\item{pAdjustMethod}{Method for adjusting p-values. Default is "BH"
+\item{pAdjustMethod}{Method for adjusting p-values. Default is 'BH'
 (Benjamini & Hochberg).}
 
-\item{ont}{Ontology to use for the enrichment analysis. Default is "all".}
+\item{ont}{Ontology to use for the enrichment analysis. Default is 'all'.}
 
 \item{BPPARAM}{A BiocParallelParam object specifying parallelization
 options. Default is BiocParallel::SerialParam().}
@@ -53,5 +53,6 @@ Running TF enrichment analysis
 # Example usage:
 data(ov_test_tcga_omics)
 #multiomics_integration <- run_multiomics(mmultiassay_ov)
-#run_tf_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
+#run_tf_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05,
+ pAdjustMethod = 'none')
 }

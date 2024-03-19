@@ -32,7 +32,8 @@ plotting enrichment
 \examples{
 # Example usage:
 data("ov_test_tcga_omics")
-#multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
-#dot_plotly(gen_enr, title = "Enrichment Analysis",showCategory = 10)
+# multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+# gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1,
+ pvalueCutoff = 0.05, pAdjustMethod = "none")
+# dot_plotly(gen_enr, title = "Enrichment Analysis",showCategory = 10)
 }
