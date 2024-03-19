@@ -10,6 +10,7 @@ plot_heatmap(
   omics,
   scale = "none",
   genes_number = 50,
+  samples_number = 50,
   class = NULL,
   pval = 0.05
 )
@@ -25,6 +26,10 @@ plot_heatmap(
 
 \item{genes_number}{Optional. The number of genes to include in the heatmap.
 Default is 50.}
+
+\item{samples_number}{Number of samples to include in the heatmap. If this
+number is inferior to the total number of samples, the n most variable
+samples will be selected}
 
 \item{class}{Optional. The class of interactions to include in the heatmap.}
 
