@@ -194,7 +194,7 @@ mmultiassay_ov <- intersectColumns(mmultiassay_ov)
 mmultiassay_ov <- mmultiassay_ov[, 1:20]
 
 
-#save(mmultiassay_ov, file = "~/Documenti/Rpackages/integrazione/data/ov_test_tcga_omics.rda")
+#save(mmultiassay_ov, file = "~/Documenti/Rpackages/gINTomics/data/ov_test_tcga_omics.rda", compress = "xz")
 
 
 ```
