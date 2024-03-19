@@ -96,7 +96,7 @@ In this section we will see how to perform a gene_expression~CNV+met integration
 NOTE: if you customize genomics interactions, linking more covariates to a single response, the output may
 be not more compatible with the shiny visualization.
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 gene_genomic_integration <- run_genomic_integration(expression = t(gene_exp_matrix),
                                                     cnv_data = t(gene_cnv_matrix),
                                                     methylation = t(meth_matrix))
@@ -108,7 +108,7 @@ summary(gene_genomic_integration)
 
 In this section we will see how to perform an expression~CNV integration. The input data (for both expression and CNV) should be provided as matrices or data.frames. Rows represent samples, while each column represents the different response variables/covariates of the models. By default all the integration functions will assume that expression data are obtained through sequencing, you should set the `sequencing_data` argument to FALSE if they are not.  Expression data could be both normalized or not normalized, the function is able to normalize data by setting the `normalize` argument to TRUE (default). If you want you can specify custom interaction through the `interactions` argument otherwise  the function will automatically look for the genes of `expression` in `cnv_data`.
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 gene_cnv_integration <- run_cnv_integration(expression = t(gene_exp_matrix),
                                             cnv_data = t(gene_cnv_matrix))
 summary(gene_cnv_integration)
@@ -118,7 +118,7 @@ summary(gene_cnv_integration)
 
 In this section we will see how to perform an expression~methylation integration. The input data should be the same of `run_cnv_integration`, but the covariates matrix will contain methylation data instead of Copy Number Variations data. Expression data could be both normalized or not normalized, the function is able to normalize data by setting the `normalize` argument to TRUE (default). If you want you can specify custom interaction through the `interactions` argument otherwise  the function will automatically look for the genes of `expression` in `methylation`.
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 gene_met_integration <- run_met_integration(expression = t(gene_exp_matrix),
                                             methylation = t(meth_matrix))
 summary(gene_met_integration)
@@ -128,7 +128,7 @@ summary(gene_met_integration)
 
 In this section we will see how to perform an expression~TF integration. In this case you can use as input data a single gene expression matrix if both your TF and targets are genes and are contained in the gene expression matrix. If you want the package to automatically download the interactions between TFs and targets you have to set the argument `type` to "tf". Otherwise you can also specify your custom interactions providing them with the `interactions` argument. You can handle data normalization as in the previous functions through the `normalize` argument. This function is designed to integrate TF expression data but it can handle every type of numerical data representing a gene expression regulator. So you can pass the regulators matrix to the `tf_expression` argument and specify your custom `interactions`. If expression data are not obtained through sequencing, remember to set `sequencing data` to FALSE.
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 tf_target_integration <- run_tf_integration(expression = t(gene_exp_matrix),
                                             type = "tf")
 summary(tf_target_integration)
@@ -139,7 +139,7 @@ summary(tf_target_integration)
 
 In this section we will see how to perform an expression~miRNA integration. Gene expression data will be provided through the `expression` argument while miRNA expression data through the `tf_expression` argument. Input matrices should follow the same rules of the previous functions. If you want the package to automatically download the interactions between miRNA and targets you have to set the argument `type` to "miRNA_target". Otherwise you can also specify your custom interactions providing them with the `interactions` argument. You can handle data normalization as in the previous functions through the `normalize` argument.
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 miRNA_target_integration <- run_tf_integration(expression = t(gene_exp_matrix),
                                                tf_expression = t(miRNA_exp_matrix),
                                                type = "miRNA_target")
@@ -151,7 +151,7 @@ summary(miRNA_target_integration)
 
 In this section we will see how to perform an miRNA~TF integration. miRNA expression data will be provided through the `expression` argument while gene expression data through the `tf_expression` argument. Input matrices should follow the same rules of the previous functions. If you want the package to automatically download the interactions between TF and miRNA you have to set the argument `type` to "tf_miRNA". Otherwise you can also specify your custom interactions providing them with the `interactions` argument. You can handle data normalization as in the previous functions through the `normalize` argument.
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 tf_miRNA_integration <- run_tf_integration(expression = t(miRNA_exp_matrix),
                                                tf_expression = t(gene_exp_matrix),
                                                type = "tf_miRNA")
@@ -164,6 +164,10 @@ summary(tf_miRNA_integration)
 Finally we will see how to perform a complete integration using all the available omics. In order to run this function you need to generate a MultiAssayExperiment as showed at the beginning of this vignette. The function will automatically use all the omics contained in the MultiAssayExperiment to perform all the possible integrations showed before. Moreover, if genomic data are available (CNV and/or Methylation), the first step will be the genomic integration and all the following integrations that contain gene expression data as response variable will use instead the residuals of the genomic model in order to filter out the effect of CNV and/or methylation. This framework is used also for miRNA, but in this case only CNV data are supported.
 
 ```{r, message=FALSE}
+## Here we just select part of the data to speed up the process
+tmp <- lapply(new_multiassay@ExperimentList, function(x) x[1:200,])
+new_multiassay <- MultiAssayExperiment(experiments = tmp)
+## Here we run the model
 multiomics_integration <- run_multiomics(data = new_multiassay)
 summary(multiomics_integration)
 ```
@@ -189,14 +193,14 @@ Here you can see the code to generate a network from a multiomics integration
 ```{r}
 data_table <- extract_model_res(multiomics_integration)
 data_table <- data_table[data_table$cov!="(Intercept)",]
-plot_network(data_table, num_interactions = 200)
+# plot_network(data_table, num_interactions = 200)
 
 ```
 
 ### Venn Diagram
 The Venn Diagram is designed for the genomic integration. It can help to identify genes which are significantly regulated by both CNV and methylation.
 Here you can see the code to generate a Venn Diagram from a multiomics integration
-```{r}
+```{r, eval=FALSE}
 plot_venn(data_table)
 
 ```
@@ -205,7 +209,7 @@ plot_venn(data_table)
 ### Volcano plot
 The Volcano Plot shows the distribution of integration coefficients for every integration type associated with a genomic class (cnv, met, cnv-mirna). For each integration coefficient, on the y axis you have the -log10 of Pvalue/FDR and on the x axis the value of the coefficient.
 Here you can see the code to generate a Volcano plot for CNV and one for methylation from a multiomics integration
-```{r}
+```{r, eval=FALSE}
 plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
 plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "met")
 
@@ -216,7 +220,7 @@ plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "met")
 The ridgeline plot is designed to compare different distributions, it has been integrated in the package with the aim to compare the distribution of significant and non significant coefficients returned by our integration models.
 For each distribution, on the y axis you have the frequencies and on the x axis the values of the coefficients.
 Here you can see the code to generate a Ridgeline plot for CNV and one for methylation from a multiomics integration
-```{r}
+```{r, eval=FALSE}
 plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
 plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "met")
 
@@ -226,7 +230,7 @@ plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "met")
 ### Chromosome distribution plot
 This barplot highlights the distribution of significant and non significant covariates among chromosomes. This kind of visualization will identify chromosomes in which the type of regulation under analysis is particularly active.
 Here you can see the code to generate a chromosome distribution plot specif for the genomic integration, starting from the results of the multiomics integration.
-```{r}
+```{r, eval=FALSE}
 plot_chr_distribution(data_table = data_table,
                      omics = "gene_genomic_res")
 
@@ -235,7 +239,7 @@ plot_chr_distribution(data_table = data_table,
 ### TF distribution plot
 This barplot highlights the number of significant tragets for each TFs.
 Here you can see the code to generate a TF distribution plot starting from the results of the multiomics integration.
-```{r}
+```{r, eval=FALSE}
 plot_tf_distribution(data_table = data_table)
 
 ```
@@ -243,7 +247,7 @@ plot_tf_distribution(data_table = data_table)
 ### Enrichment plot
 The enrichment plot shows the enrichment results obtained with enrichGO and enrichKEGG (clusterProfiler). The genomic enrichment is performed providing the list of genes significantly regulated by methylation or CNV, while the transcriptional one with the list of genes significantly regulated by each transcription factor (we run an enrichment for each TF that significantly regulates at least 12 targets)
 Here you can see the code to run a genomic enrichment starting from the results of the multiomics integration and to visualize the top results with a DotPlot
-```{r}
+```{r, eval=FALSE}
 gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
 dot_plotly(gen_enr$cnv[[1]]$go)
 
