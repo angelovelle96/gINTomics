@@ -58,7 +58,10 @@ Variations data
 }
 \examples{
 # Example usage_multi:
+library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
+tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
 gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
 cnv_integration <- run_cnv_integration(

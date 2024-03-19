@@ -623,8 +623,8 @@
     reactive({
         invalidateLater(millis = 1000, session = session)
         if (bg_enrich$is_alive()) {
-            x <- "Enrichment running in background, this may take several
-            minutes"
+            x <- paste("Enrichment running in background, this may take",
+                       "several minutes")
         } else {
             x <- "Enrichment completed"
         }

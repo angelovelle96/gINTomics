@@ -38,7 +38,10 @@
 #' possible integration models
 #' @examples
 #' # Example usage_multiomics:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' @export
 run_multiomics <- function(data,
@@ -359,7 +362,10 @@ run_multiomics <- function(data,
 #' containing the results of the CNV integration
 #' @examples
 #' # Example usage_multi:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
 #' cnv_integration <- run_cnv_integration(
@@ -495,7 +501,10 @@ run_cnv_integration <- function(expression,
 #' containing the results of the Methylation integration
 #' @examples
 #' # Example usage_multi:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
 #' met_integration <- run_met_integration(
@@ -688,7 +697,10 @@ run_met_integration <- function(expression,
 #' containing the results of the Genomic integration
 #' @examples
 #' # Example usage_multi:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
 #' gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
@@ -893,9 +905,12 @@ run_genomic_integration <- function(expression,
 #' containing the results of the transcriptional integration
 #' @examples
 #' # Example usage_multi:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
-#' tf_integration <- run_tf_integration(expression = gene_exp_matrix)
+#' tf_integration <- run_tf_integration(expression = gene_exp_matrix, type="tf")
 #' @export
 
 run_tf_integration <- function(expression,

@@ -7,6 +7,7 @@
 #' @return A network plot.
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
@@ -41,6 +42,7 @@ plot_network <- function(data_table,
 #' @importFrom shiny isolate
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
@@ -81,6 +83,7 @@ plot_venn <- function(data_table,
 #' @return A volcano plot.
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
@@ -126,11 +129,12 @@ plot_volcano <- function(data_table,
 #' @return A ridge plot.
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
-#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#' data_table <- extract_model_res(multiomics_integration)
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
 #' plot_ridge(data_table, omics = "gene_genomic_res", cnv_met="cnv")
 #' @export
 plot_ridge <- function(data_table,
@@ -180,11 +184,12 @@ plot_ridge <- function(data_table,
 #' @importFrom methods is
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
-#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#' data_table <- extract_model_res(multiomics_integration)
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
+#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' data_table <- extract_model_res(multiomics_integration)
 #' data_table <- data_table[!is.na(data_table$cnv_met),]
 #' plot_heatmap(multiomics_integration, data_table, omics = "gene_genomic_res")
 #' @export
@@ -297,6 +302,7 @@ plot_heatmap <- function(multiomics_integration,
 #' @return A histogram plot showing chromosome distribution.
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
@@ -353,6 +359,7 @@ plot_chr_distribution <- function(data_table,
 #' @return A TF distribution plot.
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
@@ -408,6 +415,7 @@ plot_tf_distribution <- function(data_table,
 #' @importFrom plotly add_markers subplot plot_ly
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)

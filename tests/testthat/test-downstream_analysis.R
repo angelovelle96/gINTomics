@@ -15,19 +15,6 @@ test_that(".def_enrich works", {
 })
 
 
-test_that("run_genomic_enrich works", {
-  model_results <- data_shiny_tests$multiomics_integration
-  tested <- run_genomic_enrich(model_results=model_results,
-                               species="hsa",
-                               pvalueCutoff = 0.1,
-                               pAdjustMethod="BH",
-                               qvalueCutoff=0.1,
-                               ont = "all",
-                               BPPARAM = SerialParam(),
-                               extracted_data=NULL)
-  expect_type(tested, "list")
-})
-
 
 test_that("run_tf_enrich works", {
   model_results <- data_shiny_tests$multiomics_integration

@@ -246,9 +246,6 @@
 #' # Example usage:
 #' library(MultiAssayExperiment)
 #' data('ov_test_tcga_omics')
-#' class <- rep(c('A', 'B'), each = 10)
-#' names(class) <- colnames(mmultiassay_ov[[1]])
-#' multiomics_integration <-run_multiomics(data = mmultiassay_ov, class = class)
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[['gene_exp']]))
 #' miRNA_exp_matrix <- as.matrix(assay(mmultiassay_ov[['miRNA_exp']]))
 #' meth_matrix <- as.matrix(assay(mmultiassay_ov[['methylation']]))

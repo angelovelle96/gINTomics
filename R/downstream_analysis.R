@@ -74,10 +74,13 @@
 #' are available, it returns a nested list with results for each data type.
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data(ov_test_tcga_omics)
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' #multiomics_integration <- run_multiomics(mmultiassay_ov)
 #' #gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1,
-#'  pvalueCutoff = 0.05, pAdjustMethod = 'none')
+#' #pvalueCutoff = 0.05, pAdjustMethod = 'none')
 #' @export
 run_genomic_enrich <- function(model_results, species = "hsa",
     pvalueCutoff = 0.1, pAdjustMethod = "BH", qvalueCutoff = 0.1,
@@ -152,10 +155,13 @@ run_genomic_enrich <- function(model_results, species = "hsa",
 #' @return A list containing TF enrichment results.
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data(ov_test_tcga_omics)
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' #multiomics_integration <- run_multiomics(mmultiassay_ov)
 #' #run_tf_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05,
-#'  pAdjustMethod = 'none')
+#' #pAdjustMethod = 'none')
 #' @export
 run_tf_enrich <- function(model_results, species = "hsa", pvalueCutoff = 0.1,
     qvalueCutoff = 0.1, pAdjustMethod = "BH", ont = "all",
