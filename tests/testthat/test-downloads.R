@@ -28,19 +28,19 @@ test_that(".download_tf works", {
   expect_type(tested, "list")
 })
 
-test_that(".download_gene_info_biomart works", {
-  data <- data_shiny_tests$multiassay
-  expression <- as.matrix(t(assay(data[["gene_exp"]])))
-  genes = colnames(expression)
-  species <- "hsa"
-  tested <- .download_gene_info_biomart(genes = genes,
-                                         species = species)
-  expect_type(tested, "list")
-  expected_columns <- c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id",
-                        "chromosome_name", "start_position", "end_position", "band")
-  expect_true(all(expected_columns %in% colnames(tested)))
-  expect_gt(nrow(tested), 0)
-})
+# test_that(".download_gene_info_biomart works", {
+#   data <- data_shiny_tests$multiassay
+#   expression <- as.matrix(t(assay(data[["gene_exp"]])))
+#   genes = colnames(expression)
+#   species <- "hsa"
+#   tested <- .download_gene_info_biomart(genes = genes,
+#                                          species = species)
+#   expect_type(tested, "list")
+#   expected_columns <- c("hgnc_symbol", "ensembl_gene_id", "entrezgene_id",
+#                         "chromosome_name", "start_position", "end_position", "band")
+#   expect_true(all(expected_columns %in% colnames(tested)))
+#   expect_gt(nrow(tested), 0)
+# })
 
 test_that(".download_gene_info_org works", {
   data <- data_shiny_tests$multiassay

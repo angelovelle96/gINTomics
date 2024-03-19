@@ -40,9 +40,7 @@
 #' @examples
 #' # Example usage_multiomics:
 #' data("ov_test_tcga_omics")
-#' class <- rep(c('A', 'B'), each = 10)
-#' names(class) <- colnames(mmultiassay_ov[[1]])
-#' multiomics_integration <-run_multiomics(data = mmultiassay_ov, class = class)
+#' multiomics_integration <-run_multiomics(data = mmultiassay_ov)
 #' @export
 run_multiomics <- function(data,
                            interactions_met=NULL,
@@ -339,10 +337,8 @@ run_multiomics <- function(data,
 #' data("ov_test_tcga_omics")
 #' gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
-#' class <- rep(c('A', 'B'), each = 10)
-#' names(class) <- colnames(mmultiassay_ov[[1]])
 #' cnv_integration <- run_cnv_integration(expression=gene_exp_matrix,
-#'  cnv_data=gene_cnv_matrix, class=class)
+#'  cnv_data=gene_cnv_matrix)
 #' @export
 #' @importFrom BiocParallel bpparam SerialParam
 run_cnv_integration <- function(expression,
@@ -465,10 +461,8 @@ run_cnv_integration <- function(expression,
 #' data("ov_test_tcga_omics")
 #' meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
-#' class <- rep(c('A', 'B'), each = 10)
-#' names(class) <- colnames(mmultiassay_ov[[1]])
 #' met_integration <- run_met_integration(expression=gene_exp_matrix,
-#' methylation=meth_matrix, class=class)
+#' methylation=meth_matrix)
 #' @export
 #' @importFrom BiocParallel bpparam SerialParam
 
@@ -646,10 +640,8 @@ run_met_integration <- function(expression,
 #' meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
 #' gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
-#' class <- rep(c('A', 'B'), each = 10)
-#' names(class) <- colnames(mmultiassay_ov[[1]])
 #' genomic_integration <- run_genomic_integration(expression=gene_exp_matrix,
-#' cnv_data=gene_cnv_matrix, methylation=meth_matrix, class=class)
+#' cnv_data=gene_cnv_matrix, methylation=meth_matrix)
 #' @export
 run_genomic_integration <- function(expression,
                                 cnv_data,
@@ -830,10 +822,7 @@ run_genomic_integration <- function(expression,
 #' # Example usage_multi:
 #' data("ov_test_tcga_omics")
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
-#' class <- rep(c('A', 'B'), each = 10)
-#' names(class) <- colnames(mmultiassay_ov[[1]])
-#' tf_integration <- run_tf_integration(expression=gene_exp_matrix,
-#' class=class)
+#' tf_integration <- run_tf_integration(expression=gene_exp_matrix)
 #' @export
 
 run_tf_integration <- function(expression,

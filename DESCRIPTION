@@ -4,6 +4,9 @@ Version: 1.0.0
 Authors@R: c(person("Angelo", "Velle", role = c("cre", "aut"),
                     email = "angelo.velle@unipd.it",
                     comment = c(ORCID = "0000-0002-4010-6390")),
+             person("Francesco", "Patane'", role = "aut",
+                     email = "francesco.patane@unipd.it", 
+                     comment = c(ORCID = "0009-0001-8619-447X")),
              person("Chiara", "Romualdi", role = "aut", 
                     email = "chiara.romualdi@unipd.it",
                     comment = c(ORCID = "0000-0003-4792-9047")))
@@ -24,7 +27,6 @@ RoxygenNote: 7.3.1
 Imports: 
     BiocParallel,
     biomaRt,
-    ComplexHeatmap,
     OmnipathR,
     edgeR,
     ggplot2,

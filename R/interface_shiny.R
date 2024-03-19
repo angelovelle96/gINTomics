@@ -244,7 +244,7 @@
                                                      step = 0.005), ns = ns3)
                                      ),
                                      mainPanel(
-                                       plotOutput(ns3("plotly"), width = 1000),
+                                       plotOutput(ns3("plotly"), width = 700),
                                        tags$div(
                                          style = 'overflow-x: auto;',
                                          dataTableOutput(ns3('table')),
@@ -604,7 +604,7 @@
                                                      step = 0.005), ns = ns2)
                                      ),
                                      mainPanel(
-                                       plotOutput(ns2("plotly"), width = 1000),
+                                       plotOutput(ns2("plotly"), width = 700),
                                        tags$div(
                                          style = 'overflow-x: auto;',
                                          dataTableOutput(ns2('table')),
@@ -898,7 +898,7 @@
                                                      step = 0.005), ns = ns3)
                                      ),
                                      mainPanel(
-                                       plotOutput(ns3("plotly"), width = 1000),
+                                       plotOutput(ns3("plotly"), width = 700),
                                        tags$div(
                                          style = 'overflow-x: auto;',
                                          dataTableOutput(ns3('table')),

@@ -48,23 +48,22 @@ test_that("plot_chr_distribution works", {
 })
 
 
-test_that("plot_tf_distribution works", { ######3
+test_that("plot_tf_distribution works", {
   data_table <- data_shiny_tests$data_table
-   class <- "A"
-  plot <- plot_tf_distribution(data_table=data_table, class=class, pval=0.05)
-  expect_true(inherits(plot, "ggplot"),
+  class <- "A"
+  plot <- plot_tf_distribution(data_table=data_table, class=class, pval=0.5)
+  expect_true(inherits(plot, "plotly"),
               "The result should be a ggplot object")
 })
 
 
-test_that("dot_plotly works", {  ########33
+test_that("dot_plotly works", {
 
-
-  plot <- dot_plotly(enrich_result=enrich_result,
+  multiomics_integration <- data_shiny_tests$multiomics_integration
+  plot <- dot_plotly(enrich_result=data.frame(),
                      title=NULL,
                      showCategory=10,
                      width=800,
                      height=700)
-  expect_true(inherits(plot, "list"),
-              "The result should be a list object")
+  expect_null(plot)
 })

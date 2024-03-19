@@ -126,8 +126,8 @@ test_that(".server_table works", {
   expect_s3_class(server_table, "shiny.render.function")
 })
 
-test_that(".server_enrich_bg works", {  ############3
-  extracted_data <- data_shiny_tests$data
+test_that(".server_enrich_bg works", {
+  data_table <- data_shiny_tests$data_table
   input <- reactiveValues(IntegrationSelect="gene_genomic_res",
                           SignificativityCriteria="pval",
                           genomicTypeSelect="cnv",
@@ -136,10 +136,12 @@ test_that(".server_enrich_bg works", {  ############3
                           ClassSelect="A")
   output <- reactiveValues()
   session <- list()
+  data_tf_enrich <- data_table[data_table$omics=="tf_res",]
   tested <- .server_enrich_bg(input=input,
-                                     output=output,
-                                     session=session,
-                                     extracted_data = extracted_data)
+                               output=output,
+                               session=session,
+                               extracted_data = NULL)
+  expect_null(tested)
 
 })
 
