@@ -130,7 +130,9 @@
   colnames(covariates) <- gsub(bad_str, "_", colnames(covariates))
   tmp <- intersect(colnames(covariates), unlist(interactions))
   if(length(tmp)==0) return(NULL)
-  covariates <- as.data.frame(covariates[,tmp])
+  covariates <- covariates[,tmp]
+  if(is.numeric(covariates)) covariates <- as.matrix(covariates)
+  covariates <- as.data.frame(covariates)
   colnames(covariates) <- tmp
   if(linear==TRUE){
     colnames(response_var) <- gsub(bad_str, "_", colnames(response_var))
@@ -266,6 +268,7 @@
 #' @return A MultiAssayExperiment object containing the provided assays.
 #' @examples
 #' # Example usage:
+#' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
 #' class <- rep(c('A', 'B'), each = 10)
 #' names(class) <- colnames(mmultiassay_ov[[1]])
@@ -386,6 +389,7 @@ create_multiassay <- function(methylation=NULL,
 
 # RandomForest selection
 #' @importFrom randomForest randomForest importance
+#' @importFrom stats as.formula terms
 
 .rf_selection <- function(data,
                           formula){
@@ -410,6 +414,10 @@ create_multiassay <- function(methylation=NULL,
 
 
 #' @rdname extract_model_res
+#' @param outliers if TRUE (by default), it removes outliers
+#' @param species species for the analysis
+#' @param filters Specific filters to apply
+#' @param genes_info genes info
 setMethod("extract_model_res", "list",
           function(model_results,
                    outliers=TRUE,
@@ -697,6 +705,7 @@ fdr <- function(pval_mat){
     x[!is.na(x)] <- ans
     return(x)
   })
+  if(is.numeric(fdr_data)) fdr_data <- as.matrix(fdr_data)
   fdr_data <- as.data.frame(fdr_data)
   return(fdr_data)
 }
@@ -707,7 +716,7 @@ fdr <- function(pval_mat){
 .shiny_preprocess <- function(data){
 
   data_table <- data
-  data_table <- filter(data_table, cov != '(Intercept)')
+  data_table <- filter(data_table, `cov` != '(Intercept)')
   rownames(data_table) <- seq_len(nrow(data_table))
   data_table$cnv_met[data_table$omics=="gene_cnv_res"] <- "cnv"
   data_table$cnv_met[data_table$omics=="gene_met_res"] <- "met"

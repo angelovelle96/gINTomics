@@ -102,7 +102,9 @@
 #' are available, it returns a nested list with results for each data type.
 #' @examples
 #' # Example usage:
-#' run_genomic_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
+#' data(ov_test_tcga_omics)
+#' #multiomics_integration <- run_multiomics(mmultiassay_ov)
+#' #gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
 #' @export
 
 run_genomic_enrich <- function(model_results,
@@ -203,7 +205,9 @@ return(enrichment)
 #' @return A list containing TF enrichment results.
 #' @examples
 #' # Example usage:
-#' run_tf_enrich(model_results, species = "mmu", pvalueCutoff = 0.05)
+#' data(ov_test_tcga_omics)
+#' #multiomics_integration <- run_multiomics(mmultiassay_ov)
+#' #run_tf_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
 #' @export
 
 run_tf_enrich <- function(model_results,

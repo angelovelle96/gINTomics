@@ -11,7 +11,7 @@
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
-#' plot_network(data_table)
+#' #plot_network(data_table)
 #' @export
 plot_network <- function(data_table,
                          num_interactions=300,
@@ -37,18 +37,20 @@ plot_network <- function(data_table,
 #' @param class Optional. The class of interactions to include in the Venn
 #' diagram.
 #' @return A Venn diagram plot.
+#' @importFrom shiny isolate
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
-#' plot_venn(data_table)
+#' plot_venn(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
 #' @export
 plot_venn <- function(data_table,
                       class=NULL){
   if(is.null(class) & "class"%in%colnames(data_table))
      stop(str_wrap("Please, specify class"))
   input <- list()
+  output <- list()
   input$ClassSelect <- class
   input$FdrRange <- c(0, 0.05)
   input$PvalRange <- c(0,0.05)
@@ -76,7 +78,7 @@ plot_venn <- function(data_table,
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
-#' plot_volcano(data_table)
+#' plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
 #' @export
 plot_volcano <- function(data_table,
                          class=NULL,
@@ -116,7 +118,7 @@ plot_volcano <- function(data_table,
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
-#' plot_ridge(data_table)
+#' plot_ridge(data_table, omics = "gene_genomic_res", cnv_met="cnv")
 #' @export
 plot_ridge <- function(data_table,
                        class=NULL,
@@ -155,12 +157,13 @@ plot_ridge <- function(data_table,
 #' @param pval Optional. The p-value threshold for significance in the heatmap.
 #' Default is 0.05.
 #' @return A heatmap plot.
+#' @importFrom methods is
 #' @examples
 #' # Example usage:
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
-#' plot_heatmap(data_table)
+#' plot_heatmap(data_table, omics = "gene_genomic_res")
 #' @export
 plot_heatmap <- function(multiomics_integration,
                          data_table,
@@ -254,7 +257,7 @@ plot_heatmap <- function(multiomics_integration,
 #' data("ov_test_tcga_omics")
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
-#' plot_chr_distribution(data_table)
+#' plot_chr_distribution(data_table, omics = "gene_genomic_res")
 #' @export
 plot_chr_distribution <- function(data_table,
                                   class=NULL,
@@ -328,7 +331,7 @@ plot_chr_distribution <- function(data_table,
       df_filtered_histo_tf$pval <= pval,]
     genes_count <- table(df_filtered_histo_tf$cov, df_filtered_histo_tf$chr_cov)
     genes_count_df <- as.data.frame.table(genes_count)
-    genes_count_df <- subset(genes_count_df, Freq != 0)
+    genes_count_df <- subset(genes_count_df, `Freq` != 0)
     colnames(genes_count_df) <- c("TF", "Chromosome", "Count")
     genes_count_df <- genes_count_df[order(-genes_count_df$Count),]
     .build_histo_TFbyChr(genes_count_df)
@@ -347,8 +350,10 @@ plot_chr_distribution <- function(data_table,
 #' @importFrom plotly add_markers subplot plot_ly
 #' @examples
 #' # Example usage:
-#' dot_plotly(enrichment_result, title = "Enrichment Analysis",
-#' showCategory = 10)
+#' data("ov_test_tcga_omics")
+#' #multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' #gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
+#' #dot_plotly(gen_enr, title = "Enrichment Analysis",showCategory = 10)
 #' @export
   dot_plotly <- function(enrich_result,
                          title=NULL,

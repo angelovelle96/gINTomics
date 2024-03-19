@@ -17,6 +17,7 @@ test_that(".run_lm_integration works", {
                                 norm_method="TMM",
                                 BPPARAM=SerialParam())
   expect_type(tested, "list")
+  expect_true(length(tested) > 0)
 })
 
 
@@ -66,4 +67,5 @@ test_that(".def_lm works", {
                                     data=data,
                                     BPPARAM = SerialParam())
   expect_type(tested, "list")
+  expect_true(length(tested) > 0)
 })

@@ -37,6 +37,7 @@ This function will generate a proper MultiAssayExperiment suitable for the
 }
 \examples{
 # Example usage:
+library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
 class <- rep(c('A', 'B'), each = 10)
 names(class) <- colnames(mmultiassay_ov[[1]])

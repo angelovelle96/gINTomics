@@ -40,6 +40,14 @@ extract_model_res(model_results, ...)
 \item{model_results}{The model results object from which to extract results.}
 
 \item{...}{Additional arguments to be passed to specific methods.}
+
+\item{outliers}{if TRUE (by default), it removes outliers}
+
+\item{species}{species for the analysis}
+
+\item{filters}{Specific filters to apply}
+
+\item{genes_info}{genes info}
 }
 \value{
 A dataframe containing the results of all the integration models
