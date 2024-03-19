@@ -470,6 +470,7 @@ test_that(".prepare_gen_heatmap works", {
   pvalRange <- 0.1
   fdrRange <- 0.1
   scale <- "row"
+  numSamples <- 50
   df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
     classSelect]]$data$response_var
   data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
@@ -483,7 +484,8 @@ test_that(".prepare_gen_heatmap works", {
                               fdrRange = fdrRange,
                               numTopCNV = numTopCNV,
                               numTopMET = numTopMET,
-                              scale = scale)
+                              scale = scale,
+                              numSamples = numSamples)
   expect_s4_class(tested, "Heatmap")
 })
 
@@ -500,6 +502,7 @@ test_that(".prepare_cnv_heatmap works", {
   pvalRange <- 0.1
   fdrRange <- 0.1
   scale <- "row"
+  numSamples <- 50
   df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
     classSelect]]$data$response_var
   data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
@@ -514,7 +517,8 @@ test_that(".prepare_cnv_heatmap works", {
                                  pvalRange = pvalRange,
                                  fdrRange = fdrRange,
                                  numTopCNVonly = numTopCNVonly,
-                                 scale = scale)
+                                 scale = scale,
+                                 numSamples = numSamples)
   expect_s4_class(tested, "Heatmap")
 })
 
@@ -531,6 +535,7 @@ test_that(".prepare_met_heatmap works", {
   pvalRange <- 0.1
   fdrRange <- 0.1
   scale <- "row"
+  numSamples <- 50
   df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
     classSelect]]$data$response_var
   data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
@@ -545,7 +550,8 @@ test_that(".prepare_met_heatmap works", {
                                  pvalRange = pvalRange,
                                  fdrRange = fdrRange,
                                  numTopMETonly = numTopMETonly,
-                                 scale = scale)
+                                 scale = scale,
+                                 numSamples = numSamples)
   expect_s4_class(tested, "Heatmap")
 })
 
@@ -562,6 +568,7 @@ test_that(".prepare_gen_heatmap works", {
   pvalRange <- 0.1
   fdrRange <- 0.1
   scale <- "row"
+  numSamples <- 50
   df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
     classSelect]]$data$response_var
   data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
@@ -574,7 +581,8 @@ test_that(".prepare_gen_heatmap works", {
                                    pvalRange = pvalRange,
                                    fdrRange = fdrRange,
                                    numTopMiCNV = numTopMiCNV,
-                                   scale = scale)
+                                   scale = scale,
+                                   numSamples = numSamples)
   expect_s4_class(tested, "Heatmap")
 })
 

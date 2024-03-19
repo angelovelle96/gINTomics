@@ -156,6 +156,9 @@ plot_ridge <- function(data_table,
 #' @param class Optional. The class of interactions to include in the heatmap.
 #' @param pval Optional. The p-value threshold for significance in the heatmap.
 #' Default is 0.05.
+#' @param samples_number Number of samples to include in the heatmap. If this
+#' number is inferior to the total number of samples, the n most variable
+#' samples will be selected
 #' @return A heatmap plot.
 #' @importFrom methods is
 #' @examples
@@ -170,6 +173,7 @@ plot_heatmap <- function(multiomics_integration,
                          omics,
                          scale="none",
                          genes_number=50,
+                         samples_number=50,
                          class=NULL,
                          pval=0.05){
 
@@ -206,7 +210,8 @@ plot_heatmap <- function(multiomics_integration,
                               fdrRange = pval,
                               numTopCNV = round(genes_number/2),
                               numTopMET = round(genes_number/2),
-                              scale = scale)
+                              scale = scale,
+                              numSamples = samples_number)
   }
   if(omics == "gene_cnv_res"){
     ans <- .prepare_cnv_heatmap(data_table = data_table,
@@ -216,7 +221,8 @@ plot_heatmap <- function(multiomics_integration,
                               pvalRange = pval,
                               fdrRange = pval,
                               numTopCNVonly = genes_number,
-                              scale = scale)
+                              scale = scale,
+                              numSamples = samples_number)
   }
   if(omics == "gene_met_res"){
     ans <-  .prepare_met_heatmap(data_table = data_table,
@@ -226,7 +232,8 @@ plot_heatmap <- function(multiomics_integration,
                                pvalRange = pval,
                                fdrRange = pval,
                                numTopMETonly = genes_number,
-                               scale = scale)
+                               scale = scale,
+                               numSamples = samples_number)
   }
   if(omics == "mirna_cnv_res"){
     ans <- .prepare_mirna_heatmap(data_table = data_table,
@@ -236,7 +243,8 @@ plot_heatmap <- function(multiomics_integration,
                               pvalRange = pval,
                               fdrRange = pval,
                               numTopMiCNV = genes_number,
-                              scale = scale)
+                              scale = scale,
+                              numSamples = samples_number)
   }
   return(ans)
 }
