@@ -20,6 +20,7 @@ plotting venn
 }
 \examples{
 # Example usage:
+library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
 tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)

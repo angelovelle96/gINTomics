@@ -58,7 +58,10 @@ Setting method for extracting results
 }
 \examples{
 # example code
+library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
+tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 data_table <- extract_model_res(multiomics_integration)
 head(data_table)
