@@ -206,8 +206,8 @@ plot_venn(data_table)
 The Volcano Plot shows the distribution of integration coefficients for every integration type associated with a genomic class (cnv, met, cnv-mirna). For each integration coefficient, on the y axis you have the -log10 of Pvalue/FDR and on the x axis the value of the coefficient.
 Here you can see the code to generate a Volcano plot for CNV and one for methylation from a multiomics integration
 ```{r}
-gINTomics:::plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
-gINTomics:::plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "met")
+plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
+plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "met")
 
 ```
 
@@ -227,7 +227,7 @@ plot_ridge(data_table, omics = "gene_genomic_res", cnv_met = "met")
 This barplot highlights the distribution of significant and non significant covariates among chromosomes. This kind of visualization will identify chromosomes in which the type of regulation under analysis is particularly active.
 Here you can see the code to generate a chromosome distribution plot specif for the genomic integration, starting from the results of the multiomics integration.
 ```{r}
-gINTomics:::plot_chr_distribution(data_table = data_table,
+plot_chr_distribution(data_table = data_table,
                      omics = "gene_genomic_res")
 
 ```
@@ -236,7 +236,7 @@ gINTomics:::plot_chr_distribution(data_table = data_table,
 This barplot highlights the number of significant tragets for each TFs.
 Here you can see the code to generate a TF distribution plot starting from the results of the multiomics integration.
 ```{r}
-gINTomics:::plot_tf_distribution(data_table = data_table)
+plot_tf_distribution(data_table = data_table)
 
 ```
 

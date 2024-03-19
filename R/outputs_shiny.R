@@ -1459,7 +1459,7 @@
 #' application.
 #'
 #' @export
-#' @importFrom shiny NS callModule
+#' @importFrom shiny NS callModule shinyApp
 #'
 #' @examples
 #' # Example usage:
@@ -1602,5 +1602,6 @@ run_shiny <- function(multiomics_integration) {
             data = data$data
         )
     }
-    shiny::shinyApp(ui, server)
+    shinyApp(ui = ui, server = server)
+
 }
