@@ -304,7 +304,8 @@
                  input[[ns("SignificativityCriteria")]],
                  input[[ns("PvalRange")]],
                  input[[ns("FdrRange")]],
-                 input[[ns("scaleHeatmap")]])
+                 input[[ns("scaleHeatmap")]],
+                 input[[ns("numSamples")]])
 }
 
 # Prepare Reactive Ridge Plot
