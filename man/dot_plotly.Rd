@@ -33,7 +33,7 @@ plotting enrichment
 # Example usage:
 library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
-tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")

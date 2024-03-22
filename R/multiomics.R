@@ -40,7 +40,7 @@
 #' # Example usage_multiomics:
 #' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' @export
@@ -364,7 +364,7 @@ run_multiomics <- function(data,
 #' # Example usage_multi:
 #' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
@@ -503,7 +503,7 @@ run_cnv_integration <- function(expression,
 #' # Example usage_multi:
 #' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
@@ -699,7 +699,7 @@ run_met_integration <- function(expression,
 #' # Example usage_multi:
 #' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
@@ -907,7 +907,7 @@ run_genomic_integration <- function(expression,
 #' # Example usage_multi:
 #' library(MultiAssayExperiment)
 #' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
 #' tf_integration <- run_tf_integration(expression = gene_exp_matrix, type="tf")

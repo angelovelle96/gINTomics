@@ -77,7 +77,7 @@ Variations data
 # Example usage_multi:
 library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
-tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 meth_matrix <- as.matrix(assay(mmultiassay_ov[["methylation"]]))
 gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))

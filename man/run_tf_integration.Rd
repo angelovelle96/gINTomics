@@ -85,7 +85,7 @@ argument. Other types of interactions should be provided through the
 # Example usage_multi:
 library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
-tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
 tf_integration <- run_tf_integration(expression = gene_exp_matrix, type="tf")
