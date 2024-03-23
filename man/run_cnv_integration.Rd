@@ -62,8 +62,8 @@ library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
 tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
-gene_cnv_matrix <- as.matrix(assay(mmultiassay_ov[["cnv_data"]]))
-gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
+gene_cnv_matrix <- t(as.matrix(assay(mmultiassay_ov[["cnv_data"]])))
+gene_exp_matrix <- t(as.matrix(assay(mmultiassay_ov[["gene_exp"]])))
 cnv_integration <- run_cnv_integration(
     expression = gene_exp_matrix,
     cnv_data = gene_cnv_matrix

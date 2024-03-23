@@ -133,9 +133,15 @@ plot_volcano <- function(data_table,
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
-#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#' data_table <- extract_model_res(multiomics_integration)
-#' plot_ridge(data_table, omics = "gene_genomic_res", cnv_met="cnv")
+#' gene_cnv_matrix <- t(as.matrix(assay(mmultiassay_ov[["cnv_data"]])))
+#' gene_exp_matrix <- t(as.matrix(assay(mmultiassay_ov[["gene_exp"]])))
+#' cnv_integration <- run_cnv_integration(
+#'     expression = gene_exp_matrix,
+#'     cnv_data = gene_cnv_matrix
+#' )
+#' data_table <- extract_model_res(cnv_integration)
+#' data_table <- data_table[data_table$cov!="(Intercept)",]
+#' plot_ridge(data_table)
 #' @export
 plot_ridge <- function(data_table,
                        class = NULL,
@@ -153,13 +159,14 @@ plot_ridge <- function(data_table,
     data_table$significance <- ifelse(data_table$pval <= 0.05,
         "Significant", "Not Significant"
     )
-    if (omics == "gene_genomic_res" & !is.null(cnv_met)) {
-        if (!cnv_met %in% c("cnv", "met")) {
-            stop(str_wrap("cnv_met should be one of cnv and met"))
-        }
-        data_table <- data_table[data_table$cnv_met == cnv_met, ]
-        data_table <- data_table[!is.na(data_table$cnv_met), ]
-    }
+    if(!is.null(omics)){
+      if (omics == "gene_genomic_res" & !is.null(cnv_met)) {
+          if (!cnv_met %in% c("cnv", "met")) {
+              stop(str_wrap("cnv_met should be one of cnv and met"))
+          }
+          data_table <- data_table[data_table$cnv_met == cnv_met, ]
+          data_table <- data_table[!is.na(data_table$cnv_met), ]
+      }}
     lower_quantile <- quantile(data_table$coef, 0.001)
     upper_quantile <- quantile(data_table$coef, 0.999)
     quantiles <- c(lower_quantile, upper_quantile)

@@ -60,9 +60,14 @@ Setting method for extracting results
 # example code
 library(MultiAssayExperiment)
 data("ov_test_tcga_omics")
-tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:50,])
+tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
-multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-data_table <- extract_model_res(multiomics_integration)
+gene_cnv_matrix <- t(as.matrix(assay(mmultiassay_ov[["cnv_data"]])))
+gene_exp_matrix <- t(as.matrix(assay(mmultiassay_ov[["gene_exp"]])))
+cnv_integration <- run_cnv_integration(
+    expression = gene_exp_matrix,
+    cnv_data = gene_cnv_matrix
+)
+data_table <- extract_model_res(cnv_integration)
 head(data_table)
 }

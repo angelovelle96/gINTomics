@@ -180,8 +180,10 @@
     return(ans)
 }
 # Download Organism gene infos
-#' @import Homo.sapiens Mus.musculus TxDb.Hsapiens.UCSC.hg38.knownGene
-#' @import TxDb.Mmusculus.UCSC.mm10.knownGene
+#' @importFrom Homo.sapiens Homo.sapiens
+#' @importFrom Mus.musculus Mus.musculus
+#' @importFrom TxDb.Hsapiens.UCSC.hg38.knownGene TxDb.Hsapiens.UCSC.hg38.knownGene
+#' @importFrom TxDb.Mmusculus.UCSC.mm10.knownGene TxDb.Mmusculus.UCSC.mm10.knownGene
 #' @importFrom stringr str_wrap
 #' @importFrom stats setNames
 #' @importFrom plyr rbind.fill

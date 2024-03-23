@@ -2,7 +2,8 @@
 #' @importFrom clusterProfiler enrichKEGG enrichGO
 #' @importFrom ReactomePA enrichPathway
 #' @importFrom stats setNames
-#' @import org.Hs.eg.db org.Mm.eg.db
+#' @importFrom org.Hs.eg.db org.Hs.eg.db
+#' @importFrom org.Mm.eg.db org.Mm.eg.db
 .def_enrich <- function(data, species, pvalueCutoff,
     pAdjustMethod, qvalueCutoff, ont, run_go = TRUE,
     run_kegg = TRUE, run_reactome = FALSE, ...) {

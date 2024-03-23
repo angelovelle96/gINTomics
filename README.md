@@ -7,7 +7,11 @@
 To install this package:
 
 ``` r
-devtools::install_github("angelovelle96/gINTomics")
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("angelovelle96/gINTomics")
+
+#devtools::install_github("angelovelle96/gINTomics")
 ```
 
 # How to use gINTomics
