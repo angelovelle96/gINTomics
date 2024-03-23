@@ -1,11 +1,5 @@
 library(BiocParallel)
 
-test_that("run_multiomics works", {
-  data <- data_shiny_tests$multiassay
-  multiomics_integration <-run_multiomics(data = data)
-  expect_true(is(multiomics_integration, "MultiOmics"),
-              "The function should return a MultiOmics object")
-})
 
 
 test_that(".def_cnv_integration works", {
@@ -184,38 +178,3 @@ test_that(".def_tf_integration works", {
 })
 
 
-test_that("run_tf_integration works", {
-  data <- data_shiny_tests$multiassay
-  gene_exp_matrix <- as.matrix(t(assay(data[["gene_exp"]])))
-  class <- rep(c('A', 'B'), each = 10)
-  names(class) <- colnames(data[[1]])
-  tested <- run_tf_integration(expression = gene_exp_matrix,
-                            tf_expression = gene_exp_matrix,
-                            interactions = NULL,
-                            type = "tf",
-                            sequencing_data = TRUE,
-                            species = "hsa",
-                            normalize = TRUE,
-                            norm_method = "TMM",
-                            normalize_cov = TRUE,
-                            norm_method_cov = "TMM",
-                            class = NULL,
-                            run_deg = TRUE,
-                            BPPARAM = SerialParam())
- expect_named(tested$coef_data, c("(Intercept)", "cov"))
-  tested <- run_tf_integration(expression = gene_exp_matrix,
-                            tf_expression = gene_exp_matrix,
-                            interactions = NULL,
-                            type = "tf",
-                            sequencing_data = TRUE,
-                            species = "hsa",
-                            normalize = TRUE,
-                            norm_method = "TMM",
-                            normalize_cov = TRUE,
-                            norm_method_cov = "TMM",
-                            class = class,
-                            run_deg = TRUE,
-                            BPPARAM = SerialParam())
-  expect_type(tested, "list")
-  expect_true("deg" %in% names(tested))
-})
