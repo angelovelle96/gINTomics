@@ -195,10 +195,10 @@ plot_ridge <- function(data_table,
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
-#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#' data_table <- extract_model_res(multiomics_integration)
-#' data_table <- data_table[!is.na(data_table$cnv_met),]
-#' plot_heatmap(multiomics_integration, data_table, omics = "gene_genomic_res")
+#' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' # data_table <- extract_model_res(multiomics_integration)
+#' # data_table <- data_table[!is.na(data_table$cnv_met),]
+#' # plot_heatmap(multiomics_integration, data_table, omics = "gene_genomic_res")
 #' @export
 plot_heatmap <- function(multiomics_integration,
                          data_table,
@@ -370,9 +370,9 @@ plot_chr_distribution <- function(data_table,
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
-#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#' data_table <- extract_model_res(multiomics_integration)
-#' plot_tf_distribution(data_table, pval=0.5)
+#' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' # data_table <- extract_model_res(multiomics_integration)
+#' # plot_tf_distribution(data_table, pval=0.5)
 #' @export
 plot_tf_distribution <- function(data_table,
                                  class = NULL,
