@@ -180,8 +180,8 @@
     return(ans)
 }
 # Download Organism gene infos
-#' @importFrom Homo.sapiens Homo.sapiens
-#' @importFrom Mus.musculus Mus.musculus
+#' @importFrom org.Hs.eg.db org.Hs.eg.db
+#' @importFrom org.Mm.eg.db org.Mm.eg.db
 #' @importFrom TxDb.Hsapiens.UCSC.hg38.knownGene TxDb.Hsapiens.UCSC.hg38.knownGene
 #' @importFrom TxDb.Mmusculus.UCSC.mm10.knownGene TxDb.Mmusculus.UCSC.mm10.knownGene
 #' @importFrom stringr str_wrap
@@ -200,11 +200,11 @@
                                                     annotation are:",
             paste(tmp, sep = " ", collapse = ", "))))
     if (species == "hsa") {
-        dataset <- Homo.sapiens
+        dataset <- org.Hs.eg.db
         dataset2 <- TxDb.Hsapiens.UCSC.hg38.knownGene
     }
     if (species == "mmu") {
-        dataset <- Mus.musculus
+        dataset <- org.Mm.eg.db
         dataset2 <- TxDb.Mmusculus.UCSC.mm10.knownGene
     }
     genes <- unique(genes)
