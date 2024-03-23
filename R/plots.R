@@ -46,9 +46,9 @@ plot_network <- function(data_table,
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
-#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#' data_table <- extract_model_res(multiomics_integration)
-#' plot_venn(data_table)
+#' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' # data_table <- extract_model_res(multiomics_integration)
+#' # plot_venn(data_table)
 #' @export
 plot_venn <- function(data_table,
                       class = NULL) {
@@ -313,9 +313,9 @@ plot_heatmap <- function(multiomics_integration,
 #' data("ov_test_tcga_omics")
 #' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
-#' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#' data_table <- extract_model_res(multiomics_integration)
-#' plot_chr_distribution(data_table, omics = "gene_genomic_res")
+#' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
+#' # data_table <- extract_model_res(multiomics_integration)
+#' # plot_chr_distribution(data_table, omics = "gene_genomic_res")
 #' @export
 plot_chr_distribution <- function(data_table,
                                   class = NULL,
