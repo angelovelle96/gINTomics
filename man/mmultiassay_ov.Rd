@@ -10,7 +10,7 @@ The object contains all the available input data types: Gene expression data,
 miRNA expression data, gene methylation data, gene Copy Number Variations
 and miRNA Copy Number Variations.}
 \usage{
-data(ov_test_tcga_omics)
+data(mmultiassay_ov)
 "mmultiomics_ov"
 }
 \value{
@@ -26,6 +26,6 @@ and miRNA Copy Number Variations.
 }
 \examples{
 # example code
-data(ov_test_tcga_omics)
+data(mmultiassay_ov)
 mmultiassay_ov
 }

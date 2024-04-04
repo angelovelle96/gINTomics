@@ -48,7 +48,7 @@ To install this package:
 ```{r, eval=FALSE}
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install("angelovelle96/gINTomics")
+BiocManager::install("gINTomics")
 
 #devtools::install_github("angelovelle96/gINTomics")
 
@@ -69,14 +69,14 @@ The package contains a pre built MultiAssayExperiment, anyway in this section we
 library(gINTomics)
 library(MultiAssayExperiment)
 library(shiny)
-data("ov_test_tcga_omics")
+data("mmultiassay_ov")
 mmultiassay_ov
 ```
 
 Here we will extract the single omics from the MultiAssayExperiment
 ```{r, message=FALSE}
 ## Here we just select part of the data o speed up the process
-tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:400,])
+tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:400,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 
 gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[["gene_exp"]]))
@@ -251,9 +251,9 @@ Here you can see the code to generate a TF distribution plot starting from the r
 ### Enrichment plot
 The enrichment plot shows the enrichment results obtained with enrichGO and enrichKEGG (clusterProfiler). The genomic enrichment is performed providing the list of genes significantly regulated by methylation or CNV, while the transcriptional one with the list of genes significantly regulated by each transcription factor (we run an enrichment for each TF that significantly regulates at least 12 targets)
 Here you can see the code to run a genomic enrichment starting from the results of the multiomics integration and to visualize the top results with a DotPlot
-```{r, eval=FALSE}
-gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
-dot_plotly(gen_enr$cnv[[1]]$go)
+```{r}
+#gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
+#dot_plotly(gen_enr$cnv[[1]]$go)
 
 ```
 

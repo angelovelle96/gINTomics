@@ -76,8 +76,8 @@
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data(ov_test_tcga_omics)
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' data(mmultiassay_ov)
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' #multiomics_integration <- run_multiomics(mmultiassay_ov)
 #' #gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1,
@@ -116,19 +116,19 @@ run_genomic_enrich <- function(model_results, species = "hsa",
         0) {
         tmp <- lapply(data, function(x) x[x$cnv_met == "cnv",
             ])
-        enrichment_cnv <- BiocParallel::bplapply(tmp, gINTomics:::.def_enrich,
+        enrichment_cnv <- BiocParallel::bplapply(tmp, .def_enrich,
             species = species, pvalueCutoff = pvalueCutoff,
             pAdjustMethod = pAdjustMethod, qvalueCutoff = qvalueCutoff,
             ont = ont, BPPARAM = BPPARAM, ...)
         tmp <- lapply(data, function(x) x[x$cnv_met == "met",
             ])
-        enrichment_met <- BiocParallel::bplapply(tmp, gINTomics:::.def_enrich,
+        enrichment_met <- BiocParallel::bplapply(tmp, .def_enrich,
             species = species, pvalueCutoff = pvalueCutoff,
             pAdjustMethod = pAdjustMethod, qvalueCutoff = qvalueCutoff,
             ont = ont, BPPARAM = BPPARAM, ...)
         enrichment <- list(cnv = enrichment_cnv, met = enrichment_met)
     } else {
-        enrichment <- BiocParallel::bplapply(data, gINTomics:::.def_enrich,
+        enrichment <- BiocParallel::bplapply(data, .def_enrich,
             species = species, pvalueCutoff = pvalueCutoff,
             pAdjustMethod = pAdjustMethod, qvalueCutoff = qvalueCutoff,
             ont = ont, BPPARAM = BPPARAM, ...)
@@ -157,8 +157,8 @@ run_genomic_enrich <- function(model_results, species = "hsa",
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data(ov_test_tcga_omics)
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:200,])
+#' data(mmultiassay_ov)
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:200,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' #multiomics_integration <- run_multiomics(mmultiassay_ov)
 #' #run_tf_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05,
@@ -203,7 +203,7 @@ run_tf_enrich <- function(model_results, species = "hsa", pvalueCutoff = 0.1,
         tmp <- lapply(names(tmp2), function(y) x[x$cov == y,
             ])
         names(tmp) <- names(tmp2)
-        enrichment <- BiocParallel::bplapply(tmp, gINTomics:::.def_enrich,
+        enrichment <- BiocParallel::bplapply(tmp, .def_enrich,
             species = species, pvalueCutoff = pvalueCutoff,
             pAdjustMethod = pAdjustMethod, qvalueCutoff = qvalueCutoff,
             ont = ont, BPPARAM = BPPARAM)

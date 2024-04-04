@@ -8,8 +8,8 @@
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' # data_table <- extract_model_res(multiomics_integration)
@@ -43,8 +43,8 @@ plot_network <- function(data_table,
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' # data_table <- extract_model_res(multiomics_integration)
@@ -84,8 +84,8 @@ plot_venn <- function(data_table,
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' data_table <- extract_model_res(multiomics_integration)
@@ -130,8 +130,8 @@ plot_volcano <- function(data_table,
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' gene_cnv_matrix <- t(as.matrix(assay(mmultiassay_ov[["cnv_data"]])))
 #' gene_exp_matrix <- t(as.matrix(assay(mmultiassay_ov[["gene_exp"]])))
@@ -192,8 +192,8 @@ plot_ridge <- function(data_table,
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' # data_table <- extract_model_res(multiomics_integration)
@@ -310,8 +310,8 @@ plot_heatmap <- function(multiomics_integration,
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' # data_table <- extract_model_res(multiomics_integration)
@@ -367,8 +367,8 @@ plot_chr_distribution <- function(data_table,
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' # data_table <- extract_model_res(multiomics_integration)
@@ -423,11 +423,14 @@ plot_tf_distribution <- function(data_table,
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' #multiomics_integration <- run_multiomics(data = mmultiassay_ov)
-#' #gen_enr <- run_genomic_enrich(multiomics_integration, qvalueCutoff = 1, pvalueCutoff = 0.05, pAdjustMethod = "none")
+#' #gen_enr <- run_genomic_enrich(multiomics_integration,
+#' #                              qvalueCutoff = 1,
+#' #                              pvalueCutoff = 0.05,
+#' #                              pAdjustMethod = "none")
 #' #dot_plotly(gen_enr, title = "Enrichment Analysis",showCategory = 10)
 #' @export
 dot_plotly <- function(enrich_result,

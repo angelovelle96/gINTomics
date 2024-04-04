@@ -26,8 +26,8 @@ plotting ridge
 \examples{
 # Example usage:
 library(MultiAssayExperiment)
-data("ov_test_tcga_omics")
-tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+data("mmultiassay_ov")
+tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 gene_cnv_matrix <- t(as.matrix(assay(mmultiassay_ov[["cnv_data"]])))
 gene_exp_matrix <- t(as.matrix(assay(mmultiassay_ov[["gene_exp"]])))

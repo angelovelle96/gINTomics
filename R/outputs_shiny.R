@@ -1434,7 +1434,8 @@
     ans <- r_bg(
         func = FFUN,
         args = args,
-        supervise = TRUE
+        supervise = TRUE,
+        package = "gINTomics"
     )
     return(ans)
 }
@@ -1464,8 +1465,8 @@
 #' @examples
 #' # Example usage:
 #' library(MultiAssayExperiment)
-#' data("ov_test_tcga_omics")
-#' tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+#' data("mmultiassay_ov")
+#' tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 #' mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 #' # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 #' # app <- run_shiny(multiomics_integration)

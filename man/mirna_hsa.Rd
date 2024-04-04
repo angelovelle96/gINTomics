@@ -8,7 +8,7 @@ Dataset containing lastly definition of miRNAs (Names, Accessions,
 Sequences, Families and others) from different miRBase versions
 (From miRBase version 6 to version 22).}
 \usage{
-data(miRBase_conversion)
+data(mirna_hsa)
 "mirna_hsa"
 }
 \value{
@@ -22,6 +22,6 @@ Sequences, Families and others) from different miRBase versions
 }
 \examples{
 # example code
-data(miRBase_conversion)
+data(mirna_hsa)
 head(mirna_hsa)
 }

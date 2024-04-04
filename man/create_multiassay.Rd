@@ -38,7 +38,7 @@ This function will generate a proper MultiAssayExperiment suitable for the
 \examples{
 # Example usage:
 library(MultiAssayExperiment)
-data('ov_test_tcga_omics')
+data('mmultiassay_ov')
 gene_exp_matrix <- as.matrix(assay(mmultiassay_ov[['gene_exp']]))
 miRNA_exp_matrix <- as.matrix(assay(mmultiassay_ov[['miRNA_exp']]))
 meth_matrix <- as.matrix(assay(mmultiassay_ov[['methylation']]))

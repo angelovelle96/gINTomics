@@ -9,7 +9,7 @@ To install this package:
 ``` r
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install("angelovelle96/gINTomics")
+BiocManager::install("gINTomics")
 
 #devtools::install_github("angelovelle96/gINTomics")
 ```
@@ -29,7 +29,7 @@ The package contains a pre built MultiAssayExperiment, anyway in this section we
 # loading packages
 library(gINTomics)
 library(MultiAssayExperiment)
-data("ov_test_tcga_omics")
+data("mmultiassay_ov")
 ``` 
 
 Here we will extract the single omics from the MultiAssayExperiment

@@ -9,7 +9,7 @@ output: html_document
 ```{r}
 
 mirna_hsa <- read.table("data/miRBase_conversion.tsv", sep = "\t", header = T)
-#save(mirna_hsa, file = "data/miRBase_conversion.rda")
+#save(mirna_hsa, file = "data/mirna_hsa.rda")
 
 
 ```

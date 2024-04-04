@@ -7,11 +7,11 @@
 #' @docType data
 #' @name mmultiassay_ov
 #' @return An object of class \linkS4class{MultiAssayExperiment}.
-#' @usage data(ov_test_tcga_omics)
+#' @usage data(mmultiassay_ov)
 #' "mmultiomics_ov"
 #' @examples
 #' # example code
-#' data(ov_test_tcga_omics)
+#' data(mmultiassay_ov)
 #' mmultiassay_ov
 NULL
 
@@ -22,10 +22,10 @@ NULL
 #' @docType data
 #' @name mirna_hsa
 #' @return An object of class \linkS4class{data.frame}.
-#' @usage data(miRBase_conversion)
+#' @usage data(mirna_hsa)
 #' "mirna_hsa"
 #' @examples
 #' # example code
-#' data(miRBase_conversion)
+#' data(mirna_hsa)
 #' head(mirna_hsa)
 NULL

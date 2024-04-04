@@ -21,8 +21,8 @@ plotting venn
 \examples{
 # Example usage:
 library(MultiAssayExperiment)
-data("ov_test_tcga_omics")
-tmp <- lapply(mmultiassay_ov@ExperimentList, function(x) x[1:20,])
+data("mmultiassay_ov")
+tmp <- lapply(experiments(mmultiassay_ov), function(x) x[1:20,])
 mmultiassay_ov <- MultiAssayExperiment(experiments = tmp)
 # multiomics_integration <- run_multiomics(data = mmultiassay_ov)
 # data_table <- extract_model_res(multiomics_integration)
