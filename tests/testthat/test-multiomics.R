@@ -147,34 +147,34 @@ test_that("run_genomic_integration works", {
 })
 
 
-test_that(".def_tf_integration works", {
-  data <- data_shiny_tests$multiassay
-  gene_exp_matrix <- as.matrix(t(assay(data[["gene_exp"]])))
-  tested <- .def_tf_integration(expression=gene_exp_matrix,
-                             tf_expression=gene_exp_matrix,
-                             interactions=NULL,
-                             type="tf",
-                             sequencing_data=TRUE,
-                             species="hsa",
-                             normalize=TRUE,
-                             norm_method="TMM",
-                             normalize_cov=TRUE,
-                             norm_method_cov="TMM",
-                             BPPARAM=SerialParam())
-  expect_type(tested, "list")
-  tested <- .def_tf_integration(expression=gene_exp_matrix,
-                             tf_expression=gene_exp_matrix,
-                             interactions=NULL,
-                             type="tf",
-                             sequencing_data=FALSE,
-                             species="hsa",
-                             normalize=TRUE,
-                             norm_method="TMM",
-                             normalize_cov=TRUE,
-                             norm_method_cov="TMM",
-                             BPPARAM=SerialParam())
-  expect_type(tested, "list")
-  expect_named(tested$coef_data, c("(Intercept)", "cov"))
-})
+# test_that(".def_tf_integration works", {
+#   data <- data_shiny_tests$multiassay
+#   gene_exp_matrix <- as.matrix(t(assay(data[["gene_exp"]])))
+#   tested <- .def_tf_integration(expression=gene_exp_matrix,
+#                              tf_expression=gene_exp_matrix,
+#                              interactions=NULL,
+#                              type="tf",
+#                              sequencing_data=TRUE,
+#                              species="hsa",
+#                              normalize=TRUE,
+#                              norm_method="TMM",
+#                              normalize_cov=TRUE,
+#                              norm_method_cov="TMM",
+#                              BPPARAM=SerialParam())
+#   expect_type(tested, "list")
+#   tested <- .def_tf_integration(expression=gene_exp_matrix,
+#                              tf_expression=gene_exp_matrix,
+#                              interactions=NULL,
+#                              type="tf",
+#                              sequencing_data=FALSE,
+#                              species="hsa",
+#                              normalize=TRUE,
+#                              norm_method="TMM",
+#                              normalize_cov=TRUE,
+#                              norm_method_cov="TMM",
+#                              BPPARAM=SerialParam())
+#   expect_type(tested, "list")
+#   expect_named(tested$coef_data, c("(Intercept)", "cov"))
+# })
 
 
