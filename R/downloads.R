@@ -1,6 +1,5 @@
 # Download miRNAs targets
 #' @importFrom OmnipathR import_mirnatarget_interactions
-#' @importFrom miRBaseConverter getAllMiRNAs
 #' @importFrom stats setNames
 .download_mirna_target <- function(miRNAs,
                                    species = "hsa",
@@ -12,7 +11,7 @@
                        download"))
     org <- setNames(c(9606, 10090, 10116), c("hsa", "mmu", "rno"))
     mirna_target <- import_mirnatarget_interactions(organism = org[species])
-    tmp <- getAllMiRNAs(species = species)
+    tmp <- mirna_id[[species]]
     rownames(tmp) <- tmp$Accession
     mirna_target$mirbase <- tmp[mirna_target$source, "Name"]
     mirna_target$mirbase[is.na(mirna_target$mirbase)] <-
@@ -31,7 +30,6 @@
 }
 # Download TF/miRNA interactions
 #' @importFrom OmnipathR import_tf_mirna_interactions
-#' @importFrom miRBaseConverter getAllMiRNAs
 #' @importFrom stats setNames
 .download_tf_mirna <- function(miRNAs,
                                species = "hsa",
@@ -42,7 +40,7 @@
     org <- setNames(c(9606, 10090, 10116), c("hsa", "mmu", "rno"))
     tf_mirna <- import_tf_mirna_interactions(organism = org[species],
                                              resources = "TransmiR")
-    tmp <- getAllMiRNAs(species = species)
+    tmp <- mirna_id[[species]]
     rownames(tmp) <- tmp$Accession
     tf_mirna$mirbase <- tmp[tf_mirna$target, "Name"]
     tf_mirna$mirbase[is.na(tf_mirna$mirbase)] <-
