@@ -206,7 +206,8 @@
         dataset2 <- TxDb.Mmusculus.UCSC.mm10.knownGene
     }
     genes <- unique(genes)
-    all_pos <- genes(dataset2)
+    all_pos <- genes(dataset2, single.strand.genes.only=FALSE)
+    all_pos <- unlist(all_pos)
     all_genes <- select(x = dataset,
                         keys = names(all_pos),
                         keytype = "ENTREZID",
