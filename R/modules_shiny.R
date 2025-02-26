@@ -74,7 +74,8 @@
                             output,
                             session,
                             data_table,
-                            deg = FALSE) {
+                            deg = FALSE,
+                            degs = NULL) {
     nnet <- .prepare_network(data_table)
     if (is.null(nnet)) {
         return(NULL)
@@ -84,7 +85,8 @@
         input = input,
         output = output,
         network_data = nnet,
-        deg = deg
+        deg = deg,
+        degs = degs
     )
     .render_reactive_network(
         reactive_network = reactive_network,

@@ -473,8 +473,10 @@ setMethod("extract_model_res", "MultiClass", function(model_results,
     data <- extract_model_res(model_results, outliers = outliers,
         species = species, genes_info = genes_info, filters = filters,
         ...)
-    data$deg <- rep(FALSE, nrow(data))
-    data$deg[data$response %in% deg] <- TRUE
+    deg <- lapply(deg, function(x) rownames(x)[x$FDR<0.1])
+    for (i in names(deg)) {
+      data[[paste0("deg_", i)]] <- data$response %in% deg[[i]]
+    }
     return(data)
 })
 #' @rdname extract_model_res
@@ -485,14 +487,6 @@ setMethod("extract_model_res", "MultiOmics",
         genes_info = NULL, ...) {
         tmp <- model_results
         if (is.null(genes_info)) {
-            if (names(model_results[[1]])[length(model_results[[1]])] !=
-                "data") {
-                tmp <- unlist(tmp, recursive = FALSE)
-                tmp2 <- names(tmp)[-grep("\\.deg$",
-                  names(tmp))]
-                tmp <- lapply(tmp2, function(x) tmp[[x]])
-                names(tmp) <- tmp2
-            }
             tmp <- lapply(tmp, function(x) {
                 ans <- cbind(response = rownames(x$coef_data),
                   x$coef_data)
@@ -519,9 +513,18 @@ setMethod("extract_model_res", "MultiOmics",
             omics = x))
         names(data) <- names(tmp)
         data <- rbind.fill(data)
-        if ("deg" %in% colnames(data)) {
-            deg <- unique(data$response[data$deg])
-            data$deg[data$response %in% deg] <- TRUE
+        tmp <- colnames(data)[grep("^deg_", colnames(data))]
+        if(length(tmp)>0){
+          tmp2 <- lapply(tmp, function(x){
+            ans <- data.frame(id = data$response,
+                              deg = data[[x]])
+            ans <- ans[!is.na(ans$deg),]
+            ans <- ans$id[ans$deg]
+          })
+          tmp2 <- unique(unlist(tmp2))
+          for(i in tmp){
+            data[[i]] <- data$response%in%tmp2
+          }
         }
         return(data)
     })
@@ -547,13 +550,19 @@ setMethod("extract_model_res", "MultiOmics",
 # Finding DEGs
 #' @importFrom edgeR DGEList calcNormFactors estimateGLMCommonDisp
 #' estimateGLMTagwiseDisp glmFit glmLRT topTags
-#' @importFrom limma lmFit eBayes topTable
+#' @importFrom limma lmFit eBayes topTable makeContrasts
 #' @importFrom stats model.matrix
 .find_deg <- function(eexpression, class, RNAseq = TRUE, norm_method = "TMM",
     normalize = TRUE) {
     tmp <- apply(eexpression, 1, function(x) sum(is.na(x)))
     eexpression <- eexpression[tmp == 0, ]
-    design_mat <- model.matrix(~class, data = as.data.frame(t(eexpression)))
+    design_mat <- model.matrix(~ 0 + class)
+    colnames(design_mat) <- gsub("^class", "", colnames(design_mat))
+    condition_names <- colnames(design_mat)
+    contrasts <- combn(condition_names, 2, simplify = FALSE)
+    contrast_matrix <- makeContrasts(contrasts = sapply(contrasts,
+                        function(x) paste(x[1], "-", x[2])),
+                        levels = design_mat)
     if (RNAseq) {
         y <- DGEList(counts = eexpression)
         y <- calcNormFactors(y, method = norm_method)
@@ -562,17 +571,30 @@ setMethod("extract_model_res", "MultiOmics",
         y <- estimateGLMCommonDisp(y, design_mat)
         y <- estimateGLMTagwiseDisp(y, design_mat)
         fit <- glmFit(y, design_mat)
-        lrt <- glmLRT(fit)
-        top <- topTags(lrt, n = nrow(eexpression))$table
+        dge_results <- lapply(1:ncol(contrast_matrix), function(i) {
+          contrast <- contrast_matrix[, i]
+          lrt <- glmLRT(fit, contrast = contrast)
+          topTags(lrt, n = Inf)$table
+        })
+        names(dge_results) <- sapply(contrasts,
+                                     function(x) paste(x[1], "_vs_",
+                                                       x[2], sep=""))
     } else {
         if (normalize)
             eexpression <- t(.data_norm(t(eexpression), norm_method))
         fit <- lmFit(eexpression, design_mat)
-        fit <- eBayes(fit)
-        top <- topTable(fit, number = nrow(eexpression))
-        colnames(top) <- gsub("adj.P.Val", "FDR", colnames(top))
+        fit2 <- contrasts.fit(fit, contrast_matrix)
+        fit2 <- eBayes(fit2)
+        dge_results <- lapply(1:ncol(contrast_matrix), function(i) {
+          ans <- topTable(fit2, coef = i, number = Inf)
+          colnames(ans) <- gsub("adj.P.Val", "FDR", colnames(ans))
+          return(ans)
+        })
+        names(dge_results) <- sapply(contrasts,
+                                     function(x) paste(x[1], "_vs_",
+                                                       x[2], sep=""))
     }
-    return(top)
+    return(dge_results)
 }
 # Setting method for lapply
 #' @importFrom BiocGenerics lapply
@@ -666,5 +688,39 @@ residuals.DGEGLM <- function(object, type = c("deviance", "pearson"), ...) {
         }
     }))
     return(res)
+}
+
+# Find columns for DEGs
+.get_deg_col <- function(data_table) {
+  ans <- colnames(data_table)[
+    grep("deg_", colnames(data_table))]
+  names(ans) <- ans
+  names(ans) <- gsub("deg_", "", names(ans))
+  names(ans) <- gsub("_vs_", " VS ", names(ans))
+  return(ans)
+  
+}
+
+# Extract DEGs info
+#' @importFrom plyr rbind.fill
+.extract_deg_info <- function(multiomics_integration) {
+  degs <- lapply(multiomics_integration, function(x) x$deg)
+  degs <- Filter(Negate(is.null), degs)
+  degs_list <- list()
+  if(length(degs>0)){
+    for (i in seq_along(degs[[1]])) {
+      tmp <- lapply(degs, function(x) {
+        ans <- x[[i]]
+        ans$id <- rownames(ans)
+        return(ans)
+      })
+      tmp <- rbind.fill(tmp)
+      tmp <- tmp[!duplicated(tmp$id),]
+      degs_list[[names(degs[[1]])[i]]] <- tmp
+    }
+    return(degs_list)
+  } else {
+    return(NULL)
+  }
 }
 

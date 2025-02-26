@@ -101,17 +101,9 @@ run_genomic_enrich <- function(model_results, species = "hsa",
         data <- extract_model_res(model_results = model_results)
     }
     data <- data[data$cov != "(Intercept)", ]
-    if ("class" %in% colnames(data)) {
-        tmp <- lapply(unique(data$class), function(x) data[data$class ==
-            x, ])
-        names(tmp) <- unique(data$class)
-        data <- tmp
-    }
-    if (is.data.frame(data)) {
-        tmp <- list()
-        tmp[[1]] <- data
-        data <- tmp
-    }
+    tmp <- list()
+    tmp[[1]] <- data
+    data <- tmp
     if (length(unique(data[[1]]$cnv_met[!is.na(data[[1]]$cnv_met)])) >
         0) {
         tmp <- lapply(data, function(x) x[x$cnv_met == "cnv",
@@ -176,17 +168,9 @@ run_tf_enrich <- function(model_results, species = "hsa", pvalueCutoff = 0.1,
         data <- extract_model_res(model_results = model_results)
     }
     data <- data[data$cov != "(Intercept)", ]
-    if ("class" %in% colnames(data)) {
-        tmp <- lapply(unique(data$class), function(x) data[data$class ==
-            x, ])
-        names(tmp) <- unique(data$class)
-        data <- tmp
-    }
-    if (is.data.frame(data)) {
-        tmp <- list()
-        tmp[[1]] <- data
-        data <- tmp
-    }
+    tmp <- list()
+    tmp[[1]] <- data
+    data <- tmp
     enrichment <- lapply(data, function(x) {
         tmp <- unique(x$cov)
         tmp2 <- lapply(tmp, function(y) {

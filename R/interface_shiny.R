@@ -150,12 +150,6 @@
                         "Venn Diagram",
                         sidebarLayout(
                             sidebarPanel(
-                                selectInput(ns("ClassSelect"),
-                                    "Select Class:",
-                                    choices = unique(
-                                        data_table$class
-                                    )
-                                ),
                                 selectInput(
                                     inputId = ns(
                                         "SignificativityCriteria"
@@ -282,12 +276,6 @@
                         "RidgeLine Plot",
                         sidebarLayout(
                             sidebarPanel(
-                                selectInput(ns3("ClassSelect"),
-                                    "Select Class:",
-                                    choices = unique(
-                                        data_table$class
-                                    )
-                                ),
                                 selectInput(ns3("IntegrationSelect"),
                                     label = "Gene/miRNA:",
                                     choices =
@@ -460,11 +448,6 @@
                             max = 1000,
                             step = 10
                         ),
-                        selectInput(ns("ClassSelect"),
-                            "Select the class:",
-                            choices = unique(data_table$class),
-                            multiple = FALSE
-                        ),
                         selectInput(
                             inputId = ns("SignificativityCriteria"),
                             label = "Significativity criteria:",
@@ -548,11 +531,6 @@
                         ), ns = ns
                     ),
                     selectInput(
-                        inputId = ns("ClassSelect"),
-                        label = "Class:",
-                        choices = unique(data_table$class)
-                    ),
-                    selectInput(
                         inputId = ns("ChrSelect"),
                         label = "Chr:",
                         choices = chr
@@ -620,11 +598,6 @@
                             ]
                         ),
                         selectInput(
-                            inputId = ns("ClassSelect"),
-                            label = "Class:",
-                            choices = unique(data_table$class)
-                        ),
-                        selectInput(
                             inputId = ns("DBSelectEnrich"),
                             label = "Database:",
                             choices = c("go", "kegg")
@@ -660,11 +633,6 @@
             mainPanel(
                 sidebarLayout(
                     sidebarPanel(
-                        selectInput(
-                            inputId = ns("ClassSelect"),
-                            label = "Class:",
-                            choices = unique(data_table$class)
-                        ),
                         selectInput(
                             inputId = ns("DBSelectEnrich"),
                             label = "Database:",
@@ -777,12 +745,6 @@
                                         )
                                 ),
                                 selectInput(
-                                    inputId = ns2("ClassSelect"),
-                                    "Select Class:",
-                                    choices =
-                                        unique(data_table$class)
-                                ),
-                                selectInput(
                                     inputId =
                                         ns2(
                                             "SignificativityCriteria"
@@ -867,11 +829,6 @@
                             )
                         ),
                         selectInput(
-                            inputId = ns("ClassSelect"),
-                            label = "Class:",
-                            choices = unique(data_table$class)
-                        ),
-                        selectInput(
                             inputId = ns("ChrSelect"),
                             label = "Chr:",
                             choices = chr
@@ -937,10 +894,6 @@
                     div(
                         style = "width: 1600px;",
                         inputPanel(
-                            selectInput(ns("ClassSelect"),
-                                label = "Select the Class:",
-                                choices = unique(data_table$class)
-                            ),
                             selectInput(
                                 inputId = ns("SignificativityCriteria"),
                                 label = "Significativity criteria:",
@@ -958,20 +911,20 @@
                                 ), ns = ns
                             ),
                             conditionalPanel(
-                                condition =
-                                  "input.SignificativityCriteria=='FDR'",
-                                sliderInput(ns("FdrRange"),
-                                    "FDR:",
-                                    min = 0,
-                                    max = 1,
-                                    value = c(0.05),
-                                    step = 0.005
-                                )
+                              condition =
+                                "input.SignificativityCriteria=='FDR'",
+                              sliderInput(ns("FdrRange"),
+                                          "FDR:",
+                                          min = 0,
+                                          max = 1,
+                                          value = c(0.05),
+                                          step = 0.005
+                              ), ns = ns
                             ),
                             sliderInput(ns("numInteractions"),
                                 label = "Number of Interactions",
                                 min = 10,
-                                max = nrow(data_table),
+                                max = 1000,
                                 value = 200,
                                 step = 50
                             ),
@@ -1021,9 +974,8 @@
                         sidebarLayout(
                             sidebarPanel(
                                 selectInput(ns("ClassSelect"),
-                                    "Select Class:",
-                                    choices =
-                                        unique(data_table$class)
+                                    "Select Contrast:",
+                                    choices = .get_deg_col(data_table)
                                 ),
                                 selectInput(
                                     inputId =
@@ -1077,6 +1029,10 @@
                                         .change_int_names(
                                             unique(data_table$omics)
                                         )
+                                ),
+                                selectInput(ns2("ClassSelect"),
+                                            "Select Contrast:",
+                                            choices = .get_deg_col(data_table)
                                 ),
                                 conditionalPanel(
                                     condition =
@@ -1157,8 +1113,8 @@
                                 ),
                                 selectInput(
                                     inputId = ns3("ClassSelect"),
-                                    label = "Class:",
-                                    choices = unique(data_table$class)
+                                    label = "Contrast:",
+                                    choices = .get_deg_col(data_table)
                                 ),
                                 selectInput(
                                     inputId = ns3("SignificativityCriteria"),
@@ -1290,9 +1246,8 @@
                             step = 10
                         ),
                         selectInput(ns("ClassSelect"),
-                            "Select the class:",
-                            choices = unique(data_table$class),
-                            multiple = FALSE
+                            "Select the contrast:",
+                            choices = .get_deg_col(data_table)
                         ),
                         selectInput(
                             inputId = ns("SignificativityCriteria"),
@@ -1370,8 +1325,8 @@
                         ),
                         selectInput(
                             inputId = ns("ClassSelect"),
-                            label = "Class:",
-                            choices = unique(data_table$class)
+                            label = "Contrast:",
+                            choices = .get_deg_col(data_table)
                         ),
                         selectInput(
                             inputId = ns("ChrSelect"),
@@ -1440,8 +1395,8 @@
                         style = "width: 1600px;",
                         inputPanel(
                             selectInput(ns("ClassSelect"),
-                                label = "Select the Class:",
-                                choices = unique(data_table$class)
+                                label = "Select the Contrast:",
+                                choices = .get_deg_col(data_table)
                             ),
                             selectInput(
                                 inputId = ns("SignificativityCriteria"),
@@ -1451,7 +1406,7 @@
                             sliderInput(ns("numInteractions"),
                                 label = "Number of Interactions",
                                 min = 10,
-                                max = nrow(data_table),
+                                max = 1000,
                                 value = 200,
                                 step = 50
                             ),
@@ -1536,11 +1491,6 @@
                         label = "Gene/miRNA"
                     ),
                     selectInput(
-                        inputId = ns("ClassSelect"),
-                        choices = unique(data_table$class),
-                        label = "Class"
-                    ),
-                    selectInput(
                         inputId = ns("ChrSelect"),
                         choices = chr,
                         label = "Chromosome"
@@ -1593,19 +1543,14 @@
                               data_table$omics))
                         ),
                         selectInput(
-                            inputId = ns("ClassSelect"),
-                            label = "Class:",
-                            choices = unique(data_table$class)
-                        ),
-                        selectInput(
                             inputId = ns("ChrSelect"),
                             label = "Chr:",
                             choices = chr
                         ),
                         selectInput(
                             inputId = ns("degSelect"),
-                            label = "DEGs:",
-                            choices = c("All", "Only DEGs")
+                            label = "All/DEGs:",
+                            choices = c("All_genes",.get_deg_col(data_table))
                         ),
                         selectInput(
                             inputId = ns("SignificativityCriteria"),

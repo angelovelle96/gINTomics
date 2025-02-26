@@ -10,7 +10,7 @@
     observe({
         output$networkPlot <- renderVisNetwork({
             network_data <- reactive_network()
-            if (nrow(network_data$nodes) == 0) {
+            if (nrow(network_data$nodes) == 0 | is.null(network_data)) {
                 return(NULL)
             }
             network <- .build_network(
@@ -42,7 +42,8 @@
                             network_data,
                             input,
                             output,
-                            deg = FALSE) {
+                            deg = FALSE,
+                            degs = NULL) {
     reactive({
         data_table <- data_table[data_table$omics %in% c(
             "tf_res",
@@ -56,9 +57,6 @@
         fdr <- input$FdrRange
         class <- input$ClassSelect
         ans <- network_data
-        if ("class" %in% colnames(ans$edges)) {
-            ans$edges <- ans$edges[ans$edges$class == class, ]
-        }
         nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
         ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges, ]
         if (significativityCriteria == "pval") {
@@ -67,9 +65,23 @@
             ans$edges <- ans$edges[ans$edges$fdr <= fdr, ]
         }
         if (deg) {
-            tto <- unique(data_table$response[data_table$deg])
+            if(is.null(degs)) return(NULL)
+            tto <- unique(data_table$response[data_table[, class]])
             ans$edges <- ans$edges[ans$edges$to %in% tto, ]
+            degs <- degs[[gsub("deg_", "", class)]]
+            up <- degs[degs$logFC>0,]
+            down <- degs[degs$logFC<0,]
+            ans$nodes$color[ans$nodes$id%in%up$id] <- "#ED5564"
+            ans$nodes$color[ans$nodes$id%in%down$id] <- "#4169E1"
+            ans$legend_nodes$color <- "lightgrey"
+            tmp <- data.frame(
+              label = c("Up", "Down"),
+              shape = "dot",
+              color = c("#ED5564", "#4169E1"))
+            ans$legend_nodes <- rbind(ans$legend_nodes, tmp)
         }
+        ans$edges <- ans$edges[order(abs(ans$edges$coef),
+                                     decreasing = TRUE), ]
         ans$edges <- ans$edges[seq_len(length.out = numInteractions), ]
         nodes_with_edges <- unique(c(ans$edges$from, ans$edges$to))
         ans$nodes <- ans$nodes[ans$nodes$id %in% nodes_with_edges, ]
@@ -79,7 +91,6 @@
         input$numInteractions,
         input$SignificativityCriteria,
         input$PvalRange,
-        input$fdrNetwork,
         input$FdrRange,
         input$ClassSelect
     )
@@ -98,11 +109,8 @@
         pvalRange <- input$PvalRange
         fdrRange <- input$FdrRange
         significativityCriteria <- input$SignificativityCriteria
-        if (deg == FALSE & "gene_genomic_res" %in% unique(data_table$omics)) {
+        if (!deg & "gene_genomic_res" %in% unique(data_table$omics)) {
             data_table <- data_table[data_table$omics == "gene_genomic_res", ]
-            if ("class" %in% colnames(data_table)) {
-                data_table <- data_table[data_table$class == classSelect, ]
-            }
             if (significativityCriteria == "pval") {
                 cnv_sign_genes <- subset(data_table,
                     `cnv_met` == "cnv" & `pval` >= pvalRange[1] &
@@ -131,7 +139,7 @@
                 `met_sign_genes` = met_sign_genes
             )
         }
-        if (deg == FALSE & !"gene_genomic_res" %in% unique(data_table$omics)) {
+        if (!deg & !"gene_genomic_res" %in% unique(data_table$omics)) {
             if ("gene_cnv_res" %in% unique(data_table$omics)) {
                 data_venn <- data_table[data_table$omics == "gene_cnv_res", ]
             }
@@ -139,10 +147,9 @@
                 data_venn <- data_table[data_table$omics == "gene_met_res", ]
             }
         }
-        if (deg == TRUE & "gene_genomic_res" %in% unique(data_table$omics)) {
-            if ("class" %in% colnames(data_table)) {
-                data_table <- data_table[data_table$class == classSelect, ]
-                data_table <- data_table[data_table$deg, ]
+        if (deg & "gene_genomic_res" %in% unique(data_table$omics)) {
+            if (!is.null(data_table[, classSelect])) {
+                data_table <- data_table[data_table[,classSelect], ]
                 if (significativityCriteria == "pval") {
                     cnv_sign_genes <- subset(data_table,
                         cnv_met == "cnv" & pval >= pvalRange[1] &
@@ -174,13 +181,18 @@
                 (return(NULL))
             }
         }
-        if (deg == TRUE & !"gene_genomic_res" %in% unique(data_table$omics)) {
+        if (deg & !"gene_genomic_res" %in% unique(data_table$omics)) {
+          if (!is.null(data_table[, classSelect])) {
+            data_table <- data_table[data_table[,classSelect], ]
             if ("gene_cnv_res" %in% unique(data_table$omics)) {
                 data_venn <- data_table[data_table$omics == "gene_cnv_res", ]
             }
             if ("gene_met_res" %in% unique(data_table$omics)) {
                 data_venn <- data_table[data_table$omics == "gene_met_res", ]
             }
+          }else {
+              (return(NULL))
+          }
         }
         return(data_venn)
     }) %>% bindEvent(
@@ -202,9 +214,10 @@
         integrationSelect <- input$IntegrationSelect
         typeSelect <- input$genomicTypeSelect
         significativityCriteria <- input$SignificativityCriteria
+        classSelect <- input$ClassSelect
         pvalRange <- input$PvalRange
         fdrRange <- input$FdrRange
-        if (deg) data_table <- data_table[data_table$deg, ]
+        if (deg) data_table <- data_table[data_table[,classSelect], ]
         if (!"class" %in% colnames(data_table)) data_table$class <- data_table$
           omics
         data_table <- data_table[data_table$omics == integrationSelect, ]
@@ -229,7 +242,8 @@
         input$genomicTypeSelect,
         input$SignificativityCriteria,
         input$PvalRange,
-        input$FdrRange
+        input$FdrRange,
+        input$ClassSelect
     )
 }
 
@@ -259,32 +273,22 @@
         pvalRange <- input[[ns("PvalRange")]]
         fdrRange <- input[[ns("FdrRange")]]
         scale <- input[[ns("scaleHeatmap")]]
-        if ("class" %in% colnames(data_table) & deg == FALSE) {
-            df_heatmap <- multiomics_integration[[integrationSelect]][[
-                classSelect
-            ]]$data$response_var
-            data_table <- data_table[data_table$omics == integrationSelect, ]
-            data_table <- data_table[data_table$class == classSelect, ]
-        }
-        if ("class" %in% colnames(data_table) & deg == TRUE) {
-            df_heatmap <- multiomics_integration[[integrationSelect]][[
-                classSelect
-            ]]$data$response_var
-            data_table <- data_table[data_table$omics == integrationSelect, ]
-            data_table <- data_table[data_table$class == classSelect, ]
-            data_table <- data_table[data_table$deg, ]
-            df_heatmap <- df_heatmap[, unique(data_table$response)]
-        }
-        if (!"class" %in% colnames(data_table)) {
-            df_heatmap <- multiomics_integration[[
-                integrationSelect
-            ]]$data$response_var
-            data_table <- data_table[data_table$omics == integrationSelect, ]
-        }
-        if (is.null(df_heatmap)) {
+        if (length(.get_deg_col(data_table))==0 & deg) {
             return(NULL)
         }
-        if (!"class" %in% colnames(data_table) & deg == TRUE) {
+        if (!deg) {
+            df_heatmap <- multiomics_integration[[
+              integrationSelect]]$data$response_var
+            data_table <- data_table[data_table$omics == integrationSelect, ]
+        }
+        if (deg) {
+            df_heatmap <- multiomics_integration[[
+              integrationSelect]]$data$response_var
+            data_table <- data_table[data_table$omics == integrationSelect, ]
+            data_table <- data_table[data_table[,classSelect], ]
+            df_heatmap <- df_heatmap[, unique(data_table$response)]
+        }
+        if (is.null(df_heatmap)) {
             return(NULL)
         }
         df_heatmap_t <- t(as.matrix(df_heatmap))
@@ -379,9 +383,7 @@
         pvalRange <- input$PvalRange
         fdrRange <- input$FdrRange
         typeSelect <- input$genomicTypeSelect
-        if (deg) df <- df[df$deg, ]
-        if ("class" %in% colnames(data_table)) df <- df[df$class ==
-                                                          classSelect, ]
+        if (deg) df <- df[df[,classSelect], ]
         if (integrationSelect == "gene_genomic_res") {
             df <- df[df$cnv_met == typeSelect, ]
             df <- df[!is.na(df$cnv_met), ]
@@ -457,12 +459,9 @@
         if (integrationSelect == "gene_genomic_res") {
             data_table <- data_table[data_table$cnv_met == typeSelect, ]
         }
-        if (deg == TRUE) data_table <- data_table[data_table$deg, ]
+        if (deg) data_table <- data_table[data_table[, classSelect], ]
         if (chrSelect != "All") {
             data_table <- data_table[data_table$chr_cov == chrSelect, ]
-        }
-        if ("class" %in% colnames(data_table)) {
-            data_table <- data_table[data_table$class == classSelect, ]
         }
         if (table) {
             if (significativityCriteria == "pval") {
@@ -532,17 +531,13 @@
                 ,
                 colnames(data_table) %in% c(
                     "response", "cov",
-                    "pval", "fdr", "chr_cov",
-                    "deg", "class"
+                    "pval", "fdr", "chr_cov", classSelect
                 )
             ]
-            if ("class" %in% colnames(data_table)) {
-                data_table <- data_table[data_table$class == classSelect, ]
-            }
+            if (deg) data_table <- data_table[data_table[, classSelect], ]
             if (nrow(data_table) == 0) {
                 return(NULL)
             }
-            if (deg) data_table <- data_table[data_table$deg, ]
             if (significativityCriteria == "pval") {
                 data_table <- data_table[data_table$pval >= pvalRange[1] &
                     data_table$pval <= pvalRange[2], ]
@@ -584,10 +579,6 @@
         data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
 
         data_table <- data_table[data_table$omics == input$IntegrationSelect, ]
-        if ("class" %in% colnames(data_table)) {
-            data_table <- data_table[data_table$class == input$ClassSelect, ]
-        }
-
         if (input$SignificativityCriteria == "pval") {
             data_table <- data_table[data_table$pval >= input$PvalRange[1] &
                 data_table$pval <= input$PvalRange[2], ]
@@ -595,8 +586,8 @@
             data_table <- data_table[data_table$fdr >= input$FdrRange[1] &
                 data_table$fdr <= input$FdrRange[2], ]
         }
-        if (input$degSelect == "Only DEGs") {
-            data_table <- data_table[data_table$deg, ]
+        if (input$degSelect!="All_genes") {
+            data_table <- data_table[data_table[, input$degSelect], ]
         }
         if (input$ChrSelect != "All") {
             data_table <- data_table[data_table$chr_cov == input$ChrSelect, ]
@@ -642,13 +633,12 @@
         if (bg_enrich$is_alive()) {
             invalidateLater(millis = 1000, session = session)
         }
-        class <- input$ClassSelect
         db <- input$DBSelectEnrich
         type <- input$genomicTypeSelect
         if (!bg_enrich$is_alive()) {
             data <- bg_enrich$get_result()
+            class <- 1
             if (sum(c("cnv", "met") %in% names(data)) == 2) {
-                if (!class %in% names(data[[type]])) class <- 1
                 ans <- data[[type]][[class]][[db]]
                 if (is.null(ans)) {
                     return(NULL)
@@ -656,7 +646,6 @@
                 ans2 <- dot_plotly(ans)
                 ans <- list(plot = ans2, table = ans@result)
             } else {
-                if (!class %in% names(data)) class <- 1
                 ans <- data[[class]][[db]]
                 if (is.null(ans)) {
                     return(NULL)
@@ -679,11 +668,10 @@
         if (bg_enrich$is_alive()) {
             invalidateLater(millis = 1000, session = session)
         }
-        class <- input$ClassSelect
         db <- input$DBSelectEnrich
         if (!bg_enrich$is_alive()) {
             data <- bg_enrich$get_result()
-            if (!class %in% names(data)) class <- 1
+            class <- 1
             tf <- names(data[[class]])
             ans <- lapply(tf, function(x) {
                 ans <- data[[class]][[x]][[db]]
@@ -707,8 +695,6 @@
 #' @importFrom dplyr %>%
 .prepare_reactive_circos <- function(data, input, output) {
     reactive({
-        if ("class" %in% colnames(data)) data <- data[data$class ==
-                                                        input$ClassSelect, ]
         gr <- .circos_preprocess(data = data)
         tracks <- .create_tracks(data = data, gr = gr)
         width <- 800
@@ -740,7 +726,6 @@
 
         return(arranged_view)
     }) %>% bindEvent(
-        input$ClassSelect,
         input$layout,
         input$circosType,
         input$ChrSelect

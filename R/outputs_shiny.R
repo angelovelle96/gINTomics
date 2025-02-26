@@ -32,7 +32,7 @@
     target_list <- unique(c(target_list, target_list2))
     nodes$label <- nodes$id
     nodes$shape <- ifelse(nodes$id %in% tf_list,
-        "diamond",
+        "box",
         ifelse(nodes$id %in% mirna_list,
             "triangle",
             ifelse(nodes$id %in% target_list,
@@ -57,12 +57,7 @@
     edges$width <- abs(edges$coef) * 10
     edges$width[edges$width > 40] <- 40
     edges$color <- ifelse(edges$coef > 0,
-        "#4169E1",
-        ifelse(edges$coef < 0,
-            "#ED5564",
-            "black"
-        )
-    )
+        "#ED5564","#4169E1")
     edges$length <- 500
     edges$pval <- round(edges$pval, 3)
     edges$fdr <- round(edges$fdr, 3)
@@ -81,7 +76,7 @@
             "miRNA"
         ),
         shape = c(
-            "diamond",
+            "box",
             "circle",
             "triangle"
         ),
@@ -94,17 +89,14 @@
 
     legend_edges <- data.frame(
         color = c(
-            "#4169E1",
             "#ED5564",
-            "black"
+            "#4169E1"
         ),
         label = c(
             "UPregulate",
-            "DOWNregulate",
-            "no-effect"
+            "DOWNregulate"
         ),
         arrows = c(
-            "to",
             "to",
             "to"
         )
@@ -1491,6 +1483,7 @@ run_shiny <- function(multiomics_integration) {
     data <- extract_model_res(multiomics_integration)
     data <- .shiny_preprocess(data)
     data_table <- data$data_table
+    degs <- .extract_deg_info(multiomics_integration)
     ui <- .create_ui(data_table)
     server <- function(input, output, session) {
         # ---------------------- NETWORK SERVERS -----------------------------
@@ -1501,7 +1494,8 @@ run_shiny <- function(multiomics_integration) {
         callModule(.server_network,
             id = "network_deg",
             data_table = data_table,
-            deg = TRUE
+            deg = TRUE,
+            degs = degs
         )
 
         ### ------------------------ VENN SERVERS ----------------------
