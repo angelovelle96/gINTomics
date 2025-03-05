@@ -387,6 +387,7 @@ run_cnv_integration <- function(expression,
               x[x$FDR <= 0.1,])
         }
         cnv_res <- new("MultiClass", c(cnv_res, deg = list(deg)))
+        attr(cnv_res, "Class") <- class
     }
     return(cnv_res)
 }
@@ -512,6 +513,7 @@ run_met_integration <- function(expression,
           x[x$FDR <= 0.1,])
       }
       met_res <- new("MultiClass", c(met_res, deg = list(deg)))
+      attr(met_res, "Class") <- class
     }
     return(met_res)
 }
@@ -698,6 +700,7 @@ run_genomic_integration <- function(expression,
           x[x$FDR <= 0.1,])
       }
       gen_res <- new("MultiClass", c(gen_res, deg = list(deg)))
+      attr(gen_res, "Class") <- class
     }
     return(gen_res)
 }
@@ -888,6 +891,7 @@ run_tf_integration <- function(expression,
           x[x$FDR <= 0.1,])
       }
       tf_res <- new("MultiClass", c(tf_res, deg = list(deg)))
+      attr(tf_res, "Class") <- class
     }
     return(tf_res)
 }
