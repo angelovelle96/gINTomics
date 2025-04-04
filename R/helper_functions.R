@@ -724,3 +724,35 @@ residuals.DGEGLM <- function(object, type = c("deviance", "pearson"), ...) {
   }
 }
 
+
+# Get filtered Gene expression
+#' @importFrom BiocParallel SerialParam
+.get_mo_filtered_genexp <- function(multiomics,
+                                    BPPARAM = SerialParam(),
+                                    run_cnv=T,
+                                    run_met=T){
+  
+    if("gene_genomic_res"%in%names(multiomics)){
+        ans_cnv <- NULL
+        ans_met <- NULL
+        met <- multiomics$gene_genomic_res$data$covariates
+        cnv <- met[, grep("_cnv$", colnames(met))]
+        met <- met[, grep("_met$", colnames(met))]
+        colnames(met) <- gsub("_met$", "", colnames(met))
+        colnames(cnv) <- gsub("_cnv$", "", colnames(cnv))
+        geneExpr <- mmultiomics$gene_genomic_res$data$response_var
+        if(run_cnv) ans_cnv <- run_cnv_integration(geneExpr, cnv, BPPARAM = BPPARAM)
+        if(run_met) ans_met <- run_met_integration(geneExpr, met, BPPARAM = BPPARAM)
+        ans = list(res_expr_cnv = ans_cnv$residuals,
+                   res_expr_met = ans_met$residuals)
+        cclass <- attr(multiomics$gene_genomic_res, "Class")
+        if(!is.null(cclass)) attr(ans, "Class") <- cclass
+        return(ans)
+        
+    }
+  
+}
+
+
+
+

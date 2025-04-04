@@ -689,6 +689,7 @@
     })
 }
 
+
 # Prepare Reactive Circos Plot
 #' @importFrom shiny.gosling arrange_views
 #' @importFrom shiny reactive bindEvent
@@ -731,3 +732,189 @@
         input$ChrSelect
     )
 }
+
+
+# start Diffmet 
+.diffMet_start <- function(input,
+                           status,
+                           session,
+                           multiomics,
+                           mmultiomics_file,
+                           pid_file,
+                           datafile,
+                           logfile,
+                           child_pids
+                           ){
+
+  observeEvent(input$start, {
+    status$text <- "Calcolo in corso..."
+    session$sendCustomMessage("disableButton", "DiffMet_deg-start")
+    session$sendCustomMessage("enableButton", "DiffMet_deg-stop")
+    saveRDS(multiomics, mmultiomics_file)
+    file.create(pid_file)
+    num_cores <- input$num_cores
+    vfile <- c(
+      'pid <- Sys.getpid()',
+      paste0('fileConn <- file(\"', pid_file, '\")'),
+      'writeLines(as.character(pid), fileConn)',
+      'close(fileConn)',
+      'library(BiocParallel)',
+      'library(gINTomics)',
+      paste0('mmultiomics <- readRDS(\"', mmultiomics_file, '\")'),
+      paste0('bpparam <- MulticoreParam(', num_cores, ')'),
+      paste0('result <- gINTomics:::.get_mo_filtered_genexp(mmultiomics, BPPARAM = bpparam, run_met=F)'),
+      paste0('saveRDS(result, \"', datafile, '\")'),
+      'on.exit({',
+      '  rm(mmultiomics, result, bpparam)',
+      '  gc()',
+      '})',
+      'rm(list = ls())',
+      'gc()',
+      paste0('fileConn <- file(\"', logfile, '\")'),
+      'writeLines(\"COMPLETED\", fileConn)',
+      'close(fileConn)'
+    )
+    scriptfile <- tempfile(fileext = ".R")
+    writeLines(vfile, scriptfile)
+    if (Sys.info()['sysname'] == "Windows") {
+      system_cmd <- paste0("start /B ", Sys.getenv("R_HOME"), "/bin/Rscript ", scriptfile)
+    } else {
+      system_cmd <- paste0(Sys.getenv("R_HOME"), "/bin/Rscript ", scriptfile, " &")
+    }
+    system(system_cmd)
+    Sys.sleep(2)
+    main_pid <- as.numeric(readLines(pid_file))
+    child_pids$main_pid <- main_pid
+    print(paste("PID principale:", main_pid))
+  })
+  
+  }
+  
+  
+
+# stop Diffmet 
+.diffMet_stop <- function(input,
+                           status,
+                           session,
+                           mmultiomics_file,
+                           pid_file,
+                           datafile,
+                           logfile,
+                           child_pids
+){
+  
+  observeEvent(input$stop, {
+    status$text <- "Interruzione in corso..."
+    
+    if (!is.null(child_pids$main_pid)) {
+      if (.Platform$OS.type == "unix") {
+        child_pids_list <- system(paste("pgrep -P", child_pids$main_pid), intern = TRUE)
+        child_pids$child_pids <- as.numeric(child_pids_list)
+        
+        if (length(child_pids$child_pids) > 0) {
+          print(paste("PID figli trovati:", paste(child_pids$child_pids, collapse = ", ")))
+        } else {
+          print("Nessun PID figlio trovato.")
+        }
+        
+        if (length(child_pids$child_pids) > 0) {
+          child_pids2 <- isolate(child_pids$child_pids)  
+          print(paste("Terminando processo figlio PID:", child_pids2[1]))
+          system(paste("kill", child_pids2[1]))
+        }
+        print(paste("Terminando processo principale PID:", child_pids$main_pid))
+        system(paste("kill", child_pids$main_pid))
+        Sys.sleep(2)
+        
+        for (pid in c(child_pids$main_pid, child_pids$child_pids)) {
+          if (system(paste("ps -p", pid), ignore.stdout = TRUE, ignore.stderr = TRUE) == 0) {
+            print(paste("Forzando la chiusura del processo PID:", pid))
+            system(paste("kill -9", pid))
+          }
+        }
+      } else if (Sys.info()['sysname'] == "Windows") {
+        print(paste("Terminando processo principale PID su Windows:", child_pids$main_pid))
+        system(paste("taskkill /PID", child_pids$main_pid, "/F"))
+        Sys.sleep(2)
+      }
+      session$sendCustomMessage("enableButton", "DiffMet_deg-start")
+      session$sendCustomMessage("disableButton", "DiffMet_deg-stop")
+      status$text <- "Calcolo interrotto!"
+    } else {
+      print("Errore: Nessun PID salvato, impossibile terminare il processo!")
+    }
+      gc()
+      unlink(pid_file)
+      unlink(logfile)
+      unlink(datafile)
+      unlink(mmultiomics_file)
+      unlink(pid_file)
+  })
+  
+}
+
+# MethylMix observer
+.reactive_methylmix <- function(input,
+                               result_data,
+                               multiomics,
+                               session,
+                               data,
+                               cclass){
+  
+  observeEvent(list(input$class1, input$class2), {
+    disable("genes")
+    req(input$class1, input$class2)
+    if(input$class1==input$class2) return(NULL)
+    cnv_residuals <- result_data$res_expr_cnv
+    if("gene_genomic_res"%in%names(multiomics)){
+      tmp <- multiomics$gene_genomic_res$data$covariates
+      meth_data <- tmp[, grep("_met$", colnames(tmp))]
+      colnames(meth_data) <- gsub("_met$", "", colnames(meth_data))
+      }
+    if("gene_met_res"%in%names(multiomics)){
+      meth_data <- multiomics$gene_met_res$data$covariates
+      colnames(meth_data) <- gsub("_cov$", "", colnames(meth_data))
+      }
+    message(paste("Computing", as.character(input$class1)))
+    MethylMixResults <- MethylMix(t(meth_data[names(cclass)[cclass==input$class1],]),
+                                  as.matrix(cnv_residuals[,names(cclass)[cclass==input$class1]]),
+                                  t(meth_data[names(cclass)[cclass==input$class2],]))
+    message(paste("Done", as.character(input$class1)))
+    tmp <- list(MethylMixResults=MethylMixResults,
+                cnv_residuals=cnv_residuals,
+                meth_data=meth_data,
+                cclass=cclass
+    )
+    data(tmp)
+    enable("genes")
+    updateSelectInput(session, "genes", choices = names(MethylMixResults$Models), selected = names(MethylMixResults$Models)[1])
+  })
+}
+
+# MethylMix plots observer
+.reactive_methylmix_plots <- function(input,
+                                      session,
+                                      data,
+                                      output){
+  
+  observeEvent(list(input$genes, data()), {
+    req(input$genes, data())
+    MethylMixResults <- data()$MethylMixResults
+    meth_data <- data()$meth_data
+    cnv_residuals <- data()$cnv_residuals
+    cclass <- data()$cclass
+    message(paste("Plotting", as.character(input$genes)))
+    plots <- MethylMix_PlotModel(input$genes, MethylMixResults,
+                                 t(meth_data[names(cclass)[cclass==input$class1],]),
+                                 as.matrix(cnv_residuals[,names(cclass)[cclass==input$class1]]),
+                                 t(meth_data[names(cclass)[cclass==input$class2],]))
+    message(paste("Plotting2", as.character(input$genes)))
+    output$plot1 <- renderPlot({plots$MixtureModelPlot})
+    output$plot2 <- renderPlot({plots$CorrelationPlot})
+    output$table <- renderDataTable({as.data.frame(MethylMixResults$MethylationDrivers)})
+  })
+  
+  
+}
+
+  

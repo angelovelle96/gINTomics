@@ -68,6 +68,12 @@
                 ),
                 menuSubItem("Network",
                     tabName = "networkDEGs"
+                ),
+                menuSubItem("Differential Methylation",
+                            tabName = "DiffMetDEGs"
+                ),
+                menuSubItem("Differential CNV",
+                            tabName = "DiffCNVDEGs"
                 )
             ),
             menuItem("Complete Integration",
@@ -1454,6 +1460,116 @@
     )
 }
 
+
+#  Differential methylation for class comparison
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#'  mainPanel sidebarPanel div verbatimTextOutput numericInput singleton 
+#'  plotOutput
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
+#' @importFrom DT dataTableOutput
+#' @importFrom parallel detectCores
+#' @importFrom shinyjs useShinyjs
+.gint_subItem_DiffMetDEGs <- function(data_table) {
+  ns <- NS("DiffMet_deg")
+  
+  tabItem(
+    tabName = "DiffMetDEGs",
+    fluidRow(
+      singleton(tags$head(tags$script(HTML('
+      Shiny.addCustomMessageHandler("disableButton", function(id) {
+        $("#" + id).prop("disabled", true);
+      });
+      Shiny.addCustomMessageHandler("enableButton", function(id) {
+        $("#" + id).prop("disabled", false);
+      });
+    ')))),
+      
+      sidebarLayout(
+        sidebarPanel(
+          useShinyjs(),
+          width = 3,
+          actionButton(ns("start"), "Start", class = "btn btn-primary"),
+          actionButton(ns("stop"), "Stop", class = "btn btn-danger",
+                       disabled = TRUE),
+          numericInput(ns("num_cores"), "Number of cores:",
+                       value = detectCores() - 2,
+                       min = 1,
+                       max = detectCores() - 1,
+                       step = 1),
+          selectInput(ns("class1"), "Class 1:", choices = NULL),
+          selectInput(ns("class2"), "Class 2:", choices = NULL),
+          selectInput(ns("genes"), "genes:", choices = NULL)
+        ),
+        mainPanel(
+          tabsetPanel(
+            type = "tabs",
+            tabPanel(
+              "Main",
+              verbatimTextOutput(ns("results")),
+              verbatimTextOutput(ns("status")),
+              plotOutput(ns("plot1")),
+              plotOutput(ns("plot2"))
+            ),
+            tabPanel(
+              "Table",
+              dataTableOutput(ns("table"))
+            )
+          )
+        )
+      )
+    )
+  )
+  
+}
+
+
+#  Differential CNV for class comparison
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#'  mainPanel sidebarPanel div verbatimTextOutput numericInput singleton 
+#'  plotOutput
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
+#' @importFrom DT dataTableOutput
+#' @importFrom parallel detectCores
+#' @importFrom shinyjs useShinyjs
+.gint_subItem_DiffCNVDEGs <- function(data_table) {
+  ns <- NS("DiffCNV_deg")
+  
+  tabItem(
+    tabName = "DiffCNVDEGs",
+    fluidRow(
+      sidebarLayout(
+        sidebarPanel(
+          useShinyjs(),
+          width = 3,
+          selectInput(ns("class1"), "Class 1:", choices = NULL),
+          selectInput(ns("class2"), "Class 2:", choices = NULL),
+          selectInput(ns("genes"), "genes:", choices = NULL)
+        ),
+        mainPanel(
+          tabsetPanel(
+            type = "tabs",
+            tabPanel(
+              "Main",
+              verbatimTextOutput(ns("results")),
+              verbatimTextOutput(ns("status")),
+              plotOutput(ns("plot1")),
+              plotOutput(ns("plot2"))
+            ),
+            tabPanel(
+              "Table",
+              dataTableOutput(ns("table"))
+            )
+          )
+        )
+      )
+    )
+  )
+  
+}
+
+
 # Circos Subitem for Complete Integration
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput icon
 #' conditionalPanel sliderInput tabPanel NS tags fluidPage column mainPanel
@@ -1646,6 +1762,8 @@
                 .gint_subItem_HeatmapDEGs(data_table),
                 .gint_subItem_chrDistribDEGs(data_table),
                 .gint_subItem_networkDEGs(data_table),
+                .gint_subItem_DiffMetDEGs(data_table),
+                .gint_subItem_DiffCNVDEGs(data_table),
                 .gint_subItem_circosCompleteInt(data_table),
                 .gint_subItem_tableCompleteInt(data_table)
             )

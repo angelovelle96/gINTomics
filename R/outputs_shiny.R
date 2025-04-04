@@ -1594,6 +1594,17 @@ run_shiny <- function(multiomics_integration) {
             id = "enrich_tf", name = "enrich_tf",
             extracted_data = data_tf_enrich, tf = TRUE
         )
+        #### ------------------- DIFFMET SERVER ----------------------------
+        callModule(.server_DiffMet_bg,
+                   id = "DiffMet_deg",
+                   multiomics = multiomics_integration
+        )
+        #### ------------------- DIFFMET SERVER ----------------------------
+        callModule(.server_DiffCNV,
+                   id = "DiffCNV_deg",
+                   multiomics = multiomics_integration
+        )
+        
         #### ------------------- CIRCOS SERVER ----------------------------
         callModule(.server_circos,
             id = "circos",
