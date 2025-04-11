@@ -2,7 +2,6 @@
 #' @param data_table The data table containing network information.
 #' @param num_interactions The number of interactions to display in the network
 #' (default: 300).
-#' @param class Optional. The class of interactions to include in the plot.
 #' @param pval The p-value threshold for selecting interactions (default: 0.05).
 #' @return A network plot.
 #' @examples
@@ -17,9 +16,7 @@
 #' @export
 plot_network <- function(data_table,
                          num_interactions = 300,
-                         class = NULL,
                          pval = 0.05) {
-    if (!is.null(class)) data_table <- data_table[data_table$class == class, ]
     nnet <- .prepare_network(data_table)
     nnet$edges <- nnet$edges[nnet$edges$pval <= pval, ]
     nnet$edges <- nnet$edges[seq_len(length.out = num_interactions), ]
@@ -36,8 +33,6 @@ plot_network <- function(data_table,
 
 #' plotting venn
 #' @param data_table The data table containing information for the Venn diagram.
-#' @param class Optional. The class of interactions to include in the Venn
-#' diagram.
 #' @return A Venn diagram plot.
 #' @importFrom shiny isolate
 #' @examples
@@ -50,14 +45,9 @@ plot_network <- function(data_table,
 #' # data_table <- extract_model_res(multiomics_integration)
 #' # plot_venn(data_table)
 #' @export
-plot_venn <- function(data_table,
-                      class = NULL) {
-    if (is.null(class) & "class" %in% colnames(data_table)) {
-        stop(str_wrap("Please, specify class"))
-    }
+plot_venn <- function(data_table) {
     input <- list()
     output <- list()
-    input$ClassSelect <- class
     input$FdrRange <- c(0, 0.05)
     input$PvalRange <- c(0, 0.05)
     input$SignificativityCriteria <- "pval"
@@ -75,8 +65,6 @@ plot_venn <- function(data_table,
 
 #' plotting volcano
 #' @param data_table The data table containing information for the volcano plot.
-#' @param class Optional. The class of interactions to include in the volcano
-#' plot.
 #' @param omics Optional. The omics type for the volcano plot.
 #' @param cnv_met Optional. Indicates whether the volcano plot is for CNV or
 #' MET omics (only applicable if omics is specified).
@@ -92,17 +80,11 @@ plot_venn <- function(data_table,
 #' plot_volcano(data_table, omics = "gene_genomic_res", cnv_met = "cnv")
 #' @export
 plot_volcano <- function(data_table,
-                         class = NULL,
                          omics = NULL,
                          cnv_met = NULL) {
-    if (!is.null(class) & !"class" %in% colnames(data_table)) {
-        stop(str_wrap("Class not available"))
-    }
     if (is.null(omics) & length(unique(data_table$omics)) > 0) {
         stop(str_wrap("Please, specify omics"))
     }
-
-    if (!is.null(class)) data_table <- data_table[data_table$class == class, ]
     if (!is.null(omics)) data_table <- data_table[data_table$omics == omics, ]
     if (omics == "gene_genomic_res" & !is.null(cnv_met)) {
         if (!cnv_met %in% c("cnv", "met")) {
@@ -121,8 +103,6 @@ plot_volcano <- function(data_table,
 
 #' plotting ridge
 #' @param data_table The data table containing information for the ridge plot.
-#' @param class Optional. The class of interactions to include in the ridge
-#' plot.
 #' @param omics Optional. The omics type for the ridge plot.
 #' @param cnv_met Optional. Indicates whether the ridge plot is for CNV or MET
 #' omics (only applicable if omics is specified).
@@ -144,17 +124,11 @@ plot_volcano <- function(data_table,
 #' plot_ridge(data_table)
 #' @export
 plot_ridge <- function(data_table,
-                       class = NULL,
                        omics = NULL,
                        cnv_met = NULL) {
-    if (is.null(class) & "class" %in% colnames(data_table)) {
-        stop(str_wrap("Please, specify class"))
-    }
     if (is.null(omics) & length(unique(data_table$omics)) > 0) {
         stop(str_wrap("Please, specify omics"))
     }
-
-    if (!is.null(class)) data_table <- data_table[data_table$class == class, ]
     if (!is.null(omics)) data_table <- data_table[data_table$omics == omics, ]
     data_table$significance <- ifelse(data_table$pval <= 0.05,
         "Significant", "Not Significant"
@@ -181,7 +155,6 @@ plot_ridge <- function(data_table,
 #' @param scale Optional. The scale type for the heatmap. Default is "none".
 #' @param genes_number Optional. The number of genes to include in the heatmap.
 #' Default is 50.
-#' @param class Optional. The class of interactions to include in the heatmap.
 #' @param pval Optional. The p-value threshold for significance in the heatmap.
 #' Default is 0.05.
 #' @param samples_number Number of samples to include in the heatmap. If this
@@ -206,12 +179,8 @@ plot_heatmap <- function(multiomics_integration,
                          scale = "none",
                          genes_number = 50,
                          samples_number = 50,
-                         class = NULL,
                          pval = 0.05) {
     if (!"omics" %in% colnames(data_table)) data_table$omics <- omics
-    if (is.null(class) & "class" %in% colnames(data_table)) {
-        stop(str_wrap("Please, specify class"))
-    }
     tmp <- c("gene_genomic_res", "gene_cnv_res", "gene_met_res",
              "mirna_cnv_res")
     if (!omics %in% tmp) {
@@ -225,20 +194,11 @@ plot_heatmap <- function(multiomics_integration,
         tmp[[omics]] <- multiomics_integration
         multiomics_integration <- tmp
     }
-
-    if ("class" %in% colnames(data_table)) {
-        df_heatmap <- multiomics_integration[[omics]][[
-            class
-        ]]$data$response_var
-        data_table <- data_table[data_table$omics == omics, ]
-        data_table <- data_table[data_table$class == class, ]
-    } else {
-        df_heatmap <- multiomics_integration[[
-            omics
-        ]]$data$response_var
-        data_table <- data_table[data_table$omics == omics, ]
-    }
-
+ 
+    df_heatmap <- multiomics_integration[[
+        omics
+    ]]$data$response_var
+    data_table <- data_table[data_table$omics == omics, ]
     df_heatmap_t <- t(as.matrix(df_heatmap))
     if (omics == "gene_genomic_res") {
         ans <- .prepare_gen_heatmap(
@@ -300,7 +260,6 @@ plot_heatmap <- function(multiomics_integration,
 #' plotting chr distribution
 #' @param data_table The data table containing information for plotting
 #' chromosome distribution.
-#' @param class Optional. The class of interactions to include in the plot.
 #' @param omics Optional. The type of omics data for the plot.
 #' @param cnv_met Optional. The type of copy number variation or methylation
 #' data.
@@ -318,13 +277,9 @@ plot_heatmap <- function(multiomics_integration,
 #' # plot_chr_distribution(data_table, omics = "gene_genomic_res")
 #' @export
 plot_chr_distribution <- function(data_table,
-                                  class = NULL,
                                   omics = NULL,
                                   cnv_met = NULL,
                                   pval = 0.05) {
-    if (is.null(class) & "class" %in% colnames(data_table)) {
-        stop(str_wrap("Please, specify class"))
-    }
     if (is.null(omics) & length(unique(data_table$omics)) > 0) {
         stop(str_wrap("Please, specify omics"))
     }
@@ -333,10 +288,6 @@ plot_chr_distribution <- function(data_table,
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
-
-    if (!is.null(class) & "class" %in% colnames(data_table)) {
-        data_table <- data_table[data_table$class == class, ]
-    }
     if (!is.null(omics) & length(unique(data_table$omics)) > 0) {
         data_table <- data_table[data_table$omics == omics, ]
     }
@@ -359,8 +310,6 @@ plot_chr_distribution <- function(data_table,
 
 #' plotting TF distribution
 #' @param data_table The data table containing TF information.
-#' @param class Optional. The class of interactions to include in the
-#' distribution plot.
 #' @param pval Optional. The p-value threshold for significance in the
 #' distribution plot. Default is 0.05.
 #' @return A TF distribution plot.
@@ -375,12 +324,8 @@ plot_chr_distribution <- function(data_table,
 #' # plot_tf_distribution(data_table, pval=0.5)
 #' @export
 plot_tf_distribution <- function(data_table,
-                                 class = NULL,
                                  pval = 0.05) {
     omics <- "tf_res"
-    if (is.null(class) & "class" %in% colnames(data_table)) {
-        stop(str_wrap("Please, specify class"))
-    }
     chr_order <- mixedsort(unique(data_table$chr_cov))
     chr_order <- chr_order[!is.na(chr_order)]
     data_table$chr_cov <- factor(data_table$chr_cov, levels = chr_order)
@@ -392,12 +337,9 @@ plot_tf_distribution <- function(data_table,
         colnames(data_table) %in% c(
             "response", "cov",
             "pval", "fdr", "chr_cov",
-            "deg", "class"
+            "deg"
         )
     ]
-    if (!is.null(class) & "class" %in% colnames(data_table)) {
-        data_table <- data_table[data_table$class == class, ]
-    }
     df_filtered_histo_tf <- data_table
     df_filtered_histo_tf <- df_filtered_histo_tf[
         df_filtered_histo_tf$pval <= pval,

@@ -1,8 +1,8 @@
 library(BiocParallel)
 
 test_that(".run_edgeR_integration works", {
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -25,7 +25,7 @@ test_that(".run_edgeR_integration works", {
 })
 
 test_that(".allgene_edgeR_model works", {
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
   tested <- .allgene_edgeR_model(response_var,
                                  design_mat_allgene = NULL,
                                  offset_allgene = NULL,
@@ -36,8 +36,8 @@ test_that(".allgene_edgeR_model works", {
 })
 
 test_that(".singlegene_edgeR_model works", {
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -108,8 +108,8 @@ test_that(".def_edger works", {
   steady_covariates<- NULL
   reference<- NULL
 
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -180,8 +180,8 @@ test_that(".edger_coef_test works", {
   steady_covariates <-  NULL
   reference <-  NULL
 
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -236,8 +236,8 @@ test_that(".edger_coef_test works", {
 })
 
 test_that(".def_coef_test works", {
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))

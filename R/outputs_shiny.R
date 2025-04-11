@@ -536,6 +536,21 @@
             }
         )
     }
+  
+  if (plotType == "tableDegs") {
+    handler <- downloadHandler(
+      filename = function() {
+        "degs_data_table.csv"
+      },
+      content = function(file) {
+        reactive_degsTable <- .prepare_reactive_degsTable(
+          multiomics = data_table,
+          input = input,
+          output = output)
+        write.csv(reactive_degsTable(), file, row.names = FALSE)
+      }
+    )
+  }
     if (plotType == "dotPlot") {
         handler <- downloadHandler(
             filename = function() {
@@ -1420,9 +1435,7 @@
 #' @importFrom callr r_bg
 #'
 .run_bg <- function(FFUN,
-                    args,
-                    input,
-                    output) {
+                    args) {
     ans <- r_bg(
         func = FFUN,
         args = args,
@@ -1578,7 +1591,11 @@ run_shiny <- function(multiomics_integration) {
             id = "complete_table",
             data_table = data_table
         )
-
+        
+        callModule(.server_degsTable,
+                   id = "table_deg",
+                   multiomics = multiomics_integration
+        )
         #### ------------------- ENRICHMENT SERVER ----------------------------
         data_gen_enrich <- data_table[data_table$omics %in% c(
             "gene_genomic_res",
@@ -1587,24 +1604,34 @@ run_shiny <- function(multiomics_integration) {
         ), ]
         data_tf_enrich <- data_table[data_table$omics == "tf_res", ]
         callModule(.server_enrich_bg,
-            id = "enrich_gen", name = "enrich_gen",
-            extracted_data = data_gen_enrich
+                   id = "enrich_gen",
+                   extracted_data = data_gen_enrich
         )
-        callModule(.server_enrich_bg,
-            id = "enrich_tf", name = "enrich_tf",
-            extracted_data = data_tf_enrich, tf = TRUE
+        callModule(.server_enrich_bgTF,
+                   id = "enrich_tf",
+                   extracted_data = data_tf_enrich
         )
         #### ------------------- DIFFMET SERVER ----------------------------
         callModule(.server_DiffMet_bg,
                    id = "DiffMet_deg",
-                   multiomics = multiomics_integration
+                   multiomics = multiomics_integration,
+                   data_table = data_table
         )
-        #### ------------------- DIFFMET SERVER ----------------------------
+        #### ------------------- DIFFCNV SERVER ----------------------------
         callModule(.server_DiffCNV,
                    id = "DiffCNV_deg",
                    multiomics = multiomics_integration
         )
         
+        #### ------------------- ExprIns SERVER ----------------------------
+        callModule(.server_exprInsGen,
+                   id = "ExprInsGen",
+                   multiomics = multiomics_integration
+        )
+        callModule(.server_exprInsTransc,
+                   id = "ExprInsTransc",
+                   multiomics = multiomics_integration
+        )
         #### ------------------- CIRCOS SERVER ----------------------------
         callModule(.server_circos,
             id = "circos",

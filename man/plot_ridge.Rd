@@ -4,13 +4,10 @@
 \alias{plot_ridge}
 \title{plotting ridge}
 \usage{
-plot_ridge(data_table, class = NULL, omics = NULL, cnv_met = NULL)
+plot_ridge(data_table, omics = NULL, cnv_met = NULL)
 }
 \arguments{
 \item{data_table}{The data table containing information for the ridge plot.}
-
-\item{class}{Optional. The class of interactions to include in the ridge
-plot.}
 
 \item{omics}{Optional. The omics type for the ridge plot.}
 

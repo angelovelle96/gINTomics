@@ -6,7 +6,7 @@
 #' @importFrom org.Mm.eg.db org.Mm.eg.db
 .def_enrich <- function(data, species, pvalueCutoff,
     pAdjustMethod, qvalueCutoff, ont, run_go = TRUE,
-    run_kegg = TRUE, run_reactome = FALSE, ...) {
+    run_kegg = TRUE, run_reactome = TRUE, ...) {
     kegg <- go <- reactome <- NULL
     orgdb <- setNames(c("org.Hs.eg.db", "org.Mm.eg.db"),
         c("hsa", "mmu"))

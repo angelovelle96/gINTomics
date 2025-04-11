@@ -7,6 +7,7 @@
 #' @docType data
 #' @name mmultiassay_ov
 #' @return An object of class \linkS4class{MultiAssayExperiment}.
+#' @format MultiAssayExperiment
 #' @usage data(mmultiassay_ov)
 #' "mmultiomics_ov"
 #' @examples
@@ -22,6 +23,7 @@ NULL
 #' @docType data
 #' @name mirna_hsa
 #' @return An object of class \linkS4class{data.frame}.
+#' @format data.frame
 #' @usage data(mirna_hsa)
 #' "mirna_hsa"
 #' @examples

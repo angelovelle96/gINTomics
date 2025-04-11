@@ -68,7 +68,9 @@ Imports:
     utils,
     grDevices,
     callr,
-    circlize
+    circlize,
+    MethylMix,
+    shinyjs
 Depends: 
     R (>= 4.4.0)
 LazyData: false

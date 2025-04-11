@@ -521,9 +521,9 @@ setMethod("extract_model_res", "MultiOmics",
             ans <- ans[!is.na(ans$deg),]
             ans <- ans$id[ans$deg]
           })
-          tmp2 <- unique(unlist(tmp2))
+          names(tmp2) <- tmp
           for(i in tmp){
-            data[[i]] <- data$response%in%tmp2
+            data[[i]] <- data$response%in%tmp2[[i]]
           }
         }
         return(data)
@@ -571,7 +571,7 @@ setMethod("extract_model_res", "MultiOmics",
         y <- estimateGLMCommonDisp(y, design_mat)
         y <- estimateGLMTagwiseDisp(y, design_mat)
         fit <- glmFit(y, design_mat)
-        dge_results <- lapply(1:ncol(contrast_matrix), function(i) {
+        dge_results <- lapply(seq_along(colnames(contrast_matrix)),function(i) {
           contrast <- contrast_matrix[, i]
           lrt <- glmLRT(fit, contrast = contrast)
           topTags(lrt, n = Inf)$table
@@ -585,7 +585,7 @@ setMethod("extract_model_res", "MultiOmics",
         fit <- lmFit(eexpression, design_mat)
         fit2 <- contrasts.fit(fit, contrast_matrix)
         fit2 <- eBayes(fit2)
-        dge_results <- lapply(1:ncol(contrast_matrix), function(i) {
+        dge_results <- lapply(seq_along(colnames(contrast_matrix)),function(i) {
           ans <- topTable(fit2, coef = i, number = Inf)
           colnames(ans) <- gsub("adj.P.Val", "FDR", colnames(ans))
           return(ans)
@@ -707,7 +707,7 @@ residuals.DGEGLM <- function(object, type = c("deviance", "pearson"), ...) {
   degs <- lapply(multiomics_integration, function(x) x$deg)
   degs <- Filter(Negate(is.null), degs)
   degs_list <- list()
-  if(length(degs>0)){
+  if(length(degs)>0){
     for (i in seq_along(degs[[1]])) {
       tmp <- lapply(degs, function(x) {
         ans <- x[[i]]
@@ -729,8 +729,8 @@ residuals.DGEGLM <- function(object, type = c("deviance", "pearson"), ...) {
 #' @importFrom BiocParallel SerialParam
 .get_mo_filtered_genexp <- function(multiomics,
                                     BPPARAM = SerialParam(),
-                                    run_cnv=T,
-                                    run_met=T){
+                                    run_cnv=TRUE,
+                                    run_met=TRUE){
   
     if("gene_genomic_res"%in%names(multiomics)){
         ans_cnv <- NULL
@@ -740,10 +740,10 @@ residuals.DGEGLM <- function(object, type = c("deviance", "pearson"), ...) {
         met <- met[, grep("_met$", colnames(met))]
         colnames(met) <- gsub("_met$", "", colnames(met))
         colnames(cnv) <- gsub("_cnv$", "", colnames(cnv))
-        geneExpr <- mmultiomics$gene_genomic_res$data$response_var
+        geneExpr <- multiomics$gene_genomic_res$data$response_var
         if(run_cnv) ans_cnv <- run_cnv_integration(geneExpr, cnv, BPPARAM = BPPARAM)
         if(run_met) ans_met <- run_met_integration(geneExpr, met, BPPARAM = BPPARAM)
-        ans = list(res_expr_cnv = ans_cnv$residuals,
+        ans <- list(res_expr_cnv = ans_cnv$residuals,
                    res_expr_met = ans_met$residuals)
         cclass <- attr(multiomics$gene_genomic_res, "Class")
         if(!is.null(cclass)) attr(ans, "Class") <- cclass

@@ -1,8 +1,8 @@
 library(BiocParallel)
 
 test_that(".data_check works", {
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -17,8 +17,8 @@ test_that(".data_check works", {
 })
 
 test_that(".covariates_check works", {
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -35,8 +35,8 @@ test_that(".covariates_check works", {
 })
 
 test_that(".generate_formula works", {
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -53,8 +53,8 @@ test_that(".building_result_matrices works", {
   reference=NULL
   normalize=TRUE
   norm_method="TMM"
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -116,7 +116,7 @@ test_that("create_multiassay works", {
 })
 
 test_that(".data_norm works", {
-  data <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
+  data <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
   tested <- .data_norm(data,
                        method="TMM",
                        RNAseq=TRUE)
@@ -144,7 +144,7 @@ test_that(".id_conversion works", {
   })
 
 test_that(".rf_selection works", {
-  data <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
+  data <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
   fformula <- as.formula("TSPAN6~FGR+FUCA2+NIPAL3+CFTR+CYP51A1+BAD")
   tested <- .rf_selection(data = data,
                           formula = fformula)
@@ -161,16 +161,16 @@ test_that(".search_gene works", {
 })
 
 test_that(".find_deg works", {
-  data <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  class <- c(rep("A", 5), rep("B", 5))
+  data <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  class <- c(rep("A", 10), rep("B", 10))
   names(class) <- rownames(data)
   tested <- .find_deg(eexpression = t(data),
                       class=class,
                       RNAseq=TRUE,
                       norm_method="TMM",
                       normalize=TRUE)
-  expect_s3_class(tested, "data.frame")
-  expect_identical(colnames(tested)[1], "logFC")
+  expect_type(tested, "list")
+  expect_identical(colnames(tested[[1]])[1], "logFC")
 })
 
 test_that(".shiny_preprocess works", {
@@ -192,8 +192,8 @@ test_that(".change_int_names works", {
 })
 
 test_that("residuals.DGEGLM works" , {  ###########
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))

@@ -4,13 +4,10 @@
 \alias{plot_volcano}
 \title{plotting volcano}
 \usage{
-plot_volcano(data_table, class = NULL, omics = NULL, cnv_met = NULL)
+plot_volcano(data_table, omics = NULL, cnv_met = NULL)
 }
 \arguments{
 \item{data_table}{The data table containing information for the volcano plot.}
-
-\item{class}{Optional. The class of interactions to include in the volcano
-plot.}
 
 \item{omics}{Optional. The omics type for the volcano plot.}
 

@@ -250,7 +250,7 @@
 # Prepare Reactive Heatmap
 #' @importFrom InteractiveComplexHeatmap makeInteractiveComplexHeatmap
 #' @importFrom ComplexHeatmap ht_opt
-#' @importFrom shiny observe bindEvent
+#' @importFrom shiny observe bindEvent updateSliderInput
 #' @importFrom dplyr %>%
 .prepare_reactive_heatmap <- function(data_table,
                                       multiomics_integration,
@@ -267,6 +267,14 @@
         numTopCNVonly <- input[[ns("numTopGenesHeatmapCNVonly")]]
         numTopMETonly <- input[[ns("numTopGenesHeatmapMETonly")]]
         numTopMiCNV <- input[[ns("numTopGenesHeatmapmirna_cnv")]]
+        mmax <- nrow(
+          multiomics_integration[[integrationSelect]]$data$response_var)
+        updateSliderInput(session = session, ns("numSamples"),
+                          value = min(10, mmax),
+                          min = 1,
+                          max = mmax,
+                          step = 5
+        )
         numSamples <- input[[ns("numSamples")]]
         classSelect <- input[[ns("ClassSelect")]]
         significativityCriteria <- input[[ns("SignificativityCriteria")]]
@@ -605,6 +613,45 @@
 }
 
 
+# Prepare Reactive Table
+#' @importFrom gtools mixedsort
+#' @importFrom shiny reactive bindEvent
+#' @importFrom dplyr %>% mutate_if
+#' @importFrom plyr rbind.fill
+.prepare_reactive_degsTable <- function(multiomics,
+                                    input,
+                                    output) {
+  
+  reactive({
+    contrast <- input$ClassSelect
+    contrast <- gsub("deg_", "", contrast)
+    ans <- lapply(multiomics, function(x) {
+      if (!is.null(x$deg)) {
+        return(x$deg)
+      } else {
+        return(NULL)
+      }
+    })
+    ans <- Filter(Negate(is.null), ans)
+    ans <- lapply(ans, function(x) cbind(genes=rownames(x[[contrast]]),
+                                         x[[contrast]]))
+    ans <- rbind.fill(ans)
+    if(input$SignificativityCriteria=="pval"){
+      ans <- ans[ans$PValue <= input$PvalRange, ]
+    }else{
+      ans <- ans[ans$FDR <= input$FdrRange, ]
+    }
+    ans[,2:ncol(ans)] <- round(ans[,2:ncol(ans)], digits = 5)
+    return(ans)
+  })%>% bindEvent(
+    input$ClassSelect,
+    input$PvalRange,
+    input$FdrRange,
+    input$SignificativityCriteria
+  )
+}
+
+
 # Check Reactive Background Enrichment
 #' @importFrom shiny invalidateLater reactive
 .check_reactive_bg_enrich <- function(bg_enrich,
@@ -612,6 +659,7 @@
                                       output,
                                       session) {
     reactive({
+        if(is(bg_enrich, 'reactiveExpr')) bg_enrich <- bg_enrich()
         invalidateLater(millis = 1000, session = session)
         if (bg_enrich$is_alive()) {
             x <- paste("Enrichment running in background, this may take",
@@ -635,6 +683,8 @@
         }
         db <- input$DBSelectEnrich
         type <- input$genomicTypeSelect
+        ont <- input$ont
+        if(is.null(ont)) ont <- "none"
         if (!bg_enrich$is_alive()) {
             data <- bg_enrich$get_result()
             class <- 1
@@ -643,6 +693,8 @@
                 if (is.null(ans)) {
                     return(NULL)
                 }
+                if(ont%in%c("BP", "MF", "CC") & db=="go"){
+                  ans@result <- ans@result[ans@result$ONTOLOGY==ont,]}
                 ans2 <- dot_plotly(ans)
                 ans <- list(plot = ans2, table = ans@result)
             } else {
@@ -650,6 +702,8 @@
                 if (is.null(ans)) {
                     return(NULL)
                 }
+                if(ont%in%c("BP", "MF", "CC") & db=="go"){
+                  ans@result <- ans@result[ans@result$ONTOLOGY==ont,]}
                 ans2 <- dot_plotly(ans)
                 ans <- list(plot = ans2, table = ans@result)
             }
@@ -659,35 +713,31 @@
 }
 
 # Reactive TF Enrichment
-#' @importFrom shiny reactive invalidateLater
+#' @importFrom shiny reactive invalidateLater req
 .reactive_tf_enrich <- function(bg_enrich,
                                 input,
                                 output,
                                 session) {
     reactive({
-        if (bg_enrich$is_alive()) {
-            invalidateLater(millis = 1000, session = session)
-        }
-        db <- input$DBSelectEnrich
-        if (!bg_enrich$is_alive()) {
-            data <- bg_enrich$get_result()
-            class <- 1
-            tf <- names(data[[class]])
-            ans <- lapply(tf, function(x) {
-                ans <- data[[class]][[x]][[db]]
-                if (!is.null(ans)) {
-                    ans2 <- dot_plotly(ans, title = x)
-                    ans <- list(plot = ans2, table = ans@result)
-                    return(ans)
-                } else {
-                    return(NULL)
-                }
-            })
-            names(ans) <- tf
-            return(ans)
-        }
+      proc <- bg_enrich()
+      req(proc)
+      if (proc$is_alive()) {
+        invalidateLater(1000, session)
+        return(NULL)
+      }
+      if (proc$get_exit_status() != 0) {
+        stop("process: ", proc$read_error())
+      }
+      data <- proc$get_result()
+      ans2 <- dot_plotly(data[[1]], title = input$genes)
+      ans <- list(
+        plot = ans2,
+        table = data[[1]]@result
+      )
+      return(ans)
     })
-}
+  }
+
 
 
 # Prepare Reactive Circos Plot
@@ -735,6 +785,7 @@
 
 
 # start Diffmet 
+#' @importFrom shiny observeEvent
 .diffMet_start <- function(input,
                            status,
                            session,
@@ -747,7 +798,7 @@
                            ){
 
   observeEvent(input$start, {
-    status$text <- "Calcolo in corso..."
+    status$text <- "Filtering out CNV from expression data..."
     session$sendCustomMessage("disableButton", "DiffMet_deg-start")
     session$sendCustomMessage("enableButton", "DiffMet_deg-stop")
     saveRDS(multiomics, mmultiomics_file)
@@ -762,7 +813,8 @@
       'library(gINTomics)',
       paste0('mmultiomics <- readRDS(\"', mmultiomics_file, '\")'),
       paste0('bpparam <- MulticoreParam(', num_cores, ')'),
-      paste0('result <- gINTomics:::.get_mo_filtered_genexp(mmultiomics, BPPARAM = bpparam, run_met=F)'),
+      paste0('result <- gINTomics:::.get_mo_filtered_genexp(mmultiomics,',
+             ' BPPARAM = bpparam, run_met=F)'),
       paste0('saveRDS(result, \"', datafile, '\")'),
       'on.exit({',
       '  rm(mmultiomics, result, bpparam)',
@@ -776,16 +828,22 @@
     )
     scriptfile <- tempfile(fileext = ".R")
     writeLines(vfile, scriptfile)
-    if (Sys.info()['sysname'] == "Windows") {
-      system_cmd <- paste0("start /B ", Sys.getenv("R_HOME"), "/bin/Rscript ", scriptfile)
+    rscript_path <- file.path(Sys.getenv("R_HOME"), "bin", "Rscript")
+    if (Sys.info()[["sysname"]] == "Windows") {
+      # Windows: use "cmd.exe" with "start /B"
+      system2("cmd.exe",
+              args = c("/c", "start", "/B",
+                       shQuote(rscript_path),
+                       shQuote(scriptfile)),
+              wait = FALSE)
     } else {
-      system_cmd <- paste0(Sys.getenv("R_HOME"), "/bin/Rscript ", scriptfile, " &")
+      # Unix-like (Linux/macOS)
+      system2(rscript_path, args = shQuote(scriptfile), wait = FALSE)
     }
-    system(system_cmd)
     Sys.sleep(2)
     main_pid <- as.numeric(readLines(pid_file))
     child_pids$main_pid <- main_pid
-    print(paste("PID principale:", main_pid))
+    print(paste("Main PID:", main_pid))
   })
   
   }
@@ -793,6 +851,7 @@
   
 
 # stop Diffmet 
+#' @importFrom shiny observeEvent
 .diffMet_stop <- function(input,
                            status,
                            session,
@@ -804,44 +863,50 @@
 ){
   
   observeEvent(input$stop, {
-    status$text <- "Interruzione in corso..."
+    status$text <- "Stopping the process..."
     
     if (!is.null(child_pids$main_pid)) {
       if (.Platform$OS.type == "unix") {
-        child_pids_list <- system(paste("pgrep -P", child_pids$main_pid), intern = TRUE)
+        child_pids_list <- system2("pgrep",
+                                   args = c("-P",
+                                            as.character(child_pids$main_pid)),
+                                   stdout = TRUE)
+        
         child_pids$child_pids <- as.numeric(child_pids_list)
         
         if (length(child_pids$child_pids) > 0) {
-          print(paste("PID figli trovati:", paste(child_pids$child_pids, collapse = ", ")))
+          print(paste("PIDs:", paste(child_pids$child_pids, collapse = ", ")))
         } else {
-          print("Nessun PID figlio trovato.")
+          print("No PIDs found.")
         }
         
         if (length(child_pids$child_pids) > 0) {
           child_pids2 <- isolate(child_pids$child_pids)  
-          print(paste("Terminando processo figlio PID:", child_pids2[1]))
-          system(paste("kill", child_pids2[1]))
+          print(paste("Stopping PID:", child_pids2[1]))
+          system2("kill", args = as.character(child_pids2[1]))
         }
-        print(paste("Terminando processo principale PID:", child_pids$main_pid))
-        system(paste("kill", child_pids$main_pid))
+        print(paste("Stopping main PID:", child_pids$main_pid))
+        system2("kill", args = as.character(child_pids$main_pid))
         Sys.sleep(2)
         
         for (pid in c(child_pids$main_pid, child_pids$child_pids)) {
-          if (system(paste("ps -p", pid), ignore.stdout = TRUE, ignore.stderr = TRUE) == 0) {
-            print(paste("Forzando la chiusura del processo PID:", pid))
-            system(paste("kill -9", pid))
+          check <- system2("ps",args = c("-p", pid),stdout = NULL,stderr = NULL)
+          if (check == 0) {
+            print(paste("Forcing PID to stop:", pid))
+            system2("kill", args = c("-9", as.character(pid)))
           }
         }
       } else if (Sys.info()['sysname'] == "Windows") {
-        print(paste("Terminando processo principale PID su Windows:", child_pids$main_pid))
-        system(paste("taskkill /PID", child_pids$main_pid, "/F"))
+        print(paste("Stopping main PID:", child_pids$main_pid))
+        system2("taskkill", args = c("/PID",
+                                     as.character(child_pids$main_pid), "/F"))
         Sys.sleep(2)
       }
       session$sendCustomMessage("enableButton", "DiffMet_deg-start")
       session$sendCustomMessage("disableButton", "DiffMet_deg-stop")
-      status$text <- "Calcolo interrotto!"
+      status$text <- "Stopped!"
     } else {
-      print("Errore: Nessun PID salvato, impossibile terminare il processo!")
+      print("Errore: No PID saved, impossible to stop the process!")
     }
       gc()
       unlink(pid_file)
@@ -854,12 +919,14 @@
 }
 
 # MethylMix observer
+#' @importFrom shiny observeEvent req updateSelectizeInput
 .reactive_methylmix <- function(input,
                                result_data,
                                multiomics,
                                session,
-                               data,
-                               cclass){
+                               ddata,
+                               cclass,
+                               status){
   
   observeEvent(list(input$class1, input$class2), {
     disable("genes")
@@ -874,47 +941,259 @@
     if("gene_met_res"%in%names(multiomics)){
       meth_data <- multiomics$gene_met_res$data$covariates
       colnames(meth_data) <- gsub("_cov$", "", colnames(meth_data))
-      }
-    message(paste("Computing", as.character(input$class1)))
-    MethylMixResults <- MethylMix(t(meth_data[names(cclass)[cclass==input$class1],]),
-                                  as.matrix(cnv_residuals[,names(cclass)[cclass==input$class1]]),
-                                  t(meth_data[names(cclass)[cclass==input$class2],]))
-    message(paste("Done", as.character(input$class1)))
+    }
+    MethylMixResults <- MethylMix(
+      t(meth_data[names(cclass)[cclass==input$class1],]),
+      as.matrix(cnv_residuals[,names(cclass)[cclass==input$class1]]),
+      t(meth_data[names(cclass)[cclass==input$class2],]))
     tmp <- list(MethylMixResults=MethylMixResults,
                 cnv_residuals=cnv_residuals,
                 meth_data=meth_data,
                 cclass=cclass
     )
-    data(tmp)
+    ddata(tmp)
     enable("genes")
-    updateSelectInput(session, "genes", choices = names(MethylMixResults$Models), selected = names(MethylMixResults$Models)[1])
+    status$text <- "Analysis Completed !"
+    updateSelectizeInput(session, "genes",
+                         choices = names(MethylMixResults$Models),
+                         selected = names(MethylMixResults$Models)[1],
+                         server = TRUE)
   })
 }
 
 # MethylMix plots observer
+#' @importFrom shiny observeEvent req
 .reactive_methylmix_plots <- function(input,
                                       session,
-                                      data,
+                                      ddata,
+                                      data_table,
                                       output){
   
-  observeEvent(list(input$genes, data()), {
-    req(input$genes, data())
-    MethylMixResults <- data()$MethylMixResults
-    meth_data <- data()$meth_data
-    cnv_residuals <- data()$cnv_residuals
-    cclass <- data()$cclass
-    message(paste("Plotting", as.character(input$genes)))
-    plots <- MethylMix_PlotModel(input$genes, MethylMixResults,
-                                 t(meth_data[names(cclass)[cclass==input$class1],]),
-                                 as.matrix(cnv_residuals[,names(cclass)[cclass==input$class1]]),
-                                 t(meth_data[names(cclass)[cclass==input$class2],]))
-    message(paste("Plotting2", as.character(input$genes)))
+  observeEvent(list(input$genes, ddata()), {
+    req(input$genes, ddata())
+    MethylMixResults <- ddata()$MethylMixResults
+    meth_data <- ddata()$meth_data
+    cnv_residuals <- ddata()$cnv_residuals
+    cclass <- ddata()$cclass
+    plots <- MethylMix_PlotModel(
+      input$genes, MethylMixResults,
+      t(meth_data[names(cclass)[cclass==input$class1],]),
+      as.matrix(cnv_residuals[,names(cclass)[cclass==input$class1]]),
+      t(meth_data[names(cclass)[cclass==input$class2],]))
+    ttable <- MethylMixResults$MethylationDrivers
+    data_table <- data_table[data_table$omics%in%c("gene_genomic_res",
+                                                   "gene_met_res"),]
+    if("gene_genomic_res"%in%data_table$omics){
+      data_table <- data_table[data_table$cnv_met=="met",]
+    }
+    ttable <- data_table[data_table$response%in%ttable,]
     output$plot1 <- renderPlot({plots$MixtureModelPlot})
     output$plot2 <- renderPlot({plots$CorrelationPlot})
-    output$table <- renderDataTable({as.data.frame(MethylMixResults$MethylationDrivers)})
+    output$table <- renderDataTable({
+      as.data.frame(ttable)
+      })
   })
   
   
 }
+
+
+# CNV ttest
+#' @importFrom plyr rbind.fill
+#' @importFrom shiny eventReactive req
+#' @importFrom stats p.adjust t.test
+.reactive_cnv_test <- function(input,
+                               session,
+                               cnv,
+                               output,
+                               cclass){
+  
+  eventReactive(input$start, {
+    req(cclass, input$class1, input$class2)
+    disable("genes")
+    ans <- lapply(colnames(cnv), function(x){
+      t.test(cnv[names(cclass)[cclass==input$class1], x],
+             cnv[names(cclass)[cclass==input$class2], x])
+    })
+    names(ans) <- colnames(cnv)
+    ans <- lapply(ans, function(x){
+      as.data.frame(t(c(x$statistic, pvalue=x$p.value,
+                        conf=x$conf.int, x$estimate)))
+    })
+    tmp <- rbind.fill(ans)
+    rownames(tmp) <- names(ans)
+    ans <- tmp
+    ans$FDR <- p.adjust(ans$pvalue, method = "fdr")
+    return(ans)
+  })
+  
+}
+
+# CNV ttest table
+#' @importFrom shiny observeEvent req updateSelectizeInput
+.render_cnv_test_table <- function(input,
+                                   session,
+                                   ddata,
+                                   status,
+                                   output){
+  observeEvent(list(input$SignificativityCriteria,
+                    input$PvalRange,
+                    input$FdrRange,
+                    ddata()), {
+    req(ddata())
+    status$text <- paste("Analysis Completed !")
+    ssign <- input$SignificativityCriteria
+    pvalRange <- input$PvalRange
+    fdrRange <- input$FdrRange
+    ans <- ddata()
+    if(ssign=="pval") ans <- ans[ans$pvalue>=pvalRange[1] &
+                                   ans$pvalue<=pvalRange[2],]
+    if(ssign=="FDR") ans <- ans[ans$FDR>=fdrRange[1] &
+                                  ans$FDR<=fdrRange[2],]
+    updateSelectizeInput(session, "genes",
+                         choices = rownames(ans),
+                         selected = rownames(ans)[1],
+                         server = TRUE)
+    enable("genes")
+    output$table <- renderDataTable({round(ans, digits = 5)})
+  })
+}
+
+
+# CNV ttest plots
+#' @importFrom ggplot2 ggplot geom_point geom_smooth theme_minimal labs
+#' geom_boxplot scale_fill_brewer theme
+#' @importFrom shiny req reactive
+.reactive_cnv_test_plots <- function(input,
+                                     session,
+                                     cnv,
+                                     eexpr,
+                                     output,
+                                     cclass=NULL){
+  reactive({
+    req(input$genes, cnv)
+    tmp <- data.frame(x=cnv[names(cclass), input$genes],
+                      y=eexpr[names(cclass), input$genes],
+                      class=cclass)
+    ans <- ggplot(tmp, aes(x = x, y = log2(y+1), colour = class)) +
+      geom_point(size = 3, alpha = 0.7) +
+      geom_smooth(method = "lm", se = FALSE, color = "#404080",
+                  linetype = "dashed") +
+      theme_minimal(base_size = 14) +
+      labs(
+        title = paste(input$genes, "scatterplot"),
+        subtitle = "Correlation between gene expression and CNV",
+        x = "CNV",
+        y = "Log2 Gene expression"
+      )
+    
+    ans2 <- ggplot(tmp, aes(x = class, y = x, fill = class)) +
+        geom_boxplot(alpha = 0.7, outlier.color = "red", outlier.shape = 16) +
+        theme_minimal(base_size = 14) +
+        labs(
+          title = paste(input$genes, "CNV values"),
+          x = "Class",
+          y = "CNV"
+        ) +
+        theme(legend.position = "none")
+    return(list(ans, ans2))
+    
+  })%>% bindEvent(input$genes)
+}
+
+
+# Transcriptional integration expression plots
+#' @importFrom ggplot2 ggplot geom_point geom_smooth theme_minimal labs
+#' geom_boxplot scale_fill_brewer theme
+#' @importFrom shiny req reactive
+.reactive_transcExpr_plots <- function(input,
+                                       session,
+                                       multiomics,
+                                       output){
+  reactive({
+    
+    req(input$gene1, input$gene2)
+    data <- multiomics[[input$IntegrationSelect]]
+    cclass <- attr(data, "Class")
+    cov <- data$data$covariates
+    res <- data$data$response
+    if(is.null(cclass)) cclass <- setNames(rep("", nrow(res)), rownames(res))
+    tmp <- data.frame(x=cov[names(cclass), input$gene2],
+                      y=res[names(cclass), input$gene1],
+                      class=cclass)
+    ans <- ggplot(tmp, aes(x = log2(x+1), y = y, colour = class)) +
+      geom_point(size = 3, alpha = 0.7) +
+      geom_smooth(method = "lm", se = FALSE, color = "#404080",
+                  linetype = "dashed") +
+      theme_minimal(base_size = 14) +
+      labs(
+        title = paste(input$gene1, gsub("_cov", "", input$gene2),
+                      "scatterplot"),
+        subtitle = "Correlation between regulator-target expression",
+        x = paste(gsub("_cov", "", input$gene2),"Log2 expression"),
+        y = paste(input$gene1,"genomic-filtered expression")
+      )
+
+    ans2 <- ggplot(tmp, aes(x = class, y = log2(x+1), fill = class)) +
+      geom_boxplot(alpha = 0.7, outlier.color = "red", outlier.shape = 16) +
+      theme_minimal(base_size = 14) +
+      labs(
+        title = paste(gsub("_cov", "", input$gene2), "Log2 Expression"),
+        x = "Class",
+        y = "Log2 Expression"
+      ) +
+      theme(legend.position = "none")
+    return(list(ans, ans2))
+    
+  })%>% bindEvent(input$gene1,
+                  input$gene2,
+                  input$IntegrationSelect)
+}
+
+
+# Running  reactive TF enrichment analysis
+#' @importFrom shiny req reactive
+.run_reactive_tf_enrich <- function(input,
+                                    output,
+                                    session,
+                                    extracted_data,
+                                    qvalueCutoff = 1,
+                                    pvalueCutoff = 0.05,
+                                    pAdjustMethod = "none",
+                                    species="hsa") {
+  reactive({
+    req(input$genes, input$DBSelectEnrich, input$ont)
+    data <- extracted_data
+    data <- data[data$cov != "(Intercept)", ]
+    tmp <- data[data$cov == input$genes, ]
+    run_go <- run_kegg <- run_reactome <- FALSE
+    if (input$DBSelectEnrich == "KEGG") run_kegg <- TRUE
+    if (input$DBSelectEnrich == "Reactome") run_reactome <- TRUE
+    if (input$DBSelectEnrich == "GO") run_go <- TRUE
+    bg_enr <- isolate({
+      .run_bg(
+        FFUN = .def_enrich,
+        args = list(
+          data = tmp,
+          species = species,
+          pvalueCutoff = pvalueCutoff,
+          pAdjustMethod = pAdjustMethod,
+          qvalueCutoff = qvalueCutoff,
+          ont = input$ont,
+          run_kegg = run_kegg,
+          run_go = run_go,
+          run_reactome = run_reactome
+        )
+      )
+    })
+    
+    
+    bg_process <<- bg_enr
+    
+    return(bg_enr)
+  })
+}
+
+
 
   

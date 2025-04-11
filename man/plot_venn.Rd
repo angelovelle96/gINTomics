@@ -4,13 +4,10 @@
 \alias{plot_venn}
 \title{plotting venn}
 \usage{
-plot_venn(data_table, class = NULL)
+plot_venn(data_table)
 }
 \arguments{
 \item{data_table}{The data table containing information for the Venn diagram.}
-
-\item{class}{Optional. The class of interactions to include in the Venn
-diagram.}
 }
 \value{
 A Venn diagram plot.

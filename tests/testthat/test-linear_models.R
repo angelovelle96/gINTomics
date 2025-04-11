@@ -1,8 +1,8 @@
 library(BiocParallel)
 
 test_that(".run_lm_integration works", {
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))
@@ -26,8 +26,8 @@ test_that(".def_lm works", {
   steady_covariates <- NULL
   norm_method <- "TMM"
   normalize <- TRUE
-  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$response_var
-  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$A$data$covariates
+  response_var <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$response_var
+  covariates <- data_shiny_tests$multiomics_integration$gene_genomic_res$data$covariates
   tmp <- grep("_met$", colnames(covariates))
   covariates <- covariates[, -tmp]
   colnames(covariates) <- gsub("_cnv", "", colnames(covariates))

@@ -167,7 +167,7 @@ test_that(".prepare_reactive_table works", {
   input <- reactiveValues(IntegrationSelect="tf_res",
                           SignificativityCriteria="pval",
                           ChrSelect="All",
-                          degSelect="All",
+                          degSelect="All_genes",
                           PvalRange=c(0,1),
                           FdrRange=c(0,0.05),
                           ClassSelect="A")
@@ -186,8 +186,6 @@ test_that(".check_reactive_bg_enrich works", {
   input <- reactiveValues()
   output <- reactiveValues()
   bg_enr <- .run_bg(FFUN = print,
-                    input = input,
-                    output = output,
                     args = list("a"))
   tested <- .check_reactive_bg_enrich(bg_enrich = bg_enr,
                                      input = input,
@@ -207,8 +205,6 @@ test_that(".reactive_gen_enrich works", {
                           genomicTypeSelect="cnv")
   output <- reactiveValues()
   bg_enr <- .run_bg(FFUN = as.list,
-                    input = input,
-                    output = output,
                     args = list("a"))
   tested <- .reactive_gen_enrich(bg_enrich = bg_enr,
                                  input = input,
@@ -225,10 +221,8 @@ test_that(".reactive_tf_enrich works", {
                           DBSelectEnrich="go",
                           genomicTypeSelect="cnv")
   output <- reactiveValues()
-  bg_enr <- .run_bg(FFUN = as.list,
-                    input = input,
-                    output = output,
-                    args = list("a"))
+  bg_enr <- reactive({.run_bg(FFUN = as.list,
+                    args = list("a"))})
   tested <- .reactive_tf_enrich(bg_enrich = bg_enr,
                                input = input,
                                output = output,

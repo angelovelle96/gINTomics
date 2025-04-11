@@ -137,11 +137,11 @@ test_that(".server_enrich_bg works", {
   output <- reactiveValues()
   session <- list()
   data_tf_enrich <- data_table[data_table$omics=="tf_res",]
-  tested <- .server_enrich_bg(input=input,
+  tested <- .server_enrich_bgTF(input=input,
                                output=output,
                                session=session,
                                extracted_data = NULL)
-  expect_null(tested)
+  expect_type(tested, "closure")
 
 })
 

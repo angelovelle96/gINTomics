@@ -4,19 +4,11 @@
 \alias{plot_chr_distribution}
 \title{plotting chr distribution}
 \usage{
-plot_chr_distribution(
-  data_table,
-  class = NULL,
-  omics = NULL,
-  cnv_met = NULL,
-  pval = 0.05
-)
+plot_chr_distribution(data_table, omics = NULL, cnv_met = NULL, pval = 0.05)
 }
 \arguments{
 \item{data_table}{The data table containing information for plotting
 chromosome distribution.}
-
-\item{class}{Optional. The class of interactions to include in the plot.}
 
 \item{omics}{Optional. The type of omics data for the plot.}
 

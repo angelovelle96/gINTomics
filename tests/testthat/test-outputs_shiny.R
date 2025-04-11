@@ -33,8 +33,7 @@ test_that(".build_network works", {
                           numInteractions=200,
                           SignificativityCriteria="pval",
                           PvalRange=0.5,
-                          FdrRange=0.05,
-                          ClassSelect="A")
+                          FdrRange=0.05)
   output <- reactiveValues()
   nnet <- .prepare_network(data_shiny_tests$data_table)
   reactive_network <- .select_network(data_table = data_shiny_tests$data_table,
@@ -56,8 +55,7 @@ test_that(".build_network works", {
 test_that(".build_venn works", {
   input <- reactiveValues(SignificativityCriteria="pval",
                           PvalRange=0.5,
-                          FdrRange=0.05,
-                          ClassSelect="A")
+                          FdrRange=0.05)
   output <- reactiveValues()
   data_table <- data_shiny_tests$data_table
   venn_data <- .prepare_reactive_venn(data_table,
@@ -73,8 +71,7 @@ test_that(".build_venn works", {
 test_that(".render_venn works", {
   input <- reactiveValues(SignificativityCriteria="pval",
                           PvalRange=0.5,
-                          FdrRange=0.05,
-                          ClassSelect="A")
+                          FdrRange=0.05)
   output <- reactiveValues()
   data_table <- data_shiny_tests$data_table
   venn_data <- .prepare_reactive_venn(data_table,
@@ -88,8 +85,7 @@ test_that(".render_venn works", {
 test_that(".render_venn_table works", {
   input <- reactiveValues(SignificativityCriteria="pval",
                           PvalRange=0.5,
-                          FdrRange=0.05,
-                          ClassSelect="A")
+                          FdrRange=0.05)
   output <- reactiveValues()
   data_table <- data_shiny_tests$data_table
   venn_data <- .prepare_reactive_venn(data_table,
@@ -142,8 +138,7 @@ test_that(".build_ridge works", {
                           genomicTypeSelect="cnv",
                           SignificativityCriteria="pval",
                           PvalRange=c(0,0.5),
-                          FdrRange=0.05,
-                          ClassSelect="A")
+                          FdrRange=0.05)
   output <- reactiveValues()
   reactive_ridge <- .prepare_reactive_ridge(data_shiny_tests$data_table,
                                             input = input,
@@ -161,8 +156,7 @@ test_that(".render_ridge works", {
                           genomicTypeSelect="cnv",
                           SignificativityCriteria="pval",
                           PvalRange=c(0,0.5),
-                          FdrRange=0.05,
-                          ClassSelect="A")
+                          FdrRange=0.05)
   output <- reactiveValues()
   reactive_ridge <- .prepare_reactive_ridge(data_shiny_tests$data_table,
                                             input = input,
@@ -179,7 +173,6 @@ test_that(".build_histo works", {
                           SignificativityCriteria="pval",
                           PvalRange=c(0,0.5),
                           FdrRange=0.05,
-                          ClassSelect="A",
                           ChrSelect="All")
   output <- reactiveValues()
   reactive_histo <- .prepare_reactive_histo(data_shiny_tests$data_table,
@@ -199,7 +192,6 @@ test_that(".render_histo works", {
                           SignificativityCriteria="pval",
                           PvalRange=c(0,0.5),
                           FdrRange=0.05,
-                          ClassSelect="A",
                           ChrSelect="All")
   output <- reactiveValues()
   reactive_histo <- .prepare_reactive_histo(data_shiny_tests$data_table,
@@ -217,7 +209,6 @@ test_that(".render_histo_table works", {
                           SignificativityCriteria="pval",
                           PvalRange=c(0,0.5),
                           FdrRange=0.05,
-                          ClassSelect="A",
                           ChrSelect="All")
   output <- reactiveValues()
   reactive_histo <- .prepare_reactive_histo(data_shiny_tests$data_table,
@@ -236,7 +227,6 @@ test_that(".build_histo_TFbyChr works", {
                           SignificativityCriteria="pval",
                           PvalRange=c(0,1),
                           FdrRange=0.05,
-                          ClassSelect="A",
                           ChrSelect="All")
   output <- reactiveValues
   reactive_histo_tf_transcript <- .prepare_reactive_histo_tf(data_shiny_tests$data_table,
@@ -256,7 +246,6 @@ test_that(".render_histo_TF works", {
                           SignificativityCriteria="pval",
                           PvalRange=c(0,1),
                           FdrRange=0.05,
-                          ClassSelect="A",
                           ChrSelect="All")
   output <- reactiveValues
   reactive_histo_tf_transcript <- .prepare_reactive_histo_tf(data_shiny_tests$data_table,
@@ -274,7 +263,6 @@ test_that(".render_histo_tf_table works", {
                           SignificativityCriteria="pval",
                           PvalRange=c(0,1),
                           FdrRange=0.05,
-                          ClassSelect="A",
                           ChrSelect="All")
   output <- reactiveValues
   reactive_histo_tf_transcript <- .prepare_reactive_histo_tf(data_shiny_tests$data_table,
@@ -291,8 +279,7 @@ test_that(".render_ridge_table works", {
                           genomicTypeSelect="cnv",
                           SignificativityCriteria="pval",
                           PvalRange=c(0,0.5),
-                          FdrRange=0.05,
-                          ClassSelect="A")
+                          FdrRange=0.05)
   output <- reactiveValues()
   reactive_ridge <- .prepare_reactive_ridge(data_shiny_tests$data_table,
                                             input = input,
@@ -316,9 +303,8 @@ test_that(".render_table works", {
                           SignificativityCriteria="pval",
                           PvalRange=c(0,1),
                           FdrRange=0.05,
-                          ClassSelect="A",
                           ChrSelect="All",
-                          degSelect="All")
+                          degSelect="All_genes")
   output <- reactiveValues()
   reactive_table <- .prepare_reactive_table(data_shiny_tests$data_table,
                                             input=input,
@@ -334,7 +320,6 @@ test_that(".download_csv works", {
                           SignificativityCriteria="pval",
                           PvalRange=c(0,1),
                           FdrRange=0.05,
-                          ClassSelect="A",
                           ChrSelect="All",
                           degSelect="All")
   output <- reactiveValues()
@@ -465,16 +450,13 @@ test_that(".prepare_gen_heatmap works", {
   numTopCNVonly <- 20
   numTopMETonly <- 20
   numTopMiCNV <- 20
-  classSelect <- "A"
   significativityCriteria <- "pval"
   pvalRange <- 0.1
   fdrRange <- 0.1
   scale <- "row"
   numSamples <- 50
-  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
-    classSelect]]$data$response_var
+  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]]$data$response_var
   data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
-  data_table <- data_table[data_table$class == classSelect,]
   df_heatmap_t <- t(as.matrix(df_heatmap))
   tested <- .prepare_gen_heatmap(data_table = data_table,
                               df_heatmap = df_heatmap,
@@ -497,16 +479,13 @@ test_that(".prepare_cnv_heatmap works", {
   numTopCNVonly <- 20
   numTopMETonly <- 20
   numTopMiCNV <- 20
-  classSelect <- "A"
   significativityCriteria <- "pval"
   pvalRange <- 0.1
   fdrRange <- 0.1
   scale <- "row"
   numSamples <- 50
-  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
-    classSelect]]$data$response_var
+  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]]$data$response_var
   data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
-  data_table <- data_table[data_table$class == classSelect,]
   df_heatmap_t <- t(as.matrix(df_heatmap))
   data_table <- data_table[data_table$cnv_met=="cnv",]
   data_table$omics <- "gene_cnv_res"
@@ -530,16 +509,13 @@ test_that(".prepare_met_heatmap works", {
   numTopCNVonly <- 20
   numTopMETonly <- 20
   numTopMiCNV <- 20
-  classSelect <- "A"
   significativityCriteria <- "pval"
   pvalRange <- 0.1
   fdrRange <- 0.1
   scale <- "row"
   numSamples <- 50
-  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
-    classSelect]]$data$response_var
+  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]]$data$response_var
   data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
-  data_table <- data_table[data_table$class == classSelect,]
   df_heatmap_t <- t(as.matrix(df_heatmap))
   data_table <- data_table[data_table$cnv_met=="met",]
   data_table$omics <- "gene_met_res"
@@ -563,16 +539,13 @@ test_that(".prepare_gen_heatmap works", {
   numTopCNVonly <- 20
   numTopMETonly <- 20
   numTopMiCNV <- 20
-  classSelect <- "A"
   significativityCriteria <- "pval"
   pvalRange <- 0.1
   fdrRange <- 0.1
   scale <- "row"
   numSamples <- 50
-  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]][[
-    classSelect]]$data$response_var
+  df_heatmap <- data_shiny_tests$multiomics_integration[[integrationSelect]]$data$response_var
   data_table <- data_shiny_tests$data_table[data_shiny_tests$data_table$omics == integrationSelect,]
-  data_table <- data_table[data_table$class == classSelect,]
   df_heatmap_t <- t(as.matrix(df_heatmap))
   tested <- .prepare_mirna_heatmap(data_table = data_table,
                                    df_heatmap = df_heatmap,
@@ -588,9 +561,7 @@ test_that(".prepare_gen_heatmap works", {
 
 test_that(".run_bg works", {
   tested <- .run_bg(FFUN = paste0,
-                    args = list("test"),
-                    input = list(),
-                    output = list())
+                    args = list("test"))
   expect_true(tested$is_alive())
   i=0
   while(tested$is_alive()){

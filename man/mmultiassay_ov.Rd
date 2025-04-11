@@ -9,6 +9,9 @@ cancer (OVC) patients extracted from the Cancer Genome Atlas (TCGA) database.
 The object contains all the available input data types: Gene expression data,
 miRNA expression data, gene methylation data, gene Copy Number Variations
 and miRNA Copy Number Variations.}
+\format{
+MultiAssayExperiment
+}
 \usage{
 data(mmultiassay_ov)
 "mmultiomics_ov"

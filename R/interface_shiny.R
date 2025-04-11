@@ -30,6 +30,9 @@
                 ),
                 menuSubItem("Enrichment",
                     tabName = "enrichGenomic"
+                ),
+                menuSubItem("Expression Insights",
+                            tabName = "exprGenomic"
                 )
             ),
             menuItem("Transcription Integration",
@@ -51,11 +54,18 @@
                 menuSubItem("Enrichment",
                     tabName =
                         "enrichTranscript"
+                ),
+                menuSubItem("Expression Insights",
+                            tabName = "exprTranscript"
                 )
             ),
             menuItem("Class Comparison",
                 tabName = "degsPage",
                 startExpanded = TRUE,
+                menuSubItem("DEGs",
+                            tabName =
+                              "tableDEGs"
+                ),
                 menuSubItem("Coefficients Distribution",
                     tabName =
                         "coefDistribDEGs"
@@ -448,11 +458,11 @@
                             ), ns = ns
                         ),
                         sliderInput(ns("numSamples"),
-                            "Number of Samples:",
-                            value = 50,
-                            min = 1,
-                            max = 1000,
-                            step = 10
+                                    "Number of Samples:",
+                                    value = 10,
+                                    min = 1,
+                                    max = 1000,
+                                    step = 10
                         ),
                         selectInput(
                             inputId = ns("SignificativityCriteria"),
@@ -606,7 +616,16 @@
                         selectInput(
                             inputId = ns("DBSelectEnrich"),
                             label = "Database:",
-                            choices = c("go", "kegg")
+                            choices = c("go", "kegg", "reactome")
+                        ),
+                        conditionalPanel(
+                          condition =
+                            "input.DBSelectEnrich=='go'",
+                          selectInput(
+                            inputId = ns("ont"),
+                            label = "Ontology:",
+                            choices = c("BP", "MF", "CC", "all")
+                          ), ns = ns
                         )
                     ),
                     mainPanel(
@@ -642,12 +661,32 @@
                         selectInput(
                             inputId = ns("DBSelectEnrich"),
                             label = "Database:",
-                            choices = c("go", "kegg")
+                            choices = c("GO", "KEGG", "Reactome")
+                        ),
+                        conditionalPanel(
+                          condition =
+                            "input.DBSelectEnrich=='GO'",
+                          selectInput(
+                            inputId = ns("ont"),
+                            label = "Ontology:",
+                            choices = c("BP", "MF", "CC", "all")
+                          ), ns = ns
+                        ),
+                        selectizeInput(
+                          inputId = ns("genes"),
+                          label = "Gene:",
+                          choices = NULL
                         )
                     ),
                     mainPanel(
                         textOutput(ns("check")),
-                        uiOutput(ns("dotplot"))
+                        plotlyOutput(ns("plot")),
+                        HTML(paste0(rep("<br>", 20), collapse = "")),
+                        tags$div(
+                            style = "overflow-x: auto;",
+                            dataTableOutput(ns("table"))
+                        ),
+                        downloadButton(ns("download_csv"))
                     )
                 )
             )
@@ -956,6 +995,68 @@
     )
 }
 
+
+# DEGs table for class comparison
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#'  conditionalPanel sliderInput downloadButton tabPanel NS checkboxInput tags
+#'  fluidRow mainPanel sidebarPanel div inputPanel
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
+#' @importFrom DT dataTableOutput
+
+.gint_subItem_tableDEGs <- function(data_table) {
+  ns <- NS("table_deg")
+  tabItem(
+    tabName = "tableDEGs",
+    fluidRow(
+      mainPanel(
+        sidebarLayout(
+          sidebarPanel(
+              selectInput(ns("ClassSelect"),
+                          label = "Select the Contrast:",
+                          choices = .get_deg_col(data_table)
+              ),
+              selectInput(
+                inputId = ns("SignificativityCriteria"),
+                label = "Significativity criteria:",
+                choices = c("FDR", "pval")
+              ),
+              conditionalPanel(
+                condition = "input.SignificativityCriteria==
+                                'pval'",
+                sliderInput(ns("PvalRange"),
+                            "P-Value:",
+                            min = 0,
+                            max = 0.05,
+                            value = c(0.05),
+                            step = 0.005
+                ), ns = ns
+              ),
+              conditionalPanel(
+                condition = "input.SignificativityCriteria==
+                                'FDR'",
+                sliderInput(ns("FdrRange"),
+                            "FDR:",
+                            min = 0,
+                            max = 0.1,
+                            value = c(0.05),
+                            step = 0.005
+                ), ns = ns
+              )
+            ),
+          mainPanel(
+            tags$div(
+              style = "overflow-x: auto;",
+              dataTableOutput(ns("table")),
+              downloadButton(ns("download_csv"), "Download CSV")
+            )
+          )
+        )
+      )
+    )
+  )
+}
+
+
 # Coefficients Distribution Subitem for Class Comparison
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
@@ -1246,7 +1347,7 @@
                         ),
                         sliderInput(ns("numSamples"),
                             "Number of Samples:",
-                            value = 50,
+                            value = 10,
                             min = 1,
                             max = 1000,
                             step = 10
@@ -1499,7 +1600,7 @@
                        step = 1),
           selectInput(ns("class1"), "Class 1:", choices = NULL),
           selectInput(ns("class2"), "Class 2:", choices = NULL),
-          selectInput(ns("genes"), "genes:", choices = NULL)
+          selectizeInput(ns("genes"), "genes:", choices = NULL)
         ),
         mainPanel(
           tabsetPanel(
@@ -1528,7 +1629,7 @@
 #' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
 #' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
 #'  mainPanel sidebarPanel div verbatimTextOutput numericInput singleton 
-#'  plotOutput
+#'  plotOutput selectizeInput
 #' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
 #' @importFrom DT dataTableOutput
 #' @importFrom parallel detectCores
@@ -1543,25 +1644,135 @@
         sidebarPanel(
           useShinyjs(),
           width = 3,
+          actionButton(ns("start"), "Start", class = "btn btn-primary"),
           selectInput(ns("class1"), "Class 1:", choices = NULL),
           selectInput(ns("class2"), "Class 2:", choices = NULL),
-          selectInput(ns("genes"), "genes:", choices = NULL)
+          selectizeInput(ns("genes"), "genes:", choices = NULL),
+          selectInput(
+            inputId = ns("SignificativityCriteria"),
+            label = "Significativity criteria:",
+            choices = c("pval", "FDR")
+          ),
+          conditionalPanel(
+            condition = "input.SignificativityCriteria=='pval'",
+            sliderInput(ns("PvalRange"),
+                        "P-Value Range:",
+                        min = 0,
+                        max = 1,
+                        value = c(0, 0.05),
+                        step = 0.005
+            ), ns = ns
+          ),
+          conditionalPanel(
+            condition = "input.SignificativityCriteria=='FDR'",
+            sliderInput(ns("FdrRange"),
+                        "FDR-Value Range:",
+                        min = 0,
+                        max = 1,
+                        value = c(0, 0.05),
+                        step = 0.005
+            ), ns = ns
+          )
         ),
         mainPanel(
           tabsetPanel(
             type = "tabs",
             tabPanel(
-              "Main",
+              "Plots",
               verbatimTextOutput(ns("results")),
               verbatimTextOutput(ns("status")),
               plotOutput(ns("plot1")),
               plotOutput(ns("plot2"))
             ),
             tabPanel(
-              "Table",
+              "Ttest Table",
               dataTableOutput(ns("table"))
             )
           )
+        )
+      )
+    )
+  )
+  
+}
+
+
+#  Expression insight genomic
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#'  mainPanel sidebarPanel div verbatimTextOutput numericInput singleton 
+#'  plotOutput selectizeInput
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
+#' @importFrom DT dataTableOutput
+#' @importFrom parallel detectCores
+#' @importFrom shinyjs useShinyjs
+.gint_subItem_ExprInsGen <- function(data_table) {
+  ns <- NS("ExprInsGen")
+  tabItem(
+    tabName = "exprGenomic",
+    fluidRow(
+      sidebarLayout(
+        sidebarPanel(
+          useShinyjs(),
+          width = 3,
+          selectizeInput(ns("genes"), "genes:", choices = NULL),
+          ),
+        mainPanel(
+          tabsetPanel(
+            type = "tabs",
+            tabPanel(
+              "CNV",
+              plotOutput(ns("plot1")),
+              plotOutput(ns("plot2"))
+            ),
+            tabPanel(
+              "Methylation",
+              plotOutput(ns("plot3")),
+              plotOutput(ns("plot4"))
+            )
+          )
+        )
+      )
+    )
+  )
+  
+}
+
+
+#  Expression insight transcriptional
+#' @importFrom shiny fluidPage sidebarLayout tabsetPanel selectInput
+#' conditionalPanel sliderInput downloadButton tabPanel NS tags fluidRow
+#'  mainPanel sidebarPanel div verbatimTextOutput numericInput singleton 
+#'  plotOutput selectizeInput
+#' @importFrom shinydashboard dashboardSidebar sidebarMenu tabItem
+#' @importFrom DT dataTableOutput
+#' @importFrom parallel detectCores
+#' @importFrom shinyjs useShinyjs
+.gint_subItem_ExprInsTransc <- function(data_table) {
+  ns <- NS("ExprInsTransc")
+  tabItem(
+    tabName = "exprTranscript",
+    fluidRow(
+        sidebarLayout(
+          sidebarPanel(
+            useShinyjs(),
+            width = 3,
+            selectInput(
+              inputId = ns("IntegrationSelect"),
+              label = "Integration Type:",
+              choices = .change_int_names(
+                intersect(
+                  c("tf_res", "tf_mirna_res","mirna_target_res"),
+                  unique(data_table$omics)
+                )
+              )
+            ),
+            selectizeInput(ns("gene1"), "Target:", choices = NULL),
+            selectizeInput(ns("gene2"), "Regulator:", choices = NULL)
+          ),
+          mainPanel(
+            plotOutput(ns("plot1")),
+            plotOutput(ns("plot2"))
         )
       )
     )
@@ -1754,10 +1965,13 @@
                 .gint_subItem_HeatmapGenomic(data_table),
                 .gint_subItem_chrDistribGenomic(data_table),
                 .gint_tabitem_enr(data_table),
+                .gint_subItem_ExprInsGen(data_table),
                 .gint_subItem_coefDistribTranscript(data_table),
                 .gint_subItem_chrDistribTranscript(data_table),
                 .gint_subItem_networkTranscript(data_table),
                 .gint_subItem_enrichTranscript(data_table),
+                .gint_subItem_ExprInsTransc(data_table),
+                .gint_subItem_tableDEGs(data_table),
                 .gint_subItem_coefDistribDEGs(data_table),
                 .gint_subItem_HeatmapDEGs(data_table),
                 .gint_subItem_chrDistribDEGs(data_table),
@@ -1806,9 +2020,9 @@ website: https://romualdi.bio.unipd.it/
                              The coefficients distribution subpanel contains
                              three plot types that are Venn Diagram, Volcano
                              Plot, and RidgeLine Plot. <br>
-                             They were designed to
+                             They are designed to
                              represent the integration coefficients
-                             distribution; In particular, The Venn Diagram is
+                             distribution. In particular, The Venn Diagram is
                              designed for the genomic integration. It can help
                              to identify genes which are significantly
                              regulated by both CNV and methylation. <br>
@@ -1838,10 +2052,10 @@ website: https://romualdi.bio.unipd.it/
         collapsible = TRUE,
         collapsed = FALSE,
         footer = HTML("
-                    Heatmap subpanel contains an interactive heatmap developed
-                    using InteractiveComplexHeatmap package, and it shows the
+                    The Heatmap subpanel contains an interactive heatmap developed
+                    using the InteractiveComplexHeatmap package, and it shows the
                     value of genomic integration coefficients (only cnv or met,
-                    or both of them) in relation of gene expression and along
+                    or both of them) in relation to gene expression and along
                     the different input samples. What is more, the user can
                     scale values by rows or columns, or simply view raw values.
       ")
@@ -1857,7 +2071,7 @@ website: https://romualdi.bio.unipd.it/
         collapsible = TRUE,
         collapsed = FALSE,
         footer = HTML("
-                    Chromosome distribution subpanel allows the user to
+                    The Chromosome Distribution subpanel allows the user to
                     visualize the distribution of integration coefficients
                     along the different chromosomes and to focus on specific
                     chromosomes and genes trough an interactive and
@@ -1877,7 +2091,7 @@ website: https://romualdi.bio.unipd.it/
         collapsible = TRUE,
         collapsed = TRUE,
         footer = HTML("
-                    Network subpanel shows the significant interactions between
+                    The Network subpanel shows the significant interactions between
                     transcriptional regulators (TFs and miRNAs, if present)
                     and their targets genes/miRNA. Nodes and edges are selected
                     ordering them by the most high coefficient values (absolute
@@ -1895,13 +2109,13 @@ website: https://romualdi.bio.unipd.it/
         collapsible = TRUE,
         collapsed = FALSE,
         footer = HTML("
-                    Enrichment subpanel shows the enrichment results obtained
-                    with enrichGO and enrichKEGG (clusterProfiler). The genomic
-                    enrichment is performed providing the list of genes
-                    significantly regulated by methylation or CNV, while the
-                    transcriptional one with the list of genes significantly
-                    regulated by each transcription factor (we run an
-                    enrichment for each TF that significantly regulates at
+                    The Enrichment subpanel shows the enrichment results obtained
+                    with enrichGO, enrichKEGG (clusterProfiler) and enrichPathway
+                    (ReactomePA). The genomic enrichment is performed providing 
+                    the list of genes significantly regulated by methylation or 
+                    CNV, while the transcriptional one with the list of genes 
+                    significantly regulated by each transcription factor (we run
+                    an enrichment for each TF that significantly regulates at
                     least 12 targets).
       ")
     )
@@ -1916,12 +2130,12 @@ website: https://romualdi.bio.unipd.it/
         collapsible = TRUE,
         collapsed = TRUE,
         footer = HTML("
-                    Circos plots subpanel lodges Circos plots for genomic
+                    The Circos Plots subpanel lodges Circos plots for genomic
                     integration (it requires the presence of both cnv and met
                     data or only one of them).
                     The strenght of this type of visualization lies in the
                     possibility to visulize different omics together, moreover
-                    the user of zoom in the plot focusing the attention to only
+                    the user can zoom in the plot focusing the attention to only
                     specific chromosome of interest or particular genomic
                     regions. What is more, the plot can be linearized and by
                     passing the pointer on genes it is possible to visualize a
@@ -1942,9 +2156,8 @@ website: https://romualdi.bio.unipd.it/
         collapsible = TRUE,
         collapsed = FALSE,
         footer = HTML("
-                   Data Table subpanel contains a table that shows the full and
-                   initial data frame containing all data that is used by the
-                   shiny app for generating plots and relate tables.
+                   The Data Table subpanel contains a table that shows the 
+                   full data frame with gINTomics' model results and genes info. 
       ")
     )
 }

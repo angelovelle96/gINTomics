@@ -4,15 +4,13 @@
 \alias{plot_network}
 \title{Plotting network}
 \usage{
-plot_network(data_table, num_interactions = 300, class = NULL, pval = 0.05)
+plot_network(data_table, num_interactions = 300, pval = 0.05)
 }
 \arguments{
 \item{data_table}{The data table containing network information.}
 
 \item{num_interactions}{The number of interactions to display in the network
 (default: 300).}
-
-\item{class}{Optional. The class of interactions to include in the plot.}
 
 \item{pval}{The p-value threshold for selecting interactions (default: 0.05).}
 }

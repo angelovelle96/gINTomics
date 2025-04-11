@@ -7,6 +7,9 @@
 Dataset containing lastly definition of miRNAs (Names, Accessions,
 Sequences, Families and others) from different miRBase versions
 (From miRBase version 6 to version 22).}
+\format{
+data.frame
+}
 \usage{
 data(mirna_hsa)
 "mirna_hsa"
