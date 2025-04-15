@@ -1,6 +1,6 @@
 Package: gINTomics
 Title: Multi-Omics data integration
-Version: 1.4.0
+Version: 1.5.0
 Authors@R: c(person("Angelo", "Velle", role = c("cre", "aut"),
                     email = "angelo.velle@unipd.it",
                     comment = c(ORCID = "0000-0002-4010-6390")),
