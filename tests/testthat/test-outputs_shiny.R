@@ -63,9 +63,8 @@ test_that(".build_venn works", {
                                       output = output)
   venn_data <- isolate(venn_data())
   venn <- .build_venn(venn_data)
-  expect_type(venn, "list")
-  expect_s3_class(venn, "gg")
-  expect_equal(names(venn)[1], "data")
+  expect_s3_class(venn, "ggplot")
+  expect_equal(names(venn[1]), "data")
 })
 
 test_that(".render_venn works", {
@@ -146,9 +145,8 @@ test_that(".build_ridge works", {
                                             deg = FALSE)
   tmp <- isolate(reactive_ridge())
   tested <- .build_ridge(ridge_data = tmp$df, quantiles = tmp$quantiles)
-  expect_type(tested, "list")
   expect_s3_class(tested, "ggplot")
-  expect_equal(names(tested)[1], "data")
+  expect_equal(names(tested[1]), "data")
 })
 
 test_that(".render_ridge works", {
@@ -181,9 +179,8 @@ test_that(".build_histo works", {
                                             deg = FALSE)
   tmp <- isolate(reactive_histo())
   tested <- .build_histo(tmp)
-  expect_type(tested, "list")
   expect_s3_class(tested, "ggplot")
-  expect_equal(names(tested)[1], "data")
+  expect_equal(names(tested[1]), "data")
 })
 
 test_that(".render_histo works", {
