@@ -1,5 +1,5 @@
 # Download miRNAs targets
-#' @importFrom OmnipathR import_mirnatarget_interactions
+#' @importFrom OmnipathR import_mirnatarget_interactions mirna_target
 #' @importFrom stats setNames
 .download_mirna_target <- function(miRNAs,
                                    species = "hsa",
@@ -10,7 +10,7 @@
                        for miRNA target
                        download"))
     org <- setNames(c(9606, 10090, 10116), c("hsa", "mmu", "rno"))
-    mirna_target <- import_mirnatarget_interactions(organism = org[species])
+    mirna_target <- mirna_target(organism = org[species])
     tmp <- mirna_id[[species]]
     rownames(tmp) <- tmp$Accession
     mirna_target$mirbase <- tmp[mirna_target$source, "Name"]
@@ -29,7 +29,7 @@
     return(ans)
 }
 # Download TF/miRNA interactions
-#' @importFrom OmnipathR import_tf_mirna_interactions
+#' @importFrom OmnipathR import_tf_mirna_interactions tf_mirna
 #' @importFrom stats setNames
 .download_tf_mirna <- function(miRNAs,
                                species = "hsa",
@@ -38,8 +38,8 @@
         stop(str_wrap("Available species are hsa, mmu and rno
                       for miRNA target download"))
     org <- setNames(c(9606, 10090, 10116), c("hsa", "mmu", "rno"))
-    tf_mirna <- import_tf_mirna_interactions(organism = org[species],
-                                             resources = "TransmiR")
+    tf_mirna <- tf_mirna(organism = org[species],
+                         resources = "TransmiR")
     tmp <- mirna_id[[species]]
     rownames(tmp) <- tmp$Accession
     tf_mirna$mirbase <- tmp[tf_mirna$target, "Name"]
@@ -63,7 +63,7 @@
     return(ans)
 }
 # Download TF
-#' @importFrom OmnipathR import_tf_target_interactions
+#' @importFrom OmnipathR import_tf_target_interactions tf_target
 #' @importFrom stats setNames
 .download_tf <- function(genes,
                          species = "hsa",
@@ -72,7 +72,7 @@
         stop(str_wrap("Available species are hsa, mmu and rno
                       for TF target download"))
     org <- setNames(c(9606, 10090, 10116), c("hsa", "mmu", "rno"))
-    tf_target <- import_tf_target_interactions(organism = org[species])
+    tf_target <- tf_target(organism = org[species])
     tf_target <- tf_target[tf_target$source_genesymbol %in% genes, ]
     tf_target <- tf_target[tf_target$target_genesymbol %in% genes, ]
     ans <- lapply(unique(tf_target$target_genesymbol),
