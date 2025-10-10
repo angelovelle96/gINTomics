@@ -1,0 +1,21 @@
+citHeader("To cite gINTomics in publications, please use:")
+
+citEntry(
+  entry = "article",
+  title = "From Genomic Alterations to Expression Dynamics: A Hierarchical Multi-Omics Integration Framework with gINTomics",
+  author = personList(
+    as.person("Angelo Velle"),
+    as.person("Francesco Patanè"),
+    as.person("Chiara Romualdi")
+  ),
+  journal = "bioRxiv",
+  year = "2025",
+  doi = "10.1101/2025.10.07.680960",
+  url = "https://www.biorxiv.org/content/early/2025/10/08/2025.10.07.680960",
+  textVersion = paste(
+    "Velle A, Patanè F, Romualdi C (2025).",
+    "From Genomic Alterations to Expression Dynamics:",
+    "A Hierarchical Multi-Omics Integration Framework with gINTomics.",
+    "bioRxiv. doi:10.1101/2025.10.07.680960."
+  )
+)
