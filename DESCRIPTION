@@ -1,6 +1,6 @@
 Package: gINTomics
 Title: Multi-Omics data integration
-Version: 1.5.1
+Version: 1.5.2
 Authors@R: c(person("Angelo", "Velle", role = c("cre", "aut"),
                     email = "angelo.velle@unipd.it",
                     comment = c(ORCID = "0000-0002-4010-6390")),
@@ -23,7 +23,7 @@ biocViews: GeneExpression, RNASeq, Microarray,
     Visualization, CopyNumberVariation, GeneTarget
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 Imports: 
     BiocParallel,
     biomaRt,
